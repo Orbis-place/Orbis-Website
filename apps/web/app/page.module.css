@@ -128,8 +128,8 @@
 }
 
 .icon {
-  width: 20px;
-  height: 20px;
+  width: 28px;
+  height: 28px;
 }
 
 @media (max-width: 768px) {
@@ -152,7 +152,7 @@
   }
 
   .featureIcon {
-    font-size: 2rem;
+    font-size: 2.5rem;
   }
 
   .featureTitle {
