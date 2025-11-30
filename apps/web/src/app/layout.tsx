@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import { Nunito } from 'next/font/google';
-import Navbar from './components/Navbar';
+import Navbar from '../components/Navbar';
 import './globals.css';
 
 const hebden = localFont({
-  src: './fonts/Hebden.woff2',
+  src: '../fonts/Hebden.woff2',
   variable: '--font-hebden',
   display: 'swap',
 });

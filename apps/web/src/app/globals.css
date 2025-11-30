@@ -1,0 +1,75 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-hebden: var(--font-hebden), sans-serif;
+  --color-background: #032125;
+  --color-foreground: #c7f4fa;
+  --color-primary: #109eb1;
+  --color-primary-foreground: #032125;
+  --color-secondary: #06363d;
+  --color-secondary-foreground: #c7f4fa;
+  --color-muted: #032125;
+  --color-muted-foreground: #c7f4fa;
+  --text-shadow-title: 0 0 20px;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  height: 100%;
+}
+
+body {
+  color: var(--foreground);
+  background: url('/background.jpg') no-repeat center center fixed;
+  background-size: cover;
+  font-family:
+    var(--font-nunito),
+    system-ui,
+    -apple-system,
+    sans-serif;
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+@keyframes rotateText {
+  0%,
+  12.5% {
+    transform: translateY(0);
+  }
+  25%,
+  37.5% {
+    transform: translateY(-4.5rem);
+  }
+  50%,
+  62.5% {
+    transform: translateY(-9rem);
+  }
+  75%,
+  87.5% {
+    transform: translateY(-13.5rem);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
