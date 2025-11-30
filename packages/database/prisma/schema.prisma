@@ -135,13 +135,17 @@ model User {
   // Badges
   userBadges UserBadge[] @relation("UserBadges")
 
-  ownedResources            Resource[]                 @relation("OwnedResources")
-  moderatedResources        Resource[]                 @relation("ModeratedResources")
-  contributions             Contributor[]
-  likes                     Like[]
-  favorites                 Favorite[]
-  downloads                 Download[]
-  purchases                 Purchase[]
+  // Marketplace - Resources
+  ownedResources     Resource[] @relation("OwnedResources")
+  moderatedResources Resource[] @relation("ModeratedResources")
+
+  // Marketplace - Interactions
+  contributions Contributor[]
+  likes         Like[]
+  favorites     Favorite[]
+  downloads     Download[]
+
+  // Marketplace - Status & Images
   resourceStatusChanges     ResourceStatusHistory[]
   resourceDescriptionImages ResourceDescriptionImage[] @relation("ResourceDescriptionImages")
   versionChangelogImages    VersionChangelogImage[]    @relation("VersionChangelogImages")
@@ -243,9 +247,9 @@ model Team {
   owner   User   @relation("TeamOwner", fields: [ownerId], references: [id], onDelete: Cascade)
 
   // Relations
-  members  TeamMember[]
-  servers  Server[]
-  Resource Resource[]
+  members   TeamMember[]
+  servers   Server[]
+  resources Resource[]
 
   @@index([ownerId])
   @@map("teams")
@@ -589,8 +593,7 @@ model Resource {
   favorites     Favorite[]
   downloads     Download[]
   statusHistory ResourceStatusHistory[]
-  purchases     Purchase[]
-  dependencies  VersionDependency[]     @relation("ResourceDependencies")
+  usedBy       VersionDependency[] @relation("ResourceDependencies")
 
   // Moderation
   moderationNotes String? // Internal staff notes
@@ -615,6 +618,7 @@ model Resource {
   @@index([publishedAt])
   @@index([lastActivityAt])
   @@index([slug])
+  @@map("resources")
 }
 
 // ============================================================================
@@ -693,12 +697,17 @@ model ResourceGalleryImage {
   caption    String?
   order      Int      @default(0)
   size       Int // Bytes
+
+  title     String?
+  description String? @db.Text
+
   createdAt  DateTime @default(now())
 
   resource Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
 
   @@index([resourceId])
   @@index([order])
+  @@map("resource_gallery_images")
 }
 
 // Inline images in resource description
@@ -708,6 +717,7 @@ model ResourceDescriptionImage {
   url        String
   storageKey String // R2 key (temp/ or resources/)
   size       Int // Bytes
+  hash       String // SHA256 hash for duplicate detection
   alt        String?
   status     ImageStatus @default(TEMPORARY)
   uploadedBy String
@@ -722,6 +732,8 @@ model ResourceDescriptionImage {
   @@index([status, expiresAt]) // For cleanup cron
   @@index([uploadedBy])
   @@index([status])
+  @@index([uploadedBy, hash]) // For duplicate detection
+  @@map("resource_description_images")
 }
 
 enum ImageStatus {
@@ -744,6 +756,7 @@ model ExternalLink {
   resource Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
 
   @@index([resourceId])
+  @@map("external_links")
 }
 
 enum ExternalLinkType {
@@ -779,6 +792,7 @@ model ResourceCategory {
 
   @@index([parentId])
   @@index([order])
+  @@map("resource_categories")
 }
 
 model ResourceToCategory {
@@ -791,6 +805,7 @@ model ResourceToCategory {
 
   @@id([resourceId, categoryId])
   @@index([categoryId])
+  @@map("resource_to_categories")
 }
 
 // ============================================================================
@@ -814,6 +829,7 @@ model ResourceTag {
 
   @@index([categoryId])
   @@index([usageCount])
+  @@map("resource_tags")
 }
 
 model ResourceToTag {
@@ -828,6 +844,7 @@ model ResourceToTag {
 
   @@id([resourceId, tagId])
   @@index([tagId])
+  @@map("resource_to_tags")
 }
 
 // ============================================================================
@@ -877,6 +894,7 @@ model Version {
   @@index([resourceId, channel])
   @@index([publishedAt])
   @@index([resourceId, status])
+  @@map("versions")
 }
 
 // ============================================================================
@@ -894,6 +912,7 @@ model VersionCompatibleVersion {
   @@unique([versionId, hytaleVersion])
   @@index([versionId])
   @@index([hytaleVersion])
+  @@map("version_compatible_versions")
 }
 
 enum ReleaseChannel {
@@ -918,6 +937,7 @@ model VersionChangelogImage {
   url        String
   storageKey String // R2 key (temp/ or versions/)
   size       Int // Bytes
+  hash       String // SHA256 hash for duplicate detection
   alt        String?
   status     ImageStatus @default(TEMPORARY)
   uploadedBy String
@@ -932,6 +952,8 @@ model VersionChangelogImage {
   @@index([status, expiresAt]) // For cleanup cron
   @@index([uploadedBy])
   @@index([status])
+  @@index([uploadedBy, hash]) // For duplicate detection
+  @@map("version_changelog_images")
 }
 
 // ============================================================================
@@ -962,6 +984,7 @@ model VersionFile {
   primaryFor Version[] @relation("PrimaryFile")
 
   @@index([versionId])
+  @@map("version_files")
 }
 
 enum FileType {
@@ -985,6 +1008,7 @@ model VersionDependency {
 
   @@unique([versionId, dependencyId])
   @@index([dependencyId])
+  @@map("version_dependencies")
 }
 
 enum DependencyType {
@@ -1009,6 +1033,7 @@ model Contributor {
 
   @@unique([resourceId, userId])
   @@index([userId])
+  @@map("contributors")
 }
 
 // ============================================================================
@@ -1027,6 +1052,7 @@ model Like {
   @@unique([userId, resourceId])
   @@index([userId])
   @@index([resourceId])
+  @@map("likes")
 }
 
 model Favorite {
@@ -1041,6 +1067,7 @@ model Favorite {
   @@unique([userId, resourceId])
   @@index([userId])
   @@index([resourceId])
+  @@map("favorites")
 }
 
 // ============================================================================
@@ -1062,6 +1089,7 @@ model Download {
   @@index([resourceId])
   @@index([userId])
   @@index([downloadedAt])
+  @@map("downloads")
 }
 
 // ============================================================================
@@ -1082,4 +1110,5 @@ model ResourceStatusHistory {
 
   @@index([resourceId])
   @@index([changedAt])
+  @@map("resource_status_history")
 }

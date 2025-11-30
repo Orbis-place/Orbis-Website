@@ -18,6 +18,7 @@
     "dev": "tsup src/index.ts src/auth.ts --format cjs,esm --dts --watch"
   },
   "devDependencies": {
+    "@types/node": "^22.10.7",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3"
   },
