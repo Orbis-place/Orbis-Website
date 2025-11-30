@@ -8,7 +8,7 @@ RUN apk add --no-cache libc6-compat && \
 FROM base AS builder
 RUN apk add --no-cache openssl
 WORKDIR /app
-COPY package.json pnpm-lock.yaml* ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY . .
 RUN turbo prune api --docker
 
