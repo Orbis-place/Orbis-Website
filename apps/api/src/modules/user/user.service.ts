@@ -45,6 +45,26 @@ export class UserService {
                         following: true,
                     },
                 },
+                userBadges: {
+                    select: {
+                        id: true,
+                        awardedAt: true,
+                        badge: {
+                            select: {
+                                id: true,
+                                name: true,
+                                slug: true,
+                                description: true,
+                                icon: true,
+                                color: true,
+                                rarity: true,
+                            },
+                        },
+                    },
+                    orderBy: {
+                        awardedAt: 'desc',
+                    },
+                },
             },
         });
     }
@@ -265,6 +285,26 @@ export class UserService {
                     select: {
                         followers: true,
                         following: true,
+                    },
+                },
+                userBadges: {
+                    select: {
+                        id: true,
+                        awardedAt: true,
+                        badge: {
+                            select: {
+                                id: true,
+                                name: true,
+                                slug: true,
+                                description: true,
+                                icon: true,
+                                color: true,
+                                rarity: true,
+                            },
+                        },
+                    },
+                    orderBy: {
+                        awardedAt: 'desc',
                     },
                 },
             },
