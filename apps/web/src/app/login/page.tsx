@@ -33,7 +33,7 @@ export default function Login() {
       }
 
       if (data) {
-        router.push('/dashboard');
+        router.push('/dashboard/profile');
         router.refresh();
       }
     } catch (err) {
@@ -47,7 +47,7 @@ export default function Login() {
     try {
       await authClient.signIn.social({
         provider,
-        callbackURL: '/dashboard',
+        callbackURL: `${window.location.origin}/dashboard/profile`,
       });
     } catch (err) {
       setError('Social sign-in failed');
