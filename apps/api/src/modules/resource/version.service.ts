@@ -357,7 +357,7 @@ export class VersionService {
 
         // Determine file type based on extension
         const extension = file.originalname.split('.').pop()?.toLowerCase();
-        let fileType = FileType.OTHER;
+        let fileType: FileType = FileType.OTHER;
 
         switch (extension) {
             case 'jar':

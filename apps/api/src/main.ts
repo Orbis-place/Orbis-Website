@@ -13,7 +13,11 @@ async function bootstrap() {
     app.useGlobalPipes(new ValidationPipe({
         transform: true,
     }));
-    app.enableCors();
+    app.enableCors({
+        origin: true,
+        credentials: true,
+    });
+
 
     const configService = app.get(ConfigService);
     const resendApiKey = configService.get<string>('RESEND_API_KEY');

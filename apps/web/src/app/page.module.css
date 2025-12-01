@@ -2,7 +2,30 @@
   width: 100%;
   position: relative;
   z-index: 1;
-  padding-top: 80px;
+}
+
+.page::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('/background.webp') no-repeat center center fixed;
+  background-size: cover;
+  z-index: -2;
+  transform: scaleX(-1);
+}
+
+.page::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(281.84deg, rgba(0, 0, 0, 0) 0%, rgba(3, 33, 37, 0.9) 100%);
+  z-index: -1;
 }
 
 /* Hero Section */

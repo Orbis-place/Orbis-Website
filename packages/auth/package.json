@@ -11,11 +11,15 @@
     "./auth": {
       "types": "./dist/auth.d.ts",
       "default": "./dist/auth.js"
+    },
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "default": "./dist/client.js"
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts src/auth.ts --format cjs,esm --dts",
-    "dev": "tsup src/index.ts src/auth.ts --format cjs,esm --dts --watch"
+    "build": "tsup src/index.ts src/auth.ts  src/client.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts src/auth.ts src/client.ts  --format cjs,esm --dts --watch"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",
