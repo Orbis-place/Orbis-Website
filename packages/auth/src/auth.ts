@@ -26,6 +26,18 @@ export const getAuth = () => {
             advanced: {
                 disableCSRFCheck: process.env.NODE_ENV === 'development', // For testing purposes only
                 cookies: {
+                    session_token: {
+                        name: "orbis_session_token",
+                        attributes: {
+                            domain: process.env.NODE_ENV === 'production'
+                                ? '.orbis.place'
+                                : 'localhost',
+                            sameSite: "lax",
+                            secure: true,
+                            httpOnly: true,
+                            path: '/',
+                        }
+                    },
                     state: {
                         attributes: {
                             sameSite: "lax", // TODO: To configure based on environment
