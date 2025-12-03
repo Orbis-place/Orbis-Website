@@ -36,13 +36,9 @@ export function Rotater({
       >
         <div
           key={'last'}
-          className={cn(
-            'flex items-center justify-center text-shadow-title text-shadow-white/50 font-hebden',
-            cellClassName,
-          )}
+          className={cn(cellClassName)}
           style={{
             width: containerRef.current?.offsetWidth,
-            textShadow: '0 0 20px rgba(255, 255, 255, 0.5)',
             height: containerRef.current?.offsetHeight,
           }}
         >
@@ -51,13 +47,9 @@ export function Rotater({
         {names.map((name, index) => (
           <div
             key={index}
-            className={cn(
-              'flex items-center justify-center text-shadow-title text-shadow-white/50 font-hebden',
-              cellClassName,
-            )}
+            className={cn(cellClassName)}
             style={{
               width: containerRef.current?.offsetWidth,
-              textShadow: '0 0 20px rgba(255, 255, 255, 0.5)',
               height: containerRef.current?.offsetHeight,
             }}
           >

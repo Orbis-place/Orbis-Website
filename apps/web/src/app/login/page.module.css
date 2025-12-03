@@ -1,27 +1,41 @@
 .page {
-  min-height: 100vh;
+  min-height: calc(100vh - 112px);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
-  background: var(--color-background);
 }
-
+.page::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('/background.webp') no-repeat center center fixed;
+  filter: blur(5px);
+  background-size: cover;
+  z-index: -2;
+  transform: scaleX(-1);
+}
 .container {
   width: 100%;
   max-width: 480px;
 }
 
 .card {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 24px;
-  padding: 3rem;
+  padding: 3rem 0;
   backdrop-filter: blur(10px);
 }
 
 .title {
-  font-family: var(--font-hebden), system-ui, -apple-system, sans-serif;
+  font-family:
+    var(--font-hebden),
+    system-ui,
+    -apple-system,
+    sans-serif;
   font-size: 2.5rem;
   font-weight: 700;
   color: rgba(199, 244, 250, 1);
