@@ -19,7 +19,7 @@ export default function Home() {
               </h1>
               <Rotater
                 cellClassName="font-hebden font-semibold text-2xl sm:text-3xl md:text-[40px] leading-tight md:leading-[48px] text-[#15C8E0]"
-                className="text-3xl h-6 sm:h-[30px] md:h-[48px]"
+                className="text-3xl h-8 sm:h-[32px] md:h-12"
                 names={[
                   'Server Hub',
                   'Marketplace',
@@ -75,7 +75,7 @@ export default function Home() {
               <input
                 type="text"
                 placeholder="Search Anything"
-                className="bg-transparent border-none outline-none font-nunito text-sm md:text-[17px] leading-[24px] text-[rgba(199,244,250,0.5)] placeholder:text-[rgba(199,244,250,0.5)] w-full"
+                className="bg-transparent border-none outline-none font-nunito text-sm md:text-[17px] leading-6 text-[rgba(199,244,250,0.5)] placeholder:text-[rgba(199,244,250,0.5)] w-full"
               />
             </div>
           </div>

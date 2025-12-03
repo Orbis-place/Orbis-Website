@@ -118,7 +118,7 @@ export default function Signup() {
       {/* Background (replaces page::before from CSS module) */}
       <div className="fixed inset-0 bg-[url('/background.webp')] bg-center bg-cover filter blur-sm -z-20 transform -scale-x-100" />
       <div className="w-full max-w-[480px]">
-        <div className="relative border-4 border-muted/60 rounded-2xl p-4 pt-8">
+        <div className="relative border-4 mt-5 mx-2 border-muted/60 rounded-2xl p-4 pt-8">
           <div className="absolute -inset-1 rounded-2xl bg-linear-to-br from-background/90 to-secondary/75 -z-10" />
           <Form {...form}>
             <h1
@@ -134,7 +134,7 @@ export default function Signup() {
             {error && <div className="text-sm text-red-400 mb-4">{error}</div>}
 
             {/* Social Login Buttons */}
-            <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
+            <div className="flex items-center justify-between max-md:flex-col gap-3 mb-4">
               <Button
                 type="button"
                 size={'lg'}

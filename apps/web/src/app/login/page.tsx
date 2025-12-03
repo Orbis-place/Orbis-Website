@@ -102,9 +102,9 @@ export default function Login() {
       <div className="fixed inset-0 bg-[url('/background.webp')] bg-center bg-cover filter blur-sm -z-20 transform -scale-x-100" />
 
       <div className="w-full max-w-[480px]">
-        <div className="relative border-4 border-muted/60 rounded-2xl p-4 pt-8">
+        <div className="relative border-4 mt-5 border-muted/60 mx-2 rounded-2xl p-4 pt-8">
           {/* Decorative gradient layer */}
-          <div className="absolute -inset-1 rounded-2xl bg-linear-to-br from-background/90 to-secondary/75 -z-10" />
+          <div className="absolute -inset-1  rounded-2xl bg-linear-to-br from-background/90 to-secondary/75 -z-10" />
 
           <Form {...form}>
             <div className="z-10 relative">
@@ -119,7 +119,7 @@ export default function Login() {
                 <div className="text-sm text-red-400 mb-4">{error}</div>
               )}
 
-              <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
+              <div className="flex items-center justify-between max-md:flex-col gap-3 mb-4">
                 <Button
                   type="button"
                   size={'lg'}
@@ -227,7 +227,7 @@ export default function Login() {
                 />
               </div>
 
-              <div className="flex justify-between w-full items-center my-4">
+              <div className="flex justify-between max-sm:flex-col max-sm:gap-4 w-full items-center my-4">
                 <FormField
                   control={control}
                   name="rememberMe"

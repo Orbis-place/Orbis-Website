@@ -262,7 +262,8 @@ export default function Navbar({ session }: NavbarProps) {
                 href="/login"
                 className="w-full flex items-center gap-2.5 justify-center"
               >
-                <LogInIcon size={24} /> Sign In
+                <LogInIcon size={24} />{' '}
+                <span className="max-sm:hidden">Sign In</span>
               </Link>
             </Button>
           )}
@@ -319,7 +320,7 @@ export default function Navbar({ session }: NavbarProps) {
                 className="flex items-center justify-center gap-2 px-4 py-2 bg-primary/80 hover:bg-primary rounded-full transition-all"
               >
                 <LogInIcon size={18} className="text-white" />
-                <span className="font-hebden text-sm text-white font-semibold">
+                <span className="font-hebden text-sm text-white font-semibold max-[450px]:hidden">
                   Sign In
                 </span>
               </Link>
