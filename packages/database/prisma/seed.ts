@@ -1,4 +1,4 @@
-import { PrismaClient } from '../generated/prisma';
+import { PrismaClient, ResourceType } from '../generated/prisma';
 
 const prisma = new PrismaClient();
 
@@ -455,6 +455,307 @@ async function main() {
   }
 
   console.log(`✓ Seeded ${tags.length} server tags`);
+
+  // Seed Resource Categories
+  console.log('Seeding resource categories...');
+
+  const resourceCategories = [
+    // Plugin Categories
+    {
+      name: 'Gameplay',
+      slug: 'gameplay',
+      description: 'Plugins that enhance or modify core gameplay mechanics',
+      icon: '🎮',
+      color: '#69a024',
+      order: 1,
+      resourceTypes: [ResourceType.PLUGIN, ResourceType.MOD],
+    },
+    {
+      name: 'Administration',
+      slug: 'administration',
+      description: 'Server management and administrative tools',
+      icon: '⚙️',
+      color: '#FF6B6B',
+      order: 2,
+      resourceTypes: [ResourceType.PLUGIN],
+    },
+    {
+      name: 'Chat & Communication',
+      slug: 'chat-communication',
+      description: 'Chat formatting, moderation, and communication tools',
+      icon: '💬',
+      color: '#4ECDC4',
+      order: 3,
+      resourceTypes: [ResourceType.PLUGIN, ResourceType.MOD],
+    },
+    {
+      name: 'Economy',
+      slug: 'economy',
+      description: 'Economy systems, shops, and currency management',
+      icon: '💰',
+      color: '#55EFC4',
+      order: 4,
+      resourceTypes: [ResourceType.PLUGIN, ResourceType.MOD],
+    },
+    {
+      name: 'Fun & Entertainment',
+      slug: 'fun-entertainment',
+      description: 'Mini-games, cosmetics, and entertainment features',
+      icon: '🎉',
+      color: '#FFE66D',
+      order: 5,
+      resourceTypes: [ResourceType.PLUGIN, ResourceType.MOD, ResourceType.WORLD],
+    },
+    {
+      name: 'World Management',
+      slug: 'world-management',
+      description: 'World editing, generation, and protection tools',
+      icon: '🌍',
+      color: '#00B894',
+      order: 6,
+      resourceTypes: [ResourceType.PLUGIN, ResourceType.MOD],
+    },
+    {
+      name: 'Developer Tools',
+      slug: 'developer-tools',
+      description: 'APIs, libraries, and development utilities',
+      icon: '🛠️',
+      color: '#636E72',
+      order: 7,
+      resourceTypes: [ResourceType.PLUGIN, ResourceType.MOD],
+    },
+    {
+      name: 'Combat & PvP',
+      slug: 'combat-pvp',
+      description: 'Combat mechanics and PvP-related features',
+      icon: '⚔️',
+      color: '#FF4757',
+      order: 8,
+      resourceTypes: [ResourceType.PLUGIN, ResourceType.MOD],
+    },
+
+    // Mod-specific Categories
+    {
+      name: 'Technology',
+      slug: 'technology',
+      description: 'Tech mods with machinery, automation, and power systems',
+      icon: '🔧',
+      color: '#74B9FF',
+      order: 9,
+      resourceTypes: [ResourceType.MOD, ResourceType.MODPACK],
+    },
+    {
+      name: 'Magic & Sorcery',
+      slug: 'magic-sorcery',
+      description: 'Magical abilities, spells, and mystical content',
+      icon: '✨',
+      color: '#A29BFE',
+      order: 10,
+      resourceTypes: [ResourceType.MOD, ResourceType.MODPACK],
+    },
+    {
+      name: 'Exploration & Adventure',
+      slug: 'exploration-adventure',
+      description: 'New dimensions, biomes, and exploration content',
+      icon: '🗺️',
+      color: '#FD79A8',
+      order: 11,
+      resourceTypes: [ResourceType.MOD, ResourceType.MODPACK, ResourceType.WORLD],
+    },
+    {
+      name: 'Farming & Food',
+      slug: 'farming-food',
+      description: 'Agriculture, cooking, and food-related content',
+      icon: '🌾',
+      color: '#55EFC4',
+      order: 12,
+      resourceTypes: [ResourceType.MOD, ResourceType.MODPACK],
+    },
+
+    // World Categories
+    {
+      name: 'Adventure Maps',
+      slug: 'adventure-maps',
+      description: 'Story-driven adventure maps with quests',
+      icon: '🗺️',
+      color: '#4ECDC4',
+      order: 13,
+      resourceTypes: [ResourceType.WORLD],
+    },
+    {
+      name: 'Parkour',
+      slug: 'parkour-world',
+      description: 'Parkour and jumping challenges',
+      icon: '🏃',
+      color: '#FF4757',
+      order: 14,
+      resourceTypes: [ResourceType.WORLD],
+    },
+    {
+      name: 'PvP Maps',
+      slug: 'pvp-maps',
+      description: 'Battle arenas and PvP-focused maps',
+      icon: '⚔️',
+      color: '#FF6B6B',
+      order: 15,
+      resourceTypes: [ResourceType.WORLD],
+    },
+    {
+      name: 'Survival Spawns',
+      slug: 'survival-spawns',
+      description: 'Spawn areas and hubs for survival servers',
+      icon: '🏰',
+      color: '#69a024',
+      order: 16,
+      resourceTypes: [ResourceType.WORLD, ResourceType.PREFAB],
+    },
+    {
+      name: 'Creative Showcases',
+      slug: 'creative-showcases',
+      description: 'Impressive builds and creative showcases',
+      icon: '🎨',
+      color: '#A29BFE',
+      order: 17,
+      resourceTypes: [ResourceType.WORLD, ResourceType.PREFAB],
+    },
+
+    // Asset Pack Categories
+    {
+      name: 'Textures',
+      slug: 'textures',
+      description: 'Texture packs and resource packs',
+      icon: '🎨',
+      color: '#FFE66D',
+      order: 18,
+      resourceTypes: [ResourceType.ASSET_PACK],
+    },
+    {
+      name: 'Sounds & Music',
+      slug: 'sounds-music',
+      description: 'Sound effects and music packs',
+      icon: '🎵',
+      color: '#74B9FF',
+      order: 19,
+      resourceTypes: [ResourceType.ASSET_PACK],
+    },
+    {
+      name: 'Models',
+      slug: 'models',
+      description: '3D models and custom entity models',
+      icon: '🎭',
+      color: '#FD79A8',
+      order: 20,
+      resourceTypes: [ResourceType.ASSET_PACK, ResourceType.PREFAB],
+    },
+
+    // Prefab Categories
+    {
+      name: 'Buildings',
+      slug: 'buildings',
+      description: 'Pre-built structures and buildings',
+      icon: '🏛️',
+      color: '#636E72',
+      order: 21,
+      resourceTypes: [ResourceType.PREFAB],
+    },
+    {
+      name: 'Decorations',
+      slug: 'decorations',
+      description: 'Decorative elements and details',
+      icon: '🎀',
+      color: '#FF6B6B',
+      order: 22,
+      resourceTypes: [ResourceType.PREFAB],
+    },
+
+    // Data Pack Categories
+    {
+      name: 'Recipes & Crafting',
+      slug: 'recipes-crafting',
+      description: 'Custom recipes and crafting systems',
+      icon: '📜',
+      color: '#00B894',
+      order: 23,
+      resourceTypes: [ResourceType.DATA_PACK],
+    },
+    {
+      name: 'Loot Tables',
+      slug: 'loot-tables',
+      description: 'Custom loot and drop tables',
+      icon: '📦',
+      color: '#55EFC4',
+      order: 24,
+      resourceTypes: [ResourceType.DATA_PACK],
+    },
+
+    // Modpack Categories
+    {
+      name: 'Kitchen Sink',
+      slug: 'kitchen-sink',
+      description: 'Large modpacks with diverse content',
+      icon: '📚',
+      color: '#69a024',
+      order: 25,
+      resourceTypes: [ResourceType.MODPACK],
+    },
+    {
+      name: 'Quest-Based',
+      slug: 'quest-based',
+      description: 'Progression-focused modpacks with quests',
+      icon: '📖',
+      color: '#4ECDC4',
+      order: 26,
+      resourceTypes: [ResourceType.MODPACK],
+    },
+    {
+      name: 'Lightweight',
+      slug: 'lightweight',
+      description: 'Performance-friendly modpacks',
+      icon: '⚡',
+      color: '#FFE66D',
+      order: 27,
+      resourceTypes: [ResourceType.MODPACK],
+    },
+
+    // Premade Server Categories
+    {
+      name: 'Survival Server',
+      slug: 'survival-server',
+      description: 'Complete survival server setups',
+      icon: '🏕️',
+      color: '#69a024',
+      order: 28,
+      resourceTypes: [ResourceType.PREMADE_SERVER],
+    },
+    {
+      name: 'Minigame Server',
+      slug: 'minigame-server',
+      description: 'Pre-configured minigame server setups',
+      icon: '🎮',
+      color: '#FF6B6B',
+      order: 29,
+      resourceTypes: [ResourceType.PREMADE_SERVER],
+    },
+    {
+      name: 'Roleplay Server',
+      slug: 'roleplay-server',
+      description: 'Complete roleplay server configurations',
+      icon: '🎭',
+      color: '#A29BFE',
+      order: 30,
+      resourceTypes: [ResourceType.PREMADE_SERVER],
+    },
+  ];
+
+  for (const category of resourceCategories) {
+    await prisma.resourceCategory.upsert({
+      where: { slug: category.slug },
+      update: category,
+      create: category,
+    });
+  }
+
+  console.log(`✓ Seeded ${resourceCategories.length} resource categories`);
   console.log('Database seeding completed successfully!');
 }
 

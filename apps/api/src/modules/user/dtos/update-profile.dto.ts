@@ -6,7 +6,8 @@ import {
     MaxLength,
     IsBoolean,
     Matches,
-    MinLength
+    MinLength,
+    ValidateIf
 } from 'class-validator';
 
 export class UpdateProfileDto {
@@ -39,6 +40,7 @@ export class UpdateProfileDto {
         description: 'Profile banner image URL',
         example: 'https://example.com/banner.jpg'
     })
+    @ValidateIf((o) => o.banner !== null && o.banner !== undefined && o.banner !== '')
     @IsUrl()
     @IsOptional()
     banner?: string;
@@ -67,6 +69,7 @@ export class UpdateProfileDto {
         description: 'Personal website URL',
         example: 'https://johndoe.com'
     })
+    @ValidateIf((o) => o.website !== null && o.website !== undefined && o.website !== '')
     @IsUrl()
     @IsOptional()
     website?: string;

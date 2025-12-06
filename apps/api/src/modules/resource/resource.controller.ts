@@ -1,5 +1,6 @@
-import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Param, Patch, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { AllowAnonymous, Roles, Session, UserSession } from '@thallesp/nestjs-better-auth';
 import { ResourceService } from './resource.service';
 import { CreateResourceDto } from './dtos/create-resource.dto';
@@ -7,11 +8,43 @@ import { UpdateResourceDto } from './dtos/update-resource.dto';
 import { PaginationDto } from '../../common/dtos/pagination.dto';
 import { ModerateResourceDto } from './dtos/moderate-resource.dto';
 import { ResourceStatus, UserRole } from '@repo/db';
+import { FilterResourcesDto } from './dtos/filter-resources.dto';
+
 
 @ApiTags('resources')
 @Controller('resources')
 export class ResourceController {
-    constructor(private readonly resourceService: ResourceService) {}
+    constructor(private readonly resourceService: ResourceService) { }
+
+    // ============================================
+    // PUBLIC MARKETPLACE ENDPOINT
+    // ============================================
+
+    @Get()
+    @AllowAnonymous()
+    @ApiOperation({ summary: 'Get all approved resources with filters (Public marketplace)' })
+    async getAllResources(@Query() filterDto: FilterResourcesDto) {
+        return this.resourceService.getAllResources(filterDto);
+    }
+
+    @Get('categories')
+    @AllowAnonymous()
+    @ApiOperation({ summary: 'Get categories filtered by resource type' })
+    @ApiQuery({
+        name: 'type',
+        required: false,
+        description: 'Filter categories by resource type',
+    })
+    async getCategories(@Query('type') type?: string) {
+        return this.resourceService.getCategoriesForType(type as any);
+    }
+
+    @Get('hytale-versions')
+    @AllowAnonymous()
+    @ApiOperation({ summary: 'Get all available Hytale versions' })
+    async getHytaleVersions() {
+        return this.resourceService.getHytaleVersions();
+    }
 
     // ============================================
     // AUTHENTICATED ENDPOINTS
@@ -43,6 +76,13 @@ export class ResourceController {
         return this.resourceService.getById(id);
     }
 
+    @Get('slug/:slug')
+    @AllowAnonymous()
+    @ApiOperation({ summary: 'Get resource by slug' })
+    async getBySlug(@Param('slug') slug: string) {
+        return this.resourceService.getBySlug(slug);
+    }
+
     @Patch(':id')
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Update a resource' })
@@ -52,6 +92,36 @@ export class ResourceController {
         @Body() updateDto: UpdateResourceDto,
     ) {
         return this.resourceService.update(id, session.user.id, updateDto);
+    }
+
+    // ============================================
+    // FILE UPLOAD ENDPOINTS
+    // ============================================
+
+    @Post(':id/icon')
+    @ApiBearerAuth()
+    @ApiConsumes('multipart/form-data')
+    @ApiOperation({ summary: 'Upload resource icon' })
+    @UseInterceptors(FileInterceptor('icon'))
+    async uploadIcon(
+        @Session() session: UserSession,
+        @Param('id') id: string,
+        @UploadedFile() file: Express.Multer.File,
+    ) {
+        return this.resourceService.uploadIcon(id, session.user.id, file);
+    }
+
+    @Post(':id/banner')
+    @ApiBearerAuth()
+    @ApiConsumes('multipart/form-data')
+    @ApiOperation({ summary: 'Upload resource banner' })
+    @UseInterceptors(FileInterceptor('banner'))
+    async uploadBanner(
+        @Session() session: UserSession,
+        @Param('id') id: string,
+        @UploadedFile() file: Express.Multer.File,
+    ) {
+        return this.resourceService.uploadBanner(id, session.user.id, file);
     }
 
     // ============================================

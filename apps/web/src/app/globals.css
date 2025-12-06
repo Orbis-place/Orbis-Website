@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@plugin "@tailwindcss/typography";
 
 :root {
   --background: #032125;
@@ -122,11 +123,14 @@
   --shadow-2xl: var(--shadow-2xl);
 }
 
+html {
+  height: 100%;
+}
+
 html,
 body {
   max-width: 100vw;
   overflow-x: hidden;
-  height: 100%;
 }
 
 body {
@@ -186,4 +190,45 @@ a {
 
 a, button {
   cursor: pointer;
+}
+
+/* Hide scrollbar while maintaining scroll functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
+}
+
+
+
+.tiptap {
+  color: var(--foreground);
+}
+
+/* Custom scrollbar for filter cards */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(199, 244, 250, 0.2);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(199, 244, 250, 0.3);
+}
+
+/* Firefox scrollbar */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(199, 244, 250, 0.2) rgba(255, 255, 255, 0.05);
 }

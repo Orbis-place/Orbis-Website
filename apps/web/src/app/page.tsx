@@ -1,7 +1,23 @@
 import Image from 'next/image';
+import type { Metadata } from 'next';
 import styles from './page.module.css';
 import {Rotater} from '@/components/home/Rotater';
 import Link from "next/link";
+
+export const metadata: Metadata = {
+    title: 'Home',
+    description: 'Discover, create and connect with the best Hytale mods, worlds, plugins and servers. Join the ultimate Hytale community hub for players and creators.',
+    openGraph: {
+        title: 'Orbis - Your Hytale Modding & Server Hub',
+        description: 'Discover, create and connect with the best Hytale mods, worlds, plugins and servers.',
+        type: 'website',
+        url: '/',
+    },
+    twitter: {
+        title: 'Orbis - Your Hytale Modding & Server Hub',
+        description: 'Discover, create and connect with the best Hytale mods, worlds, plugins and servers.',
+    },
+};
 
 export default function Home() {
     return (

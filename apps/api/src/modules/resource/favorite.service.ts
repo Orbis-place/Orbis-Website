@@ -3,7 +3,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class FavoriteService {
-    constructor(private readonly prisma: PrismaService) {}
+    constructor(private readonly prisma: PrismaService) { }
 
     /**
      * Add resource to favorites
@@ -19,7 +19,7 @@ export class FavoriteService {
         }
 
         // Check if already favorited
-        const existingFavorite = await this.prisma.favorite.findUnique({
+        const existingFavorite = await this.prisma.resourceFavorite.findUnique({
             where: {
                 userId_resourceId: {
                     userId,
@@ -38,7 +38,7 @@ export class FavoriteService {
 
         // Create favorite and increment favorite count
         await this.prisma.$transaction([
-            this.prisma.favorite.create({
+            this.prisma.resourceFavorite.create({
                 data: {
                     userId,
                     resourceId,
@@ -74,7 +74,7 @@ export class FavoriteService {
         }
 
         // Check if favorited
-        const existingFavorite = await this.prisma.favorite.findUnique({
+        const existingFavorite = await this.prisma.resourceFavorite.findUnique({
             where: {
                 userId_resourceId: {
                     userId,
@@ -93,7 +93,7 @@ export class FavoriteService {
 
         // Delete favorite and decrement favorite count
         await this.prisma.$transaction([
-            this.prisma.favorite.delete({
+            this.prisma.resourceFavorite.delete({
                 where: {
                     userId_resourceId: {
                         userId,
@@ -121,7 +121,7 @@ export class FavoriteService {
      * Check if user has favorited a resource
      */
     async hasFavorited(resourceId: string, userId: string) {
-        const favorite = await this.prisma.favorite.findUnique({
+        const favorite = await this.prisma.resourceFavorite.findUnique({
             where: {
                 userId_resourceId: {
                     userId,
@@ -139,7 +139,7 @@ export class FavoriteService {
      * Get user's favorites
      */
     async getUserFavorites(userId: string) {
-        const favorites = await this.prisma.favorite.findMany({
+        const favorites = await this.prisma.resourceFavorite.findMany({
             where: { userId },
             include: {
                 resource: {
@@ -163,9 +163,6 @@ export class FavoriteService {
                             },
                         },
                         tags: {
-                            where: {
-                                featured: true,
-                            },
                             include: {
                                 tag: true,
                             },

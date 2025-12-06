@@ -9,6 +9,12 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Camera, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { OrbisConfirmDialog } from '@/components/OrbisDialog';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 interface ServerCategory {
   id: string;
@@ -42,6 +48,7 @@ interface Server {
   twitterUrl?: string;
   tiktokUrl?: string;
   logo?: string;
+  banner?: string;
   teamId?: string | null;
   categories?: Array<{
     category: ServerCategory;
@@ -62,8 +69,8 @@ export default function EditServerPage() {
   const [categories, setCategories] = useState<ServerCategory[]>([]);
   const [tags, setTags] = useState<ServerTag[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
-  const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+
+  const [server, setServer] = useState<Server | null>(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -85,6 +92,7 @@ export default function EditServerPage() {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [deleteImageId, setDeleteImageId] = useState<'logo' | 'banner' | null>(null);
 
   useEffect(() => {
     fetchServer();
@@ -95,42 +103,40 @@ export default function EditServerPage() {
 
   const fetchServer = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/servers/${serverId}`, {
+      const response = await fetch(`${API_URL}/servers/${serverId}`, {
         credentials: 'include',
       });
 
       if (response.ok) {
-        const server: Server = await response.json();
+        const serverData: Server = await response.json();
+        setServer(serverData);
 
-        const primaryCategory = server.categories?.find(c => c.isPrimary)?.category;
-        const additionalCategories = server.categories?.filter(c => !c.isPrimary).map(c => c.category.id) || [];
-        const serverTags = server.tags?.map(t => t.tag.id) || [];
+        const primaryCategory = serverData.categories?.find(c => c.isPrimary)?.category;
+        const additionalCategories = serverData.categories?.filter(c => !c.isPrimary).map(c => c.category.id) || [];
+        const serverTags = serverData.tags?.map(t => t.tag.id) || [];
 
         setFormData({
-          name: server.name,
-          description: server.description,
-          shortDesc: server.shortDesc || '',
-          serverIp: server.serverIp,
-          port: server.port.toString(),
-          gameVersion: server.gameVersion,
-          supportedVersions: server.supportedVersions,
-          websiteUrl: server.websiteUrl || '',
-          discordUrl: server.discordUrl || '',
-          youtubeUrl: server.youtubeUrl || '',
-          twitterUrl: server.twitterUrl || '',
-          tiktokUrl: server.tiktokUrl || '',
+          name: serverData.name,
+          description: serverData.description,
+          shortDesc: serverData.shortDesc || '',
+          serverIp: serverData.serverIp,
+          port: serverData.port.toString(),
+          gameVersion: serverData.gameVersion,
+          supportedVersions: serverData.supportedVersions,
+          websiteUrl: serverData.websiteUrl || '',
+          discordUrl: serverData.discordUrl || '',
+          youtubeUrl: serverData.youtubeUrl || '',
+          twitterUrl: serverData.twitterUrl || '',
+          tiktokUrl: serverData.tiktokUrl || '',
           primaryCategoryId: primaryCategory?.id || '',
           categoryIds: additionalCategories,
           tagIds: serverTags,
-          teamId: server.teamId || null,
+          teamId: serverData.teamId || null,
         });
-
-        if (server.logo) {
-          setLogoPreview(server.logo);
-        }
       }
     } catch (error) {
       console.error('Failed to fetch server:', error);
+      toast.error('Failed to fetch server details');
     } finally {
       setLoading(false);
     }
@@ -138,7 +144,7 @@ export default function EditServerPage() {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/server-categories`);
+      const response = await fetch(`${API_URL}/server-categories`);
       if (response.ok) {
         const data = await response.json();
         setCategories(data);
@@ -150,7 +156,7 @@ export default function EditServerPage() {
 
   const fetchTags = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/server-tags`);
+      const response = await fetch(`${API_URL}/server-tags`);
       if (response.ok) {
         const data = await response.json();
         setTags(data);
@@ -162,7 +168,7 @@ export default function EditServerPage() {
 
   const fetchTeams = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/users/me/teams`, {
+      const response = await fetch(`${API_URL}/users/me/teams`, {
         credentials: 'include',
       });
       if (response.ok) {
@@ -174,15 +180,57 @@ export default function EditServerPage() {
     }
   };
 
-  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setLogoFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setLogoPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+  const handleImageUpload = async (type: 'logo' | 'banner', file: File) => {
+    // Validate file size (5MB for logo, 10MB for banner)
+    const maxSize = type === 'logo' ? 5 * 1024 * 1024 : 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      toast.error(`File size must be less than ${type === 'logo' ? '5MB' : '10MB'}`);
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append(type, file);
+
+    try {
+      const response = await fetch(`${API_URL}/servers/${serverId}/${type}`, {
+        method: 'POST',
+        credentials: 'include',
+        body: formData,
+      });
+
+      if (response.ok) {
+        await fetchServer();
+        toast.success(`${type === 'logo' ? 'Logo' : 'Banner'} updated successfully!`);
+      } else {
+        const error = await response.json().catch(() => ({ message: 'Failed to upload image' }));
+        toast.error(error.message || `Failed to upload ${type}`);
+      }
+    } catch (error) {
+      console.error(`Error uploading ${type}:`, error);
+      toast.error(`Failed to upload ${type}. Please try again.`);
+    }
+  };
+
+  const handleDeleteImage = async () => {
+    if (!deleteImageId) return;
+
+    try {
+      const response = await fetch(`${API_URL}/servers/${serverId}/${deleteImageId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        await fetchServer();
+        toast.success(`${deleteImageId === 'logo' ? 'Logo' : 'Banner'} deleted successfully!`);
+      } else {
+        toast.error(`Failed to delete ${deleteImageId}`);
+      }
+    } catch (error) {
+      console.error(`Error deleting ${deleteImageId}:`, error);
+      toast.error(`Failed to delete ${deleteImageId}`);
+    } finally {
+      setDeleteImageId(null);
     }
   };
 
@@ -211,6 +259,7 @@ export default function EditServerPage() {
     e.preventDefault();
 
     if (!validateForm()) {
+      toast.error('Please fix the errors in the form');
       return;
     }
 
@@ -223,7 +272,7 @@ export default function EditServerPage() {
         teamId: formData.teamId || null,
       };
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/servers/${serverId}`, {
+      const response = await fetch(`${API_URL}/servers/${serverId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -237,21 +286,11 @@ export default function EditServerPage() {
         throw new Error(errorData.message || 'Failed to update server');
       }
 
-      if (logoFile) {
-        const formData = new FormData();
-        formData.append('logo', logoFile);
-
-        await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/servers/${serverId}/logo`, {
-          method: 'POST',
-          credentials: 'include',
-          body: formData,
-        });
-      }
-
+      toast.success('Server updated successfully!');
       router.push('/dashboard/servers');
     } catch (error) {
       console.error('Failed to update server:', error);
-      alert(error instanceof Error ? error.message : 'Failed to update server. Please try again.');
+      toast.error(error instanceof Error ? error.message : 'Failed to update server. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -292,12 +331,19 @@ export default function EditServerPage() {
     });
   };
 
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-center py-12">
-          <Icon icon="mdi:loading" width="48" height="48" className="text-primary animate-spin" />
-        </div>
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Icon icon="mdi:loading" className="animate-spin text-primary" width="40" height="40" />
       </div>
     );
   }
@@ -313,6 +359,77 @@ export default function EditServerPage() {
           <p className="text-muted-foreground mt-1 font-nunito">
             Update your server details
           </p>
+        </div>
+      </div>
+
+      {/* Banner and Logo Section */}
+      <div className="bg-secondary/30 rounded-lg overflow-hidden">
+        {/* Banner */}
+        <div className="relative h-48 bg-gradient-to-r from-primary/20 to-secondary/20">
+          {server?.banner && (
+            <img src={server.banner} alt="Banner" className="w-full h-full object-cover" />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-background/50 to-transparent" />
+
+          <div className="absolute top-4 right-4 flex gap-2">
+            {server?.banner && (
+              <Button
+                variant="destructive"
+                size="sm"
+                className="h-9 px-4 font-nunito"
+                onClick={() => setDeleteImageId('banner')}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete
+              </Button>
+            )}
+            <label className="cursor-pointer">
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => e.target.files?.[0] && handleImageUpload('banner', e.target.files[0])}
+              />
+              <div className="flex items-center gap-2 px-4 py-2 bg-background/80 rounded-lg hover:bg-background transition-colors h-9">
+                <Camera className="w-4 h-4" />
+                <span className="text-sm font-nunito">Change Banner</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        {/* Logo */}
+        <div className="px-6 -mt-16 pb-6">
+          <div className="relative inline-block">
+            <Avatar className="h-32 w-32 border-4 border-background shadow-lg rounded-lg">
+              <AvatarImage src={server?.logo || undefined} alt={server?.name || 'Server'} className="object-cover" />
+              <AvatarFallback className="bg-primary text-white font-hebden text-3xl rounded-lg">
+                {server?.name ? getInitials(server.name) : 'S'}
+              </AvatarFallback>
+            </Avatar>
+
+            <div className="absolute -bottom-2 -right-2 flex gap-2">
+              {server?.logo && (
+                <button
+                  onClick={() => setDeleteImageId('logo')}
+                  className="flex items-center justify-center w-8 h-8 bg-destructive text-destructive-foreground rounded-full hover:bg-destructive/90 transition-colors shadow-sm"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              )}
+              <label className="cursor-pointer">
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => e.target.files?.[0] && handleImageUpload('logo', e.target.files[0])}
+                />
+                <div className="flex items-center justify-center w-8 h-8 bg-primary rounded-full hover:bg-primary/80 transition-colors shadow-sm">
+                  <Camera className="w-4 h-4 text-white" />
+                </div>
+              </label>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -332,7 +449,7 @@ export default function EditServerPage() {
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="My Awesome Hytale Server"
-                className={errors.name ? 'border-red-500' : ''}
+                className={`font-nunito ${errors.name ? 'border-red-500' : ''}`}
               />
               {errors.name && <p className="text-sm text-red-500 font-nunito">{errors.name}</p>}
             </div>
@@ -345,7 +462,7 @@ export default function EditServerPage() {
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="A complete description of at least 50 characters to explain what the server offers..."
                 rows={6}
-                className={errors.description ? 'border-red-500' : ''}
+                className={`font-nunito ${errors.description ? 'border-red-500' : ''}`}
               />
               <p className="text-sm text-muted-foreground font-nunito">
                 {formData.description.length} / 50 characters
@@ -361,7 +478,7 @@ export default function EditServerPage() {
                 onChange={(e) => setFormData({ ...formData, shortDesc: e.target.value })}
                 placeholder="A brief description of your server..."
                 rows={3}
-                className={errors.shortDesc ? 'border-red-500' : ''}
+                className={`font-nunito ${errors.shortDesc ? 'border-red-500' : ''}`}
               />
               <p className="text-sm text-muted-foreground font-nunito">
                 {formData.shortDesc.length} / 200 characters
@@ -387,7 +504,7 @@ export default function EditServerPage() {
                   value={formData.serverIp}
                   onChange={(e) => setFormData({ ...formData, serverIp: e.target.value })}
                   placeholder="play.myserver.com"
-                  className={errors.serverIp ? 'border-red-500' : ''}
+                  className={`font-nunito ${errors.serverIp ? 'border-red-500' : ''}`}
                 />
                 {errors.serverIp && <p className="text-sm text-red-500 font-nunito">{errors.serverIp}</p>}
               </div>
@@ -400,7 +517,7 @@ export default function EditServerPage() {
                   value={formData.port}
                   onChange={(e) => setFormData({ ...formData, port: e.target.value })}
                   placeholder="25565"
-                  className={errors.port ? 'border-red-500' : ''}
+                  className={`font-nunito ${errors.port ? 'border-red-500' : ''}`}
                 />
                 {errors.port && <p className="text-sm text-red-500 font-nunito">{errors.port}</p>}
               </div>
@@ -413,7 +530,7 @@ export default function EditServerPage() {
                 value={formData.gameVersion}
                 onChange={(e) => setFormData({ ...formData, gameVersion: e.target.value })}
                 placeholder="1.0.0"
-                className={errors.gameVersion ? 'border-red-500' : ''}
+                className={`font-nunito ${errors.gameVersion ? 'border-red-500' : ''}`}
               />
               {errors.gameVersion && <p className="text-sm text-red-500 font-nunito">{errors.gameVersion}</p>}
             </div>
@@ -434,8 +551,8 @@ export default function EditServerPage() {
                   </div>
                 ))}
               </div>
-              <Button type="button" variant="outline" size="sm" onClick={handleVersionAdd}>
-                <Icon icon="mdi:plus" width="16" height="16" />
+              <Button type="button" variant="outline" size="sm" onClick={handleVersionAdd} className="font-nunito">
+                <Icon icon="mdi:plus" width="16" height="16" className="mr-2" />
                 Add Version
               </Button>
             </div>
@@ -456,12 +573,12 @@ export default function EditServerPage() {
                 value={formData.primaryCategoryId}
                 onValueChange={(value) => setFormData({ ...formData, primaryCategoryId: value })}
               >
-                <SelectTrigger className={errors.primaryCategoryId ? 'border-red-500' : ''}>
+                <SelectTrigger className={`font-nunito ${errors.primaryCategoryId ? 'border-red-500' : ''}`}>
                   <SelectValue placeholder="Select primary category" />
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
+                    <SelectItem key={category.id} value={category.id} className="font-nunito">
                       {category.name}
                     </SelectItem>
                   ))}
@@ -478,11 +595,10 @@ export default function EditServerPage() {
                     key={category.id}
                     type="button"
                     onClick={() => toggleCategory(category.id)}
-                    className={`p-3 rounded-lg border-2 transition-all font-nunito text-sm ${
-                      formData.categoryIds.includes(category.id)
+                    className={`p-3 rounded-lg border-2 transition-all font-nunito text-sm ${formData.categoryIds.includes(category.id)
                         ? 'border-primary bg-primary/10'
                         : 'border-border hover:border-primary/50'
-                    }`}
+                      }`}
                   >
                     {category.name}
                   </button>
@@ -498,11 +614,10 @@ export default function EditServerPage() {
                     key={tag.id}
                     type="button"
                     onClick={() => toggleTag(tag.id)}
-                    className={`p-3 rounded-lg border-2 transition-all font-nunito text-sm ${
-                      formData.tagIds.includes(tag.id)
+                    className={`p-3 rounded-lg border-2 transition-all font-nunito text-sm ${formData.tagIds.includes(tag.id)
                         ? 'border-primary bg-primary/10'
                         : 'border-border hover:border-primary/50'
-                    }`}
+                      }`}
                   >
                     {tag.name}
                   </button>
@@ -528,6 +643,7 @@ export default function EditServerPage() {
                 value={formData.websiteUrl}
                 onChange={(e) => setFormData({ ...formData, websiteUrl: e.target.value })}
                 placeholder="https://myserver.com"
+                className="font-nunito"
               />
             </div>
 
@@ -539,6 +655,7 @@ export default function EditServerPage() {
                 value={formData.discordUrl}
                 onChange={(e) => setFormData({ ...formData, discordUrl: e.target.value })}
                 placeholder="https://discord.gg/myserver"
+                className="font-nunito"
               />
             </div>
 
@@ -550,6 +667,7 @@ export default function EditServerPage() {
                 value={formData.youtubeUrl}
                 onChange={(e) => setFormData({ ...formData, youtubeUrl: e.target.value })}
                 placeholder="https://youtube.com/@myserver"
+                className="font-nunito"
               />
             </div>
 
@@ -561,6 +679,7 @@ export default function EditServerPage() {
                 value={formData.twitterUrl}
                 onChange={(e) => setFormData({ ...formData, twitterUrl: e.target.value })}
                 placeholder="https://twitter.com/myserver"
+                className="font-nunito"
               />
             </div>
 
@@ -572,6 +691,7 @@ export default function EditServerPage() {
                 value={formData.tiktokUrl}
                 onChange={(e) => setFormData({ ...formData, tiktokUrl: e.target.value })}
                 placeholder="https://tiktok.com/@myserver"
+                className="font-nunito"
               />
             </div>
           </CardContent>
@@ -579,50 +699,36 @@ export default function EditServerPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="font-hebden">Logo & Team</CardTitle>
+            <CardTitle className="font-hebden">Team Assignment</CardTitle>
             <CardDescription className="font-nunito">
-              Upload a logo and assign to a team (optional)
+              Assign this server to a team (optional)
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="logo" className="font-nunito">Server Logo</Label>
-              <div className="flex items-center gap-4">
-                {logoPreview && (
-                  <div className="w-20 h-20 rounded-lg overflow-hidden border-2 border-border">
-                    <img src={logoPreview} alt="Logo preview" className="w-full h-full object-cover" />
-                  </div>
-                )}
-                <Input
-                  id="logo"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleLogoChange}
-                  className="font-nunito"
-                />
-              </div>
-            </div>
-
-            {teams.length > 0 && (
+          <CardContent>
+            {teams.length > 0 ? (
               <div className="space-y-2">
-                <Label htmlFor="team" className="font-nunito">Assign to Team</Label>
+                <Label htmlFor="team" className="font-nunito">Select Team</Label>
                 <Select
                   value={formData.teamId || ''}
                   onValueChange={(value) => setFormData({ ...formData, teamId: value || null })}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="font-nunito">
                     <SelectValue placeholder="Select a team (optional)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No team</SelectItem>
+                    <SelectItem value="no-team" className="font-nunito text-muted-foreground">No team</SelectItem>
                     {teams.map((team) => (
-                      <SelectItem key={team.id} value={team.id}>
+                      <SelectItem key={team.id} value={team.id} className="font-nunito">
                         {team.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
+            ) : (
+              <p className="text-sm text-muted-foreground font-nunito">
+                You don't have any teams yet. Create a team to assign servers to it.
+              </p>
             )}
           </CardContent>
         </Card>
@@ -631,12 +737,12 @@ export default function EditServerPage() {
           <Button type="submit" disabled={saving} className="font-hebden">
             {saving ? (
               <>
-                <Icon icon="mdi:loading" width="20" height="20" className="animate-spin" />
+                <Icon icon="mdi:loading" width="20" height="20" className="animate-spin mr-2" />
                 Saving Changes...
               </>
             ) : (
               <>
-                <Icon icon="mdi:check" width="20" height="20" />
+                <Icon icon="mdi:check" width="20" height="20" className="mr-2" />
                 Save Changes
               </>
             )}
@@ -646,6 +752,20 @@ export default function EditServerPage() {
           </Button>
         </div>
       </form>
+
+      <OrbisConfirmDialog
+        open={!!deleteImageId}
+        onOpenChange={(open) => !open && setDeleteImageId(null)}
+        title={`Delete Server ${deleteImageId === 'logo' ? 'Logo' : 'Banner'}`}
+        description={`Are you sure you want to delete this ${deleteImageId}? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="destructive"
+        onConfirm={handleDeleteImage}
+        onCancel={() => setDeleteImageId(null)}
+      >
+        <></>
+      </OrbisConfirmDialog>
     </div>
   );
 }

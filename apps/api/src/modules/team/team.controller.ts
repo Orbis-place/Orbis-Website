@@ -18,6 +18,7 @@ import { CreateTeamDto } from './dtos/create-team.dto';
 import { UpdateTeamDto } from './dtos/update-team.dto';
 import { FilterTeamsDto } from './dtos/filter-teams.dto';
 import { AddTeamMemberDto, UpdateTeamMemberDto } from './dtos/manage-member.dto';
+import { CreateInvitationDto, RespondToInvitationDto, FilterInvitationsDto } from './dtos/invitation.dto';
 
 @ApiTags('teams')
 @Controller('teams')
@@ -135,20 +136,71 @@ export class TeamController {
     }
 
     // ============================================
-    // MEMBER MANAGEMENT ENDPOINTS
+    // INVITATION MANAGEMENT ENDPOINTS
     // ============================================
 
-    @Post(':id/members')
+    @Post(':id/invitations')
     @ApiBearerAuth()
-    @ApiOperation({ summary: 'Add member to team' })
+    @ApiOperation({ summary: 'Create team invitation' })
     @ApiParam({ name: 'id', description: 'Team ID' })
-    async addMember(
+    async createInvitation(
         @Session() session: UserSession,
         @Param('id') teamId: string,
-        @Body() addDto: AddTeamMemberDto,
+        @Body() createDto: CreateInvitationDto,
     ) {
-        return this.teamService.addMember(session.user.id, teamId, addDto);
+        return this.teamService.createInvitation(session.user.id, teamId, createDto);
     }
+
+    @Get(':id/invitations')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Get team invitations' })
+    @ApiParam({ name: 'id', description: 'Team ID' })
+    async getTeamInvitations(
+        @Session() session: UserSession,
+        @Param('id') teamId: string,
+        @Query() filterDto: FilterInvitationsDto,
+    ) {
+        return this.teamService.getTeamInvitations(session.user.id, teamId, filterDto);
+    }
+
+    @Delete(':id/invitations/:invitationId')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Cancel team invitation' })
+    @ApiParam({ name: 'id', description: 'Team ID' })
+    @ApiParam({ name: 'invitationId', description: 'Invitation ID' })
+    async cancelInvitation(
+        @Session() session: UserSession,
+        @Param('id') teamId: string,
+        @Param('invitationId') invitationId: string,
+    ) {
+        return this.teamService.cancelInvitation(session.user.id, teamId, invitationId);
+    }
+
+    @Get('invitations/me')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Get current user received invitations' })
+    async getUserInvitations(
+        @Session() session: UserSession,
+        @Query() filterDto: FilterInvitationsDto,
+    ) {
+        return this.teamService.getUserInvitations(session.user.id, filterDto);
+    }
+
+    @Post('invitations/:invitationId/respond')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Respond to team invitation' })
+    @ApiParam({ name: 'invitationId', description: 'Invitation ID' })
+    async respondToInvitation(
+        @Session() session: UserSession,
+        @Param('invitationId') invitationId: string,
+        @Body() respondDto: RespondToInvitationDto,
+    ) {
+        return this.teamService.respondToInvitation(session.user.id, invitationId, respondDto);
+    }
+
+    // ============================================
+    // MEMBER MANAGEMENT ENDPOINTS
+    // ============================================
 
     @Patch(':id/members/:memberId')
     @ApiBearerAuth()

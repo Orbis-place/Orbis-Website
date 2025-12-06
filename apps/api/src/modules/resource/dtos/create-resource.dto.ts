@@ -43,16 +43,6 @@ export class CreateResourceDto {
     tagline: string;
 
     @ApiProperty({
-        example: 'This is a detailed description of the plugin with all its features...',
-        description: 'Full description (Markdown/HTML)',
-    })
-    @IsString()
-    @IsNotEmpty()
-    @MinLength(50)
-    @MaxLength(50000)
-    description: string;
-
-    @ApiProperty({
         example: 'PLUGIN',
         description: 'Resource type',
         enum: ResourceType,

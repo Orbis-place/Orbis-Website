@@ -6,6 +6,7 @@ import { Icon } from '@iconify-icon/react';
 import { Button } from '@/components/ui/button';
 import { useSessionStore } from '@/stores/useSessionStore';
 import Image from 'next/image';
+import { OrbisConfirmDialog } from '@/components/OrbisDialog';
 
 interface TeamMember {
   id: string;
@@ -34,10 +35,31 @@ interface Team {
   };
 }
 
+interface TeamInvitation {
+  id: string;
+  role: 'OWNER' | 'ADMIN' | 'MODERATOR' | 'MEMBER';
+  status: 'PENDING' | 'ACCEPTED' | 'DECLINED' | 'CANCELLED' | 'EXPIRED';
+  createdAt: string;
+  expiresAt: string;
+  team: {
+    id: string;
+    name: string;
+    displayName: string;
+    logo?: string;
+  };
+  inviter: {
+    id: string;
+    username: string;
+    displayName?: string;
+    image?: string;
+  };
+}
+
 export default function TeamsPage() {
   const router = useRouter();
   const { session } = useSessionStore();
   const [teams, setTeams] = useState<Team[]>([]);
+  const [invitations, setInvitations] = useState<TeamInvitation[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [formData, setFormData] = useState({
@@ -47,9 +69,12 @@ export default function TeamsPage() {
     websiteUrl: '',
     discordUrl: '',
   });
+  const [leavingTeamId, setLeavingTeamId] = useState<string | null>(null);
+  const [deletingTeamId, setDeletingTeamId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchTeams();
+    fetchInvitations();
   }, []);
 
   const fetchTeams = async () => {
@@ -66,6 +91,21 @@ export default function TeamsPage() {
       console.error('Failed to fetch teams:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchInvitations = async () => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/teams/invitations/me?status=PENDING`, {
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setInvitations(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch invitations:', error);
     }
   };
 
@@ -98,37 +138,80 @@ export default function TeamsPage() {
     }
   };
 
-  const handleLeaveTeam = async (teamId: string) => {
-    if (!confirm('Are you sure you want to leave this team?')) return;
+  const handleLeaveTeam = async () => {
+    if (!leavingTeamId) return;
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/teams/${teamId}/leave`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/teams/${leavingTeamId}/leave`, {
         method: 'POST',
         credentials: 'include',
       });
 
       if (response.ok) {
-        setTeams(teams.filter(team => team.id !== teamId));
+        setTeams(teams.filter(team => team.id !== leavingTeamId));
       }
     } catch (error) {
       console.error('Failed to leave team:', error);
+    } finally {
+      setLeavingTeamId(null);
     }
   };
 
-  const handleDeleteTeam = async (teamId: string) => {
-    if (!confirm('Are you sure you want to delete this team? This action cannot be undone.')) return;
+  const handleDeleteTeam = async () => {
+    if (!deletingTeamId) return;
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/teams/${teamId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/teams/${deletingTeamId}`, {
         method: 'DELETE',
         credentials: 'include',
       });
 
       if (response.ok) {
-        setTeams(teams.filter(team => team.id !== teamId));
+        setTeams(teams.filter(team => team.id !== deletingTeamId));
       }
     } catch (error) {
       console.error('Failed to delete team:', error);
+    } finally {
+      setDeletingTeamId(null);
+    }
+  };
+
+  const handleAcceptInvitation = async (invitationId: string) => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/teams/invitations/${invitationId}/respond`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ response: 'ACCEPTED' }),
+      });
+
+      if (response.ok) {
+        setInvitations(invitations.filter(inv => inv.id !== invitationId));
+        await fetchTeams(); // Refresh teams list
+      }
+    } catch (error) {
+      console.error('Failed to accept invitation:', error);
+    }
+  };
+
+  const handleDeclineInvitation = async (invitationId: string) => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/teams/invitations/${invitationId}/respond`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ response: 'DECLINED' }),
+      });
+
+      if (response.ok) {
+        setInvitations(invitations.filter(inv => inv.id !== invitationId));
+      }
+    } catch (error) {
+      console.error('Failed to decline invitation:', error);
     }
   };
 
@@ -246,6 +329,71 @@ export default function TeamsPage() {
         </div>
       )}
 
+      {/* Pending Invitations */}
+      {invitations.length > 0 && (
+        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Icon icon="mdi:email" width="24" height="24" className="text-yellow-500" />
+            <h2 className="font-hebden text-xl font-semibold text-foreground">Pending Invitations</h2>
+            <span className="bg-yellow-500 text-background text-xs font-bold px-2 py-1 rounded-full">
+              {invitations.length}
+            </span>
+          </div>
+          <div className="space-y-3">
+            {invitations.map((invitation) => (
+              <div key={invitation.id} className="bg-background/50 rounded-lg p-4 border border-border">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                    {invitation.team.logo ? (
+                      <Image src={invitation.team.logo} alt={invitation.team.displayName} width={48} height={48} className="rounded-lg" />
+                    ) : (
+                      <Icon icon="mdi:account-group" width="24" height="24" className="text-primary" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-hebden text-lg font-semibold text-foreground">{invitation.team.displayName}</h3>
+                    <p className="text-sm text-muted-foreground font-nunito mb-2">
+                      <span className="font-semibold text-foreground">{invitation.inviter.displayName || invitation.inviter.username}</span>
+                      {' '}invited you to join as{' '}
+                      <span className="font-semibold text-primary">{invitation.role}</span>
+                    </p>
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground font-nunito">
+                      <span className="flex items-center gap-1">
+                        <Icon icon="mdi:clock-outline" width="14" height="14" />
+                        Invited {new Date(invitation.createdAt).toLocaleDateString()}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Icon icon="mdi:calendar-clock" width="14" height="14" />
+                        Expires {new Date(invitation.expiresAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      className="font-nunito text-sm bg-green-600 hover:bg-green-700"
+                      onClick={() => handleAcceptInvitation(invitation.id)}
+                    >
+                      <Icon icon="mdi:check" width="16" height="16" />
+                      Accept
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="font-nunito text-sm text-destructive border-destructive hover:bg-destructive/10"
+                      onClick={() => handleDeclineInvitation(invitation.id)}
+                    >
+                      <Icon icon="mdi:close" width="16" height="16" />
+                      Decline
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Owned Teams */}
       {ownedTeams.length > 0 && (
         <div className="bg-secondary/30 rounded-lg p-6">
@@ -298,7 +446,7 @@ export default function TeamsPage() {
                     <Icon icon="mdi:cog" width="16" height="16" />
                     Manage
                   </Button>
-                  <Button size="sm" variant="destructive" className="font-nunito text-sm" onClick={() => handleDeleteTeam(team.id)}>
+                  <Button size="sm" variant="destructive" className="font-nunito text-sm" onClick={() => setDeletingTeamId(team.id)}>
                     <Icon icon="mdi:delete" width="16" height="16" />
                     Delete
                   </Button>
@@ -359,11 +507,15 @@ export default function TeamsPage() {
                   </div>
                 </div>
                 <div className="flex gap-2 mt-4">
-                  <Button size="sm" variant="outline" className="font-nunito text-sm" onClick={() => router.push(`/dashboard/teams/${team.name}`)}>
+                  <Button size="sm" variant="outline" className="font-nunito text-sm" onClick={() => router.push(`/team/${team.name}`)}>
                     <Icon icon="mdi:eye" width="16" height="16" />
                     View
                   </Button>
-                  <Button size="sm" variant="outline" className="font-nunito text-sm text-destructive" onClick={() => handleLeaveTeam(team.id)}>
+                  <Button size="sm" variant="outline" onClick={() => router.push(`/dashboard/teams/${team.name}`)}>
+                    <Icon icon="mdi:cog" width="16" height="16" />
+                    Manage
+                  </Button>
+                  <Button size="sm" variant="outline" className="font-nunito text-sm text-destructive" onClick={() => setLeavingTeamId(team.id)}>
                     <Icon icon="mdi:logout" width="16" height="16" />
                     Leave
                   </Button>
@@ -392,6 +544,36 @@ export default function TeamsPage() {
           </div>
         </div>
       )}
+
+      {/* Leave Team Confirmation Dialog */}
+      <OrbisConfirmDialog
+        open={!!leavingTeamId}
+        onOpenChange={(open) => !open && setLeavingTeamId(null)}
+        title="Leave Team"
+        description="Are you sure you want to leave this team?"
+        confirmText="Leave Team"
+        cancelText="Cancel"
+        variant="destructive"
+        onConfirm={handleLeaveTeam}
+        onCancel={() => setLeavingTeamId(null)}
+      >
+        <></>
+      </OrbisConfirmDialog>
+
+      {/* Delete Team Confirmation Dialog */}
+      <OrbisConfirmDialog
+        open={!!deletingTeamId}
+        onOpenChange={(open) => !open && setDeletingTeamId(null)}
+        title="Delete Team"
+        description="Are you sure you want to delete this team? This action cannot be undone."
+        confirmText="Delete Team"
+        cancelText="Cancel"
+        variant="destructive"
+        onConfirm={handleDeleteTeam}
+        onCancel={() => setDeletingTeamId(null)}
+      >
+        <></>
+      </OrbisConfirmDialog>
     </div>
   );
 }

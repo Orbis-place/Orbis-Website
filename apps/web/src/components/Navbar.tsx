@@ -1,9 +1,9 @@
 'use client'
 import Image from 'next/image';
 import Link from 'next/link';
-import {useState, useEffect} from 'react';
+import { useState, useEffect } from 'react';
 
-import {LogInIcon, Menu, X, User, Settings, ChevronRight} from 'lucide-react';
+import { LogInIcon, Menu, X, User, Settings, ChevronRight } from 'lucide-react';
 import {
     NavigationMenu,
     NavigationMenuContent,
@@ -20,32 +20,32 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar"
-import {Icon} from "@iconify-icon/react";
-import {Button} from "@/components/ui/button";
-import {authClient} from "@repo/auth/client";
-import {useSessionStore} from "@/stores/useSessionStore";
-import {Session} from '@repo/auth';
-import {EvaArrowDownFill} from "@/components/icons/EvaArrowDownFill";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Icon } from "@iconify-icon/react";
+import { Button } from "@/components/ui/button";
+import { authClient } from "@repo/auth/client";
+import { useSessionStore } from "@/stores/useSessionStore";
+import { Session } from '@repo/auth';
+import { EvaArrowDownFill } from "@/components/icons/EvaArrowDownFill";
 import * as React from "react";
 
 const marketplaceCategories = [
-    {name: 'Mods', href: '/marketplace/mods', icon: 'mdi:puzzle'},
-    {name: 'Modpacks', href: '/marketplace/modpacks', icon: 'mdi:package-variant'},
-    {name: 'Worlds', href: '/marketplace/worlds', icon: 'mdi:earth'},
-    {name: 'Plugins', href: '/marketplace/plugins', icon: 'mdi:power-plug'},
-    {name: 'Asset Packs', href: '/marketplace/asset-packs', icon: 'mdi:image-multiple'},
-    {name: 'Premade Servers', href: '/marketplace/premade-servers', icon: 'mdi:server'},
-    {name: 'Prefabs', href: '/marketplace/prefabs', icon: 'mdi:cube-outline'},
-    {name: 'Datapacks', href: '/marketplace/datapacks', icon: 'mdi:database'},
-    {name: 'Tools & Scripts', href: '/marketplace/tools-scripts', icon: 'mdi:tools'},
+    { name: 'Mods', href: '/mods', icon: 'mdi:puzzle' },
+    { name: 'Modpacks', href: '/modpacks', icon: 'mdi:package-variant' },
+    { name: 'Worlds', href: '/worlds', icon: 'mdi:earth' },
+    { name: 'Plugins', href: '/plugins', icon: 'mdi:power-plug' },
+    { name: 'Asset Packs', href: '/asset-packs', icon: 'mdi:image-multiple' },
+    { name: 'Premade Servers', href: '/premade-servers', icon: 'mdi:server' },
+    { name: 'Prefabs', href: '/prefabs', icon: 'mdi:cube-outline' },
+    { name: 'Datapacks', href: '/datapacks', icon: 'mdi:database' },
+    { name: 'Tools & Scripts', href: '/tools-scripts', icon: 'mdi:tools' },
 ];
 
 interface NavbarProps {
     session: Session | null;
 }
 
-export default function Navbar({session}: NavbarProps) {
+export default function Navbar({ session }: NavbarProps) {
     const [mobileNavOpen, setMobileNavOpen] = useState(false);
     const [mobileProfileOpen, setMobileProfileOpen] = useState(false);
 
@@ -108,7 +108,7 @@ export default function Navbar({session}: NavbarProps) {
                                                 href={category.href}
                                                 className="flex flex-row items-center gap-2 select-none rounded-lg p-2 leading-none no-underline outline-none transition-colors hover:bg-white/5 hover:text-foreground focus:bg-white/5 focus:text-foreground font-hebden font-semibold text-foreground text-sm"
                                             >
-                                                <Icon icon={category.icon} width="16" height="16"/>
+                                                <Icon icon={category.icon} width="16" height="16" />
                                                 {category.name}
                                             </NavigationMenuLink>
                                         ))}
@@ -130,7 +130,7 @@ export default function Navbar({session}: NavbarProps) {
                                 <Avatar
                                     className="h-11 w-11 border-2 border-primary/80 hover:border-primary transition-colors">
                                     <AvatarImage src={session.user.image || undefined}
-                                                 alt={session.user.name || 'User'}/>
+                                        alt={session.user.name || 'User'} />
                                     <AvatarFallback className="bg-primary/80 text-white font-hebden">
                                         {session.user.name ? getInitials(session.user.name) : 'U'}
                                     </AvatarFallback>
@@ -148,62 +148,62 @@ export default function Navbar({session}: NavbarProps) {
                                 className="w-56 bg-accent border border-border font-hebden"
                             >
                                 <DropdownMenuItem asChild className="text-foreground cursor-pointer">
-                                    <Link href="/dashboard/profile"
-                                          className="flex items-center gap-2 w-full px-2 py-2">
-                                        <User size={16}/>
+                                    <Link href={`/users/${session.user.name}`}
+                                        className="flex items-center gap-2 w-full px-2 py-2">
+                                        <User size={16} />
                                         Profile
                                     </Link>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem asChild className="text-foreground cursor-pointer">
                                     <Link href="/dashboard/settings"
-                                          className="flex items-center gap-2 w-full px-2 py-2">
-                                        <Settings size={16}/>
+                                        className="flex items-center gap-2 w-full px-2 py-2">
+                                        <Settings size={16} />
                                         Settings
                                     </Link>
                                 </DropdownMenuItem>
-                                <DropdownMenuSeparator className="bg-[#084B54]"/>
+                                <DropdownMenuSeparator className="bg-[#084B54]" />
                                 <DropdownMenuItem asChild className="text-foreground cursor-pointer">
                                     <Link href="/dashboard/notifications"
-                                          className="flex items-center gap-2 w-full px-2 py-2">
-                                        <Icon icon="mdi:bell" width="16" height="16"/>
+                                        className="flex items-center gap-2 w-full px-2 py-2">
+                                        <Icon icon="mdi:bell" width="16" height="16" />
                                         Notifications
                                     </Link>
                                 </DropdownMenuItem>
-                               {/* <DropdownMenuItem asChild className="text-foreground cursor-pointer">
+                                {/* <DropdownMenuItem asChild className="text-foreground cursor-pointer">
                                     <Link href="/dashboard/collections"
                                           className="flex items-center gap-2 w-full px-2 py-2">
                                         <Icon icon="mdi:view-list" width="16" height="16"/>
                                         Collections
                                     </Link>
                                 </DropdownMenuItem>*/}
-                                <DropdownMenuSeparator className="bg-[#084B54]"/>
+                                <DropdownMenuSeparator className="bg-[#084B54]" />
                                 <DropdownMenuItem asChild className="text-foreground cursor-pointer">
                                     <Link href="/dashboard/resources"
-                                          className="flex items-center gap-2 w-full px-2 py-2">
-                                        <Icon icon="mdi:package-variant" width="16" height="16"/>
+                                        className="flex items-center gap-2 w-full px-2 py-2">
+                                        <Icon icon="mdi:package-variant" width="16" height="16" />
                                         My Resources
                                     </Link>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem asChild className="text-foreground cursor-pointer">
                                     <Link href="/dashboard/teams"
-                                          className="flex items-center gap-2 w-full px-2 py-2">
-                                        <Icon icon="mdi:account-group" width="16" height="16"/>
+                                        className="flex items-center gap-2 w-full px-2 py-2">
+                                        <Icon icon="mdi:account-group" width="16" height="16" />
                                         My Teams
                                     </Link>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem asChild className="text-foreground cursor-pointer">
                                     <Link href="/dashboard/servers"
-                                          className="flex items-center gap-2 w-full px-2 py-2">
-                                        <Icon icon="mdi:server" width="16" height="16"/>
+                                        className="flex items-center gap-2 w-full px-2 py-2">
+                                        <Icon icon="mdi:server" width="16" height="16" />
                                         My Servers
                                     </Link>
                                 </DropdownMenuItem>
-                                <DropdownMenuSeparator className="bg-[#084B54]"/>
+                                <DropdownMenuSeparator className="bg-[#084B54]" />
                                 <DropdownMenuItem
                                     onClick={handleSignOut}
                                     className="text-destructive cursor-pointer data-[highlighted]:text-destructive"
                                 >
-                                    <Icon icon="mdi:logout" width="16" height="16"/>
+                                    <Icon icon="mdi:logout" width="16" height="16" />
                                     Sign Out
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
@@ -214,7 +214,7 @@ export default function Navbar({session}: NavbarProps) {
                             <Link
                                 href="/login"
                                 className="w-full flex items-center gap-2.5 justify-center">
-                                <LogInIcon size={24}/> Sign In
+                                <LogInIcon size={24} /> Sign In
                             </Link>
                         </button>
                     )}
@@ -230,7 +230,7 @@ export default function Navbar({session}: NavbarProps) {
                         className="p-2 text-foreground hover:text-primary transition-colors z-50"
                         aria-label="Toggle navigation"
                     >
-                        {mobileNavOpen ? <X size={28}/> : <Menu size={28}/>}
+                        {mobileNavOpen ? <X size={28} /> : <Menu size={28} />}
                     </button>
 
                     {/* Logo au centre */}
@@ -254,7 +254,7 @@ export default function Navbar({session}: NavbarProps) {
                             >
                                 <Avatar className="h-10 w-10 border-2 border-primary/80">
                                     <AvatarImage src={session.user.image || undefined}
-                                                 alt={session.user.name || 'User'}/>
+                                        alt={session.user.name || 'User'} />
                                     <AvatarFallback className="bg-primary/80 text-white font-hebden">
                                         {session.user.name ? getInitials(session.user.name) : 'U'}
                                     </AvatarFallback>
@@ -265,7 +265,7 @@ export default function Navbar({session}: NavbarProps) {
                                 href="/login"
                                 className="flex items-center justify-center gap-2 px-4 py-2 bg-primary/80 hover:bg-primary rounded-full transition-all"
                             >
-                                <LogInIcon size={18} className="text-white"/>
+                                <LogInIcon size={18} className="text-white" />
                                 <span className="font-hebden text-sm text-white font-semibold">Sign In</span>
                             </Link>
                         )}
@@ -277,7 +277,7 @@ export default function Navbar({session}: NavbarProps) {
             {mobileNavOpen && (
                 <div
                     className="lg:hidden fixed inset-0 bg-background/95 backdrop-blur-md z-40 overflow-y-auto"
-                    style={{top: '70px'}}
+                    style={{ top: '70px' }}
                 >
                     <div className="flex flex-col h-full">
                         <div className="flex-1 px-6 py-6 space-y-6 overflow-y-auto">
@@ -296,7 +296,7 @@ export default function Navbar({session}: NavbarProps) {
                                     <span className="font-hebden font-semibold text-base text-foreground">
                                         Marketplace
                                     </span>
-                                    <ChevronRight size={20} className="text-foreground/40 group-hover:text-foreground/60"/>
+                                    <ChevronRight size={20} className="text-foreground/40 group-hover:text-foreground/60" />
                                 </Link>
 
                                 {/* Server Discovery */}
@@ -308,7 +308,7 @@ export default function Navbar({session}: NavbarProps) {
                                     <span className="font-hebden font-semibold text-base text-foreground">
                                         Server Discovery
                                     </span>
-                                    <ChevronRight size={20} className="text-foreground/40 group-hover:text-foreground/60"/>
+                                    <ChevronRight size={20} className="text-foreground/40 group-hover:text-foreground/60" />
                                 </Link>
                             </div>
 
@@ -325,7 +325,7 @@ export default function Navbar({session}: NavbarProps) {
                                             onClick={closeMobileNav}
                                             className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-accent/50 hover:bg-accent transition-colors"
                                         >
-                                            <Icon icon={category.icon} width="18" height="18" className="text-primary"/>
+                                            <Icon icon={category.icon} width="18" height="18" className="text-primary" />
                                             <span className="font-hebden font-medium text-sm text-foreground">
                                                 {category.name}
                                             </span>
@@ -342,7 +342,7 @@ export default function Navbar({session}: NavbarProps) {
             {mobileProfileOpen && session?.user && (
                 <div
                     className="lg:hidden fixed inset-0 bg-background/95 backdrop-blur-md z-40 overflow-y-auto"
-                    style={{top: '70px'}}
+                    style={{ top: '70px' }}
                 >
                     <div className="flex flex-col h-full">
                         <div className="flex-1 px-6 py-6 space-y-6 overflow-y-auto">
@@ -350,7 +350,7 @@ export default function Navbar({session}: NavbarProps) {
                             <div className="flex items-center gap-3 pb-6 border-b border-border">
                                 <Avatar className="h-12 w-12 border-2 border-primary/80">
                                     <AvatarImage src={session.user.image || undefined}
-                                                 alt={session.user.name || 'User'}/>
+                                        alt={session.user.name || 'User'} />
                                     <AvatarFallback className="bg-primary/80 text-white font-hebden">
                                         {session.user.name ? getInitials(session.user.name) : 'U'}
                                     </AvatarFallback>
@@ -371,21 +371,21 @@ export default function Navbar({session}: NavbarProps) {
                                     Account
                                 </h3>
 
-                                <Link href="/dashboard/profile" onClick={closeMobileProfile}
-                                      className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent transition-colors">
-                                    <User size={20} className="text-primary"/>
+                                <Link href={`/users/${session.user.name}`} onClick={closeMobileProfile}
+                                    className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent transition-colors">
+                                    <User size={20} className="text-primary" />
                                     <span className="font-hebden font-medium text-foreground">Profile</span>
                                 </Link>
 
                                 <Link href="/dashboard/settings" onClick={closeMobileProfile}
-                                      className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent transition-colors">
-                                    <Settings size={20} className="text-primary"/>
+                                    className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent transition-colors">
+                                    <Settings size={20} className="text-primary" />
                                     <span className="font-hebden font-medium text-foreground">Settings</span>
                                 </Link>
 
                                 <Link href="/dashboard/notifications" onClick={closeMobileProfile}
-                                      className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent transition-colors">
-                                    <Icon icon="mdi:bell" width="20" height="20" className="text-primary"/>
+                                    className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent transition-colors">
+                                    <Icon icon="mdi:bell" width="20" height="20" className="text-primary" />
                                     <span className="font-hebden font-medium text-foreground">Notifications</span>
                                 </Link>
 
@@ -403,20 +403,20 @@ export default function Navbar({session}: NavbarProps) {
                                 </h3>
 
                                 <Link href="/dashboard/resources" onClick={closeMobileProfile}
-                                      className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent transition-colors">
-                                    <Icon icon="mdi:package-variant" width="20" height="20" className="text-primary"/>
+                                    className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent transition-colors">
+                                    <Icon icon="mdi:package-variant" width="20" height="20" className="text-primary" />
                                     <span className="font-hebden font-medium text-foreground">My Resources</span>
                                 </Link>
 
                                 <Link href="/dashboard/teams" onClick={closeMobileProfile}
-                                      className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent transition-colors">
-                                    <Icon icon="mdi:account-group" width="20" height="20" className="text-primary"/>
+                                    className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent transition-colors">
+                                    <Icon icon="mdi:account-group" width="20" height="20" className="text-primary" />
                                     <span className="font-hebden font-medium text-foreground">My Teams</span>
                                 </Link>
 
                                 <Link href="/dashboard/servers" onClick={closeMobileProfile}
-                                      className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent transition-colors">
-                                    <Icon icon="mdi:server" width="20" height="20" className="text-primary"/>
+                                    className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent transition-colors">
+                                    <Icon icon="mdi:server" width="20" height="20" className="text-primary" />
                                     <span className="font-hebden font-medium text-foreground">My Servers</span>
                                 </Link>
                             </div>
@@ -428,7 +428,7 @@ export default function Navbar({session}: NavbarProps) {
                                 onClick={handleSignOut}
                                 className="flex items-center justify-center gap-3 w-full px-4 py-3 rounded-xl bg-destructive/10 hover:bg-destructive/20 transition-colors"
                             >
-                                <Icon icon="mdi:logout" width="20" height="20" className="text-destructive"/>
+                                <Icon icon="mdi:logout" width="20" height="20" className="text-destructive" />
                                 <span className="font-hebden font-semibold text-base text-destructive">
                                     Sign Out
                                 </span>
