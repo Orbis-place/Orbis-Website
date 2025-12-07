@@ -24,6 +24,12 @@ COPY --from=builder /app/out/full/ .
 RUN pnpm install --frozen-lockfile
 
 COPY turbo.json turbo.json
+
+# Set DATABASE_URL for prisma generate (dummy value for build time)
+# Will be overridden by actual env var at runtime
+ARG DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy?schema=public"
+ENV DATABASE_URL=$DATABASE_URL
+
 RUN pnpm --filter @repo/db exec prisma generate
 RUN turbo run build --filter=api...
 
