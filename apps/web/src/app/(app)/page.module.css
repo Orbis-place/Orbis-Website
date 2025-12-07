@@ -24,7 +24,11 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(281.84deg, rgba(0, 0, 0, 0) 0%, rgba(3, 33, 37, 0.9) 100%);
+  background: linear-gradient(
+    281.84deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(3, 33, 37, 0.9) 100%
+  );
   z-index: -1;
 }
 
@@ -57,7 +61,11 @@
 }
 
 .title {
-  font-family: var(--font-hebden), system-ui, -apple-system, sans-serif;
+  font-family:
+    var(--font-hebden),
+    system-ui,
+    -apple-system,
+    sans-serif;
   font-size: 4rem;
   font-weight: 700;
   letter-spacing: 0.05em;
@@ -68,7 +76,11 @@
 }
 
 .subtitle {
-  font-family: var(--font-nunito), system-ui, -apple-system, sans-serif;
+  font-family:
+    var(--font-nunito),
+    system-ui,
+    -apple-system,
+    sans-serif;
   font-size: 1.5rem;
   color: rgba(255, 255, 255, 0.9);
   margin: 0;
@@ -84,7 +96,11 @@
 
 .primaryButton,
 .secondaryButton {
-  font-family: var(--font-nunito), system-ui, -apple-system, sans-serif;
+  font-family:
+    var(--font-nunito),
+    system-ui,
+    -apple-system,
+    sans-serif;
   padding: 1rem 2.5rem;
   font-size: 1.1rem;
   font-weight: 600;
@@ -92,17 +108,6 @@
   border: none;
   cursor: pointer;
   transition: all 0.3s ease;
-}
-
-.primaryButton {
-  background: rgba(255, 255, 255, 0.95);
-  color: #0a0a0a;
-}
-
-.primaryButton:hover {
-  background: #ffffff;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.3);
 }
 
 .secondaryButton {
@@ -135,7 +140,11 @@
 }
 
 .sectionTitle {
-  font-family: var(--font-hebden), system-ui, -apple-system, sans-serif;
+  font-family:
+    var(--font-hebden),
+    system-ui,
+    -apple-system,
+    sans-serif;
   font-size: 2.5rem;
   font-weight: 700;
   color: #ffffff;
@@ -176,7 +185,11 @@
 }
 
 .featureTitle {
-  font-family: var(--font-nunito), system-ui, -apple-system, sans-serif;
+  font-family:
+    var(--font-nunito),
+    system-ui,
+    -apple-system,
+    sans-serif;
   font-size: 1.35rem;
   font-weight: 700;
   color: #ffffff;
@@ -185,7 +198,11 @@
 }
 
 .featureText {
-  font-family: var(--font-nunito), system-ui, -apple-system, sans-serif;
+  font-family:
+    var(--font-nunito),
+    system-ui,
+    -apple-system,
+    sans-serif;
   font-size: 1rem;
   color: rgba(255, 255, 255, 0.7);
   margin: 0;
@@ -208,7 +225,11 @@
 }
 
 .creatorTitle {
-  font-family: var(--font-nunito), system-ui, -apple-system, sans-serif;
+  font-family:
+    var(--font-nunito),
+    system-ui,
+    -apple-system,
+    sans-serif;
   font-size: 2rem;
   font-weight: 700;
   color: #ffffff;
@@ -216,7 +237,11 @@
 }
 
 .creatorText {
-  font-family: var(--font-nunito), system-ui, -apple-system, sans-serif;
+  font-family:
+    var(--font-nunito),
+    system-ui,
+    -apple-system,
+    sans-serif;
   font-size: 1.1rem;
   color: rgba(255, 255, 255, 0.8);
   margin: 0;
@@ -234,7 +259,11 @@
 }
 
 .creatorFeatureTitle {
-  font-family: var(--font-nunito), system-ui, -apple-system, sans-serif;
+  font-family:
+    var(--font-nunito),
+    system-ui,
+    -apple-system,
+    sans-serif;
   font-size: 1.25rem;
   font-weight: 700;
   color: #ffffff;
@@ -242,7 +271,11 @@
 }
 
 .creatorFeatureText {
-  font-family: var(--font-nunito), system-ui, -apple-system, sans-serif;
+  font-family:
+    var(--font-nunito),
+    system-ui,
+    -apple-system,
+    sans-serif;
   font-size: 1rem;
   color: rgba(255, 255, 255, 0.7);
   margin: 0;
@@ -257,7 +290,11 @@
 }
 
 .launchMessage {
-  font-family: var(--font-nunito), system-ui, -apple-system, sans-serif;
+  font-family:
+    var(--font-nunito),
+    system-ui,
+    -apple-system,
+    sans-serif;
   font-size: 1.5rem;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.9);
@@ -279,7 +316,11 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 50px;
   color: #ffffff;
-  font-family: var(--font-nunito), system-ui, -apple-system, sans-serif;
+  font-family:
+    var(--font-nunito),
+    system-ui,
+    -apple-system,
+    sans-serif;
   font-size: 1rem;
   font-weight: 500;
   transition: all 0.3s ease;
