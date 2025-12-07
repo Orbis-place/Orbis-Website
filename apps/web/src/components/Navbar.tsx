@@ -35,7 +35,6 @@ const marketplaceCategories = [
     { name: 'Worlds', href: '/worlds', icon: 'mdi:earth' },
     { name: 'Plugins', href: '/plugins', icon: 'mdi:power-plug' },
     { name: 'Asset Packs', href: '/asset-packs', icon: 'mdi:image-multiple' },
-    { name: 'Premade Servers', href: '/premade-servers', icon: 'mdi:server' },
     { name: 'Prefabs', href: '/prefabs', icon: 'mdi:cube-outline' },
     { name: 'Datapacks', href: '/datapacks', icon: 'mdi:database' },
     { name: 'Tools & Scripts', href: '/tools-scripts', icon: 'mdi:tools' },

@@ -722,36 +722,7 @@ async function main() {
       color: '#FFE66D',
       order: 27,
       resourceTypes: [ResourceType.MODPACK],
-    },
-
-    // Premade Server Categories
-    {
-      name: 'Survival Server',
-      slug: 'survival-server',
-      description: 'Complete survival server setups',
-      icon: '🏕️',
-      color: '#69a024',
-      order: 28,
-      resourceTypes: [ResourceType.PREMADE_SERVER],
-    },
-    {
-      name: 'Minigame Server',
-      slug: 'minigame-server',
-      description: 'Pre-configured minigame server setups',
-      icon: '🎮',
-      color: '#FF6B6B',
-      order: 29,
-      resourceTypes: [ResourceType.PREMADE_SERVER],
-    },
-    {
-      name: 'Roleplay Server',
-      slug: 'roleplay-server',
-      description: 'Complete roleplay server configurations',
-      icon: '🎭',
-      color: '#A29BFE',
-      order: 30,
-      resourceTypes: [ResourceType.PREMADE_SERVER],
-    },
+    }
   ];
 
   for (const category of resourceCategories) {

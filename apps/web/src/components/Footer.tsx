@@ -91,6 +91,21 @@ export default function Footer() {
                                     Asset Packs
                                 </Link>
                             </li>
+                            <li>
+                                <Link href="/premade-servers" className="text-[#C7F4FA]/70 hover:text-[#109EB1] transition-colors">
+                                    Prefabs
+                                </Link>
+                            </li>
+                            <li>
+                                <Link href="/datapacks" className="text-[#C7F4FA]/70 hover:text-[#109EB1] transition-colors">
+                                    Datapacks
+                                </Link>
+                            </li>
+                            <li>
+                                <Link href="/tools-scripts" className="text-[#C7F4FA]/70 hover:text-[#109EB1] transition-colors">
+                                    Tools & Scripts
+                                </Link>
+                            </li>
                         </ul>
                     </div>
 
@@ -103,11 +118,6 @@ export default function Footer() {
                             <li>
                                 <Link href="/servers" className="text-[#C7F4FA]/70 hover:text-[#109EB1] transition-colors">
                                     Server Discovery
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/teams" className="text-[#C7F4FA]/70 hover:text-[#109EB1] transition-colors">
-                                    Teams
                                 </Link>
                             </li>
                             <li>
