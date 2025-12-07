@@ -17,5 +17,3 @@ export { VersionFilter } from './VersionFilter';
 export type { FilterOption } from './FilterSidebar';
 export type { ViewMode } from './ViewSwitcher';
 export type { MarketplaceItem } from './MarketplaceCard';
-export type { Tag } from './TagFilter';
-export type { Category } from './CategoryFilter';

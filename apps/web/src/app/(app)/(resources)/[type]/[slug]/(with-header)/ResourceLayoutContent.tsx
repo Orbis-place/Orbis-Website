@@ -137,8 +137,7 @@ export default function ResourceLayoutContent({ children }: { children: ReactNod
     const authorDisplay = resource.team?.displayName || resource.owner.displayName;
 
     // Get featured tags
-    const featuredTags = resource.tags
-        .filter(t => t.featured)
+    const tags = resource.tags
         .map(t => t.tag.name)
         .slice(0, 5);
 
@@ -181,7 +180,7 @@ export default function ResourceLayoutContent({ children }: { children: ReactNod
                 image={resource.bannerUrl || resource.iconUrl || ''}
                 downloads={formatNumber(resource.downloadCount)}
                 followers={likeCount}
-                tags={featuredTags}
+                tags={tags}
                 type={type! as 'mod' | 'plugin' | 'world' | 'prefab' | 'asset-pack' | 'data-pack' | 'modpack' | 'tool'}
                 slug={resource.slug}
                 author={author}
