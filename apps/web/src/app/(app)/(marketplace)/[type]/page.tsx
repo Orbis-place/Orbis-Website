@@ -112,7 +112,7 @@ export default function MarketplacePage({ params }: { params: Promise<{ type: st
             author,
             authorDisplay,
             description: resource.tagline || resource.description || '',
-            image: resource.iconUrl || resource.bannerUrl,
+            image: resource.iconUrl || resource.bannerUrl || '',
             rating: 4.5, // TODO: Add rating system
             likes: formatNumber(resource.likeCount),
             downloads: formatNumber(resource.downloadCount),

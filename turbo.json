@@ -13,6 +13,11 @@
       "persistent": true,
       "env": ["DATABASE_URL", "BETTER_AUTH_SECRET", "BETTER_AUTH_URL"]
     },
+    "web#build": {
+      "dependsOn": ["@repo/auth#build", "@repo/ui#build"],
+      "outputs": [".next/**", "!.next/cache/**"],
+      "env": ["NEXT_PUBLIC_API_URL", "NEXT_PUBLIC_SITE_URL"]
+    },
     "build": {
       "dependsOn": ["^build"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"],
