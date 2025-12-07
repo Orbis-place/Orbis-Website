@@ -4,25 +4,25 @@ import {
     ForbiddenException,
     BadRequestException,
 } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+
 import { StorageService } from '../storage/storage.service';
 import { CreateVersionDto, UpdateVersionDto } from './dtos/version.dto';
-import { VersionStatus, FileType, UserRole } from '@repo/db';
+import { prisma, VersionStatus, FileType, UserRole } from '@repo/db';
 import * as crypto from 'crypto';
 
 @Injectable()
 export class VersionService {
     constructor(
-        private readonly prisma: PrismaService,
+
         private readonly storageService: StorageService,
-    ) {}
+    ) { }
 
     /**
      * Create a new version for a resource
      */
     async create(resourceId: string, userId: string, createDto: CreateVersionDto) {
         // Check if resource exists and user has permission
-        const resource = await this.prisma.resource.findUnique({
+        const resource = await prisma.resource.findUnique({
             where: { id: resourceId },
             include: {
                 team: {
@@ -50,7 +50,7 @@ export class VersionService {
         }
 
         // Check if version number already exists
-        const existingVersion = await this.prisma.version.findUnique({
+        const existingVersion = await prisma.resourceVersion.findUnique({
             where: {
                 resourceId_versionNumber: {
                     resourceId,
@@ -66,7 +66,7 @@ export class VersionService {
         }
 
         // Create version
-        const version = await this.prisma.version.create({
+        const version = await prisma.resourceVersion.create({
             data: {
                 resourceId,
                 versionNumber: createDto.versionNumber,
@@ -87,7 +87,7 @@ export class VersionService {
         });
 
         // Update resource lastActivityAt
-        await this.prisma.resource.update({
+        await prisma.resource.update({
             where: { id: resourceId },
             data: { lastActivityAt: new Date() },
         });
@@ -102,7 +102,7 @@ export class VersionService {
      * Get all versions for a resource
      */
     async findAll(resourceId: string) {
-        const versions = await this.prisma.version.findMany({
+        const versions = await prisma.resourceVersion.findMany({
             where: { resourceId },
             include: {
                 compatibleVersions: true,
@@ -122,7 +122,7 @@ export class VersionService {
      * Get a specific version by ID
      */
     async findOne(resourceId: string, versionId: string) {
-        const version = await this.prisma.version.findFirst({
+        const version = await prisma.resourceVersion.findFirst({
             where: {
                 id: versionId,
                 resourceId,
@@ -159,7 +159,7 @@ export class VersionService {
         updateDto: UpdateVersionDto,
     ) {
         // Get version with resource
-        const version = await this.prisma.version.findFirst({
+        const version = await prisma.resourceVersion.findFirst({
             where: {
                 id: versionId,
                 resourceId,
@@ -202,7 +202,7 @@ export class VersionService {
         if (updateDto.status !== undefined) updateData.status = updateDto.status;
 
         // Update version
-        const updatedVersion = await this.prisma.version.update({
+        const updatedVersion = await prisma.resourceVersion.update({
             where: { id: versionId },
             data: updateData,
             include: {
@@ -215,12 +215,12 @@ export class VersionService {
         // Update compatible versions if provided
         if (updateDto.compatibleVersions) {
             // Delete existing compatible versions
-            await this.prisma.versionCompatibleVersion.deleteMany({
+            await prisma.hytaleVersion.deleteMany({
                 where: { versionId },
             });
 
             // Create new compatible versions
-            await this.prisma.versionCompatibleVersion.createMany({
+            await prisma.hytaleVersion.createMany({
                 data: updateDto.compatibleVersions.map((hytaleVersion) => ({
                     versionId,
                     hytaleVersion,
@@ -229,7 +229,7 @@ export class VersionService {
         }
 
         // Fetch updated version with new compatible versions
-        const finalVersion = await this.prisma.version.findUnique({
+        const finalVersion = await prisma.resourceVersion.findUnique({
             where: { id: versionId },
             include: {
                 compatibleVersions: true,
@@ -249,7 +249,7 @@ export class VersionService {
      */
     async delete(resourceId: string, versionId: string, userId: string) {
         // Get version with resource and files
-        const version = await this.prisma.version.findFirst({
+        const version = await prisma.resourceVersion.findFirst({
             where: {
                 id: versionId,
                 resourceId,
@@ -301,7 +301,7 @@ export class VersionService {
         }
 
         // Delete version (cascade will delete files and compatible versions)
-        await this.prisma.version.delete({
+        await prisma.resourceVersion.delete({
             where: { id: versionId },
         });
 
@@ -321,7 +321,7 @@ export class VersionService {
         displayName?: string,
     ) {
         // Get version with resource
-        const version = await this.prisma.version.findFirst({
+        const version = await prisma.resourceVersion.findFirst({
             where: {
                 id: versionId,
                 resourceId,
@@ -384,7 +384,7 @@ export class VersionService {
         const storageKey = fileUrl.split('media.orbis.place/')[1] || fileUrl;
 
         // Create file record
-        const versionFile = await this.prisma.versionFile.create({
+        const versionFile = await prisma.resourceVersionFile.create({
             data: {
                 versionId,
                 filename: file.originalname,
@@ -399,18 +399,11 @@ export class VersionService {
 
         // If this is the first file, set it as primary
         if (!version.primaryFileId) {
-            await this.prisma.version.update({
+            await prisma.resourceVersion.update({
                 where: { id: versionId },
                 data: { primaryFileId: versionFile.id },
             });
         }
-
-        // Update version file size
-        const totalSize = await this.calculateVersionFileSize(versionId);
-        await this.prisma.version.update({
-            where: { id: versionId },
-            data: { fileSize: totalSize },
-        });
 
         return {
             message: 'File uploaded successfully',
@@ -428,7 +421,7 @@ export class VersionService {
         userId: string,
     ) {
         // Get version with resource and file
-        const version = await this.prisma.version.findFirst({
+        const version = await prisma.resourceVersion.findFirst({
             where: {
                 id: versionId,
                 resourceId,
@@ -483,24 +476,17 @@ export class VersionService {
         }
 
         // Delete file record
-        await this.prisma.versionFile.delete({
+        await prisma.resourceVersionFile.delete({
             where: { id: fileId },
         });
 
         // If this was the primary file, clear the primary file ID
         if (version.primaryFileId === fileId) {
-            await this.prisma.version.update({
+            await prisma.resourceVersion.update({
                 where: { id: versionId },
                 data: { primaryFileId: null },
             });
         }
-
-        // Update version file size
-        const totalSize = await this.calculateVersionFileSize(versionId);
-        await this.prisma.version.update({
-            where: { id: versionId },
-            data: { fileSize: totalSize },
-        });
 
         return {
             message: 'File deleted successfully',
@@ -517,7 +503,7 @@ export class VersionService {
         userId: string,
     ) {
         // Get version with resource
-        const version = await this.prisma.version.findFirst({
+        const version = await prisma.resourceVersion.findFirst({
             where: {
                 id: versionId,
                 resourceId,
@@ -559,7 +545,7 @@ export class VersionService {
         }
 
         // Update primary file
-        await this.prisma.version.update({
+        await prisma.resourceVersion.update({
             where: { id: versionId },
             data: { primaryFileId: fileId },
         });
@@ -581,7 +567,7 @@ export class VersionService {
         userAgent?: string,
     ) {
         // Get version with file
-        const version = await this.prisma.version.findFirst({
+        const version = await prisma.resourceVersion.findFirst({
             where: {
                 id: versionId,
                 resourceId,
@@ -602,7 +588,7 @@ export class VersionService {
         }
 
         // Track download
-        await this.prisma.download.create({
+        await prisma.resourceDownload.create({
             data: {
                 resourceId,
                 versionId,
@@ -613,17 +599,13 @@ export class VersionService {
         });
 
         // Increment download counters
-        await this.prisma.$transaction([
-            this.prisma.version.update({
-                where: { id: versionId },
-                data: { downloadCount: { increment: 1 } },
-            }),
-            this.prisma.resource.update({
+        await prisma.$transaction([
+            prisma.resource.update({
                 where: { id: resourceId },
                 data: { downloadCount: { increment: 1 } },
             }),
-            this.prisma.versionFile.update({
-                where: { id: fileId },
+            prisma.resourceVersion.update({
+                where: { id: versionId },
                 data: { downloadCount: { increment: 1 } },
             }),
         ]);
@@ -635,24 +617,14 @@ export class VersionService {
         };
     }
 
-    /**
-     * Calculate total file size for a version
-     */
-    private async calculateVersionFileSize(versionId: string): Promise<number> {
-        const files = await this.prisma.versionFile.findMany({
-            where: { versionId },
-            select: { size: true },
-        });
 
-        return files.reduce((total, file) => total + file.size, 0);
-    }
 
     /**
      * Set a version as the latest version for a resource
      */
     async setAsLatest(resourceId: string, versionId: string, userId: string) {
         // Get version with resource
-        const version = await this.prisma.version.findFirst({
+        const version = await prisma.resourceVersion.findFirst({
             where: {
                 id: versionId,
                 resourceId,
@@ -687,7 +659,7 @@ export class VersionService {
         }
 
         // Update resource latest version
-        await this.prisma.resource.update({
+        await prisma.resource.update({
             where: { id: resourceId },
             data: {
                 latestVersionId: versionId,

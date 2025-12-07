@@ -1,16 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
 
+import { prisma } from '@repo/db';
 @Injectable()
 export class LikeService {
-    constructor(private readonly prisma: PrismaService) {}
+    constructor() { }
 
     /**
      * Like a resource
      */
     async likeResource(resourceId: string, userId: string) {
         // Check if resource exists
-        const resource = await this.prisma.resource.findUnique({
+        const resource = await prisma.resource.findUnique({
             where: { id: resourceId },
         });
 
@@ -19,7 +19,7 @@ export class LikeService {
         }
 
         // Check if already liked
-        const existingLike = await this.prisma.like.findUnique({
+        const existingLike = await prisma.resourceLike.findUnique({
             where: {
                 userId_resourceId: {
                     userId,
@@ -37,14 +37,14 @@ export class LikeService {
         }
 
         // Create like and increment like count
-        await this.prisma.$transaction([
-            this.prisma.like.create({
+        await prisma.$transaction([
+            prisma.resourceLike.create({
                 data: {
                     userId,
                     resourceId,
                 },
             }),
-            this.prisma.resource.update({
+            prisma.resource.update({
                 where: { id: resourceId },
                 data: {
                     likeCount: {
@@ -65,7 +65,7 @@ export class LikeService {
      */
     async unlikeResource(resourceId: string, userId: string) {
         // Check if resource exists
-        const resource = await this.prisma.resource.findUnique({
+        const resource = await prisma.resource.findUnique({
             where: { id: resourceId },
         });
 
@@ -74,7 +74,7 @@ export class LikeService {
         }
 
         // Check if liked
-        const existingLike = await this.prisma.like.findUnique({
+        const existingLike = await prisma.resourceLike.findUnique({
             where: {
                 userId_resourceId: {
                     userId,
@@ -92,8 +92,8 @@ export class LikeService {
         }
 
         // Delete like and decrement like count
-        await this.prisma.$transaction([
-            this.prisma.like.delete({
+        await prisma.$transaction([
+            prisma.resourceLike.delete({
                 where: {
                     userId_resourceId: {
                         userId,
@@ -101,7 +101,7 @@ export class LikeService {
                     },
                 },
             }),
-            this.prisma.resource.update({
+            prisma.resource.update({
                 where: { id: resourceId },
                 data: {
                     likeCount: {
@@ -121,7 +121,7 @@ export class LikeService {
      * Check if user has liked a resource
      */
     async hasLiked(resourceId: string, userId: string) {
-        const like = await this.prisma.like.findUnique({
+        const like = await prisma.resourceLike.findUnique({
             where: {
                 userId_resourceId: {
                     userId,
@@ -139,7 +139,7 @@ export class LikeService {
      * Get users who liked a resource
      */
     async getLikes(resourceId: string) {
-        const likes = await this.prisma.like.findMany({
+        const likes = await prisma.resourceLike.findMany({
             where: { resourceId },
             include: {
                 user: {

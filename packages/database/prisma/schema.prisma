@@ -1,11 +1,10 @@
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
   output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 // ============================================
@@ -41,6 +40,14 @@ enum TeamMemberRole {
   MEMBER
 }
 
+enum TeamInvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  CANCELLED
+  EXPIRED
+}
+
 enum ReportReason {
   SPAM
   REUPLOADED_WORK
@@ -64,6 +71,20 @@ enum ReportResourceType {
   // Future: SERVER, MOD, PLUGIN, etc.
 }
 
+enum SocialLinkType {
+  TWITTER
+  GITHUB
+  DISCORD
+  YOUTUBE
+  TWITCH
+  LINKEDIN
+  INSTAGRAM
+  FACEBOOK
+  REDDIT
+  TIKTOK
+  CUSTOM
+}
+
 // ============================================
 // USER MODEL
 // ============================================
@@ -71,7 +92,7 @@ enum ReportResourceType {
 model User {
   // Core fields (Better Auth)
   id            String   @id @default(cuid())
-  username      String
+  username      String @unique
   email         String   @unique
   emailVerified Boolean  @default(false)
   image         String?
@@ -122,8 +143,10 @@ model User {
   approvedServers Server[] @relation("ServerApprover")
 
   // Team relations
-  ownedTeams      Team[]       @relation("TeamOwner")
-  teamMemberships TeamMember[] @relation("TeamMemberships")
+  ownedTeams        Team[]           @relation("TeamOwner")
+  teamMemberships   TeamMember[]     @relation("TeamMemberships")
+  sentInvitations   TeamInvitation[] @relation("TeamInvitationsSent")
+  receivedInvitations TeamInvitation[] @relation("TeamInvitationsReceived")
 
   // Server status changes
   statusChanges ServerStatusHistory[] @relation("StatusChanger")
@@ -140,15 +163,18 @@ model User {
   moderatedResources Resource[] @relation("ModeratedResources")
 
   // Marketplace - Interactions
-  contributions Contributor[]
-  likes         Like[]
-  favorites     Favorite[]
-  downloads     Download[]
+  contributions ResourceContributor[]
+  likes         ResourceLike[]
+  favorites     ResourceFavorite[]
+  downloads     ResourceDownload[]
 
   // Marketplace - Status & Images
   resourceStatusChanges     ResourceStatusHistory[]
   resourceDescriptionImages ResourceDescriptionImage[] @relation("ResourceDescriptionImages")
-  versionChangelogImages    VersionChangelogImage[]    @relation("VersionChangelogImages")
+  versionChangelogImages    ResourceVersionChangelogImage[]    @relation("VersionChangelogImages")
+
+  // Social Links
+  socialLinks UserSocialLink[] @relation("UserSocialLinks")
 
   @@index([email])
   @@index([username])
@@ -226,6 +252,23 @@ model Follow {
   @@map("follows")
 }
 
+model UserSocialLink {
+  id        String         @id @default(cuid())
+  userId    String
+  type      SocialLinkType
+  url       String
+  label     String? // Optional custom label
+  order     Int            @default(0)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  user User @relation("UserSocialLinks", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type])
+  @@index([userId])
+  @@map("user_social_links")
+}
+
 // ============================================
 // TEAMS (Future feature - prepared)
 // ============================================
@@ -247,9 +290,10 @@ model Team {
   owner   User   @relation("TeamOwner", fields: [ownerId], references: [id], onDelete: Cascade)
 
   // Relations
-  members   TeamMember[]
-  servers   Server[]
-  resources Resource[]
+  members     TeamMember[]
+  invitations TeamInvitation[]
+  servers     Server[]
+  resources   Resource[]
 
   @@index([ownerId])
   @@map("teams")
@@ -270,6 +314,30 @@ model TeamMember {
   @@index([teamId])
   @@index([userId])
   @@map("team_members")
+}
+
+model TeamInvitation {
+  id        String               @id @default(cuid())
+  teamId    String
+  inviterId String // User who sent the invitation
+  inviteeId String // User who receives the invitation
+  role      TeamMemberRole       @default(MEMBER)
+  status    TeamInvitationStatus @default(PENDING)
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+  expiresAt DateTime // Invitation expiration date
+
+  team     Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  inviter  User @relation("TeamInvitationsSent", fields: [inviterId], references: [id], onDelete: Cascade)
+  invitee  User @relation("TeamInvitationsReceived", fields: [inviteeId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, inviteeId, status]) // Prevent multiple pending invitations
+  @@index([teamId])
+  @@index([inviterId])
+  @@index([inviteeId])
+  @@index([status])
+  @@index([expiresAt])
+  @@map("team_invitations")
 }
 
 // ============================================
@@ -308,7 +376,7 @@ model Server {
   playerHistory ServerPlayerHistory[]
 
   // Voting (Just counter for now, full system later)
-  votesCount Int @default(0)
+  voteCount Int @default(0)
 
   // Links
   websiteUrl String?
@@ -343,7 +411,7 @@ model Server {
   @@index([ownerId])
   @@index([teamId])
   @@index([featured])
-  @@index([votesCount])
+  @@index([voteCount])
   @@index([createdAt])
   @@index([isOnline])
   @@map("servers")
@@ -536,7 +604,7 @@ model Resource {
   name        String
   slug        String             @unique
   tagline     String             @db.VarChar(200) // Short description
-  description String             @db.Text // Full description (Markdown/HTML with images)
+  description String?             @db.Text // Full description (Markdown/HTML with images)
   type        ResourceType
   status      ResourceStatus     @default(DRAFT)
   visibility  ResourceVisibility @default(PUBLIC)
@@ -548,9 +616,9 @@ model Resource {
   descriptionImages ResourceDescriptionImage[] // Inline images in description
 
   // Versioning
-  versions        Version[]
+  versions        ResourceVersion[]
   latestVersionId String?
-  latestVersion   Version?  @relation("LatestVersion", fields: [latestVersionId], references: [id], onDelete: SetNull)
+  latestVersion   ResourceVersion?  @relation("LatestVersion", fields: [latestVersionId], references: [id], onDelete: SetNull)
 
   // Organization
   categories ResourceToCategory[]
@@ -568,13 +636,13 @@ model Resource {
   licenseUrl        String? // Required if CUSTOM
 
   // External Links
-  externalLinks ExternalLink[]
+  externalLinks ResourceExternalLink[]
 
   // Stats
-  downloadCount Int @default(0)
-  viewCount     Int @default(0)
   likeCount     Int @default(0)
   favoriteCount Int @default(0)
+  downloadCount Int @default(0)
+  viewCount     Int @default(0)
 
   // Features
   featured  Boolean @default(false)
@@ -586,14 +654,14 @@ model Resource {
   owner        User          @relation("OwnedResources", fields: [ownerId], references: [id], onDelete: Cascade)
   teamId       String?
   team         Team?         @relation(fields: [teamId], references: [id], onDelete: SetNull)
-  contributors Contributor[]
+  contributors ResourceContributor[]
 
   // Relations
-  likes         Like[]
-  favorites     Favorite[]
-  downloads     Download[]
+  likes         ResourceLike[]
+  favorites     ResourceFavorite[]
+  downloads     ResourceDownload[]
   statusHistory ResourceStatusHistory[]
-  usedBy       VersionDependency[] @relation("ResourceDependencies")
+  usedBy       ResourceVersionDependency[] @relation("ResourceDependencies")
 
   // Moderation
   moderationNotes String? // Internal staff notes
@@ -746,7 +814,7 @@ enum ImageStatus {
 // EXTERNAL LINKS
 // ============================================================================
 
-model ExternalLink {
+model ResourceExternalLink {
   id         String           @id @default(cuid())
   resourceId String
   type       ExternalLinkType
@@ -756,7 +824,7 @@ model ExternalLink {
   resource Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
 
   @@index([resourceId])
-  @@map("external_links")
+  @@map("resource_external_links")
 }
 
 enum ExternalLinkType {
@@ -781,17 +849,19 @@ model ResourceCategory {
   icon        String? // Icon name or emoji
   color       String? // Hex color for UI
   order       Int                @default(0)
-  parentId    String?
-  parent      ResourceCategory?  @relation("ResourceCategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
-  children    ResourceCategory[] @relation("ResourceCategoryHierarchy")
+  usageCount  Int                @default(0) // Global usage count
+  
+  // Resource types this category applies to (empty = all types)
+  resourceTypes ResourceType[] @default([])
+  
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
 
-  resources ResourceToCategory[]
-  tags      ResourceTag[] // Tags belong to resource categories
+  resources   ResourceToCategory[]
+  usageByType ResourceCategoryUsageByType[] // Usage statistics per resource type
 
-  @@index([parentId])
   @@index([order])
+  @@index([usageCount])
   @@map("resource_categories")
 }
 
@@ -808,6 +878,22 @@ model ResourceToCategory {
   @@map("resource_to_categories")
 }
 
+// Track category usage per resource type for analytics and filtering
+model ResourceCategoryUsageByType {
+  id           String       @id @default(cuid())
+  categoryId   String
+  resourceType ResourceType
+  usageCount   Int          @default(0)
+
+  category ResourceCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([categoryId, resourceType])
+  @@index([categoryId])
+  @@index([resourceType])
+  @@index([usageCount])
+  @@map("resource_category_usage_by_type")
+}
+
 // ============================================================================
 // RESOURCE TAGS
 // ============================================================================
@@ -819,15 +905,13 @@ model ResourceTag {
   description String?
   icon        String? // Optional: emoji or icon name
   color       String? // Hex color for UI
-  categoryId  String? // Tags belong to a resource category
-  category    ResourceCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  usageCount  Int               @default(0)
+  usageCount  Int               @default(0) // Global usage count
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
 
-  resources ResourceToTag[]
+  resources   ResourceToTag[]
+  usageByType ResourceTagUsageByType[] // Usage statistics per resource type
 
-  @@index([categoryId])
   @@index([usageCount])
   @@map("resource_tags")
 }
@@ -837,8 +921,6 @@ model ResourceToTag {
   tagId      String
   addedAt    DateTime @default(now())
 
-  featured Boolean @default(false)
-
   resource Resource    @relation(fields: [resourceId], references: [id], onDelete: Cascade)
   tag      ResourceTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
@@ -847,11 +929,27 @@ model ResourceToTag {
   @@map("resource_to_tags")
 }
 
+// Track tag usage per resource type for analytics and recommendations
+model ResourceTagUsageByType {
+  id           String       @id @default(cuid())
+  tagId        String
+  resourceType ResourceType
+  usageCount   Int          @default(0)
+
+  tag ResourceTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([tagId, resourceType])
+  @@index([tagId])
+  @@index([resourceType])
+  @@index([usageCount])
+  @@map("resource_tag_usage_by_type")
+}
+
 // ============================================================================
 // VERSIONS
 // ============================================================================
 
-model Version {
+model ResourceVersion {
   id         String @id @default(cuid())
   resourceId String
 
@@ -861,58 +959,57 @@ model Version {
   channel       ReleaseChannel @default(RELEASE)
 
   // Compatibility
-  compatibleVersions VersionCompatibleVersion[]
+  compatibleVersions HytaleVersion[]
 
-  // Changelog (Markdown/HTML with inline images)
-  changelog String @db.Text
+  // Changelog
+  changelog String? @db.Text
 
   // Files (multiple files per version with primary)
-  files         VersionFile[]
+  files         ResourceVersionFile[]
+  // Primary file for download
   primaryFileId String? // The main download file
-  primaryFile   VersionFile?  @relation("PrimaryFile", fields: [primaryFileId], references: [id], onDelete: SetNull)
-
-  // Images in changelog
-  changelogImages VersionChangelogImage[]
-
-  // Stats
-  downloadCount Int @default(0)
+  primaryFile   ResourceVersionFile?  @relation("PrimaryFile", fields: [primaryFileId], references: [id], onDelete: SetNull)
 
   // Status
-  status VersionStatus @default(APPROVED)
+  status VersionStatus @default(DRAFT)
 
-  // Metadata
-  fileSize    Int? // Total size in bytes
-  createdAt   DateTime  @default(now())
+  // Images in changelog
+  changelogImages ResourceVersionChangelogImage[]
+
+  // Publication
   publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   // Relations
   resource     Resource            @relation(fields: [resourceId], references: [id], onDelete: Cascade)
   latestFor    Resource[]          @relation("LatestVersion")
-  dependencies VersionDependency[]
+  dependencies ResourceVersionDependency[]
+  downloadCount Int      @default(0)
 
   @@unique([resourceId, versionNumber])
   @@index([resourceId, channel])
   @@index([publishedAt])
   @@index([resourceId, status])
-  @@map("versions")
+  @@map("resource_versions")
 }
 
 // ============================================================================
-// VERSION COMPATIBLE VERSIONS
+// HYTALE VERSIONS
 // ============================================================================
 
-model VersionCompatibleVersion {
+model HytaleVersion {
   id            String   @id @default(cuid())
   versionId     String
   hytaleVersion String // "1.0", "1.1", etc.
   addedAt       DateTime @default(now())
 
-  version Version @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  version ResourceVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
 
   @@unique([versionId, hytaleVersion])
   @@index([versionId])
   @@index([hytaleVersion])
-  @@map("version_compatible_versions")
+  @@map("hytale_versions")
 }
 
 enum ReleaseChannel {
@@ -931,7 +1028,7 @@ enum VersionStatus {
 }
 
 // Inline images in version changelog
-model VersionChangelogImage {
+model ResourceVersionChangelogImage {
   id         String      @id @default(cuid())
   versionId  String? // NULL if temporary/draft
   url        String
@@ -945,7 +1042,7 @@ model VersionChangelogImage {
   expiresAt  DateTime? // For TEMPORARY images (24h)
   movedAt    DateTime? // When moved to PERMANENT
 
-  version  Version? @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  version  ResourceVersion? @relation(fields: [versionId], references: [id], onDelete: Cascade)
   uploader User     @relation("VersionChangelogImages", fields: [uploadedBy], references: [id], onDelete: Cascade)
 
   @@index([versionId])
@@ -953,14 +1050,14 @@ model VersionChangelogImage {
   @@index([uploadedBy])
   @@index([status])
   @@index([uploadedBy, hash]) // For duplicate detection
-  @@map("version_changelog_images")
+  @@map("resource_version_changelog_images")
 }
 
 // ============================================================================
 // VERSION FILES
 // ============================================================================
 
-model VersionFile {
+model ResourceVersionFile {
   id        String @id @default(cuid())
   versionId String
 
@@ -977,14 +1074,13 @@ model VersionFile {
 
   // Metadata
   uploadedAt    DateTime @default(now())
-  downloadCount Int      @default(0)
 
   // Relations
-  version    Version   @relation(fields: [versionId], references: [id], onDelete: Cascade)
-  primaryFor Version[] @relation("PrimaryFile")
+  version    ResourceVersion   @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  primaryFor ResourceVersion[] @relation("PrimaryFile")
 
   @@index([versionId])
-  @@map("version_files")
+  @@map("resource_version_files")
 }
 
 enum FileType {
@@ -996,19 +1092,19 @@ enum FileType {
 }
 
 // Dependencies between versions
-model VersionDependency {
+model ResourceVersionDependency {
   id                 String         @id @default(cuid())
   versionId          String
   dependencyId       String // ID of the dependent resource
   dependencyType     DependencyType
   versionRequirement String? // ">=1.0.0", "^2.1.0", etc.
 
-  version    Version  @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  version    ResourceVersion  @relation(fields: [versionId], references: [id], onDelete: Cascade)
   dependency Resource @relation("ResourceDependencies", fields: [dependencyId], references: [id], onDelete: Cascade)
 
   @@unique([versionId, dependencyId])
   @@index([dependencyId])
-  @@map("version_dependencies")
+  @@map("resource_version_dependencies")
 }
 
 enum DependencyType {
@@ -1021,7 +1117,7 @@ enum DependencyType {
 // CONTRIBUTORS
 // ============================================================================
 
-model Contributor {
+model ResourceContributor {
   id         String   @id @default(cuid())
   resourceId String
   userId     String
@@ -1033,14 +1129,14 @@ model Contributor {
 
   @@unique([resourceId, userId])
   @@index([userId])
-  @@map("contributors")
+  @@map("resource_contributors")
 }
 
 // ============================================================================
 // LIKES & FAVORITES
 // ============================================================================
 
-model Like {
+model ResourceLike {
   id         String   @id @default(cuid())
   userId     String
   resourceId String
@@ -1052,10 +1148,10 @@ model Like {
   @@unique([userId, resourceId])
   @@index([userId])
   @@index([resourceId])
-  @@map("likes")
+  @@map("resource_likes")
 }
 
-model Favorite {
+model ResourceFavorite {
   id         String   @id @default(cuid())
   userId     String
   resourceId String
@@ -1067,14 +1163,14 @@ model Favorite {
   @@unique([userId, resourceId])
   @@index([userId])
   @@index([resourceId])
-  @@map("favorites")
+  @@map("resource_favorites")
 }
 
 // ============================================================================
 // DOWNLOADS
 // ============================================================================
 
-model Download {
+model ResourceDownload {
   id           String   @id @default(cuid())
   resourceId   String
   versionId    String?
@@ -1089,7 +1185,7 @@ model Download {
   @@index([resourceId])
   @@index([userId])
   @@index([downloadedAt])
-  @@map("downloads")
+  @@map("resource_downloads")
 }
 
 // ============================================================================

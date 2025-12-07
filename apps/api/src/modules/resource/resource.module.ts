@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ResourceController } from './resource.controller';
 import { ResourceService } from './resource.service';
+import { ResourceTagController } from './resource-tag.controller';
+import { ResourceTagService } from './resource-tag.service';
 import { ResourceGalleryImageController } from './resource-gallery-image.controller';
 import { ResourceGalleryImageService } from './resource-gallery-image.service';
 import { ResourceDescriptionImageController } from './resource-description-image.controller';
@@ -14,13 +16,13 @@ import { FavoriteService } from './favorite.service';
 import { UserFavoritesController } from './user-favorites.controller';
 import { VersionController } from './version.controller';
 import { VersionService } from './version.service';
-import { PrismaModule } from '../../prisma/prisma.module';
 import { StorageModule } from '../storage/storage.module';
 
 @Module({
-    imports: [PrismaModule, StorageModule],
+    imports: [StorageModule],
     controllers: [
         ResourceController,
+        ResourceTagController,
         ResourceGalleryImageController,
         ResourceDescriptionImageController,
         ContributorController,
@@ -31,6 +33,7 @@ import { StorageModule } from '../storage/storage.module';
     ],
     providers: [
         ResourceService,
+        ResourceTagService,
         ResourceGalleryImageService,
         ResourceDescriptionImageService,
         ContributorService,
@@ -40,6 +43,7 @@ import { StorageModule } from '../storage/storage.module';
     ],
     exports: [
         ResourceService,
+        ResourceTagService,
         ResourceGalleryImageService,
         ResourceDescriptionImageService,
         ContributorService,
@@ -48,4 +52,4 @@ import { StorageModule } from '../storage/storage.module';
         VersionService,
     ],
 })
-export class ResourceModule {}
+export class ResourceModule { }

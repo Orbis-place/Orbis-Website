@@ -1,47 +1,28 @@
 {
   "$schema": "https://turborepo.com/schema.json",
-  "globalDependencies": [
-    "**/.env.*local"
-  ],
+  "globalDependencies": ["**/.env.*local"],
   "tasks": {
+    "@repo/db#dev": {
+      "dependsOn": ["build"],
+      "cache": false,
+      "persistent": true
+    },
     "dev": {
-      "dependsOn": [
-        "^build",
-        "^db:generate"
-      ],
+      "dependsOn": ["^build"],
       "cache": false,
       "persistent": true,
-      "env": [
-        "DATABASE_URL",
-        "BETTER_AUTH_SECRET",
-        "BETTER_AUTH_URL"
-      ]
+      "env": ["DATABASE_URL", "BETTER_AUTH_SECRET", "BETTER_AUTH_URL"]
     },
     "build": {
-      "dependsOn": [
-        "^build",
-        "^db:generate"
-      ],
-      "outputs": [
-        ".next/**",
-        "!.next/cache/**",
-        "dist/**"
-      ],
-      "env": [
-        "DATABASE_URL"
-      ]
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
+      "env": ["DATABASE_URL"]
     },
     "lint": {},
     "test": {},
     "test:e2e": {},
-    "db:generate": {
-      "cache": false
-    },
-    "db:migrate": {
-      "cache": false
-    },
-    "db:deploy": {
-      "cache": false
-    }
+    "db:generate": { "cache": false },
+    "db:migrate": { "cache": false },
+    "db:deploy": { "cache": false }
   }
 }

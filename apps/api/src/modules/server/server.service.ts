@@ -5,17 +5,17 @@ import {
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
-import {PrismaService} from '../../prisma/prisma.service';
-import {StorageService} from '../storage/storage.service';
-import {CreateServerDto} from './dtos/create-server.dto';
-import {UpdateServerDto} from './dtos/update-server.dto';
-import {FilterServersDto, ServerSortOption} from './dtos/filter-servers.dto';
-import {ServerStatus} from '@repo/db';
+
+import { StorageService } from '../storage/storage.service';
+import { CreateServerDto } from './dtos/create-server.dto';
+import { UpdateServerDto } from './dtos/update-server.dto';
+import { FilterServersDto, ServerSortOption } from './dtos/filter-servers.dto';
+import { prisma, ServerStatus } from '@repo/db';
 
 @Injectable()
 export class ServerService {
     constructor(
-        private readonly prisma: PrismaService,
+
         private readonly storage: StorageService,
     ) {
     }
@@ -25,8 +25,8 @@ export class ServerService {
      */
     async create(userId: string, createDto: CreateServerDto) {
         // Verify primary category exists
-        const primaryCategory = await this.prisma.serverCategory.findUnique({
-            where: {id: createDto.primaryCategoryId},
+        const primaryCategory = await prisma.serverCategory.findUnique({
+            where: { id: createDto.primaryCategoryId },
         });
 
         if (!primaryCategory) {
@@ -35,8 +35,8 @@ export class ServerService {
 
         // Verify all category IDs exist
         if (createDto.categoryIds && createDto.categoryIds.length > 0) {
-            const categories = await this.prisma.serverCategory.findMany({
-                where: {id: {in: createDto.categoryIds}},
+            const categories = await prisma.serverCategory.findMany({
+                where: { id: { in: createDto.categoryIds } },
             });
 
             if (categories.length !== createDto.categoryIds.length) {
@@ -58,8 +58,8 @@ export class ServerService {
             throw new BadRequestException('Between 1 and 10 tags required');
         }
 
-        const tags = await this.prisma.serverTag.findMany({
-            where: {id: {in: createDto.tagIds}},
+        const tags = await prisma.serverTag.findMany({
+            where: { id: { in: createDto.tagIds } },
         });
 
         if (tags.length !== createDto.tagIds.length) {
@@ -68,13 +68,13 @@ export class ServerService {
 
         // Verify team ownership if teamId provided
         if (createDto.teamId) {
-            const team = await this.prisma.team.findUnique({
-                where: {id: createDto.teamId},
+            const team = await prisma.team.findUnique({
+                where: { id: createDto.teamId },
                 include: {
                     members: {
                         where: {
                             userId,
-                            role: {in: ['OWNER', 'ADMIN']},
+                            role: { in: ['OWNER', 'ADMIN'] },
                         },
                     },
                 },
@@ -91,7 +91,7 @@ export class ServerService {
         const slug = await this.generateUniqueSlug(createDto.name);
 
         // Create server with relations
-        const server = await this.prisma.server.create({
+        const server = await prisma.server.create({
             data: {
                 name: createDto.name,
                 slug,
@@ -204,15 +204,15 @@ export class ServerService {
 
         if (search) {
             where.OR = [
-                {name: {contains: search, mode: 'insensitive'}},
-                {description: {contains: search, mode: 'insensitive'}},
+                { name: { contains: search, mode: 'insensitive' } },
+                { description: { contains: search, mode: 'insensitive' } },
             ];
         }
 
         if (category) {
             where.categories = {
                 some: {
-                    category: {slug: category},
+                    category: { slug: category },
                 },
             };
         }
@@ -221,7 +221,7 @@ export class ServerService {
             where.tags = {
                 some: {
                     tag: {
-                        slug: {in: tags},
+                        slug: { in: tags },
                     },
                 },
             };
@@ -246,11 +246,11 @@ export class ServerService {
         }
 
         if (minPlayers !== undefined) {
-            where.currentPlayers = {gte: minPlayers};
+            where.currentPlayers = { gte: minPlayers };
         }
 
         if (maxPlayers !== undefined) {
-            where.currentPlayers = {...where.currentPlayers, lte: maxPlayers};
+            where.currentPlayers = { ...where.currentPlayers, lte: maxPlayers };
         }
 
         // Build orderBy
@@ -261,7 +261,7 @@ export class ServerService {
 
         // Execute query
         const [servers, total] = await Promise.all([
-            this.prisma.server.findMany({
+            prisma.server.findMany({
                 where,
                 orderBy,
                 skip,
@@ -275,7 +275,7 @@ export class ServerService {
                         },
                     },
                     categories: {
-                        where: {isPrimary: true},
+                        where: { isPrimary: true },
                         include: {
                             category: true,
                         },
@@ -295,7 +295,7 @@ export class ServerService {
                     },
                 },
             }),
-            this.prisma.server.count({where}),
+            prisma.server.count({ where }),
         ]);
 
         // Return with pagination meta
@@ -316,8 +316,8 @@ export class ServerService {
      * Find server by slug
      */
     async findBySlug(slug: string) {
-        const server = await this.prisma.server.findUnique({
-            where: {slug},
+        const server = await prisma.server.findUnique({
+            where: { slug },
             include: {
                 owner: {
                     select: {
@@ -384,8 +384,8 @@ export class ServerService {
      * Find server by ID (internal use)
      */
     async findById(serverId: string) {
-        const server = await this.prisma.server.findUnique({
-            where: {id: serverId},
+        const server = await prisma.server.findUnique({
+            where: { id: serverId },
             include: {
                 owner: true,
                 team: true,
@@ -413,9 +413,9 @@ export class ServerService {
      * Update server
      */
     async update(userId: string, serverId: string, updateDto: UpdateServerDto) {
-        const server = await this.prisma.server.findUnique({
-            where: {id: serverId},
-            select: {ownerId: true, teamId: true},
+        const server = await prisma.server.findUnique({
+            where: { id: serverId },
+            select: { ownerId: true, teamId: true },
         });
 
         if (!server) {
@@ -452,13 +452,13 @@ export class ServerService {
         if (updateDto.twitterUrl !== undefined)
             updateData.twitterUrl = updateDto.twitterUrl;
 
-        const updated = await this.prisma.server.update({
-            where: {id: serverId},
+        const updated = await prisma.server.update({
+            where: { id: serverId },
             data: updateData,
             include: {
                 owner: true,
-                categories: {include: {category: true}},
-                tags: {include: {tag: true}},
+                categories: { include: { category: true } },
+                tags: { include: { tag: true } },
             },
         });
 
@@ -469,9 +469,9 @@ export class ServerService {
      * Delete server (archive)
      */
     async delete(userId: string, serverId: string) {
-        const server = await this.prisma.server.findUnique({
-            where: {id: serverId},
-            select: {ownerId: true, teamId: true, logo: true, banner: true, status: true},
+        const server = await prisma.server.findUnique({
+            where: { id: serverId },
+            select: { ownerId: true, teamId: true, logo: true, banner: true, status: true },
         });
 
         if (!server) {
@@ -484,8 +484,8 @@ export class ServerService {
         }
 
         // Archive instead of delete
-        await this.prisma.server.update({
-            where: {id: serverId},
+        await prisma.server.update({
+            where: { id: serverId },
             data: {
                 status: ServerStatus.ARCHIVED,
                 statusHistory: {
@@ -509,7 +509,7 @@ export class ServerService {
             });
         }
 
-        return {message: 'Server archived successfully'};
+        return { message: 'Server archived successfully' };
     }
 
     /**
@@ -533,9 +533,9 @@ export class ServerService {
             throw new BadRequestException('File too large. Maximum size is 2MB');
         }
 
-        const server = await this.prisma.server.findUnique({
-            where: {id: serverId},
-            select: {ownerId: true, teamId: true, logo: true},
+        const server = await prisma.server.findUnique({
+            where: { id: serverId },
+            select: { ownerId: true, teamId: true, logo: true },
         });
 
         if (!server) {
@@ -552,9 +552,9 @@ export class ServerService {
             `servers/${serverId}/logo`,
         );
 
-        const updated = await this.prisma.server.update({
-            where: {id: serverId},
-            data: {logo: logoUrl},
+        const updated = await prisma.server.update({
+            where: { id: serverId },
+            data: { logo: logoUrl },
         });
 
         // Delete old logo
@@ -591,9 +591,9 @@ export class ServerService {
             throw new BadRequestException('File too large. Maximum size is 5MB');
         }
 
-        const server = await this.prisma.server.findUnique({
-            where: {id: serverId},
-            select: {ownerId: true, teamId: true, banner: true},
+        const server = await prisma.server.findUnique({
+            where: { id: serverId },
+            select: { ownerId: true, teamId: true, banner: true },
         });
 
         if (!server) {
@@ -610,9 +610,9 @@ export class ServerService {
             `servers/${serverId}/banner`,
         );
 
-        const updated = await this.prisma.server.update({
-            where: {id: serverId},
-            data: {banner: bannerUrl},
+        const updated = await prisma.server.update({
+            where: { id: serverId },
+            data: { banner: bannerUrl },
         });
 
         // Delete old banner
@@ -628,9 +628,9 @@ export class ServerService {
      * Delete server logo
      */
     async deleteLogo(userId: string, serverId: string) {
-        const server = await this.prisma.server.findUnique({
-            where: {id: serverId},
-            select: {ownerId: true, teamId: true, logo: true},
+        const server = await prisma.server.findUnique({
+            where: { id: serverId },
+            select: { ownerId: true, teamId: true, logo: true },
         });
 
         if (!server) {
@@ -646,9 +646,9 @@ export class ServerService {
             await this.storage.deleteFile(server.logo);
         }
 
-        return this.prisma.server.update({
-            where: {id: serverId},
-            data: {logo: null},
+        return prisma.server.update({
+            where: { id: serverId },
+            data: { logo: null },
         });
     }
 
@@ -656,9 +656,9 @@ export class ServerService {
      * Delete server banner
      */
     async deleteBanner(userId: string, serverId: string) {
-        const server = await this.prisma.server.findUnique({
-            where: {id: serverId},
-            select: {ownerId: true, teamId: true, banner: true},
+        const server = await prisma.server.findUnique({
+            where: { id: serverId },
+            select: { ownerId: true, teamId: true, banner: true },
         });
 
         if (!server) {
@@ -674,9 +674,9 @@ export class ServerService {
             await this.storage.deleteFile(server.banner);
         }
 
-        return this.prisma.server.update({
-            where: {id: serverId},
-            data: {banner: null},
+        return prisma.server.update({
+            where: { id: serverId },
+            data: { banner: null },
         });
     }
 
@@ -684,9 +684,9 @@ export class ServerService {
      * Approve server (Admin only)
      */
     async approve(adminId: string, serverId: string, reason?: string) {
-        const server = await this.prisma.server.findUnique({
-            where: {id: serverId},
-            select: {status: true},
+        const server = await prisma.server.findUnique({
+            where: { id: serverId },
+            select: { status: true },
         });
 
         if (!server) {
@@ -697,8 +697,8 @@ export class ServerService {
             throw new ConflictException('Server is already approved');
         }
 
-        return this.prisma.server.update({
-            where: {id: serverId},
+        return prisma.server.update({
+            where: { id: serverId },
             data: {
                 status: ServerStatus.APPROVED,
                 approvedAt: new Date(),
@@ -721,17 +721,17 @@ export class ServerService {
      * Reject server (Admin only)
      */
     async reject(adminId: string, serverId: string, reason: string) {
-        const server = await this.prisma.server.findUnique({
-            where: {id: serverId},
-            select: {status: true},
+        const server = await prisma.server.findUnique({
+            where: { id: serverId },
+            select: { status: true },
         });
 
         if (!server) {
             throw new NotFoundException('Server not found');
         }
 
-        return this.prisma.server.update({
-            where: {id: serverId},
+        return prisma.server.update({
+            where: { id: serverId },
             data: {
                 status: ServerStatus.REJECTED,
                 rejectionReason: reason,
@@ -751,17 +751,17 @@ export class ServerService {
      * Suspend server (Admin only)
      */
     async suspend(adminId: string, serverId: string, reason: string) {
-        const server = await this.prisma.server.findUnique({
-            where: {id: serverId},
-            select: {status: true},
+        const server = await prisma.server.findUnique({
+            where: { id: serverId },
+            select: { status: true },
         });
 
         if (!server) {
             throw new NotFoundException('Server not found');
         }
 
-        return this.prisma.server.update({
-            where: {id: serverId},
+        return prisma.server.update({
+            where: { id: serverId },
             data: {
                 status: ServerStatus.SUSPENDED,
                 statusHistory: {
@@ -780,19 +780,19 @@ export class ServerService {
      * Get user's servers
      */
     async getUserServers(userId: string) {
-        return this.prisma.server.findMany({
-            where: {ownerId: userId},
+        return prisma.server.findMany({
+            where: { ownerId: userId },
             include: {
                 categories: {
-                    where: {isPrimary: true},
-                    include: {category: true},
+                    where: { isPrimary: true },
+                    include: { category: true },
                 },
                 tags: {
-                    include: {tag: true},
+                    include: { tag: true },
                     take: 3,
                 },
             },
-            orderBy: {createdAt: 'desc'},
+            orderBy: { createdAt: 'desc' },
         });
     }
 
@@ -810,7 +810,7 @@ export class ServerService {
         let unique = slug;
         let counter = 1;
 
-        while (await this.prisma.server.findUnique({where: {slug: unique}})) {
+        while (await prisma.server.findUnique({ where: { slug: unique } })) {
             unique = `${slug}-${counter}`;
             counter++;
         }
@@ -832,7 +832,7 @@ export class ServerService {
 
         // Team member with permission
         if (server.teamId) {
-            const member = await this.prisma.teamMember.findUnique({
+            const member = await prisma.teamMember.findUnique({
                 where: {
                     teamId_userId: {
                         teamId: server.teamId,
@@ -855,19 +855,19 @@ export class ServerService {
     private buildOrderBy(sortBy?: ServerSortOption) {
         switch (sortBy) {
             case ServerSortOption.VOTES:
-                return {votesCount: 'desc' as const};
+                return { votesCount: 'desc' as const };
             case ServerSortOption.PLAYERS:
-                return {currentPlayers: 'desc' as const};
+                return { currentPlayers: 'desc' as const };
             case ServerSortOption.NEWEST:
-                return {createdAt: 'desc' as const};
+                return { createdAt: 'desc' as const };
             case ServerSortOption.OLDEST:
-                return {createdAt: 'asc' as const};
+                return { createdAt: 'asc' as const };
             case ServerSortOption.NAME_ASC:
-                return {name: 'asc' as const};
+                return { name: 'asc' as const };
             case ServerSortOption.NAME_DESC:
-                return {name: 'desc' as const};
+                return { name: 'desc' as const };
             default:
-                return {votesCount: 'desc' as const};
+                return { votesCount: 'desc' as const };
         }
     }
 }

@@ -5,17 +5,18 @@ import {
     NotFoundException,
     ForbiddenException,
 } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+
 import { CreateBadgeDto } from './dtos/create-badge.dto';
 import { UpdateBadgeDto } from './dtos/update-badge.dto';
 import { AwardBadgeDto } from './dtos/award-badge.dto';
+import { prisma } from '@repo/db';
 
 @Injectable()
 export class BadgeService {
-    constructor(private readonly prisma: PrismaService) {}
+    constructor() { }
 
     async createBadge(createDto: CreateBadgeDto) {
-        const existing = await this.prisma.badge.findUnique({
+        const existing = await prisma.badge.findUnique({
             where: { slug: createDto.slug },
         });
 
@@ -23,13 +24,13 @@ export class BadgeService {
             throw new ConflictException('Badge with this slug already exists');
         }
 
-        return this.prisma.badge.create({
+        return prisma.badge.create({
             data: createDto,
         });
     }
 
     async findAllBadges(isActive?: boolean) {
-        return this.prisma.badge.findMany({
+        return prisma.badge.findMany({
             where: isActive !== undefined ? { isActive } : undefined,
             orderBy: { createdAt: 'desc' },
             include: {
@@ -41,7 +42,7 @@ export class BadgeService {
     }
 
     async findBadgeById(badgeId: string) {
-        const badge = await this.prisma.badge.findUnique({
+        const badge = await prisma.badge.findUnique({
             where: { id: badgeId },
             include: {
                 _count: {
@@ -58,7 +59,7 @@ export class BadgeService {
     }
 
     async findBadgeBySlug(slug: string) {
-        const badge = await this.prisma.badge.findUnique({
+        const badge = await prisma.badge.findUnique({
             where: { slug },
             include: {
                 _count: {
@@ -75,7 +76,7 @@ export class BadgeService {
     }
 
     async updateBadge(badgeId: string, updateDto: UpdateBadgeDto) {
-        const badge = await this.prisma.badge.findUnique({
+        const badge = await prisma.badge.findUnique({
             where: { id: badgeId },
         });
 
@@ -83,14 +84,14 @@ export class BadgeService {
             throw new NotFoundException('Badge not found');
         }
 
-        return this.prisma.badge.update({
+        return prisma.badge.update({
             where: { id: badgeId },
             data: updateDto,
         });
     }
 
     async deleteBadge(badgeId: string) {
-        const badge = await this.prisma.badge.findUnique({
+        const badge = await prisma.badge.findUnique({
             where: { id: badgeId },
             include: {
                 _count: {
@@ -109,13 +110,13 @@ export class BadgeService {
             );
         }
 
-        return this.prisma.badge.delete({
+        return prisma.badge.delete({
             where: { id: badgeId },
         });
     }
 
     async awardBadge(awardDto: AwardBadgeDto, awardedBy: string) {
-        const user = await this.prisma.user.findUnique({
+        const user = await prisma.user.findUnique({
             where: { id: awardDto.userId },
         });
 
@@ -123,7 +124,7 @@ export class BadgeService {
             throw new NotFoundException('User not found');
         }
 
-        const badge = await this.prisma.badge.findUnique({
+        const badge = await prisma.badge.findUnique({
             where: { id: awardDto.badgeId },
         });
 
@@ -135,7 +136,7 @@ export class BadgeService {
             throw new BadRequestException('Cannot award inactive badge');
         }
 
-        const existing = await this.prisma.userBadge.findUnique({
+        const existing = await prisma.userBadge.findUnique({
             where: {
                 userId_badgeId: {
                     userId: awardDto.userId,
@@ -148,7 +149,7 @@ export class BadgeService {
             throw new ConflictException('User already has this badge');
         }
 
-        return this.prisma.userBadge.create({
+        return prisma.userBadge.create({
             data: {
                 userId: awardDto.userId,
                 badgeId: awardDto.badgeId,
@@ -170,7 +171,7 @@ export class BadgeService {
     }
 
     async revokeBadge(userId: string, badgeId: string) {
-        const userBadge = await this.prisma.userBadge.findUnique({
+        const userBadge = await prisma.userBadge.findUnique({
             where: {
                 userId_badgeId: {
                     userId,
@@ -183,7 +184,7 @@ export class BadgeService {
             throw new NotFoundException('User does not have this badge');
         }
 
-        return this.prisma.userBadge.delete({
+        return prisma.userBadge.delete({
             where: {
                 userId_badgeId: {
                     userId,
@@ -194,7 +195,7 @@ export class BadgeService {
     }
 
     async getUserBadges(userId: string) {
-        return this.prisma.userBadge.findMany({
+        return prisma.userBadge.findMany({
             where: { userId },
             include: {
                 badge: true,

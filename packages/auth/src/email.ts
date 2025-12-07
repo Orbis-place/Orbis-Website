@@ -14,94 +14,137 @@ const getResend = () => {
 };
 
 const emailStyles = `
+    @import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700&display=swap');
+    
     body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        font-family: 'Nunito Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         line-height: 1.6;
-        color: #333;
+        color: #C7F4FA;
         margin: 0;
         padding: 0;
-        background-color: #f4f4f4;
+        background-color: #032125;
     }
     .container {
         max-width: 600px;
-        margin: 0 auto;
-        background-color: #ffffff;
-        border-radius: 8px;
+        margin: 40px auto;
+        background-color: rgba(3, 33, 37, 0.95);
+        border-radius: 30px;
         overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(8, 75, 84, 0.3);
     }
     .header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 40px 20px;
+        background: linear-gradient(135deg, rgba(6, 54, 61, 0.9) 0%, rgba(8, 75, 84, 0.9) 100%);
+        padding: 50px 40px;
         text-align: center;
+        border-bottom: 2px solid rgba(16, 158, 177, 0.3);
+    }
+    .logo {
+        margin-bottom: 20px;
     }
     .header h1 {
-        color: #ffffff;
+        color: #C7F4FA;
         margin: 0;
-        font-size: 28px;
+        font-size: 32px;
         font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+    .header p {
+        color: rgba(199, 244, 250, 0.8);
+        margin: 10px 0 0;
+        font-size: 16px;
     }
     .content {
-        padding: 40px 30px;
+        padding: 40px;
+        background-color: rgba(3, 33, 37, 0.95);
     }
     .content p {
         margin: 0 0 20px;
         font-size: 16px;
-        color: #555;
+        color: #C7F4FA;
+        line-height: 1.8;
+    }
+    .content strong {
+        color: #98EAF5;
+    }
+    .button-container {
+        text-align: center;
+        margin: 30px 0;
     }
     .button {
         display: inline-block;
-        padding: 14px 32px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: #ffffff !important;
+        padding: 15px 40px;
+        background: #109EB1;
+        color: #C7F4FA !important;
         text-decoration: none;
-        border-radius: 6px;
-        font-weight: 600;
+        border-radius: 124px;
+        font-weight: 700;
         font-size: 16px;
-        margin: 20px 0;
-        transition: transform 0.2s;
+        transition: all 0.3s ease;
+        border: 2px solid #109EB1;
     }
     .button:hover {
+        background: #0d8a9b;
         transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(16, 158, 177, 0.4);
     }
     .footer {
-        background-color: #f8f9fa;
-        padding: 30px;
+        background-color: rgba(6, 54, 61, 0.5);
+        padding: 30px 40px;
         text-align: center;
-        border-top: 1px solid #e9ecef;
+        border-top: 1px solid rgba(8, 75, 84, 0.5);
     }
     .footer p {
-        margin: 5px 0;
+        margin: 8px 0;
         font-size: 14px;
-        color: #6c757d;
+        color: rgba(199, 244, 250, 0.6);
     }
     .security-notice {
-        background-color: #fff3cd;
-        border-left: 4px solid #ffc107;
-        padding: 15px;
-        margin: 20px 0;
-        border-radius: 4px;
+        background-color: rgba(16, 158, 177, 0.15);
+        border-left: 4px solid #109EB1;
+        padding: 20px;
+        margin: 25px 0;
+        border-radius: 12px;
     }
     .security-notice p {
         margin: 0;
         font-size: 14px;
-        color: #856404;
+        color: #98EAF5;
+        line-height: 1.6;
     }
     .link-box {
-        background-color: #f8f9fa;
-        padding: 15px;
-        border-radius: 6px;
-        margin: 20px 0;
+        background-color: rgba(6, 54, 61, 0.6);
+        padding: 20px;
+        border-radius: 12px;
+        margin: 25px 0;
         word-break: break-all;
+        border: 1px solid rgba(8, 75, 84, 0.5);
     }
     .link-box p {
-        margin: 5px 0;
-        font-size: 13px;
-        color: #6c757d;
+        margin: 5px 0 10px;
+        font-size: 14px;
+        color: #C7F4FA;
     }
     .link-box code {
-        color: #495057;
-        font-size: 12px;
+        color: #109EB1;
+        font-size: 13px;
+        background-color: rgba(8, 75, 84, 0.4);
+        padding: 8px 12px;
+        border-radius: 6px;
+        display: block;
+        margin-top: 10px;
+    }
+    .icon-circle {
+        width: 80px;
+        height: 80px;
+        background: rgba(152, 234, 245, 0.2);
+        border: 2px solid rgba(152, 234, 245, 0.4);
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+        font-size: 40px;
     }
 `;
 
@@ -111,7 +154,7 @@ export const sendVerificationEmail = async (email: string, url: string) => {
     await resend.emails.send({
         from: 'Orbis <no-reply@orbis.place>',
         to: email,
-        subject: 'Verify Your Email Address',
+        subject: 'Verify Your Email Address - Orbis',
         html: `
             <!DOCTYPE html>
             <html lang="en">
@@ -124,14 +167,16 @@ export const sendVerificationEmail = async (email: string, url: string) => {
             <body>
                 <div class="container">
                     <div class="header">
-                        <h1>✉️ Verify Your Email</h1>
+                        <div class="icon-circle">✉️</div>
+                        <h1>Verify Your Email</h1>
+                        <p>Welcome to Orbis - Enter the space where every vision finds its form</p>
                     </div>
                     <div class="content">
                         <p>Hi there,</p>
-                        <p>Thanks for signing up with Orbis! We're excited to have you on board.</p>
-                        <p>To complete your registration and start using your account, please verify your email address by clicking the button below:</p>
+                        <p>Thanks for signing up with <strong>Orbis</strong>! We're excited to have you join our community.</p>
+                        <p>To complete your registration and start your journey, please verify your email address by clicking the button below:</p>
                         
-                        <div style="text-align: center;">
+                        <div class="button-container">
                             <a href="${url}" class="button">Verify My Email</a>
                         </div>
 
@@ -141,7 +186,7 @@ export const sendVerificationEmail = async (email: string, url: string) => {
                         </div>
 
                         <div class="security-notice">
-                            <p><strong>⚠️ Security Notice:</strong> This link will expire in 24 hours. If you didn't create an account with Orbis, please ignore this email.</p>
+                            <p><strong>⚠️ Security Notice:</strong> This verification link will expire in 24 hours for your security. If you didn't create an account with Orbis, please ignore this email.</p>
                         </div>
 
                         <p>If you have any questions or need assistance, feel free to reach out to our support team.</p>
@@ -165,7 +210,7 @@ export const sendResetPasswordEmail = async (email: string, url: string) => {
     await resend.emails.send({
         from: 'Orbis <no-reply@orbis.place>',
         to: email,
-        subject: 'Reset Your Password',
+        subject: 'Reset Your Password - Orbis',
         html: `
             <!DOCTYPE html>
             <html lang="en">
@@ -178,14 +223,16 @@ export const sendResetPasswordEmail = async (email: string, url: string) => {
             <body>
                 <div class="container">
                     <div class="header">
-                        <h1>🔐 Password Reset Request</h1>
+                        <div class="icon-circle">🔐</div>
+                        <h1>Password Reset Request</h1>
+                        <p>Secure your account with a new password</p>
                     </div>
                     <div class="content">
                         <p>Hi there,</p>
-                        <p>We received a request to reset the password for your Orbis account associated with this email address.</p>
+                        <p>We received a request to reset the password for your <strong>Orbis</strong> account associated with this email address.</p>
                         <p>To reset your password, click the button below:</p>
                         
-                        <div style="text-align: center;">
+                        <div class="button-container">
                             <a href="${url}" class="button">Reset My Password</a>
                         </div>
 

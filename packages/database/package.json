@@ -2,6 +2,7 @@
   "name": "@repo/db",
   "version": "0.0.0",
   "main": "./dist/index.js",
+  "type": "module",
   "types": "./index.ts",
   "exports": {
     ".": {
@@ -13,20 +14,26 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev --name auto",
     "db:deploy": "prisma migrate deploy",
-    "build": "tsup ./index.ts --format cjs,esm",
-    "dev": "tsup ./index.ts --format cjs,esm --watch"
+    "db:seed": "tsx prisma/seed.ts",
+    "build": "prisma generate && tsup ./index.ts --format cjs,esm",
+"dev": "tsup ./index.ts --format cjs,esm --watch"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   },
   "devDependencies": {
-    "@types/pg": "^8.15.6",
-    "prisma": "^6.19.0",
-    "tsup": "^8.5.0",
-    "typescript": "^5.8.3",
+    "@repo/typescript-config": "workspace:*",
     "@types/node": "^22.15.30",
-    "@repo/typescript-config": "workspace:*"
+    "@types/pg": "^8.15.6",
+    "prisma": "^7.1.0",
+    "tsup": "^8.5.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@prisma/adapter-pg": "^6.19.0",
-    "@prisma/client": "^6.19.0",
+    "@prisma/adapter-pg": "^7.1.0",
+    "@prisma/client": "^7.1.0",
+    "@prisma/client-runtime-utils": "^7.1.0",
     "dotenv": "^17.2.3",
     "pg": "^8.16.3"
   }

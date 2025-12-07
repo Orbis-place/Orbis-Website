@@ -1,14 +1,14 @@
-import {Injectable} from '@nestjs/common';
-import {PrismaService} from "../../prisma/prisma.service";
+import { Injectable } from '@nestjs/common';
+import { prisma } from '@repo/db';
 
 @Injectable()
 export class ServerCategoryService {
-    constructor(private readonly prisma: PrismaService) {
+    constructor() {
     }
 
     async findAll() {
-        return this.prisma.serverCategory.findMany({
-            orderBy: {order: 'asc'},
+        return prisma.serverCategory.findMany({
+            orderBy: { order: 'asc' },
             include: {
                 _count: {
                     select: {
@@ -20,8 +20,8 @@ export class ServerCategoryService {
     }
 
     async findBySlug(slug: string) {
-        return this.prisma.serverCategory.findUnique({
-            where: {slug},
+        return prisma.serverCategory.findUnique({
+            where: { slug },
             include: {
                 _count: {
                     select: {

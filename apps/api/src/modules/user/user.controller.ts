@@ -1,11 +1,14 @@
-// users.controller.ts
-import {Body, Controller, Delete, Get, Param, Patch, Post, UploadedFile, UseInterceptors} from '@nestjs/common';
+import {Body, Controller, Delete, Get, Param, Patch, Post, Query, UploadedFile, UseInterceptors} from '@nestjs/common';
 import {ApiBearerAuth, ApiConsumes, ApiOperation, ApiTags} from '@nestjs/swagger';
 import {UpdateProfileDto} from "./dtos/update-profile.dto";
 import {UserService} from "./user.service";
-import {Session, UserSession} from "@thallesp/nestjs-better-auth";
+import {AllowAnonymous, Session, UserSession} from "@thallesp/nestjs-better-auth";
 import {FileInterceptor} from '@nestjs/platform-express';
 import {ServerService} from "../server/server.service";
+import {CreateSocialLinkDto} from "./dtos/create-social-link.dto";
+import {UpdateSocialLinkDto} from "./dtos/update-social-link.dto";
+import {ReorderSocialLinksDto} from "./dtos/reorder-social-links.dto";
+import {SearchUsersDto} from "./dtos/search-users.dto";
 
 @ApiTags('users')
 @Controller('users')
@@ -51,6 +54,25 @@ export class UserController {
         return this.userService.deleteProfileImage(session.user.id);
     }
 
+    @Post('me/banner')
+    @ApiBearerAuth()
+    @ApiConsumes('multipart/form-data')
+    @ApiOperation({summary: 'Upload profile banner'})
+    @UseInterceptors(FileInterceptor('banner'))
+    async uploadBanner(
+        @Session() session: UserSession,
+        @UploadedFile() file: Express.Multer.File,
+    ) {
+        return this.userService.uploadProfileBanner(session.user.id, file);
+    }
+
+    @Delete('me/banner')
+    @ApiBearerAuth()
+    @ApiOperation({summary: 'Delete profile banner'})
+    async deleteBanner(@Session() session: UserSession) {
+        return this.userService.deleteProfileBanner(session.user.id);
+    }
+
     @Get('me/servers')
     @ApiBearerAuth()
     @ApiOperation({summary: 'Get current user servers'})
@@ -90,9 +112,78 @@ export class UserController {
         return this.userService.getFollowing(userId);
     }
 
+    @Get('search')
+    @ApiBearerAuth()
+    @ApiOperation({summary: 'Search users by username or display name'})
+    async searchUsers(@Query() searchDto: SearchUsersDto) {
+        return this.userService.searchUsers(searchDto);
+    }
+
+    @Get('username/:username')
+    @AllowAnonymous()
+    @ApiOperation({summary: 'Get user profile by username'})
+    async getUserProfileByUsername(@Param('username') username: string) {
+        return this.userService.getUserProfileByUsername(username);
+    }
+
     @Get(':userId')
+    @AllowAnonymous()
     @ApiOperation({summary: 'Get user profile by ID'})
     async getUserProfile(@Param('userId') userId: string) {
         return this.userService.getUserProfile(userId);
     }
+
+    // ============================================
+    // SOCIAL LINKS
+    // ============================================
+
+    @Get('me/social-links')
+    @ApiBearerAuth()
+    @ApiOperation({summary: 'Get current user social links'})
+    async getMySocialLinks(@Session() session: UserSession) {
+        return this.userService.getSocialLinks(session.user.id);
+    }
+
+    @Post('me/social-links')
+    @ApiBearerAuth()
+    @ApiOperation({summary: 'Create a social link'})
+    async createSocialLink(
+        @Session() session: UserSession,
+        @Body() createDto: CreateSocialLinkDto,
+    ) {
+        return this.userService.createSocialLink(session.user.id, createDto);
+    }
+
+
+    @Patch('me/social-links/reorder')
+    @ApiBearerAuth()
+    @ApiOperation({summary: 'Reorder social links'})
+    async reorderSocialLinks(
+        @Session() session: UserSession,
+        @Body() reorderDto: ReorderSocialLinksDto,
+    ) {
+        return this.userService.reorderSocialLinks(session.user.id, reorderDto.linkIds);
+    }
+
+    @Patch('me/social-links/:id')
+    @ApiBearerAuth()
+    @ApiOperation({summary: 'Update a social link'})
+    async updateSocialLink(
+        @Session() session: UserSession,
+        @Param('id') id: string,
+        @Body() updateDto: UpdateSocialLinkDto,
+    ) {
+        return this.userService.updateSocialLink(session.user.id, id, updateDto);
+    }
+
+    @Delete('me/social-links/:id')
+    @ApiBearerAuth()
+    @ApiOperation({summary: 'Delete a social link'})
+    async deleteSocialLink(
+        @Session() session: UserSession,
+        @Param('id') id: string,
+    ) {
+        return this.userService.deleteSocialLink(session.user.id, id);
+    }
+
 }
