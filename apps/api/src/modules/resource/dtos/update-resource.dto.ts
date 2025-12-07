@@ -1,4 +1,4 @@
-import {ApiPropertyOptional} from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import {
     IsString,
     IsEnum,
@@ -10,8 +10,8 @@ import {
     IsUrl,
     ArrayMaxSize,
 } from 'class-validator';
-import {Type} from 'class-transformer';
-import {ResourceType, ResourceVisibility} from './create-resource.dto';
+import { Type } from 'class-transformer';
+import { ResourceType, ResourceVisibility } from './create-resource.dto';
 
 export enum LicenseType {
     // Common open source
@@ -50,20 +50,20 @@ export enum ExternalLinkType {
 }
 
 export class ExternalLinkDto {
-    @ApiPropertyOptional({description: 'Link ID (for updates/deletes)'})
+    @ApiPropertyOptional({ description: 'Link ID (for updates/deletes)' })
     @IsString()
     @IsOptional()
     id?: string;
 
-    @ApiPropertyOptional({example: 'SOURCE_CODE', enum: ExternalLinkType})
+    @ApiPropertyOptional({ example: 'SOURCE_CODE', enum: ExternalLinkType })
     @IsEnum(ExternalLinkType)
     type: ExternalLinkType;
 
-    @ApiPropertyOptional({example: 'https://github.com/user/repo'})
+    @ApiPropertyOptional({ example: 'https://github.com/user/repo' })
     @IsUrl()
     url: string;
 
-    @ApiPropertyOptional({example: 'Main Repository'})
+    @ApiPropertyOptional({ example: 'Main Repository' })
     @IsString()
     @IsOptional()
     @MaxLength(100)
@@ -71,7 +71,7 @@ export class ExternalLinkDto {
 }
 
 export class UpdateResourceDto {
-    @ApiPropertyOptional({example: 'My Awesome Plugin', description: 'Resource name'})
+    @ApiPropertyOptional({ example: 'My Awesome Plugin', description: 'Resource name' })
     @IsString()
     @IsOptional()
     @MinLength(3)
@@ -96,15 +96,6 @@ export class UpdateResourceDto {
     @MinLength(50)
     @MaxLength(50000)
     description?: string;
-
-    @ApiPropertyOptional({
-        example: 'PLUGIN',
-        description: 'Resource type',
-        enum: ResourceType,
-    })
-    @IsEnum(ResourceType)
-    @IsOptional()
-    type?: ResourceType;
 
     @ApiPropertyOptional({
         example: 'PUBLIC',
@@ -158,7 +149,7 @@ export class UpdateResourceDto {
     })
     @IsArray()
     @IsOptional()
-    @ValidateNested({each: true})
+    @ValidateNested({ each: true })
     @Type(() => ExternalLinkDto)
     externalLinks?: ExternalLinkDto[];
 
@@ -168,35 +159,58 @@ export class UpdateResourceDto {
     })
     @IsArray()
     @IsOptional()
-    @IsString({each: true})
+    @IsString({ each: true })
     removeExternalLinks?: string[];
 
     // Tags
     @ApiPropertyOptional({
-        description: 'Tag IDs to add',
-        example: ['tag-id-1', 'tag-id-2'],
+        description: 'Tag names to add (will be created if they don\'t exist), max 10 tags total per resource',
+        example: ['Vanilla', 'Performance', 'Medieval'],
     })
     @IsArray()
     @IsOptional()
-    @IsString({each: true})
+    @IsString({ each: true })
+    @MinLength(2, { each: true })
+    @MaxLength(30, { each: true })
+    @ArrayMaxSize(10)
     addTags?: string[];
 
     @ApiPropertyOptional({
-        description: 'Tag IDs to remove',
-        example: ['tag-id-1'],
+        description: 'Tag names or slugs to remove',
+        example: ['vanilla', 'performance'],
     })
     @IsArray()
     @IsOptional()
-    @IsString({each: true})
+    @IsString({ each: true })
     removeTags?: string[];
 
     @ApiPropertyOptional({
-        description: 'Tag IDs to feature (max 3)',
+        description: 'Tag IDs or names to mark as featured (max 3)',
         example: ['tag-id-1', 'tag-id-2'],
     })
     @IsArray()
     @IsOptional()
-    @IsString({each: true})
+    @IsString({ each: true })
     @ArrayMaxSize(3)
     featuredTags?: string[];
+
+    // Categories
+    @ApiPropertyOptional({
+        description: 'Category IDs to add, max 3 categories total per resource',
+        example: ['category-id-1', 'category-id-2'],
+    })
+    @IsArray()
+    @IsOptional()
+    @IsString({ each: true })
+    @ArrayMaxSize(3)
+    addCategories?: string[];
+
+    @ApiPropertyOptional({
+        description: 'Category IDs to remove',
+        example: ['category-id-1'],
+    })
+    @IsArray()
+    @IsOptional()
+    @IsString({ each: true })
+    removeCategories?: string[];
 }

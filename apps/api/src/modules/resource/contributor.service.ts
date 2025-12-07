@@ -33,7 +33,7 @@ export class ContributorService {
         }
 
         // Check if already a contributor
-        const existingContributor = await this.prisma.contributor.findUnique({
+        const existingContributor = await this.prisma.resourceContributor.findUnique({
             where: {
                 resourceId_userId: {
                     resourceId,
@@ -47,7 +47,7 @@ export class ContributorService {
         }
 
         // Add contributor
-        const contributor = await this.prisma.contributor.create({
+        const contributor = await this.prisma.resourceContributor.create({
             data: {
                 resourceId,
                 userId: dto.userId,
@@ -89,7 +89,7 @@ export class ContributorService {
         }
 
         // Check if contributor exists
-        const contributor = await this.prisma.contributor.findUnique({
+        const contributor = await this.prisma.resourceContributor.findUnique({
             where: {
                 resourceId_userId: {
                     resourceId,
@@ -103,7 +103,7 @@ export class ContributorService {
         }
 
         // Update contributor
-        const updatedContributor = await this.prisma.contributor.update({
+        const updatedContributor = await this.prisma.resourceContributor.update({
             where: {
                 resourceId_userId: {
                     resourceId,
@@ -149,7 +149,7 @@ export class ContributorService {
         }
 
         // Check if contributor exists
-        const contributor = await this.prisma.contributor.findUnique({
+        const contributor = await this.prisma.resourceContributor.findUnique({
             where: {
                 resourceId_userId: {
                     resourceId,
@@ -163,7 +163,7 @@ export class ContributorService {
         }
 
         // Remove contributor
-        await this.prisma.contributor.delete({
+        await this.prisma.resourceContributor.delete({
             where: {
                 resourceId_userId: {
                     resourceId,
@@ -181,7 +181,7 @@ export class ContributorService {
      * Get all contributors for a resource
      */
     async getContributors(resourceId: string) {
-        const contributors = await this.prisma.contributor.findMany({
+        const contributors = await this.prisma.resourceContributor.findMany({
             where: { resourceId },
             include: {
                 user: {

@@ -5,13 +5,14 @@ import {
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
-import {PrismaService} from '../../prisma/prisma.service';
-import {StorageService} from '../storage/storage.service';
-import {CreateTeamDto} from './dtos/create-team.dto';
-import {UpdateTeamDto} from './dtos/update-team.dto';
-import {FilterTeamsDto} from './dtos/filter-teams.dto';
-import {AddTeamMemberDto, UpdateTeamMemberDto} from './dtos/manage-member.dto';
-import {TeamMemberRole} from '@repo/db';
+import { PrismaService } from '../../prisma/prisma.service';
+import { StorageService } from '../storage/storage.service';
+import { CreateTeamDto } from './dtos/create-team.dto';
+import { UpdateTeamDto } from './dtos/update-team.dto';
+import { FilterTeamsDto } from './dtos/filter-teams.dto';
+import { UpdateTeamMemberDto } from './dtos/manage-member.dto';
+import { CreateInvitationDto, RespondToInvitationDto, FilterInvitationsDto } from './dtos/invitation.dto';
+import { TeamInvitationStatus, TeamMemberRole } from '@repo/db';
 
 @Injectable()
 export class TeamService {
@@ -27,7 +28,7 @@ export class TeamService {
     async create(userId: string, createDto: CreateTeamDto) {
         // Check if team name is already taken
         const existing = await this.prisma.team.findUnique({
-            where: {name: createDto.name.toLowerCase()},
+            where: { name: createDto.name.toLowerCase() },
         });
 
         if (existing) {
@@ -81,15 +82,15 @@ export class TeamService {
      * Find all teams with filters and pagination
      */
     async findAll(filterDto: FilterTeamsDto) {
-        const {search, page = 1, limit = 20} = filterDto;
+        const { search, page = 1, limit = 20 } = filterDto;
 
         const where: any = {};
 
         if (search) {
             where.OR = [
-                {name: {contains: search, mode: 'insensitive'}},
-                {displayName: {contains: search, mode: 'insensitive'}},
-                {description: {contains: search, mode: 'insensitive'}},
+                { name: { contains: search, mode: 'insensitive' } },
+                { displayName: { contains: search, mode: 'insensitive' } },
+                { description: { contains: search, mode: 'insensitive' } },
             ];
         }
 
@@ -100,7 +101,7 @@ export class TeamService {
                 where,
                 skip,
                 take: limit,
-                orderBy: {createdAt: 'desc'},
+                orderBy: { createdAt: 'desc' },
                 include: {
                     owner: {
                         select: {
@@ -117,7 +118,7 @@ export class TeamService {
                     },
                 },
             }),
-            this.prisma.team.count({where}),
+            this.prisma.team.count({ where }),
         ]);
 
         return {
@@ -138,7 +139,7 @@ export class TeamService {
      */
     async findByName(name: string) {
         const team = await this.prisma.team.findUnique({
-            where: {name: name.toLowerCase()},
+            where: { name: name.toLowerCase() },
             include: {
                 owner: {
                     select: {
@@ -160,8 +161,8 @@ export class TeamService {
                         },
                     },
                     orderBy: [
-                        {role: 'asc'},
-                        {joinedAt: 'asc'},
+                        { role: 'asc' },
+                        { joinedAt: 'asc' },
                     ],
                 },
                 servers: {
@@ -175,7 +176,7 @@ export class TeamService {
                         isOnline: true,
                     },
                     take: 10,
-                    orderBy: {createdAt: 'desc'},
+                    orderBy: { createdAt: 'desc' },
                 },
                 _count: {
                     select: {
@@ -198,7 +199,7 @@ export class TeamService {
      */
     async findById(teamId: string) {
         const team = await this.prisma.team.findUnique({
-            where: {id: teamId},
+            where: { id: teamId },
             include: {
                 owner: true,
                 members: {
@@ -221,8 +222,8 @@ export class TeamService {
      */
     async update(userId: string, teamId: string, updateDto: UpdateTeamDto) {
         const team = await this.prisma.team.findUnique({
-            where: {id: teamId},
-            select: {ownerId: true},
+            where: { id: teamId },
+            select: { ownerId: true },
         });
 
         if (!team) {
@@ -243,7 +244,7 @@ export class TeamService {
         if (updateDto.discordUrl !== undefined) updateData.discordUrl = updateDto.discordUrl;
 
         const updated = await this.prisma.team.update({
-            where: {id: teamId},
+            where: { id: teamId },
             data: updateData,
             include: {
                 owner: {
@@ -277,8 +278,8 @@ export class TeamService {
      */
     async delete(userId: string, teamId: string) {
         const team = await this.prisma.team.findUnique({
-            where: {id: teamId},
-            select: {ownerId: true, logo: true, banner: true},
+            where: { id: teamId },
+            select: { ownerId: true, logo: true, banner: true },
         });
 
         if (!team) {
@@ -300,10 +301,10 @@ export class TeamService {
         }
 
         await this.prisma.team.delete({
-            where: {id: teamId},
+            where: { id: teamId },
         });
 
-        return {message: 'Team deleted successfully'};
+        return { message: 'Team deleted successfully' };
     }
 
     /**
@@ -327,8 +328,8 @@ export class TeamService {
         }
 
         const team = await this.prisma.team.findUnique({
-            where: {id: teamId},
-            select: {logo: true},
+            where: { id: teamId },
+            select: { logo: true },
         });
 
         if (!team) {
@@ -346,8 +347,8 @@ export class TeamService {
         );
 
         const updated = await this.prisma.team.update({
-            where: {id: teamId},
-            data: {logo: logoUrl},
+            where: { id: teamId },
+            data: { logo: logoUrl },
         });
 
         if (team.logo) {
@@ -379,8 +380,8 @@ export class TeamService {
         }
 
         const team = await this.prisma.team.findUnique({
-            where: {id: teamId},
-            select: {banner: true},
+            where: { id: teamId },
+            select: { banner: true },
         });
 
         if (!team) {
@@ -398,8 +399,8 @@ export class TeamService {
         );
 
         const updated = await this.prisma.team.update({
-            where: {id: teamId},
-            data: {banner: bannerUrl},
+            where: { id: teamId },
+            data: { banner: bannerUrl },
         });
 
         if (team.banner) {
@@ -415,8 +416,8 @@ export class TeamService {
      */
     async deleteLogo(userId: string, teamId: string) {
         const team = await this.prisma.team.findUnique({
-            where: {id: teamId},
-            select: {logo: true},
+            where: { id: teamId },
+            select: { logo: true },
         });
 
         if (!team) {
@@ -433,8 +434,8 @@ export class TeamService {
         }
 
         return this.prisma.team.update({
-            where: {id: teamId},
-            data: {logo: null},
+            where: { id: teamId },
+            data: { logo: null },
         });
     }
 
@@ -443,8 +444,8 @@ export class TeamService {
      */
     async deleteBanner(userId: string, teamId: string) {
         const team = await this.prisma.team.findUnique({
-            where: {id: teamId},
-            select: {banner: true},
+            where: { id: teamId },
+            select: { banner: true },
         });
 
         if (!team) {
@@ -461,28 +462,33 @@ export class TeamService {
         }
 
         return this.prisma.team.update({
-            where: {id: teamId},
-            data: {banner: null},
+            where: { id: teamId },
+            data: { banner: null },
         });
     }
 
     /**
-     * Add team member
+     * Create team invitation
      */
-    async addMember(userId: string, teamId: string, addDto: AddTeamMemberDto) {
+    async createInvitation(userId: string, teamId: string, createDto: CreateInvitationDto) {
         // Check if user has permission (owner or admin)
         const canManageMembers = await this.checkManageMembersPermission(userId, teamId);
         if (!canManageMembers) {
-            throw new ForbiddenException('You do not have permission to add members');
+            throw new ForbiddenException('You do not have permission to invite members');
         }
 
-        // Check if user to add exists
-        const userToAdd = await this.prisma.user.findUnique({
-            where: {id: addDto.userId},
+        // Check if invitee exists
+        const invitee = await this.prisma.user.findUnique({
+            where: { id: createDto.inviteeId },
         });
 
-        if (!userToAdd) {
+        if (!invitee) {
             throw new NotFoundException('User not found');
+        }
+
+        // Cannot invite yourself
+        if (userId === createDto.inviteeId) {
+            throw new BadRequestException('You cannot invite yourself');
         }
 
         // Check if user is already a member
@@ -490,7 +496,7 @@ export class TeamService {
             where: {
                 teamId_userId: {
                     teamId,
-                    userId: addDto.userId,
+                    userId: createDto.inviteeId,
                 },
             },
         });
@@ -499,26 +505,62 @@ export class TeamService {
             throw new ConflictException('User is already a member of this team');
         }
 
-        // Only owner can add other owners
-        if (addDto.role === TeamMemberRole.OWNER) {
+        // Check if there's already a pending invitation
+        const existingInvitation = await this.prisma.teamInvitation.findFirst({
+            where: {
+                teamId,
+                inviteeId: createDto.inviteeId,
+                status: TeamInvitationStatus.PENDING,
+            },
+        });
+
+        if (existingInvitation) {
+            throw new ConflictException('There is already a pending invitation for this user');
+        }
+
+        // Only owner can invite as owner
+        const role = createDto.role || TeamMemberRole.MEMBER;
+        if (role === TeamMemberRole.OWNER) {
             const team = await this.prisma.team.findUnique({
-                where: {id: teamId},
-                select: {ownerId: true},
+                where: { id: teamId },
+                select: { ownerId: true },
             });
 
             if (team?.ownerId !== userId) {
-                throw new ForbiddenException('Only the team owner can add other owners');
+                throw new ForbiddenException('Only the team owner can invite other owners');
             }
         }
 
-        const member = await this.prisma.teamMember.create({
+        // Create invitation (expires in 7 days)
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + 7);
+
+        const invitation = await this.prisma.teamInvitation.create({
             data: {
                 teamId,
-                userId: addDto.userId,
-                role: addDto.role,
+                inviterId: userId,
+                inviteeId: createDto.inviteeId,
+                role,
+                expiresAt,
             },
             include: {
-                user: {
+                team: {
+                    select: {
+                        id: true,
+                        name: true,
+                        displayName: true,
+                        logo: true,
+                    },
+                },
+                inviter: {
+                    select: {
+                        id: true,
+                        username: true,
+                        displayName: true,
+                        image: true,
+                    },
+                },
+                invitee: {
                     select: {
                         id: true,
                         username: true,
@@ -529,7 +571,225 @@ export class TeamService {
             },
         });
 
-        return member;
+        return invitation;
+    }
+
+    /**
+     * Get team invitations
+     */
+    async getTeamInvitations(userId: string, teamId: string, filterDto: FilterInvitationsDto) {
+        const canManageMembers = await this.checkManageMembersPermission(userId, teamId);
+        if (!canManageMembers) {
+            throw new ForbiddenException('You do not have permission to view team invitations');
+        }
+
+        const where: any = { teamId };
+        if (filterDto.status) {
+            where.status = filterDto.status;
+        }
+
+        const invitations = await this.prisma.teamInvitation.findMany({
+            where,
+            include: {
+                inviter: {
+                    select: {
+                        id: true,
+                        username: true,
+                        displayName: true,
+                        image: true,
+                    },
+                },
+                invitee: {
+                    select: {
+                        id: true,
+                        username: true,
+                        displayName: true,
+                        image: true,
+                    },
+                },
+            },
+            orderBy: { createdAt: 'desc' },
+        });
+
+        return invitations;
+    }
+
+    /**
+     * Get user's received invitations
+     */
+    async getUserInvitations(userId: string, filterDto: FilterInvitationsDto) {
+        const where: any = { inviteeId: userId };
+        if (filterDto.status) {
+            where.status = filterDto.status;
+        }
+
+        const invitations = await this.prisma.teamInvitation.findMany({
+            where,
+            include: {
+                team: {
+                    select: {
+                        id: true,
+                        name: true,
+                        displayName: true,
+                        logo: true,
+                    },
+                },
+                inviter: {
+                    select: {
+                        id: true,
+                        username: true,
+                        displayName: true,
+                        image: true,
+                    },
+                },
+            },
+            orderBy: { createdAt: 'desc' },
+        });
+
+        return invitations;
+    }
+
+    /**
+     * Respond to invitation (accept or decline)
+     */
+    async respondToInvitation(userId: string, invitationId: string, respondDto: RespondToInvitationDto) {
+        const invitation = await this.prisma.teamInvitation.findUnique({
+            where: { id: invitationId },
+            include: { team: true },
+        });
+
+        if (!invitation) {
+            throw new NotFoundException('Invitation not found');
+        }
+
+        if (invitation.inviteeId !== userId) {
+            throw new ForbiddenException('You can only respond to your own invitations');
+        }
+
+        if (invitation.status !== TeamInvitationStatus.PENDING) {
+            throw new BadRequestException('This invitation has already been responded to');
+        }
+
+        // Check if invitation has expired
+        if (invitation.expiresAt < new Date()) {
+            await this.prisma.teamInvitation.update({
+                where: { id: invitationId },
+                data: { status: TeamInvitationStatus.EXPIRED },
+            });
+            throw new BadRequestException('This invitation has expired');
+        }
+
+        // If accepting, add user as team member
+        if (respondDto.response === TeamInvitationStatus.ACCEPTED) {
+            // Check if user is already a member
+            const existingMember = await this.prisma.teamMember.findUnique({
+                where: {
+                    teamId_userId: {
+                        teamId: invitation.teamId,
+                        userId,
+                    },
+                },
+            });
+
+            if (existingMember) {
+                // Update invitation status anyway
+                await this.prisma.teamInvitation.update({
+                    where: { id: invitationId },
+                    data: { status: TeamInvitationStatus.ACCEPTED },
+                });
+                throw new ConflictException('You are already a member of this team');
+            }
+
+            // Create team member and update invitation in a transaction
+            const [updatedInvitation] = await this.prisma.$transaction([
+                this.prisma.teamInvitation.update({
+                    where: { id: invitationId },
+                    data: { status: TeamInvitationStatus.ACCEPTED },
+                    include: {
+                        team: {
+                            select: {
+                                id: true,
+                                name: true,
+                                displayName: true,
+                                logo: true,
+                            },
+                        },
+                        inviter: {
+                            select: {
+                                id: true,
+                                username: true,
+                                displayName: true,
+                                image: true,
+                            },
+                        },
+                    },
+                }),
+                this.prisma.teamMember.create({
+                    data: {
+                        teamId: invitation.teamId,
+                        userId,
+                        role: invitation.role,
+                    },
+                }),
+            ]);
+
+            return updatedInvitation;
+        } else {
+            // Decline invitation
+            const updatedInvitation = await this.prisma.teamInvitation.update({
+                where: { id: invitationId },
+                data: { status: TeamInvitationStatus.DECLINED },
+                include: {
+                    team: {
+                        select: {
+                            id: true,
+                            name: true,
+                            displayName: true,
+                            logo: true,
+                        },
+                    },
+                    inviter: {
+                        select: {
+                            id: true,
+                            username: true,
+                            displayName: true,
+                            image: true,
+                        },
+                    },
+                },
+            });
+
+            return updatedInvitation;
+        }
+    }
+
+    /**
+     * Cancel invitation
+     */
+    async cancelInvitation(userId: string, teamId: string, invitationId: string) {
+        const canManageMembers = await this.checkManageMembersPermission(userId, teamId);
+        if (!canManageMembers) {
+            throw new ForbiddenException('You do not have permission to cancel invitations');
+        }
+
+        const invitation = await this.prisma.teamInvitation.findUnique({
+            where: { id: invitationId },
+        });
+
+        if (!invitation || invitation.teamId !== teamId) {
+            throw new NotFoundException('Invitation not found');
+        }
+
+        if (invitation.status !== TeamInvitationStatus.PENDING) {
+            throw new BadRequestException('Only pending invitations can be cancelled');
+        }
+
+        await this.prisma.teamInvitation.update({
+            where: { id: invitationId },
+            data: { status: TeamInvitationStatus.CANCELLED },
+        });
+
+        return { message: 'Invitation cancelled successfully' };
     }
 
     /**
@@ -547,8 +807,8 @@ export class TeamService {
         }
 
         const member = await this.prisma.teamMember.findUnique({
-            where: {id: memberId},
-            include: {team: true},
+            where: { id: memberId },
+            include: { team: true },
         });
 
         if (!member || member.teamId !== teamId) {
@@ -558,8 +818,8 @@ export class TeamService {
         // Only owner can change owner role
         if (updateDto.role === TeamMemberRole.OWNER || member.role === TeamMemberRole.OWNER) {
             const team = await this.prisma.team.findUnique({
-                where: {id: teamId},
-                select: {ownerId: true},
+                where: { id: teamId },
+                select: { ownerId: true },
             });
 
             if (team?.ownerId !== userId) {
@@ -568,8 +828,8 @@ export class TeamService {
         }
 
         const updated = await this.prisma.teamMember.update({
-            where: {id: memberId},
-            data: {role: updateDto.role},
+            where: { id: memberId },
+            data: { role: updateDto.role },
             include: {
                 user: {
                     select: {
@@ -595,7 +855,7 @@ export class TeamService {
         }
 
         const member = await this.prisma.teamMember.findUnique({
-            where: {id: memberId},
+            where: { id: memberId },
         });
 
         if (!member || member.teamId !== teamId) {
@@ -608,10 +868,10 @@ export class TeamService {
         }
 
         await this.prisma.teamMember.delete({
-            where: {id: memberId},
+            where: { id: memberId },
         });
 
-        return {message: 'Member removed successfully'};
+        return { message: 'Member removed successfully' };
     }
 
     /**
@@ -638,10 +898,10 @@ export class TeamService {
         }
 
         await this.prisma.teamMember.delete({
-            where: {id: member.id},
+            where: { id: member.id },
         });
 
-        return {message: 'Left team successfully'};
+        return { message: 'Left team successfully' };
     }
 
     /**
@@ -649,7 +909,7 @@ export class TeamService {
      */
     async getUserTeams(userId: string) {
         const memberships = await this.prisma.teamMember.findMany({
-            where: {userId},
+            where: { userId },
             include: {
                 team: {
                     include: {
@@ -669,7 +929,7 @@ export class TeamService {
                     },
                 },
             },
-            orderBy: {joinedAt: 'desc'},
+            orderBy: { joinedAt: 'desc' },
         });
 
         return memberships.map((m) => ({

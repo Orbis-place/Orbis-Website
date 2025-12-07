@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Area, AreaChart, XAxis, YAxis } from 'recharts';
 import Image from 'next/image';
+import { OrbisConfirmDialog } from '@/components/OrbisDialog';
 
 interface ServerCategory {
   id: string;
@@ -60,6 +61,7 @@ export default function ServersPage() {
   const router = useRouter();
   const [servers, setServers] = useState<Server[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deletingServerId, setDeletingServerId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchServers();
@@ -82,20 +84,22 @@ export default function ServersPage() {
     }
   };
 
-  const handleDeleteServer = async (serverId: string) => {
-    if (!confirm('Are you sure you want to delete this server? This action cannot be undone.')) return;
+  const handleDeleteServer = async () => {
+    if (!deletingServerId) return;
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/servers/${serverId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/servers/${deletingServerId}`, {
         method: 'DELETE',
         credentials: 'include',
       });
 
       if (response.ok) {
-        setServers(servers.filter(server => server.id !== serverId));
+        setServers(servers.filter(server => server.id !== deletingServerId));
       }
     } catch (error) {
       console.error('Failed to delete server:', error);
+    } finally {
+      setDeletingServerId(null);
     }
   };
 
@@ -311,7 +315,7 @@ export default function ServersPage() {
                     <Icon icon="mdi:pencil" width="16" height="16" />
                     Edit
                   </Button>
-                  <Button size="sm" variant="destructive" className="font-nunito text-sm" onClick={() => handleDeleteServer(server.id)}>
+                  <Button size="sm" variant="destructive" className="font-nunito text-sm" onClick={() => setDeletingServerId(server.id)}>
                     <Icon icon="mdi:delete" width="16" height="16" />
                     Delete
                   </Button>
@@ -335,6 +339,21 @@ export default function ServersPage() {
           </div>
         )}
       </div>
+
+      {/* Delete Server Confirmation Dialog */}
+      <OrbisConfirmDialog
+        open={!!deletingServerId}
+        onOpenChange={(open) => !open && setDeletingServerId(null)}
+        title="Delete Server"
+        description="Are you sure you want to delete this server? This action cannot be undone."
+        confirmText="Delete Server"
+        cancelText="Cancel"
+        variant="destructive"
+        onConfirm={handleDeleteServer}
+        onCancel={() => setDeletingServerId(null)}
+      >
+        <></>
+      </OrbisConfirmDialog>
     </div>
   );
 }

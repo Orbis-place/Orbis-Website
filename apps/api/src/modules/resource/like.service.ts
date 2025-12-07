@@ -3,7 +3,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class LikeService {
-    constructor(private readonly prisma: PrismaService) {}
+    constructor(private readonly prisma: PrismaService) { }
 
     /**
      * Like a resource
@@ -19,7 +19,7 @@ export class LikeService {
         }
 
         // Check if already liked
-        const existingLike = await this.prisma.like.findUnique({
+        const existingLike = await this.prisma.resourceLike.findUnique({
             where: {
                 userId_resourceId: {
                     userId,
@@ -38,7 +38,7 @@ export class LikeService {
 
         // Create like and increment like count
         await this.prisma.$transaction([
-            this.prisma.like.create({
+            this.prisma.resourceLike.create({
                 data: {
                     userId,
                     resourceId,
@@ -74,7 +74,7 @@ export class LikeService {
         }
 
         // Check if liked
-        const existingLike = await this.prisma.like.findUnique({
+        const existingLike = await this.prisma.resourceLike.findUnique({
             where: {
                 userId_resourceId: {
                     userId,
@@ -93,7 +93,7 @@ export class LikeService {
 
         // Delete like and decrement like count
         await this.prisma.$transaction([
-            this.prisma.like.delete({
+            this.prisma.resourceLike.delete({
                 where: {
                     userId_resourceId: {
                         userId,
@@ -121,7 +121,7 @@ export class LikeService {
      * Check if user has liked a resource
      */
     async hasLiked(resourceId: string, userId: string) {
-        const like = await this.prisma.like.findUnique({
+        const like = await this.prisma.resourceLike.findUnique({
             where: {
                 userId_resourceId: {
                     userId,
@@ -139,7 +139,7 @@ export class LikeService {
      * Get users who liked a resource
      */
     async getLikes(resourceId: string) {
-        const likes = await this.prisma.like.findMany({
+        const likes = await this.prisma.resourceLike.findMany({
             where: { resourceId },
             include: {
                 user: {
