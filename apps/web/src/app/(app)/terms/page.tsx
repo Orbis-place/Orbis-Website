@@ -17,7 +17,7 @@ export default function TermsOfService() {
                         Terms of Service
                     </h1>
                     <p className="font-nunito text-base text-[#C7F4FA]/70">
-                        Last Updated: December 7, 2024
+                        Last Updated: December 7, 2025
                     </p>
                 </div>
 
