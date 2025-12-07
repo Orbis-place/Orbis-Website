@@ -5,19 +5,19 @@ import {
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+
 import { StorageService } from '../storage/storage.service';
 import { CreateTeamDto } from './dtos/create-team.dto';
 import { UpdateTeamDto } from './dtos/update-team.dto';
 import { FilterTeamsDto } from './dtos/filter-teams.dto';
 import { UpdateTeamMemberDto } from './dtos/manage-member.dto';
 import { CreateInvitationDto, RespondToInvitationDto, FilterInvitationsDto } from './dtos/invitation.dto';
-import { TeamInvitationStatus, TeamMemberRole } from '@repo/db';
+import { prisma, TeamInvitationStatus, TeamMemberRole } from '@repo/db';
 
 @Injectable()
 export class TeamService {
     constructor(
-        private readonly prisma: PrismaService,
+
         private readonly storage: StorageService,
     ) {
     }
@@ -27,7 +27,7 @@ export class TeamService {
      */
     async create(userId: string, createDto: CreateTeamDto) {
         // Check if team name is already taken
-        const existing = await this.prisma.team.findUnique({
+        const existing = await prisma.team.findUnique({
             where: { name: createDto.name.toLowerCase() },
         });
 
@@ -36,7 +36,7 @@ export class TeamService {
         }
 
         // Create team with owner as first member
-        const team = await this.prisma.team.create({
+        const team = await prisma.team.create({
             data: {
                 name: createDto.name.toLowerCase(),
                 displayName: createDto.displayName,
@@ -97,7 +97,7 @@ export class TeamService {
         const skip = (page - 1) * limit;
 
         const [teams, total] = await Promise.all([
-            this.prisma.team.findMany({
+            prisma.team.findMany({
                 where,
                 skip,
                 take: limit,
@@ -118,7 +118,7 @@ export class TeamService {
                     },
                 },
             }),
-            this.prisma.team.count({ where }),
+            prisma.team.count({ where }),
         ]);
 
         return {
@@ -138,7 +138,7 @@ export class TeamService {
      * Find team by name
      */
     async findByName(name: string) {
-        const team = await this.prisma.team.findUnique({
+        const team = await prisma.team.findUnique({
             where: { name: name.toLowerCase() },
             include: {
                 owner: {
@@ -198,7 +198,7 @@ export class TeamService {
      * Find team by ID (internal use)
      */
     async findById(teamId: string) {
-        const team = await this.prisma.team.findUnique({
+        const team = await prisma.team.findUnique({
             where: { id: teamId },
             include: {
                 owner: true,
@@ -221,7 +221,7 @@ export class TeamService {
      * Update team
      */
     async update(userId: string, teamId: string, updateDto: UpdateTeamDto) {
-        const team = await this.prisma.team.findUnique({
+        const team = await prisma.team.findUnique({
             where: { id: teamId },
             select: { ownerId: true },
         });
@@ -243,7 +243,7 @@ export class TeamService {
         if (updateDto.websiteUrl !== undefined) updateData.website = updateDto.websiteUrl;
         if (updateDto.discordUrl !== undefined) updateData.discordUrl = updateDto.discordUrl;
 
-        const updated = await this.prisma.team.update({
+        const updated = await prisma.team.update({
             where: { id: teamId },
             data: updateData,
             include: {
@@ -277,7 +277,7 @@ export class TeamService {
      * Delete team
      */
     async delete(userId: string, teamId: string) {
-        const team = await this.prisma.team.findUnique({
+        const team = await prisma.team.findUnique({
             where: { id: teamId },
             select: { ownerId: true, logo: true, banner: true },
         });
@@ -300,7 +300,7 @@ export class TeamService {
             });
         }
 
-        await this.prisma.team.delete({
+        await prisma.team.delete({
             where: { id: teamId },
         });
 
@@ -327,7 +327,7 @@ export class TeamService {
             throw new BadRequestException('File too large. Maximum size is 2MB');
         }
 
-        const team = await this.prisma.team.findUnique({
+        const team = await prisma.team.findUnique({
             where: { id: teamId },
             select: { logo: true },
         });
@@ -346,7 +346,7 @@ export class TeamService {
             `teams/${teamId}/logo`,
         );
 
-        const updated = await this.prisma.team.update({
+        const updated = await prisma.team.update({
             where: { id: teamId },
             data: { logo: logoUrl },
         });
@@ -379,7 +379,7 @@ export class TeamService {
             throw new BadRequestException('File too large. Maximum size is 5MB');
         }
 
-        const team = await this.prisma.team.findUnique({
+        const team = await prisma.team.findUnique({
             where: { id: teamId },
             select: { banner: true },
         });
@@ -398,7 +398,7 @@ export class TeamService {
             `teams/${teamId}/banner`,
         );
 
-        const updated = await this.prisma.team.update({
+        const updated = await prisma.team.update({
             where: { id: teamId },
             data: { banner: bannerUrl },
         });
@@ -415,7 +415,7 @@ export class TeamService {
      * Delete team logo
      */
     async deleteLogo(userId: string, teamId: string) {
-        const team = await this.prisma.team.findUnique({
+        const team = await prisma.team.findUnique({
             where: { id: teamId },
             select: { logo: true },
         });
@@ -433,7 +433,7 @@ export class TeamService {
             await this.storage.deleteFile(team.logo);
         }
 
-        return this.prisma.team.update({
+        return prisma.team.update({
             where: { id: teamId },
             data: { logo: null },
         });
@@ -443,7 +443,7 @@ export class TeamService {
      * Delete team banner
      */
     async deleteBanner(userId: string, teamId: string) {
-        const team = await this.prisma.team.findUnique({
+        const team = await prisma.team.findUnique({
             where: { id: teamId },
             select: { banner: true },
         });
@@ -461,7 +461,7 @@ export class TeamService {
             await this.storage.deleteFile(team.banner);
         }
 
-        return this.prisma.team.update({
+        return prisma.team.update({
             where: { id: teamId },
             data: { banner: null },
         });
@@ -478,7 +478,7 @@ export class TeamService {
         }
 
         // Check if invitee exists
-        const invitee = await this.prisma.user.findUnique({
+        const invitee = await prisma.user.findUnique({
             where: { id: createDto.inviteeId },
         });
 
@@ -492,7 +492,7 @@ export class TeamService {
         }
 
         // Check if user is already a member
-        const existingMember = await this.prisma.teamMember.findUnique({
+        const existingMember = await prisma.teamMember.findUnique({
             where: {
                 teamId_userId: {
                     teamId,
@@ -506,7 +506,7 @@ export class TeamService {
         }
 
         // Check if there's already a pending invitation
-        const existingInvitation = await this.prisma.teamInvitation.findFirst({
+        const existingInvitation = await prisma.teamInvitation.findFirst({
             where: {
                 teamId,
                 inviteeId: createDto.inviteeId,
@@ -521,7 +521,7 @@ export class TeamService {
         // Only owner can invite as owner
         const role = createDto.role || TeamMemberRole.MEMBER;
         if (role === TeamMemberRole.OWNER) {
-            const team = await this.prisma.team.findUnique({
+            const team = await prisma.team.findUnique({
                 where: { id: teamId },
                 select: { ownerId: true },
             });
@@ -535,7 +535,7 @@ export class TeamService {
         const expiresAt = new Date();
         expiresAt.setDate(expiresAt.getDate() + 7);
 
-        const invitation = await this.prisma.teamInvitation.create({
+        const invitation = await prisma.teamInvitation.create({
             data: {
                 teamId,
                 inviterId: userId,
@@ -588,7 +588,7 @@ export class TeamService {
             where.status = filterDto.status;
         }
 
-        const invitations = await this.prisma.teamInvitation.findMany({
+        const invitations = await prisma.teamInvitation.findMany({
             where,
             include: {
                 inviter: {
@@ -623,7 +623,7 @@ export class TeamService {
             where.status = filterDto.status;
         }
 
-        const invitations = await this.prisma.teamInvitation.findMany({
+        const invitations = await prisma.teamInvitation.findMany({
             where,
             include: {
                 team: {
@@ -653,7 +653,7 @@ export class TeamService {
      * Respond to invitation (accept or decline)
      */
     async respondToInvitation(userId: string, invitationId: string, respondDto: RespondToInvitationDto) {
-        const invitation = await this.prisma.teamInvitation.findUnique({
+        const invitation = await prisma.teamInvitation.findUnique({
             where: { id: invitationId },
             include: { team: true },
         });
@@ -672,7 +672,7 @@ export class TeamService {
 
         // Check if invitation has expired
         if (invitation.expiresAt < new Date()) {
-            await this.prisma.teamInvitation.update({
+            await prisma.teamInvitation.update({
                 where: { id: invitationId },
                 data: { status: TeamInvitationStatus.EXPIRED },
             });
@@ -682,7 +682,7 @@ export class TeamService {
         // If accepting, add user as team member
         if (respondDto.response === TeamInvitationStatus.ACCEPTED) {
             // Check if user is already a member
-            const existingMember = await this.prisma.teamMember.findUnique({
+            const existingMember = await prisma.teamMember.findUnique({
                 where: {
                     teamId_userId: {
                         teamId: invitation.teamId,
@@ -693,7 +693,7 @@ export class TeamService {
 
             if (existingMember) {
                 // Update invitation status anyway
-                await this.prisma.teamInvitation.update({
+                await prisma.teamInvitation.update({
                     where: { id: invitationId },
                     data: { status: TeamInvitationStatus.ACCEPTED },
                 });
@@ -701,8 +701,8 @@ export class TeamService {
             }
 
             // Create team member and update invitation in a transaction
-            const [updatedInvitation] = await this.prisma.$transaction([
-                this.prisma.teamInvitation.update({
+            const [updatedInvitation] = await prisma.$transaction([
+                prisma.teamInvitation.update({
                     where: { id: invitationId },
                     data: { status: TeamInvitationStatus.ACCEPTED },
                     include: {
@@ -724,7 +724,7 @@ export class TeamService {
                         },
                     },
                 }),
-                this.prisma.teamMember.create({
+                prisma.teamMember.create({
                     data: {
                         teamId: invitation.teamId,
                         userId,
@@ -736,7 +736,7 @@ export class TeamService {
             return updatedInvitation;
         } else {
             // Decline invitation
-            const updatedInvitation = await this.prisma.teamInvitation.update({
+            const updatedInvitation = await prisma.teamInvitation.update({
                 where: { id: invitationId },
                 data: { status: TeamInvitationStatus.DECLINED },
                 include: {
@@ -772,7 +772,7 @@ export class TeamService {
             throw new ForbiddenException('You do not have permission to cancel invitations');
         }
 
-        const invitation = await this.prisma.teamInvitation.findUnique({
+        const invitation = await prisma.teamInvitation.findUnique({
             where: { id: invitationId },
         });
 
@@ -784,7 +784,7 @@ export class TeamService {
             throw new BadRequestException('Only pending invitations can be cancelled');
         }
 
-        await this.prisma.teamInvitation.update({
+        await prisma.teamInvitation.update({
             where: { id: invitationId },
             data: { status: TeamInvitationStatus.CANCELLED },
         });
@@ -806,7 +806,7 @@ export class TeamService {
             throw new ForbiddenException('You do not have permission to update members');
         }
 
-        const member = await this.prisma.teamMember.findUnique({
+        const member = await prisma.teamMember.findUnique({
             where: { id: memberId },
             include: { team: true },
         });
@@ -817,7 +817,7 @@ export class TeamService {
 
         // Only owner can change owner role
         if (updateDto.role === TeamMemberRole.OWNER || member.role === TeamMemberRole.OWNER) {
-            const team = await this.prisma.team.findUnique({
+            const team = await prisma.team.findUnique({
                 where: { id: teamId },
                 select: { ownerId: true },
             });
@@ -827,7 +827,7 @@ export class TeamService {
             }
         }
 
-        const updated = await this.prisma.teamMember.update({
+        const updated = await prisma.teamMember.update({
             where: { id: memberId },
             data: { role: updateDto.role },
             include: {
@@ -854,7 +854,7 @@ export class TeamService {
             throw new ForbiddenException('You do not have permission to remove members');
         }
 
-        const member = await this.prisma.teamMember.findUnique({
+        const member = await prisma.teamMember.findUnique({
             where: { id: memberId },
         });
 
@@ -867,7 +867,7 @@ export class TeamService {
             throw new ForbiddenException('Cannot remove the team owner');
         }
 
-        await this.prisma.teamMember.delete({
+        await prisma.teamMember.delete({
             where: { id: memberId },
         });
 
@@ -878,7 +878,7 @@ export class TeamService {
      * Leave team
      */
     async leaveTeam(userId: string, teamId: string) {
-        const member = await this.prisma.teamMember.findUnique({
+        const member = await prisma.teamMember.findUnique({
             where: {
                 teamId_userId: {
                     teamId,
@@ -897,7 +897,7 @@ export class TeamService {
             );
         }
 
-        await this.prisma.teamMember.delete({
+        await prisma.teamMember.delete({
             where: { id: member.id },
         });
 
@@ -908,7 +908,7 @@ export class TeamService {
      * Get user's teams
      */
     async getUserTeams(userId: string) {
-        const memberships = await this.prisma.teamMember.findMany({
+        const memberships = await prisma.teamMember.findMany({
             where: { userId },
             include: {
                 team: {
@@ -943,7 +943,7 @@ export class TeamService {
      * Check if user has edit permission
      */
     private async checkEditPermission(userId: string, teamId: string): Promise<boolean> {
-        const member = await this.prisma.teamMember.findUnique({
+        const member = await prisma.teamMember.findUnique({
             where: {
                 teamId_userId: {
                     teamId,
@@ -963,7 +963,7 @@ export class TeamService {
      * Check if user can manage members
      */
     private async checkManageMembersPermission(userId: string, teamId: string): Promise<boolean> {
-        const member = await this.prisma.teamMember.findUnique({
+        const member = await prisma.teamMember.findUnique({
             where: {
                 teamId_userId: {
                     teamId,

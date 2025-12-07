@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { CreateGalleryImageDto, UpdateGalleryImageDto, ReorderGalleryImagesDto } from './dtos/gallery-image.dto';
 
+import { CreateGalleryImageDto, UpdateGalleryImageDto, ReorderGalleryImagesDto } from './dtos/gallery-image.dto';
+import { prisma } from '@repo/db';
 @Injectable()
 export class ResourceGalleryImageService {
-    constructor(private readonly prisma: PrismaService) {}
+    constructor() { }
 
     /**
      * Create a new gallery image for a resource
@@ -14,7 +14,7 @@ export class ResourceGalleryImageService {
         const resource = await this.verifyResourceOwnership(resourceId, userId);
 
         // Create gallery image
-        const galleryImage = await this.prisma.resourceGalleryImage.create({
+        const galleryImage = await prisma.resourceGalleryImage.create({
             data: {
                 resourceId,
                 url: createDto.url,
@@ -38,7 +38,7 @@ export class ResourceGalleryImageService {
      */
     async findAll(resourceId: string) {
         // Verify resource exists
-        const resource = await this.prisma.resource.findUnique({
+        const resource = await prisma.resource.findUnique({
             where: { id: resourceId },
         });
 
@@ -46,7 +46,7 @@ export class ResourceGalleryImageService {
             throw new NotFoundException('Resource not found');
         }
 
-        const galleryImages = await this.prisma.resourceGalleryImage.findMany({
+        const galleryImages = await prisma.resourceGalleryImage.findMany({
             where: { resourceId },
             orderBy: { order: 'asc' },
         });
@@ -61,7 +61,7 @@ export class ResourceGalleryImageService {
      * Get a single gallery image by ID
      */
     async findOne(resourceId: string, imageId: string) {
-        const galleryImage = await this.prisma.resourceGalleryImage.findFirst({
+        const galleryImage = await prisma.resourceGalleryImage.findFirst({
             where: {
                 id: imageId,
                 resourceId,
@@ -85,7 +85,7 @@ export class ResourceGalleryImageService {
         await this.verifyResourceOwnership(resourceId, userId);
 
         // Verify gallery image exists and belongs to the resource
-        const existingImage = await this.prisma.resourceGalleryImage.findFirst({
+        const existingImage = await prisma.resourceGalleryImage.findFirst({
             where: {
                 id: imageId,
                 resourceId,
@@ -97,7 +97,7 @@ export class ResourceGalleryImageService {
         }
 
         // Update gallery image
-        const galleryImage = await this.prisma.resourceGalleryImage.update({
+        const galleryImage = await prisma.resourceGalleryImage.update({
             where: { id: imageId },
             data: {
                 caption: updateDto.caption,
@@ -121,7 +121,7 @@ export class ResourceGalleryImageService {
         await this.verifyResourceOwnership(resourceId, userId);
 
         // Verify gallery image exists and belongs to the resource
-        const existingImage = await this.prisma.resourceGalleryImage.findFirst({
+        const existingImage = await prisma.resourceGalleryImage.findFirst({
             where: {
                 id: imageId,
                 resourceId,
@@ -133,7 +133,7 @@ export class ResourceGalleryImageService {
         }
 
         // Delete gallery image
-        await this.prisma.resourceGalleryImage.delete({
+        await prisma.resourceGalleryImage.delete({
             where: { id: imageId },
         });
 
@@ -150,7 +150,7 @@ export class ResourceGalleryImageService {
         await this.verifyResourceOwnership(resourceId, userId);
 
         // Verify all image IDs belong to this resource
-        const images = await this.prisma.resourceGalleryImage.findMany({
+        const images = await prisma.resourceGalleryImage.findMany({
             where: {
                 id: { in: reorderDto.imageIds },
                 resourceId,
@@ -162,16 +162,16 @@ export class ResourceGalleryImageService {
         }
 
         // Update order for each image
-        await this.prisma.$transaction(
+        await prisma.$transaction(
             reorderDto.imageIds.map((imageId, index) =>
-                this.prisma.resourceGalleryImage.update({
+                prisma.resourceGalleryImage.update({
                     where: { id: imageId },
                     data: { order: index },
                 })
             )
         );
 
-        const updatedImages = await this.prisma.resourceGalleryImage.findMany({
+        const updatedImages = await prisma.resourceGalleryImage.findMany({
             where: { resourceId },
             orderBy: { order: 'asc' },
         });
@@ -186,7 +186,7 @@ export class ResourceGalleryImageService {
      * Verify resource exists and user has ownership
      */
     private async verifyResourceOwnership(resourceId: string, userId: string) {
-        const resource = await this.prisma.resource.findUnique({
+        const resource = await prisma.resource.findUnique({
             where: { id: resourceId },
         });
 

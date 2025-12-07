@@ -8,7 +8,7 @@ const nextConfig = {
         hostname: '*.orbis.place',
         port: '',
         pathname: '/**',
-      }
+      },
       {
         protocol: 'https',
         hostname: 'avatars.githubusercontent.com',

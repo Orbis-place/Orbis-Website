@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { ResourceType } from '@repo/db';
+
+import { prisma, ResourceType } from '@repo/db';
 
 @Injectable()
 export class ResourceTagService {
-    constructor(private readonly prisma: PrismaService) { }
+    constructor() { }
 
     /**
      * Get all tags with optional search and categorization
@@ -19,7 +19,7 @@ export class ResourceTagService {
             ];
         }
 
-        return this.prisma.resourceTag.findMany({
+        return prisma.resourceTag.findMany({
             where,
             take: limit,
             orderBy: [
@@ -38,7 +38,7 @@ export class ResourceTagService {
     async searchTags(query: string, limit = 10) {
         if (!query || query.trim().length === 0) {
             // Return popular tags if no query
-            return this.prisma.resourceTag.findMany({
+            return prisma.resourceTag.findMany({
                 take: limit,
                 orderBy: [
                     { usageCount: 'desc' },
@@ -47,7 +47,7 @@ export class ResourceTagService {
             });
         }
 
-        return this.prisma.resourceTag.findMany({
+        return prisma.resourceTag.findMany({
             where: {
                 OR: [
                     { name: { contains: query, mode: 'insensitive' } },
@@ -66,7 +66,7 @@ export class ResourceTagService {
      * Get popular tags for a specific resource type
      */
     async getPopularTagsForType(resourceType: ResourceType, limit = 20) {
-        const tagUsages = await this.prisma.resourceTagUsageByType.findMany({
+        const tagUsages = await prisma.resourceTagUsageByType.findMany({
             where: { resourceType },
             take: limit,
             orderBy: {
@@ -87,7 +87,7 @@ export class ResourceTagService {
      * Get tag by ID
      */
     async getTagById(tagId: string) {
-        return this.prisma.resourceTag.findUnique({
+        return prisma.resourceTag.findUnique({
             where: { id: tagId },
             include: {
                 usageByType: true,
@@ -99,7 +99,7 @@ export class ResourceTagService {
      * Get tag by slug
      */
     async getTagBySlug(slug: string) {
-        return this.prisma.resourceTag.findUnique({
+        return prisma.resourceTag.findUnique({
             where: { slug },
             include: {
                 usageByType: true,

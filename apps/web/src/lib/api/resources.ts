@@ -35,6 +35,13 @@ export interface FetchResourcesParams {
 }
 
 // API response types
+export interface ResourceCategory {
+    id: string;
+    name: string;
+    slug: string;
+    icon?: string;
+}
+
 export interface ResourceTag {
     id: string;
     name: string;
@@ -85,6 +92,9 @@ export interface Resource {
     latestVersion?: ResourceVersion;
     tags: Array<{
         tag: ResourceTag;
+    }>;
+    categories: Array<{
+        category: ResourceCategory;
     }>;
     _count: {
         versions: number;

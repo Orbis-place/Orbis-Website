@@ -16,11 +16,10 @@ import { FavoriteService } from './favorite.service';
 import { UserFavoritesController } from './user-favorites.controller';
 import { VersionController } from './version.controller';
 import { VersionService } from './version.service';
-import { PrismaModule } from '../../prisma/prisma.module';
 import { StorageModule } from '../storage/storage.module';
 
 @Module({
-    imports: [PrismaModule, StorageModule],
+    imports: [StorageModule],
     controllers: [
         ResourceController,
         ResourceTagController,

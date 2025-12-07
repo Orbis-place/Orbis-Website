@@ -1,16 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+import { prisma } from '@repo/db';
 
 @Injectable()
 export class FavoriteService {
-    constructor(private readonly prisma: PrismaService) { }
+    constructor() { }
 
     /**
      * Add resource to favorites
      */
     async favoriteResource(resourceId: string, userId: string) {
         // Check if resource exists
-        const resource = await this.prisma.resource.findUnique({
+        const resource = await prisma.resource.findUnique({
             where: { id: resourceId },
         });
 
@@ -19,7 +19,7 @@ export class FavoriteService {
         }
 
         // Check if already favorited
-        const existingFavorite = await this.prisma.resourceFavorite.findUnique({
+        const existingFavorite = await prisma.resourceFavorite.findUnique({
             where: {
                 userId_resourceId: {
                     userId,
@@ -37,14 +37,14 @@ export class FavoriteService {
         }
 
         // Create favorite and increment favorite count
-        await this.prisma.$transaction([
-            this.prisma.resourceFavorite.create({
+        await prisma.$transaction([
+            prisma.resourceFavorite.create({
                 data: {
                     userId,
                     resourceId,
                 },
             }),
-            this.prisma.resource.update({
+            prisma.resource.update({
                 where: { id: resourceId },
                 data: {
                     favoriteCount: {
@@ -65,7 +65,7 @@ export class FavoriteService {
      */
     async unfavoriteResource(resourceId: string, userId: string) {
         // Check if resource exists
-        const resource = await this.prisma.resource.findUnique({
+        const resource = await prisma.resource.findUnique({
             where: { id: resourceId },
         });
 
@@ -74,7 +74,7 @@ export class FavoriteService {
         }
 
         // Check if favorited
-        const existingFavorite = await this.prisma.resourceFavorite.findUnique({
+        const existingFavorite = await prisma.resourceFavorite.findUnique({
             where: {
                 userId_resourceId: {
                     userId,
@@ -92,8 +92,8 @@ export class FavoriteService {
         }
 
         // Delete favorite and decrement favorite count
-        await this.prisma.$transaction([
-            this.prisma.resourceFavorite.delete({
+        await prisma.$transaction([
+            prisma.resourceFavorite.delete({
                 where: {
                     userId_resourceId: {
                         userId,
@@ -101,7 +101,7 @@ export class FavoriteService {
                     },
                 },
             }),
-            this.prisma.resource.update({
+            prisma.resource.update({
                 where: { id: resourceId },
                 data: {
                     favoriteCount: {
@@ -121,7 +121,7 @@ export class FavoriteService {
      * Check if user has favorited a resource
      */
     async hasFavorited(resourceId: string, userId: string) {
-        const favorite = await this.prisma.resourceFavorite.findUnique({
+        const favorite = await prisma.resourceFavorite.findUnique({
             where: {
                 userId_resourceId: {
                     userId,
@@ -139,7 +139,7 @@ export class FavoriteService {
      * Get user's favorites
      */
     async getUserFavorites(userId: string) {
-        const favorites = await this.prisma.resourceFavorite.findMany({
+        const favorites = await prisma.resourceFavorite.findMany({
             where: { userId },
             include: {
                 resource: {

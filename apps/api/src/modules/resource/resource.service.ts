@@ -1,8 +1,8 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+
 import { CreateResourceDto } from './dtos/create-resource.dto';
 import { LicenseType, UpdateResourceDto } from './dtos/update-resource.dto';
-import { ResourceStatus, ResourceType, UserRole } from '@repo/db';
+import { prisma, ResourceStatus, ResourceType, UserRole } from '@repo/db';
 import { PaginationDto, PaginatedResponse } from '../../common/dtos/pagination.dto';
 import { FilterResourcesDto, ResourceSortOption } from './dtos/filter-resources.dto';
 
@@ -13,7 +13,7 @@ import { StorageService } from '../storage/storage.service';
 @Injectable()
 export class ResourceService {
     constructor(
-        private readonly prisma: PrismaService,
+
         private readonly storage: StorageService,
         private descriptionImageService?: ResourceDescriptionImageService,
     ) { }
@@ -26,7 +26,7 @@ export class ResourceService {
         const slug = await this.generateUniqueSlug(createDto.name);
 
         // Create resource
-        const resource = await this.prisma.resource.create({
+        const resource = await prisma.resource.create({
             data: {
                 name: createDto.name,
                 slug,
@@ -52,7 +52,7 @@ export class ResourceService {
         });
 
         // Create status history entry
-        await this.prisma.resourceStatusHistory.create({
+        await prisma.resourceStatusHistory.create({
             data: {
                 resourceId: resource.id,
                 fromStatus: ResourceStatus.DRAFT,
@@ -72,7 +72,7 @@ export class ResourceService {
      * Get resource by ID
      */
     async getById(resourceId: string) {
-        const resource = await this.prisma.resource.findUnique({
+        const resource = await prisma.resource.findUnique({
             where: { id: resourceId },
             include: {
                 owner: {
@@ -162,7 +162,7 @@ export class ResourceService {
      * Get resource by slug
      */
     async getBySlug(slug: string) {
-        const resource = await this.prisma.resource.findUnique({
+        const resource = await prisma.resource.findUnique({
             where: { slug },
             include: {
                 owner: {
@@ -253,7 +253,7 @@ export class ResourceService {
      */
     async update(resourceId: string, userId: string, updateDto: UpdateResourceDto) {
         // Check if resource exists
-        const resource = await this.prisma.resource.findUnique({
+        const resource = await prisma.resource.findUnique({
             where: { id: resourceId },
             include: {
                 tags: {
@@ -308,7 +308,7 @@ export class ResourceService {
         if (updateDto.licenseUrl !== undefined) updateData.licenseUrl = updateDto.licenseUrl;
 
         // Use transaction to handle all updates atomically
-        const updatedResource = await this.prisma.$transaction(async (tx) => {
+        const updatedResource = await prisma.$transaction(async (tx) => {
             // Update basic resource fields
             const updated = await tx.resource.update({
                 where: { id: resourceId },
@@ -554,7 +554,7 @@ export class ResourceService {
             throw new BadRequestException('File too large. Maximum size is 5MB');
         }
 
-        const resource = await this.prisma.resource.findUnique({
+        const resource = await prisma.resource.findUnique({
             where: { id: resourceId },
             select: { iconUrl: true, ownerId: true },
         });
@@ -572,7 +572,7 @@ export class ResourceService {
             `resources/${resourceId}/icon`,
         );
 
-        const updated = await this.prisma.resource.update({
+        const updated = await prisma.resource.update({
             where: { id: resourceId },
             data: { iconUrl: iconUrl },
             include: {
@@ -618,7 +618,7 @@ export class ResourceService {
             throw new BadRequestException('File too large. Maximum size is 5MB');
         }
 
-        const resource = await this.prisma.resource.findUnique({
+        const resource = await prisma.resource.findUnique({
             where: { id: resourceId },
             select: { bannerUrl: true, ownerId: true },
         });
@@ -636,7 +636,7 @@ export class ResourceService {
             `resources/${resourceId}/banner`,
         );
 
-        const updated = await this.prisma.resource.update({
+        const updated = await prisma.resource.update({
             where: { id: resourceId },
             data: { bannerUrl: bannerUrl },
             include: {
@@ -693,10 +693,10 @@ export class ResourceService {
         }
 
         // Get total count
-        const total = await this.prisma.resource.count({ where });
+        const total = await prisma.resource.count({ where });
 
         // Get resources
-        const resources = await this.prisma.resource.findMany({
+        const resources = await prisma.resource.findMany({
             where,
             skip,
             take: limit,
@@ -767,10 +767,10 @@ export class ResourceService {
         }
 
         // Get total count
-        const total = await this.prisma.resource.count({ where });
+        const total = await prisma.resource.count({ where });
 
         // Get resources
-        const resources = await this.prisma.resource.findMany({
+        const resources = await prisma.resource.findMany({
             where,
             skip,
             take: limit,
@@ -834,7 +834,7 @@ export class ResourceService {
         let counter = 1;
 
         while (true) {
-            const existing = await this.prisma.resource.findUnique({
+            const existing = await prisma.resource.findUnique({
                 where: { slug },
             });
 
@@ -994,10 +994,10 @@ export class ResourceService {
         }
 
         // Get total count
-        const total = await this.prisma.resource.count({ where });
+        const total = await prisma.resource.count({ where });
 
         // Get resources
-        const resources = await this.prisma.resource.findMany({
+        const resources = await prisma.resource.findMany({
             where,
             skip,
             take: limit,
@@ -1065,9 +1065,9 @@ export class ResourceService {
             status: ResourceStatus.PENDING,
         };
 
-        const total = await this.prisma.resource.count({ where });
+        const total = await prisma.resource.count({ where });
 
-        const resources = await this.prisma.resource.findMany({
+        const resources = await prisma.resource.findMany({
             where,
             skip,
             take: limit,
@@ -1132,7 +1132,7 @@ export class ResourceService {
         await this.checkModeratorPermission(moderatorId);
 
         // Get resource
-        const resource = await this.prisma.resource.findUnique({
+        const resource = await prisma.resource.findUnique({
             where: { id: resourceId },
             include: {
                 owner: {
@@ -1164,7 +1164,7 @@ export class ResourceService {
         const oldStatus = resource.status;
 
         // Update resource in transaction
-        const updatedResource = await this.prisma.$transaction(async (tx) => {
+        const updatedResource = await prisma.$transaction(async (tx) => {
             // Update resource
             const updated = await tx.resource.update({
                 where: { id: resourceId },
@@ -1234,9 +1234,9 @@ export class ResourceService {
 
         const where = { status };
 
-        const total = await this.prisma.resource.count({ where });
+        const total = await prisma.resource.count({ where });
 
-        const resources = await this.prisma.resource.findMany({
+        const resources = await prisma.resource.findMany({
             where,
             skip,
             take: limit,
@@ -1280,7 +1280,7 @@ export class ResourceService {
         // Check if user is moderator or higher
         await this.checkModeratorPermission(moderatorId);
 
-        const resource = await this.prisma.resource.findUnique({
+        const resource = await prisma.resource.findUnique({
             where: { id: resourceId },
             include: {
                 owner: {
@@ -1332,7 +1332,7 @@ export class ResourceService {
      * Check if user has moderator permission
      */
     private async checkModeratorPermission(userId: string) {
-        const user = await this.prisma.user.findUnique({
+        const user = await prisma.user.findUnique({
             where: { id: userId },
             select: { role: true },
         });
@@ -1394,7 +1394,7 @@ export class ResourceService {
      * Get popular tags for a specific resource type
      */
     async getPopularTagsForType(resourceType: ResourceType, limit = 20) {
-        return this.prisma.resourceTagUsageByType.findMany({
+        return prisma.resourceTagUsageByType.findMany({
             where: { resourceType },
             orderBy: { usageCount: 'desc' },
             take: limit,
@@ -1414,7 +1414,7 @@ export class ResourceService {
             ];
         }
 
-        return this.prisma.resourceTag.findMany({
+        return prisma.resourceTag.findMany({
             where,
             take: limit,
             orderBy: [
@@ -1445,7 +1445,7 @@ export class ResourceService {
             ];
         }
 
-        return this.prisma.resourceCategory.findMany({
+        return prisma.resourceCategory.findMany({
             where,
             orderBy: { usageCount: 'desc' }, // Order by usage count for better UX
             select: {
@@ -1466,7 +1466,7 @@ export class ResourceService {
      * Get all available Hytale versions
      */
     async getHytaleVersions() {
-        const versions = await this.prisma.hytaleVersion.findMany({
+        const versions = await prisma.hytaleVersion.findMany({
             select: {
                 hytaleVersion: true,
             },

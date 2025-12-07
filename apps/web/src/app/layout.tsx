@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import { Nunito } from 'next/font/google';
-import Navbar from '../components/Navbar';
 import './globals.css';
 import { headers } from "next/headers";
 import { SessionProvider } from "@/components/providers/SessionProvider";
@@ -85,13 +84,11 @@ async function getSessionFromBackend() {
         });
 
         if (!res.ok) {
-            console.error('Failed to fetch session, status:', res.status);
             return null;
         }
 
         return await res.json();
     } catch (error) {
-        console.error('Failed to fetch session:', error);
         return null;
     }
 }
@@ -103,7 +100,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <html lang="en">
             <body className={`${hebden.variable} ${nunito.variable}`}>
                 <SessionProvider initialSession={session}>
-                    <Navbar session={session} />
                     {children}
                 </SessionProvider>
                 <Toaster />

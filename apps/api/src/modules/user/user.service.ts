@@ -1,19 +1,19 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { UpdateProfileDto } from "./dtos/update-profile.dto";
-import { PrismaService } from "../../prisma/prisma.service";
 import { StorageService } from "../storage/storage.service";
 import { SearchUsersDto } from "./dtos/search-users.dto";
+import { prisma } from '@repo/db';
 
 @Injectable()
 export class UserService {
     constructor(
-        private readonly prisma: PrismaService,
+
         private readonly storage: StorageService,
     ) {
     }
 
     async findById(userId: string) {
-        return this.prisma.user.findUnique({
+        return prisma.user.findUnique({
             where: { id: userId },
             select: {
                 id: true,
@@ -72,7 +72,7 @@ export class UserService {
 
     async updateProfile(userId: string, updateDto: UpdateProfileDto) {
         try {
-            return await this.prisma.user.update({
+            return await prisma.user.update({
                 where: { id: userId },
                 data: updateDto,
             });
@@ -105,7 +105,7 @@ export class UserService {
             throw new BadRequestException('File too large. Maximum size is 5MB');
         }
 
-        const user = await this.prisma.user.findUnique({
+        const user = await prisma.user.findUnique({
             where: { id: userId },
             select: { image: true },
         });
@@ -115,7 +115,7 @@ export class UserService {
             `users/${userId}/profile`,
         );
 
-        const updatedUser = await this.prisma.user.update({
+        const updatedUser = await prisma.user.update({
             where: { id: userId },
             data: { image: imageUrl },
         });
@@ -129,7 +129,7 @@ export class UserService {
     }
 
     async deleteProfileImage(userId: string) {
-        const user = await this.prisma.user.findUnique({
+        const user = await prisma.user.findUnique({
             where: { id: userId },
             select: { image: true },
         });
@@ -138,7 +138,7 @@ export class UserService {
             await this.storage.deleteFile(user.image);
         }
 
-        return this.prisma.user.update({
+        return prisma.user.update({
             where: { id: userId },
             data: { image: null },
         });
@@ -160,7 +160,7 @@ export class UserService {
             throw new BadRequestException('File too large. Maximum size is 10MB');
         }
 
-        const user = await this.prisma.user.findUnique({
+        const user = await prisma.user.findUnique({
             where: { id: userId },
             select: { banner: true },
         });
@@ -170,7 +170,7 @@ export class UserService {
             `users/${userId}/banner`,
         );
 
-        const updatedUser = await this.prisma.user.update({
+        const updatedUser = await prisma.user.update({
             where: { id: userId },
             data: { banner: bannerUrl },
         });
@@ -184,7 +184,7 @@ export class UserService {
     }
 
     async deleteProfileBanner(userId: string) {
-        const user = await this.prisma.user.findUnique({
+        const user = await prisma.user.findUnique({
             where: { id: userId },
             select: { banner: true },
         });
@@ -193,7 +193,7 @@ export class UserService {
             await this.storage.deleteFile(user.banner);
         }
 
-        return this.prisma.user.update({
+        return prisma.user.update({
             where: { id: userId },
             data: { banner: null },
         });
@@ -204,7 +204,7 @@ export class UserService {
             throw new BadRequestException('You cannot follow yourself');
         }
 
-        const userToFollow = await this.prisma.user.findUnique({
+        const userToFollow = await prisma.user.findUnique({
             where: { id: followingId },
         });
 
@@ -212,7 +212,7 @@ export class UserService {
             throw new NotFoundException('User not found');
         }
 
-        const existingFollow = await this.prisma.follow.findUnique({
+        const existingFollow = await prisma.follow.findUnique({
             where: {
                 followerId_followingId: {
                     followerId,
@@ -225,7 +225,7 @@ export class UserService {
             throw new ConflictException('You are already following this user');
         }
 
-        return this.prisma.follow.create({
+        return prisma.follow.create({
             data: {
                 followerId,
                 followingId,
@@ -244,7 +244,7 @@ export class UserService {
     }
 
     async unfollowUser(followerId: string, followingId: string) {
-        const follow = await this.prisma.follow.findUnique({
+        const follow = await prisma.follow.findUnique({
             where: {
                 followerId_followingId: {
                     followerId,
@@ -257,7 +257,7 @@ export class UserService {
             throw new NotFoundException('You are not following this user');
         }
 
-        return this.prisma.follow.delete({
+        return prisma.follow.delete({
             where: {
                 followerId_followingId: {
                     followerId,
@@ -268,7 +268,7 @@ export class UserService {
     }
 
     async getFollowers(userId: string) {
-        const followers = await this.prisma.follow.findMany({
+        const followers = await prisma.follow.findMany({
             where: { followingId: userId },
             include: {
                 follower: {
@@ -299,7 +299,7 @@ export class UserService {
     }
 
     async getFollowing(userId: string) {
-        const following = await this.prisma.follow.findMany({
+        const following = await prisma.follow.findMany({
             where: { followerId: userId },
             include: {
                 following: {
@@ -330,7 +330,7 @@ export class UserService {
     }
 
     async getUserProfile(userId: string) {
-        const user = await this.prisma.user.findUnique({
+        const user = await prisma.user.findUnique({
             where: { id: userId },
             select: {
                 id: true,
@@ -386,7 +386,7 @@ export class UserService {
     }
 
     async getUserProfileByUsername(username: string) {
-        const user = await this.prisma.user.findFirst({
+        const user = await prisma.user.findFirst({
             where: { username: { equals: username, mode: 'insensitive' } },
             select: {
                 id: true,
@@ -534,7 +534,7 @@ export class UserService {
         const { query, limit = 10 } = searchDto;
         const queryLower = query.toLowerCase();
 
-        const users = await this.prisma.user.findMany({
+        const users = await prisma.user.findMany({
             where: {
                 AND: [
                     {
@@ -608,7 +608,7 @@ export class UserService {
     // ============================================
 
     async getSocialLinks(userId: string) {
-        return this.prisma.userSocialLink.findMany({
+        return prisma.userSocialLink.findMany({
             where: { userId },
             orderBy: { order: 'asc' },
         });
@@ -616,7 +616,7 @@ export class UserService {
 
     async createSocialLink(userId: string, data: { type: string; url: string; label?: string }) {
         // Check if user already has a link of this type
-        const existingLink = await this.prisma.userSocialLink.findUnique({
+        const existingLink = await prisma.userSocialLink.findUnique({
             where: {
                 userId_type: {
                     userId,
@@ -630,12 +630,12 @@ export class UserService {
         }
 
         // Get current max order
-        const maxOrderLink = await this.prisma.userSocialLink.findFirst({
+        const maxOrderLink = await prisma.userSocialLink.findFirst({
             where: { userId },
             orderBy: { order: 'desc' },
         });
 
-        return this.prisma.userSocialLink.create({
+        return prisma.userSocialLink.create({
             data: {
                 userId,
                 type: data.type as any,
@@ -647,7 +647,7 @@ export class UserService {
     }
 
     async updateSocialLink(userId: string, linkId: string, data: { url?: string; label?: string }) {
-        const link = await this.prisma.userSocialLink.findUnique({
+        const link = await prisma.userSocialLink.findUnique({
             where: { id: linkId },
         });
 
@@ -659,14 +659,14 @@ export class UserService {
             throw new BadRequestException('You can only update your own social links');
         }
 
-        return this.prisma.userSocialLink.update({
+        return prisma.userSocialLink.update({
             where: { id: linkId },
             data,
         });
     }
 
     async deleteSocialLink(userId: string, linkId: string) {
-        const link = await this.prisma.userSocialLink.findUnique({
+        const link = await prisma.userSocialLink.findUnique({
             where: { id: linkId },
         });
 
@@ -678,7 +678,7 @@ export class UserService {
             throw new BadRequestException('You can only delete your own social links');
         }
 
-        await this.prisma.userSocialLink.delete({
+        await prisma.userSocialLink.delete({
             where: { id: linkId },
         });
 
@@ -687,7 +687,7 @@ export class UserService {
 
     async reorderSocialLinks(userId: string, linkIds: string[]) {
         // Verify all links belong to the user
-        const links = await this.prisma.userSocialLink.findMany({
+        const links = await prisma.userSocialLink.findMany({
             where: {
                 id: { in: linkIds },
                 userId,
@@ -700,7 +700,7 @@ export class UserService {
 
         // Update order for each link
         const updates = linkIds.map((linkId, index) =>
-            this.prisma.userSocialLink.update({
+            prisma.userSocialLink.update({
                 where: { id: linkId },
                 data: { order: index },
             })

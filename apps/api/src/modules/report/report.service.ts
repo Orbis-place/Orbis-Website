@@ -1,18 +1,18 @@
-import {BadRequestException, ForbiddenException, Injectable, NotFoundException} from '@nestjs/common';
-import {PrismaService} from '../../prisma/prisma.service';
-import {CreateReportDto} from './dtos/create-report.dto';
-import {ModerateReportDto, ReportAction} from './dtos/moderate-report.dto';
-import {UserRole} from '@repo/db';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+
+import { CreateReportDto } from './dtos/create-report.dto';
+import { ModerateReportDto, ReportAction } from './dtos/moderate-report.dto';
+import { prisma, UserRole } from '@repo/db';
 
 @Injectable()
 export class ReportService {
-    constructor(private readonly prisma: PrismaService) {
+    constructor() {
     }
 
     async reportUser(reporterId: string, userId: string, createReportDto: CreateReportDto) {
         // Check if user exists
-        const userExists = await this.prisma.user.findUnique({
-            where: {id: userId},
+        const userExists = await prisma.user.findUnique({
+            where: { id: userId },
         });
 
         if (!userExists) {
@@ -30,7 +30,7 @@ export class ReportService {
         }
 
         // Check if user already reported this resource
-        const existingReport = await this.prisma.report.findFirst({
+        const existingReport = await prisma.report.findFirst({
             where: {
                 reporterId,
                 resourceType: 'USER',
@@ -46,7 +46,7 @@ export class ReportService {
         }
 
         // Create the report
-        return this.prisma.report.create({
+        return prisma.report.create({
             data: {
                 resourceType: 'USER',
                 resourceId: userId,
@@ -67,7 +67,7 @@ export class ReportService {
     }
 
     async getMyReports(userId: string) {
-        return this.prisma.report.findMany({
+        return prisma.report.findMany({
             where: {
                 reporterId: userId,
             },
@@ -95,18 +95,18 @@ export class ReportService {
 
     async getAllReports(moderatorId: string, status?: string) {
         // Verify moderator has proper role
-        const moderator = await this.prisma.user.findUnique({
-            where: {id: moderatorId},
-            select: {role: true},
+        const moderator = await prisma.user.findUnique({
+            where: { id: moderatorId },
+            select: { role: true },
         });
 
         if (!moderator || ![UserRole.MODERATOR, UserRole.ADMIN, UserRole.SUPER_ADMIN].includes(moderator.role as any)) {
             throw new ForbiddenException('You do not have permission to view reports');
         }
 
-        const where = status ? {status: status as any} : {};
+        const where = status ? { status: status as any } : {};
 
-        return this.prisma.report.findMany({
+        return prisma.report.findMany({
             where,
             orderBy: {
                 createdAt: 'desc',
@@ -133,17 +133,17 @@ export class ReportService {
 
     async getReportById(moderatorId: string, reportId: string) {
         // Verify moderator has proper role
-        const moderator = await this.prisma.user.findUnique({
-            where: {id: moderatorId},
-            select: {role: true},
+        const moderator = await prisma.user.findUnique({
+            where: { id: moderatorId },
+            select: { role: true },
         });
 
         if (!moderator || ![UserRole.MODERATOR, UserRole.ADMIN, UserRole.SUPER_ADMIN].includes(moderator.role as any)) {
             throw new ForbiddenException('You do not have permission to view this report');
         }
 
-        const report = await this.prisma.report.findUnique({
-            where: {id: reportId},
+        const report = await prisma.report.findUnique({
+            where: { id: reportId },
             include: {
                 reporter: {
                     select: {
@@ -173,9 +173,9 @@ export class ReportService {
 
     async moderateReport(moderatorId: string, reportId: string, moderateDto: ModerateReportDto) {
         // Verify moderator has proper role
-        const moderator = await this.prisma.user.findUnique({
-            where: {id: moderatorId},
-            select: {role: true},
+        const moderator = await prisma.user.findUnique({
+            where: { id: moderatorId },
+            select: { role: true },
         });
 
         if (!moderator || ![UserRole.MODERATOR, UserRole.ADMIN, UserRole.SUPER_ADMIN].includes(moderator.role as any)) {
@@ -183,8 +183,8 @@ export class ReportService {
         }
 
         // Check if report exists
-        const report = await this.prisma.report.findUnique({
-            where: {id: reportId},
+        const report = await prisma.report.findUnique({
+            where: { id: reportId },
         });
 
         if (!report) {
@@ -206,8 +206,8 @@ export class ReportService {
         const newStatus = statusMap[moderateDto.action];
 
         // Update report
-        return this.prisma.report.update({
-            where: {id: reportId},
+        return prisma.report.update({
+            where: { id: reportId },
             data: {
                 status: newStatus as any,
                 handledBy: moderatorId,
@@ -235,9 +235,9 @@ export class ReportService {
 
     async deleteReport(moderatorId: string, reportId: string) {
         // Verify moderator has proper role (only ADMIN and SUPER_ADMIN can delete)
-        const moderator = await this.prisma.user.findUnique({
-            where: {id: moderatorId},
-            select: {role: true},
+        const moderator = await prisma.user.findUnique({
+            where: { id: moderatorId },
+            select: { role: true },
         });
 
         if (!moderator || ![UserRole.ADMIN, UserRole.SUPER_ADMIN].includes(moderator.role as any)) {
@@ -245,8 +245,8 @@ export class ReportService {
         }
 
         // Check if report exists
-        const report = await this.prisma.report.findUnique({
-            where: {id: reportId},
+        const report = await prisma.report.findUnique({
+            where: { id: reportId },
         });
 
         if (!report) {
@@ -254,10 +254,10 @@ export class ReportService {
         }
 
         // Delete the report
-        await this.prisma.report.delete({
-            where: {id: reportId},
+        await prisma.report.delete({
+            where: { id: reportId },
         });
 
-        return {message: 'Report deleted successfully'};
+        return { message: 'Report deleted successfully' };
     }
 }
