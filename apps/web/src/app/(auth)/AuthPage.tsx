@@ -8,6 +8,20 @@ import { motion } from 'framer-motion';
 import styles from './login/page.module.css';
 import { authClient } from '@repo/auth/client';
 
+const BackButton = () => {
+    return (
+        <Link href="/" className={styles.backButton}>
+            <svg
+                className={styles.backIcon}
+                width="9" height="12" viewBox="0 0 9 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M-2.62319e-07 6.00117C0.00128721 5.74588 0.059387 5.49407 0.170086 5.26403C0.280784 5.03398 0.441304 4.83146 0.639999 4.67117L5.74 0.461168C6.04703 0.215162 6.417 0.0603537 6.80773 0.0143848C7.19847 -0.031584 7.59426 0.0331351 7.95 0.201168C8.25917 0.337447 8.52259 0.559841 8.70878 0.841787C8.89497 1.12373 8.99607 1.45331 9 1.79117L9 10.2112C8.99607 10.549 8.89497 10.8786 8.70878 11.1606C8.52259 11.4425 8.25917 11.6649 7.95 11.8012C7.59426 11.9692 7.19847 12.0339 6.80773 11.988C6.417 11.942 6.04703 11.7872 5.74 11.5412L0.639999 7.33117C0.441304 7.17087 0.280784 6.96835 0.170086 6.73831C0.0593869 6.50826 0.00128719 6.25646 -2.62319e-07 6.00117Z" fill="#109EB1" />
+            </svg>
+
+            Back
+        </Link>
+    );
+};
+
 export default function AuthPage() {
     const pathname = usePathname();
     const router = useRouter();
@@ -69,8 +83,8 @@ export default function AuthPage() {
                 }
 
                 if (data) {
-                    router.push('/dashboard');
-                    router.refresh();
+                    // Redirect to verify-email page after signup
+                    router.push(`/verify-email?email=${encodeURIComponent(email)}`);
                 }
             } catch (err) {
                 setError('An unexpected error occurred');
@@ -88,6 +102,15 @@ export default function AuthPage() {
                 });
 
                 if (error) {
+                    // Handle email verification required error
+                    if (error.status === 403) {
+                        setError('Please verify your email before logging in. Redirecting...');
+                        setIsLoading(false);
+                        setTimeout(() => {
+                            router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+                        }, 2000);
+                        return;
+                    }
                     setError(error.message || 'An error occurred');
                     setIsLoading(false);
                     return;
@@ -188,6 +211,9 @@ export default function AuthPage() {
                 transition={{ type: 'spring', stiffness: 300, damping: 30 }}
             >
                 <div className={styles.cardContent}>
+                    {/* Back Button */}
+                    <BackButton />
+
                     {/* Header */}
                     <div className={styles.header}>
                         <h1 className={styles.title}>

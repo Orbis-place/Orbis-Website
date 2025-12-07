@@ -1,4 +1,5 @@
 import Navbar from '../../components/Navbar';
+import Footer from '../../components/Footer';
 import { headers } from "next/headers";
 
 async function getSessionFromBackend() {
@@ -27,9 +28,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     const session = await getSessionFromBackend();
 
     return (
-        <>
+        <div className="flex flex-col min-h-screen">
             <Navbar session={session} />
-            {children}
-        </>
+            <main className="flex-1">
+                {children}
+            </main>
+            <Footer />
+        </div>
     );
 }
