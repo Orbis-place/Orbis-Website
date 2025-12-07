@@ -308,6 +308,7 @@ export default function ProfilePage() {
     // Create new order
     const newLinks = [...socialLinks];
     const [draggedLink] = newLinks.splice(draggedIndex, 1);
+    if (!draggedLink) return;
     newLinks.splice(dropIndex, 0, draggedLink);
 
     // Update local state immediately for responsive UI

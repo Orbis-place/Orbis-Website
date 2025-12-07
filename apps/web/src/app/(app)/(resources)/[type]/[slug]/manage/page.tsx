@@ -238,7 +238,7 @@ export default function ManageGeneralPage() {
                         // For new tags (temp IDs), extract the name from the ID
                         // Temp IDs are in format: temp-{timestamp}-{normalized-name}
                         const tempIdMatch = tagId.match(/^temp-\d+-(.+)$/);
-                        if (tempIdMatch) {
+                        if (tempIdMatch && tempIdMatch[1]) {
                             tagsToAdd.push(tempIdMatch[1].replace(/-/g, ' '));
                         }
                     }

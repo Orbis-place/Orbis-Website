@@ -10,7 +10,7 @@ export default function GalleryPage() {
 
     // Mock gallery images - will be replaced with real data from backend
     const gallery = [
-    ];
+    ] as string[];
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
