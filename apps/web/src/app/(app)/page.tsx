@@ -32,11 +32,17 @@ export default function Home() {
                         {/* Title Group */}
                         <div className="w-full">
                             <h1 className="font-hebden font-semibold text-2xl sm:text-3xl md:text-[40px] leading-tight md:leading-[48px] text-[#C7F4FA]">
-                                Welcome to Orbis: Your Hytale Modding &
+                                Welcome to Orbis: Hytale&apos;s #1
                             </h1>
-                            <h1 className="font-hebden font-semibold text-2xl sm:text-3xl md:text-[40px] leading-tight md:leading-[48px] text-[#15C8E0]">
-                                Server Hub
-                            </h1>
+                            <Rotater
+                                cellClassName="font-hebden font-semibold text-2xl sm:text-3xl md:text-[40px] leading-tight md:leading-[48px] text-[#15C8E0]"
+                                className="text-3xl h-8 sm:h-[32px] md:h-12"
+                                names={[
+                                    'Server Listing',
+                                    'Marketplace',
+                                    'Community Hub',
+                                ]}
+                            />
                         </div>
 
                         {/* Subtitle */}
