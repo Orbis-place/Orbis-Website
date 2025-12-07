@@ -5,7 +5,7 @@
   --background: #032125;
   --foreground: #c7f4fa;
   --primary: #109eb1;
-  --primary-foreground: #032125;
+  --primary-foreground: #e8ffff;
   --secondary: #06363d;
   --secondary-foreground: #c7f4fa;
   --muted: #032125;
@@ -17,10 +17,10 @@
   --popover-foreground: #c7f4fa;
   --accent: #06363d;
   --accent-foreground: #c7f4fa;
-  --destructive: oklch(0.7040 0.1910 22.2160);
+  --destructive: oklch(0.704 0.191 22.216);
   --destructive-foreground: #ffffff;
-  --border: #084B54;
-  --input: #084B54;
+  --border: #084b54;
+  --input: #084b54;
   --ring: #109eb1;
 
   --status-approved: #10b981;
@@ -31,13 +31,15 @@
 
   /* Fonts */
   --font-sans: Nunito, ui-sans-serif, sans-serif, system-ui;
-  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-serif: ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
+    'Courier New', monospace;
   --font-hebden: var(--font-hebden), sans-serif;
   --font-nunito: var(--font-nunito), sans-serif;
 
   /* Radius */
-  --radius: 0.625rem;
+  --radius: 0.95rem;
 
   /* Shadow custom */
   --text-shadow-title: 0 0 20px;
@@ -45,11 +47,15 @@
   /* Shadows */
   --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
   --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
-  --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 1px 2px -1px hsl(0 0% 0% / 0.10);
-  --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 1px 2px -1px hsl(0 0% 0% / 0.10);
-  --shadow-md: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 2px 4px -1px hsl(0 0% 0% / 0.10);
-  --shadow-lg: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 4px 6px -1px hsl(0 0% 0% / 0.10);
-  --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 8px 10px -1px hsl(0 0% 0% / 0.10);
+  --shadow-sm:
+    0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
+  --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
+  --shadow-md:
+    0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 2px 4px -1px hsl(0 0% 0% / 0.1);
+  --shadow-lg:
+    0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 4px 6px -1px hsl(0 0% 0% / 0.1);
+  --shadow-xl:
+    0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 8px 10px -1px hsl(0 0% 0% / 0.1);
   --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
 }
 
@@ -64,16 +70,29 @@
   --muted-foreground: #c7f4fa;
   --card: #032125;
   --card-foreground: #c7f4fa;
+  --radius: 1.625rem;
   --popover: #032125;
   --popover-foreground: #c7f4fa;
   --accent: #06363d;
   --accent-foreground: #c7f4fa;
-  --destructive: oklch(0.7040 0.1910 22.2160);
+  --destructive: oklch(0.704 0.191 22.216);
   --destructive-foreground: #ffffff;
-  --border: #084B54;
-  --input: #084B54;
+  --border: #084b54;
+  --input: #084b54;
   --ring: #109eb1;
-
+  /* Shadows */
+  --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
+  --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
+  --shadow-sm:
+    0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
+  --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
+  --shadow-md:
+    0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 2px 4px -1px hsl(0 0% 0% / 0.1);
+  --shadow-lg:
+    0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 4px 6px -1px hsl(0 0% 0% / 0.1);
+  --shadow-xl:
+    0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 8px 10px -1px hsl(0 0% 0% / 0.1);
+  --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
   --status-approved: #10b981;
   --status-pending: #f59e0b;
   --status-rejected: var(--destructive);
@@ -81,6 +100,12 @@
   --status-archived: #6b7280;
 }
 
+@layer base {
+  .hover-underline::before {
+    @apply absolute -bottom-0.5 left-0 block h-0.5 rounded-2xl w-full origin-right scale-0 transition-transform duration-300 hover:origin-left;
+    content: '';
+  }
+}
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -107,12 +132,12 @@
   --font-serif: var(--font-serif);
   --font-hebden: var(--font-hebden);
   --font-nunito: var(--font-nunito);
-
+  --radius: 1.625rem;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-
+  --spacing: 0.25rem;
   --shadow-2xs: var(--shadow-2xs);
   --shadow-xs: var(--shadow-xs);
   --shadow-sm: var(--shadow-sm);
@@ -137,10 +162,10 @@ body {
   color: var(--foreground);
   background: var(--color-background);
   font-family:
-          var(--font-nunito),
-          system-ui,
-          -apple-system,
-          sans-serif;
+    var(--font-nunito),
+    system-ui,
+    -apple-system,
+    sans-serif;
   position: relative;
 }
 
@@ -176,7 +201,8 @@ a {
 }
 
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px);
   }
   50% {
@@ -188,7 +214,8 @@ a {
   animation: float 3s ease-in-out infinite;
 }
 
-a, button {
+a,
+button {
   cursor: pointer;
 }
 
