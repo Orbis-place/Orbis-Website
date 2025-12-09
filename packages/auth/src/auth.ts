@@ -1,8 +1,8 @@
-import {prismaAdapter} from "better-auth/adapters/prisma";
-import {betterAuth} from "better-auth";
-import {prisma} from "@repo/db";
-import {sendResetPasswordEmail, sendVerificationEmail} from "./email";
-import {admin} from "better-auth/plugins";
+import { prismaAdapter } from "better-auth/adapters/prisma";
+import { betterAuth } from "better-auth";
+import { prisma } from "@repo/db";
+import { sendResetPasswordEmail, sendVerificationEmail } from "./email";
+import { admin } from "better-auth/plugins";
 
 let authInstance: ReturnType<typeof betterAuth> | null = null;
 
@@ -15,7 +15,7 @@ export const getAuth = () => {
                 },
             },
             trustedOrigins: process.env.NODE_ENV === 'production'
-                ? ["https://dev.orbis.place", "https://orbis.place"]
+                ? ["https://dev.orbis.place", "https://orbis.place", "https://www.orbis.place"]
                 : ["http://localhost:3001"],
             baseURL: process.env.BETTER_AUTH_URL,
             secret: process.env.BETTER_AUTH_SECRET!,
@@ -49,17 +49,22 @@ export const getAuth = () => {
             emailAndPassword: {
                 enabled: true,
                 requireEmailVerification: true,
-                sendResetPassword: async ({user, url, token}, request) => {
-                    await sendResetPasswordEmail(user.email, url);
+                sendResetPassword: async ({ user, url, token }, request) => {
+                    const frontendUrl = `${process.env.BETTER_AUTH_URL}/auth/verify-email?token=${token}&callbackURL=${process.env.NODE_ENV === 'production' ? 'https://orbis.place/' : 'http://localhost:3001/'}`;
+                    sendResetPasswordEmail(user.email, frontendUrl);
                 },
             },
             emailVerification: {
-                sendVerificationEmail: async ({user, url, token}) => {
-                    await sendVerificationEmail(user.email, url);
+                sendVerificationEmail: async ({ user, url, token }) => {
+                    const frontendUrl = `${process.env.BETTER_AUTH_URL}/auth/verify-email?token=${token}&callbackURL=${process.env.NODE_ENV === 'production' ? 'https://orbis.place/' : 'http://localhost:3001/'}`;
+                    sendVerificationEmail(user.email, frontendUrl);
                 },
                 sendOnSignUp: true,
                 autoSignInAfterVerification: true,
                 expiresIn: 3600,
+                callbackURL: process.env.NODE_ENV === 'production'
+                    ? 'https://orbis.place/'
+                    : 'http://localhost:3001/',
             },
             database: prismaAdapter(prisma, {
                 provider: "postgresql",

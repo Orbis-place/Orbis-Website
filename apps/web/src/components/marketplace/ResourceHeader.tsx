@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Download, Heart, Bookmark, MoreVertical, Tag, Calendar } from 'lucide-react';
 import { Icon } from '@iconify-icon/react';
+import { EntityAvatar } from '@/components/EntityAvatar';
 
 export interface ResourceHeaderProps {
     title: string;
@@ -11,7 +12,7 @@ export interface ResourceHeaderProps {
     image: string;
     bannerImage?: string;
     downloads: string;
-    followers: number;
+    likes: number;
     tags: string[];
     type: string;
     slug: string;
@@ -32,7 +33,7 @@ export default function ResourceHeader({
     image,
     bannerImage,
     downloads,
-    followers,
+    likes,
     tags,
     type,
     slug,
@@ -52,16 +53,17 @@ export default function ResourceHeader({
             <div className="relative mb-20">
                 {/* Banner Section */}
                 <div className="relative w-full h-48 rounded-[25px] overflow-hidden">
+                    {/* Gradient Background */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-[#06363D] via-[#084B54] to-[#109EB1]" />
+
                     {/* Banner Image or Gradient */}
-                    {bannerImage ? (
+                    {bannerImage && (
                         <Image
                             src={bannerImage}
                             alt={`${title} banner`}
                             fill
-                            className="object-cover"
+                            className="object-contain"
                         />
-                    ) : (
-                        <div className="absolute inset-0 bg-gradient-to-br from-[#06363D] via-[#084B54] to-[#109EB1]" />
                     )}
 
                     {/* Type Badge on Banner */}
@@ -75,11 +77,12 @@ export default function ResourceHeader({
                 {/* Avatar - Overlapping Banner (outside banner container to avoid overflow) */}
                 <div className="absolute -bottom-16 left-8">
                     <div className="relative w-32 h-32 rounded-[25px] overflow-hidden border-4 border-[#032125] shadow-2xl bg-[#032125]">
-                        <Image
+                        <EntityAvatar
                             src={image}
-                            alt={title}
-                            fill
-                            className="object-cover"
+                            name={title}
+                            variant="resource"
+                            className="h-full w-full rounded-none"
+                            fallbackClassName="text-4xl rounded-none"
                         />
                     </div>
                 </div>
@@ -180,10 +183,10 @@ export default function ResourceHeader({
 
                         <div className="flex flex-col">
                             <span className="font-hebden font-extrabold text-2xl text-[#C7F4FA]">
-                                {followers?.toLocaleString() || '0'}
+                                {likes?.toLocaleString() || '0'}
                             </span>
                             <span className="font-nunito text-sm text-[#C7F4FA]/50">
-                                Followers
+                                Likes
                             </span>
                         </div>
                     </div>

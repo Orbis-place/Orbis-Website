@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Calendar, RefreshCw, BookText, ExternalLink } from 'lucide-react';
+import { EntityAvatar } from '@/components/EntityAvatar';
 
 interface Creator {
     username: string;
@@ -96,14 +97,12 @@ export default function ResourceSidebar({
                             href={`/users/${creator.username.toLowerCase()}`}
                             className="flex items-center gap-3 group hover:bg-[#032125] p-2 -m-2 rounded-xl transition-colors"
                         >
-                            <div className="relative w-8 h-8 rounded-full overflow-hidden border-2 border-[#084B54] flex-shrink-0">
-                                <Image
-                                    src={creator.avatar}
-                                    alt={creator.username}
-                                    fill
-                                    className="object-cover"
-                                />
-                            </div>
+                            <EntityAvatar
+                                src={creator.avatar}
+                                name={creator.username}
+                                variant="user"
+                                className="w-8 h-8 border-2 border-[#084B54] flex-shrink-0"
+                            />
                             <div className="flex flex-col flex-1 min-w-0">
                                 <span className="font-hebden font-semibold text-sm text-[#C7F4FA] group-hover:underline truncate">
                                     {creator.username}

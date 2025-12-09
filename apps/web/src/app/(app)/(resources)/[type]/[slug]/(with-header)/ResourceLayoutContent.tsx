@@ -137,9 +137,15 @@ export default function ResourceLayoutContent({ children }: { children: ReactNod
     const authorDisplay = resource.team?.displayName || resource.owner.displayName;
 
     // Get featured tags
-    const tags = resource.tags
-        .map(t => t.tag.name)
-        .slice(0, 5);
+    const tags = resource.tags && resource.tags.length > 0
+        ? resource.tags.map(t => t.tag.name).slice(0, 5)
+        : resource.categories
+            ? resource.categories.map((c: any) => c.category.name).slice(0, 5)
+            : [];
+
+    console.log('Resource tags:', resource.tags);
+    console.log('Resource categories:', resource.categories);
+    console.log('Mapped tags:', tags);
 
     // Map external links
     const externalLinks = (resource as any).externalLinks || [];
@@ -177,9 +183,10 @@ export default function ResourceLayoutContent({ children }: { children: ReactNod
             <ResourceHeader
                 title={resource.name}
                 description={resource.tagline || resource.description || ''}
-                image={resource.bannerUrl || resource.iconUrl || ''}
+                image={resource.iconUrl || ''}
+                bannerImage={resource.bannerUrl}
                 downloads={formatNumber(resource.downloadCount)}
-                followers={likeCount}
+                likes={likeCount}
                 tags={tags}
                 type={type! as 'mod' | 'plugin' | 'world' | 'prefab' | 'asset-pack' | 'data-pack' | 'modpack' | 'tool'}
                 slug={resource.slug}
