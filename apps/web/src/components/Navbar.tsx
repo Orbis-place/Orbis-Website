@@ -62,6 +62,8 @@ export default function Navbar({ session }: NavbarProps) {
     const handleSignOut = async () => {
         await authClient.signOut();
         setMobileProfileOpen(false);
+        // Redirect to home and refresh to ensure complete logout
+        window.location.href = '/';
     };
 
     const getInitials = (name: string) => {
