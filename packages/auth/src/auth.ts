@@ -33,15 +33,18 @@ export const getAuth = () => {
                                 ? '.orbis.place'
                                 : 'localhost',
                             sameSite: "lax",
-                            secure: true,
+                            secure: process.env.NODE_ENV === 'production',
                             httpOnly: true,
                             path: '/',
                         }
                     },
                     state: {
+                        name: "orbis_state",
                         attributes: {
-                            sameSite: "lax", // TODO: To configure based on environment
-                            secure: false,
+                            sameSite: "lax",
+                            secure: process.env.NODE_ENV === 'production',
+                            httpOnly: true,
+                            path: '/',
                         }
                     }
                 }
