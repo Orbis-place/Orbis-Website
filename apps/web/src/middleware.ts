@@ -9,7 +9,7 @@ export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
     // Check for session cookie (better-auth uses "orbis_session_token")
-    const sessionToken = request.cookies.get('orbis_session_token');
+    const sessionToken = request.cookies.get('__Secure-orbis_session_token') || request.cookies.get('orbis_session_token')
     const isAuthenticated = !!sessionToken;
 
     // Redirect authenticated users away from auth pages
