@@ -16,12 +16,16 @@
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\""
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.948.0",
+    "@aws-sdk/lib-storage": "^3.948.0",
     "@google-cloud/storage": "^7.17.3",
     "@nestjs/common": "^11.0.0",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.0",
     "@nestjs/platform-express": "^11.0.0",
     "@nestjs/swagger": "^11.2.3",
+    "@paralleldrive/cuid2": "^3.0.4",
+    "@prisma/client-runtime-utils": "^7.1.0",
     "@repo/auth": "workspace:*",
     "@repo/db": "workspace:*",
     "@swc/cli": "^0.7.9",
@@ -31,8 +35,7 @@
     "class-validator": "^0.14.3",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
-    "uuid": "^13.0.0",
-        "@prisma/client-runtime-utils": "^7.1.0"  
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",

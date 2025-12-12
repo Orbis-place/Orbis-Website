@@ -50,12 +50,21 @@ export default function Navbar({ session }: NavbarProps) {
 
     useEffect(() => {
         if (mobileNavOpen || mobileProfileOpen) {
+            // Prevent scrolling on both html and body (mobile Safari compatible)
+            document.documentElement.style.overflow = 'hidden';
             document.body.style.overflow = 'hidden';
+            document.body.style.touchAction = 'none';
         } else {
-            document.body.style.overflow = 'unset';
+            // Restore scrolling
+            document.documentElement.style.overflow = '';
+            document.body.style.overflow = '';
+            document.body.style.touchAction = '';
         }
+
         return () => {
-            document.body.style.overflow = 'unset';
+            document.documentElement.style.overflow = '';
+            document.body.style.overflow = '';
+            document.body.style.touchAction = '';
         };
     }, [mobileNavOpen, mobileProfileOpen]);
 
@@ -295,6 +304,7 @@ export default function Navbar({ session }: NavbarProps) {
                 <div
                     className="lg:hidden fixed inset-0 bg-background/95 backdrop-blur-md z-40 overflow-y-auto"
                     style={{ top: '70px' }}
+                    onTouchMove={(e) => e.stopPropagation()}
                 >
                     <div className="flex flex-col h-full">
                         <div className="flex-1 px-6 py-6 space-y-6 overflow-y-auto">
@@ -306,7 +316,7 @@ export default function Navbar({ session }: NavbarProps) {
 
                                 {/* Marketplace */}
                                 <Link
-                                    href="/marketplace"
+                                    href="/mods"
                                     onClick={closeMobileNav}
                                     className="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-accent transition-colors group"
                                 >
@@ -360,6 +370,7 @@ export default function Navbar({ session }: NavbarProps) {
                 <div
                     className="lg:hidden fixed inset-0 bg-background/95 backdrop-blur-md z-40 overflow-y-auto"
                     style={{ top: '70px' }}
+                    onTouchMove={(e) => e.stopPropagation()}
                 >
                     <div className="flex flex-col h-full">
                         <div className="flex-1 px-6 py-6 space-y-6 overflow-y-auto">

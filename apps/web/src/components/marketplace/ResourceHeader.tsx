@@ -33,7 +33,7 @@ export interface ResourceHeaderProps {
     onToggleFavorite?: () => void;
     isLiking?: boolean;
     isFavoriting?: boolean;
-    resourceId?: string; // For copy ID and report functionality
+    resourceId?: string;
 }
 
 export default function ResourceHeader({
@@ -66,8 +66,9 @@ export default function ResourceHeader({
             setTimeout(() => setCopySuccess(false), 2000);
         }
     };
+
     return (
-        <div className="mb-4">
+        <div className="mb-4 relative">
             {/* Banner and Avatar Container */}
             <div className="relative mb-20">
                 {/* Banner Section */}
@@ -93,7 +94,7 @@ export default function ResourceHeader({
                     </div>
                 </div>
 
-                {/* Avatar - Overlapping Banner (outside banner container to avoid overflow) */}
+                {/* Avatar - Overlapping Banner */}
                 <div className="absolute -bottom-16 left-8">
                     <div className="relative w-32 h-32 rounded-[25px] overflow-hidden border-4 border-[#032125] shadow-2xl bg-[#032125]">
                         <EntityAvatar
@@ -105,101 +106,101 @@ export default function ResourceHeader({
                         />
                     </div>
                 </div>
+
+                {/* Action Buttons - Below banner */}
+                <div className="absolute -bottom-16 right-2 flex gap-3">
+                    {/* Primary buttons - Desktop only */}
+                    <div className="hidden sm:flex gap-3">
+                        <button className="flex items-center justify-center gap-3 px-6 py-3 bg-[#109EB1] hover:bg-[#0D8A9A] rounded-full font-hebden font-extrabold text-base text-[#C7F4FA] transition-all shadow-lg">
+                            <Download className="w-5 h-5" />
+                            <span>Download</span>
+                        </button>
+
+                        {isOwner && (
+                            <Link
+                                href={`/${type}/${slug}/manage`}
+                                className="flex items-center justify-center gap-3 px-6 py-3 bg-[#06363D] hover:bg-[#084B54] border border-[#084B54] rounded-full font-hebden font-bold text-base text-[#C7F4FA] transition-all"
+                            >
+                                <Icon icon="mdi:cog" width="20" height="20" />
+                                <span>Manage</span>
+                            </Link>
+                        )}
+                    </div>
+
+                    {/* Secondary buttons */}
+                    <button
+                        onClick={onToggleLike}
+                        disabled={isLiking}
+                        className={`group flex items-center justify-center w-12 h-12 border rounded-full transition-all duration-200 ${isLiked
+                            ? 'bg-[#109EB1] border-[#109EB1]'
+                            : 'bg-[#06363D] hover:bg-[#084B54] border-[#084B54]'
+                            } ${isLiking ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 active:scale-95'}`}
+                    >
+                        <Heart
+                            className={`w-5 h-5 transition-all duration-200 ${isLiked
+                                ? 'text-white fill-white scale-110'
+                                : 'text-[#C7F4FA] group-hover:scale-110'
+                                } ${isLiking ? 'animate-[pulse_1s_ease-in-out_infinite]' : ''}`}
+                        />
+                    </button>
+
+                    <button
+                        onClick={onToggleFavorite}
+                        disabled={isFavoriting}
+                        className={`group flex items-center justify-center w-12 h-12 border rounded-full transition-all duration-200 ${isFavorited
+                            ? 'bg-[#109EB1] border-[#109EB1]'
+                            : 'bg-[#06363D] hover:bg-[#084B54] border-[#084B54]'
+                            } ${isFavoriting ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 active:scale-95'}`}
+                    >
+                        <Bookmark
+                            className={`w-5 h-5 transition-all duration-200 ${isFavorited
+                                ? 'text-white fill-white scale-110'
+                                : 'text-[#C7F4FA] group-hover:scale-110'
+                                } ${isFavoriting ? 'animate-[pulse_1s_ease-in-out_infinite]' : ''}`}
+                        />
+                    </button>
+
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <button className="flex items-center justify-center w-12 h-12 hover:bg-[#06363D] border border-transparent hover:border-[#084B54] rounded-full transition-all">
+                                <MoreVertical className="w-5 h-5 text-[#C7F4FA]" />
+                            </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48 bg-accent border border-border font-hebden">
+                            <DropdownMenuItem className="text-destructive cursor-pointer flex items-center gap-2 data-[highlighted]:text-destructive">
+                                <Flag className="w-4 h-4 text-destructive" />
+                                Report
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator className="bg-[#084B54]" />
+                            <DropdownMenuItem onClick={handleCopyId} className="text-foreground cursor-pointer flex items-center gap-2">
+                                <Copy className="w-4 h-4" />
+                                {copySuccess ? 'Copied!' : 'Copy ID'}
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
             </div>
 
             {/* Info Section */}
             <div className="px-2">
                 {/* Title and Description */}
-                <div className="mb-6">
-                    <div className="flex items-start justify-between gap-4 mb-3">
-                        <div className="flex-1">
-                            <h1 className="font-hebden font-extrabold text-3xl sm:text-4xl leading-tight text-[#C7F4FA] mb-2">
-                                {title}
-                            </h1>
-                            <p className="font-nunito text-base text-[#C7F4FA]/80 leading-relaxed max-w-3xl">
-                                {description}
-                            </p>
-                        </div>
+                <div className="mb-4">
+                    <h1 className="font-hebden font-extrabold text-3xl sm:text-4xl leading-tight text-[#C7F4FA] mb-2">
+                        {title}
+                    </h1>
+                    <p className="font-nunito text-base text-[#C7F4FA]/80 leading-relaxed">
+                        {description}
+                    </p>
+                </div>
 
-                        {/* Action Buttons */}
-                        <div className="flex gap-3">
-                            <button className="flex items-center gap-3 px-6 py-3 bg-[#109EB1] hover:bg-[#0D8A9A] rounded-full font-hebden font-extrabold text-base text-[#C7F4FA] transition-all shadow-lg">
-                                <Download className="w-5 h-5" />
-                                <span className="hidden sm:inline">Download</span>
-                            </button>
-
-                            {isOwner && (
-                                <Link
-                                    href={`/${type}/${slug}/manage`}
-                                    className="flex items-center gap-3 px-6 py-3 bg-[#06363D] hover:bg-[#084B54] border border-[#084B54] rounded-full font-hebden font-bold text-base text-[#C7F4FA] transition-all"
-                                >
-                                    <Icon icon="mdi:cog" width="20" height="20" />
-                                    <span className="hidden sm:inline">Manage</span>
-                                </Link>
-                            )}
-
-                            <button
-                                onClick={onToggleLike}
-                                disabled={isLiking}
-                                className={`group flex items-center justify-center w-12 h-12 border rounded-full transition-all duration-200 ${isLiked
-                                    ? 'bg-[#109EB1] border-[#109EB1]'
-                                    : 'bg-[#06363D] hover:bg-[#084B54] border-[#084B54]'
-                                    } ${isLiking ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 active:scale-95'}`}
-                            >
-                                <Heart
-                                    className={`w-5 h-5 transition-all duration-200 ${isLiked
-                                        ? 'text-white fill-white scale-110'
-                                        : 'text-[#C7F4FA] group-hover:scale-110'
-                                        } ${isLiking ? 'animate-[pulse_1s_ease-in-out_infinite]' : ''}`}
-                                />
-                            </button>
-
-                            <button
-                                onClick={onToggleFavorite}
-                                disabled={isFavoriting}
-                                className={`group flex items-center justify-center w-12 h-12 border rounded-full transition-all duration-200 ${isFavorited
-                                    ? 'bg-[#109EB1] border-[#109EB1]'
-                                    : 'bg-[#06363D] hover:bg-[#084B54] border-[#084B54]'
-                                    } ${isFavoriting ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 active:scale-95'}`}
-                            >
-                                <Bookmark
-                                    className={`w-5 h-5 transition-all duration-200 ${isFavorited
-                                        ? 'text-white fill-white scale-110'
-                                        : 'text-[#C7F4FA] group-hover:scale-110'
-                                        } ${isFavoriting ? 'animate-[pulse_1s_ease-in-out_infinite]' : ''}`}
-                                />
-                            </button>
-
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <button className="flex items-center justify-center w-12 h-12 hover:bg-[#06363D] border border-transparent hover:border-[#084B54] rounded-full transition-all">
-                                        <MoreVertical className="w-5 h-5 text-[#C7F4FA]" />
-                                    </button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-48 bg-accent border border-border font-hebden">
-                                    <DropdownMenuItem className="text-destructive cursor-pointer flex items-center gap-2 data-[highlighted]:text-destructive">
-                                        <Flag className="w-4 h-4 text-destructive" />
-                                        Report
-                                    </DropdownMenuItem>
-                                    <DropdownMenuSeparator className="bg-[#084B54]" />
-                                    <DropdownMenuItem onClick={handleCopyId} className="text-foreground cursor-pointer flex items-center gap-2">
-                                        <Copy className="w-4 h-4" />
-                                        {copySuccess ? 'Copied!' : 'Copy ID'}
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </div>
-                    </div>
-
-                    {/* Metadata Row */}
-                    <div className="flex flex-wrap items-center gap-4 text-sm text-[#C7F4FA]/60 font-nunito">
-                        <span>by <Link href={`/users/${author.toLowerCase()}`} className="text-[#109EB1] font-semibold hover:underline">{author}</Link></span>
-                        <span>•</span>
-                        <span className="flex items-center gap-1.5">
-                            <Calendar className="w-4 h-4" />
-                            Updated {updatedAt}
-                        </span>
-                    </div>
+                {/* Metadata Row */}
+                <div className="flex flex-wrap items-center gap-4 text-sm text-[#C7F4FA]/60 font-nunito mb-4">
+                    <span>by <Link href={`/users/${author.toLowerCase()}`} className="text-[#109EB1] font-semibold hover:underline">{author}</Link></span>
+                    <span>•</span>
+                    <span className="flex items-center gap-1.5">
+                        <Calendar className="w-4 h-4" />
+                        Updated {updatedAt}
+                    </span>
                 </div>
 
                 {/* Stats and Tags */}
@@ -239,6 +240,24 @@ export default function ResourceHeader({
                             ))}
                         </div>
                     </div>
+                </div>
+
+                {/* Primary action buttons - Mobile only */}
+                <div className="flex flex-col gap-3 pb-6 sm:hidden">
+                    <button className="flex-1 flex items-center justify-center gap-3 px-6 py-3 bg-[#109EB1] hover:bg-[#0D8A9A] rounded-full font-hebden font-extrabold text-base text-[#C7F4FA] transition-all shadow-lg">
+                        <Download className="w-5 h-5" />
+                        <span>Download</span>
+                    </button>
+
+                    {isOwner && (
+                        <Link
+                            href={`/${type}/${slug}/manage`}
+                            className="flex-1 flex items-center justify-center gap-3 px-6 py-3 bg-[#06363D] hover:bg-[#084B54] border border-[#084B54] rounded-full font-hebden font-bold text-base text-[#C7F4FA] transition-all"
+                        >
+                            <Icon icon="mdi:cog" width="20" height="20" />
+                            <span>Manage</span>
+                        </Link>
+                    )}
                 </div>
             </div>
         </div>

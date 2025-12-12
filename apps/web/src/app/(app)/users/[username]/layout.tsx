@@ -75,6 +75,35 @@ function UserProfileLayoutContent({ children }: { children: ReactNode }) {
         }
     };
 
+    // Follow button component to avoid duplication
+    const FollowButton = ({ className = '' }: { className?: string }) => (
+        <button
+            onClick={handleFollowToggle}
+            disabled={followLoading}
+            className={`flex items-center justify-center gap-3 px-6 py-3 rounded-full font-hebden font-extrabold text-base transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed ${isFollowing
+                ? 'bg-[#06363D] hover:bg-[#084B54] border border-[#084B54] text-[#C7F4FA]'
+                : 'bg-[#109EB1] hover:bg-[#0D8A9A] text-[#C7F4FA]'
+                } ${className}`}
+        >
+            {followLoading ? (
+                <>
+                    <Icon icon="mdi:loading" className="w-5 h-5 animate-spin" />
+                    <span>Loading...</span>
+                </>
+            ) : isFollowing ? (
+                <>
+                    <Icon icon="mdi:account-check" className="w-5 h-5" />
+                    <span>Following</span>
+                </>
+            ) : (
+                <>
+                    <UserPlus className="w-5 h-5" />
+                    <span>Follow</span>
+                </>
+            )}
+        </button>
+    );
+
     if (isLoading || !user) {
         return (
             <div className="max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-4 py-6 sm:py-8">
@@ -145,163 +174,138 @@ function UserProfileLayoutContent({ children }: { children: ReactNode }) {
                             )}
                         </div>
                     </div>
+
+                    {/* Action Buttons - Below banner */}
+                    {currentUser && currentUser.id !== user.id && (
+                        <div className="absolute -bottom-16 right-2 flex gap-3">
+                            {/* Follow button - Desktop only */}
+                            <div className="hidden sm:flex">
+                                <FollowButton />
+                            </div>
+
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <button className="flex items-center justify-center w-12 h-12 hover:bg-[#06363D] border border-transparent hover:border-[#084B54] rounded-full transition-all">
+                                        <MoreVertical className="w-5 h-5 text-[#C7F4FA]" />
+                                    </button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-48 bg-accent border border-border font-hebden">
+                                    <DropdownMenuItem
+                                        onClick={() => setReportDialogOpen(true)}
+                                        className="text-destructive cursor-pointer flex items-center gap-2 data-[highlighted]:text-destructive"
+                                    >
+                                        <Flag className="w-4 h-4 text-destructive" />
+                                        Report
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator className="bg-[#084B54]" />
+                                    <DropdownMenuItem onClick={handleCopyId} className="text-foreground cursor-pointer flex items-center gap-2">
+                                        <Copy className="w-4 h-4" />
+                                        {copySuccess ? 'Copied!' : 'Copy ID'}
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+
+
+            {/* Info Section */}
+            <div className="px-2">
+                {/* Title and Description */}
+                <div className="mb-4">
+                    <h1 className="font-hebden font-extrabold text-3xl sm:text-4xl leading-tight text-[#C7F4FA] mb-2">
+                        {user.displayName || user.username}
+                    </h1>
+                    {user.bio && (
+                        <p className="font-nunito text-base text-[#C7F4FA]/80 leading-relaxed">
+                            {user.bio}
+                        </p>
+                    )}
                 </div>
 
-                {/* Info Section */}
-                <div className="px-2">
-                    {/* Title and Description */}
-                    <div className="mb-6">
-                        <div className="flex items-start justify-between gap-4 mb-3">
-                            <div className="flex-1">
-                                <h1 className="font-hebden font-extrabold text-3xl sm:text-4xl leading-tight text-[#C7F4FA] mb-2">
-                                    {user.displayName || user.username}
-                                </h1>
-                                {user.bio && (
-                                    <p className="font-nunito text-base text-[#C7F4FA]/80 leading-relaxed max-w-3xl">
-                                        {user.bio}
-                                    </p>
-                                )}
-                            </div>
-
-                            {/* Action Buttons */}
-                            <div className="flex gap-3">
-                                {/* Only show follow button if not own profile */}
-                                {currentUser && currentUser.id !== user.id && (
-                                    <button
-                                        onClick={handleFollowToggle}
-                                        disabled={followLoading}
-                                        className={`flex items-center gap-3 px-6 py-3 rounded-full font-hebden font-extrabold text-base transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed ${isFollowing
-                                            ? 'bg-[#06363D] hover:bg-[#084B54] border border-[#084B54] text-[#C7F4FA]'
-                                            : 'bg-[#109EB1] hover:bg-[#0D8A9A] text-[#C7F4FA]'
-                                            }`}
-                                    >
-                                        {followLoading ? (
-                                            <>
-                                                <Icon icon="mdi:loading" className="w-5 h-5 animate-spin" />
-                                                <span className="hidden sm:inline">Loading...</span>
-                                            </>
-                                        ) : isFollowing ? (
-                                            <>
-                                                <Icon icon="mdi:account-check" className="w-5 h-5" />
-                                                <span className="hidden sm:inline">Following</span>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <UserPlus className="w-5 h-5" />
-                                                <span className="hidden sm:inline">Follow</span>
-                                            </>
-                                        )}
-                                    </button>
-                                )}
-
-                                {/* {currentUser && currentUser.id !== user.id && (
-                                    <button className="flex items-center justify-center w-12 h-12 bg-[#06363D] hover:bg-[#084B54] border border-[#084B54] rounded-full transition-all">
-                                        <MessageCircle className="w-5 h-5 text-[#C7F4FA]" />
-                                    </button>
-                                )} */}
-
-                                {currentUser && currentUser.id !== user.id && (
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <button className="flex items-center justify-center w-12 h-12 hover:bg-[#06363D] border border-transparent hover:border-[#084B54] rounded-full transition-all">
-                                                <MoreVertical className="w-5 h-5 text-[#C7F4FA]" />
-                                            </button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end" className="w-48 bg-accent border border-border font-hebden">
-                                            <DropdownMenuItem
-                                                onClick={() => setReportDialogOpen(true)}
-                                                className="text-destructive cursor-pointer flex items-center gap-2 data-[highlighted]:text-destructive"
-                                            >
-                                                <Flag className="w-4 h-4 text-destructive" />
-                                                Report
-                                            </DropdownMenuItem>
-                                            <DropdownMenuSeparator className="bg-[#084B54]" />
-                                            <DropdownMenuItem onClick={handleCopyId} className="text-foreground cursor-pointer flex items-center gap-2">
-                                                <Copy className="w-4 h-4" />
-                                                {copySuccess ? 'Copied!' : 'Copy ID'}
-                                            </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Metadata Row */}
-                        <div className="flex flex-wrap items-center gap-4 text-sm text-[#C7F4FA]/60 font-nunito">
-                            <span className="text-[#109EB1] font-semibold">@{user.username}</span>
+                {/* Metadata Row */}
+                <div className="flex flex-wrap items-center gap-4 text-sm text-[#C7F4FA]/60 font-nunito mb-4">
+                    <span className="text-[#109EB1] font-semibold">@{user.username}</span>
+                    <span>•</span>
+                    <span className="flex items-center gap-1.5">
+                        <Icon icon="mdi:calendar" className="w-4 h-4" />
+                        Joined {formatDate(user.createdAt)}
+                    </span>
+                    {user.showLocation && user.location && (
+                        <>
                             <span>•</span>
                             <span className="flex items-center gap-1.5">
-                                <Icon icon="mdi:calendar" className="w-4 h-4" />
-                                Joined {formatDate(user.createdAt)}
+                                <Icon icon="mdi:map-marker" className="w-4 h-4" />
+                                {user.location}
                             </span>
-                            {user.showLocation && user.location && (
-                                <>
-                                    <span>•</span>
-                                    <span className="flex items-center gap-1.5">
-                                        <Icon icon="mdi:map-marker" className="w-4 h-4" />
-                                        {user.location}
-                                    </span>
-                                </>
-                            )}
-                            {user.website && (
-                                <>
-                                    <span>•</span>
-                                    <a href={user.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-[#109EB1] hover:underline">
-                                        <Icon icon="mdi:link" className="w-4 h-4" />
-                                        Website
-                                    </a>
-                                </>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Stats and Tags */}
-                    <div className="flex flex-wrap items-center gap-6 pb-6">
-                        {/* Stats */}
-                        <div className="flex gap-6">
-                            <div className="flex flex-col">
-                                <span className="font-hebden font-extrabold text-2xl text-[#C7F4FA]">
-                                    {user._count.followers.toLocaleString()}
-                                </span>
-                                <span className="font-nunito text-sm text-[#C7F4FA]/50">
-                                    Followers
-                                </span>
-                            </div>
-
-                            <div className="flex flex-col">
-                                <span className="font-hebden font-extrabold text-2xl text-[#C7F4FA]">
-                                    {user._count.following.toLocaleString()}
-                                </span>
-                                <span className="font-nunito text-sm text-[#C7F4FA]/50">
-                                    Following
-                                </span>
-                            </div>
-                        </div>
-
-                        {/* Badges */}
-                        {user.userBadges.length > 0 && (
-                            <div className="flex items-center gap-2 flex-1">
-                                <Tag className="w-5 h-5 text-[#C7F4FA]/50" />
-                                <div className="flex flex-wrap gap-2">
-                                    {user.userBadges.slice(0, 5).map((userBadge) => (
-                                        <span
-                                            key={userBadge.id}
-                                            className="px-3 py-1.5 bg-[#06363D] border border-[#084B54] rounded-full text-xs font-hebden font-semibold text-[#C7F4FA] hover:bg-[#084B54] transition-colors cursor-pointer"
-                                            title={userBadge.badge.name}
-                                        >
-                                            {userBadge.badge.name}
-                                        </span>
-                                    ))}
-                                    {user.userBadges.length > 5 && (
-                                        <span className="px-3 py-1.5 bg-[#06363D] border border-[#084B54] rounded-full text-xs font-hebden font-semibold text-[#C7F4FA]">
-                                            +{user.userBadges.length - 5}
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-                        )}
-                    </div>
+                        </>
+                    )}
+                    {user.website && (
+                        <>
+                            <span>•</span>
+                            <a href={user.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-[#109EB1] hover:underline">
+                                <Icon icon="mdi:link" className="w-4 h-4" />
+                                Website
+                            </a>
+                        </>
+                    )}
                 </div>
+
+                {/* Stats and Tags */}
+                <div className="flex flex-wrap items-center gap-6 pb-6">
+                    {/* Stats */}
+                    <div className="flex gap-6">
+                        <div className="flex flex-col">
+                            <span className="font-hebden font-extrabold text-2xl text-[#C7F4FA]">
+                                {user._count.followers.toLocaleString()}
+                            </span>
+                            <span className="font-nunito text-sm text-[#C7F4FA]/50">
+                                Followers
+                            </span>
+                        </div>
+
+                        <div className="flex flex-col">
+                            <span className="font-hebden font-extrabold text-2xl text-[#C7F4FA]">
+                                {user._count.following.toLocaleString()}
+                            </span>
+                            <span className="font-nunito text-sm text-[#C7F4FA]/50">
+                                Following
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* Badges */}
+                    {user.userBadges.length > 0 && (
+                        <div className="flex items-center gap-2 flex-1">
+                            <Tag className="w-5 h-5 text-[#C7F4FA]/50" />
+                            <div className="flex flex-wrap gap-2">
+                                {user.userBadges.slice(0, 5).map((userBadge) => (
+                                    <span
+                                        key={userBadge.id}
+                                        className="px-3 py-1.5 bg-[#06363D] border border-[#084B54] rounded-full text-xs font-hebden font-semibold text-[#C7F4FA] hover:bg-[#084B54] transition-colors cursor-pointer"
+                                        title={userBadge.badge.name}
+                                    >
+                                        {userBadge.badge.name}
+                                    </span>
+                                ))}
+                                {user.userBadges.length > 5 && (
+                                    <span className="px-3 py-1.5 bg-[#06363D] border border-[#084B54] rounded-full text-xs font-hebden font-semibold text-[#C7F4FA]">
+                                        +{user.userBadges.length - 5}
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* Primary action button (Follow) - Mobile only */}
+                {currentUser && currentUser.id !== user.id && (
+                    <div className="pb-6 sm:hidden">
+                        <FollowButton className="w-full" />
+                    </div>
+                )}
             </div>
 
             {/* Tabs Navigation */}

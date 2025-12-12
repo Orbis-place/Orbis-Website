@@ -23,7 +23,7 @@ function VerifyEmailContent() {
         try {
             await authClient.sendVerificationEmail({
                 email,
-                callbackURL: '/dashboard',
+                callbackURL: '/dashboard/profile',
             });
 
             setResendSuccess(true);

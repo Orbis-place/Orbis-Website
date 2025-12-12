@@ -1,58 +1,74 @@
-import {ConfigService} from "@nestjs/config";
-import {Injectable} from "@nestjs/common";
-import {Storage} from "@google-cloud/storage";
-import {v4 as uuidv4} from "uuid";
+import { ConfigService } from "@nestjs/config";
+import { Injectable } from "@nestjs/common";
+import { S3Client, DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import { Upload } from "@aws-sdk/lib-storage";
+import { createId } from "@paralleldrive/cuid2";
 
 @Injectable()
 export class StorageService {
-    private storage: Storage;
+    private s3Client: S3Client;
     private readonly publicBucket: string;
     private readonly privateBucket: string;
+    private readonly publicUrl: string;
 
     constructor(private configService: ConfigService) {
-        const serviceAccountBase64 = this.configService.get('GCS_SERVICE_ACCOUNT_BASE64');
-        const serviceAccountJson = Buffer.from(serviceAccountBase64, 'base64').toString('utf-8');
-        const credentials = JSON.parse(serviceAccountJson);
+        const accountId = this.configService.get('R2_ACCOUNT_ID');
+        const accessKeyId = this.configService.get('R2_ACCESS_KEY_ID');
+        const secretAccessKey = this.configService.get('R2_SECRET_ACCESS_KEY');
 
-        this.storage = new Storage({
-            credentials: credentials,
-            projectId: credentials.project_id,
-        });
-
-        this.publicBucket = this.configService.get('GCS_MEDIA_BUCKET_NAME');
-        this.privateBucket = this.configService.get('GCS_PREMIUM_BUCKET_NAME');
-    }
-
-    async uploadFile(file: Express.Multer.File, folder: string): Promise<string> {
-        const extension = file.originalname.split('.').pop();
-        const filename = `${folder}/${uuidv4()}.${extension}`;
-
-        const bucket = this.storage.bucket(this.publicBucket);
-        const blob = bucket.file(filename);
-
-        const stream = blob.createWriteStream({
-            resumable: false,
-            metadata: {
-                contentType: file.mimetype,
-                cacheControl: 'public, max-age=31536000',
+        this.s3Client = new S3Client({
+            region: 'auto',
+            endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
+            credentials: {
+                accessKeyId,
+                secretAccessKey,
             },
         });
 
-        return new Promise((resolve, reject) => {
-            stream.on('error', (error) => reject(error));
-            stream.on('finish', () => {
-                const publicUrl = `https://media.orbis.place/${filename}`;
-                resolve(publicUrl);
+        this.publicBucket = this.configService.get('R2_PUBLIC_BUCKET_NAME');
+        this.privateBucket = this.configService.get('R2_PRIVATE_BUCKET_NAME');
+
+        this.publicUrl = this.configService.get('R2_PUBLIC_URL') || `https://pub-xxx.r2.dev`;
+    }
+
+    async uploadFile(file: Express.Multer.File, folder: string): Promise<string> {
+        console.log('upllll', file);
+        const extension = file.originalname.split('.').pop();
+        const filename = `${folder}/${createId()}.${extension}`;
+
+        if (file.size < 5 * 1024 * 1024) {
+            await this.s3Client.send(new PutObjectCommand({
+                Bucket: this.publicBucket,
+                Key: filename,
+                Body: file.buffer,
+                ContentType: file.mimetype,
+                CacheControl: 'public, max-age=31536000',
+            }));
+        } else {
+            const upload = new Upload({
+                client: this.s3Client,
+                params: {
+                    Bucket: this.publicBucket,
+                    Key: filename,
+                    Body: file.buffer,
+                    ContentType: file.mimetype,
+                    CacheControl: 'public, max-age=31536000',
+                },
             });
-            stream.end(file.buffer);
-        });
+
+            await upload.done();
+        }
+
+        return `${this.publicUrl}/${filename}`;
     }
 
     async deleteFile(fileUrl: string): Promise<void> {
-        const filename = fileUrl.split(`${this.publicBucket}/`)[1];
+        const filename = fileUrl.split(`${this.publicUrl}/`)[1];
         if (!filename) return;
 
-        const bucket = this.storage.bucket(this.publicBucket);
-        await bucket.file(filename).delete();
+        await this.s3Client.send(new DeleteObjectCommand({
+            Bucket: this.publicBucket,
+            Key: filename,
+        }));
     }
 }
