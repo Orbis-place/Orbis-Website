@@ -15,6 +15,11 @@ const dashboardNav = [
         icon: 'mdi:account',
       },
       {
+        name: 'My Reports',
+        href: '/dashboard/reports',
+        icon: 'mdi:flag',
+      },
+      {
         name: 'Notifications',
         href: '/dashboard/notifications',
         icon: 'mdi:bell',

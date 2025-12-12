@@ -89,6 +89,70 @@ export class ReportService {
         });
     }
 
+    async getMyReportById(userId: string, reportId: string) {
+        const report = await prisma.report.findUnique({
+            where: { id: reportId },
+            select: {
+                id: true,
+                resourceType: true,
+                resourceId: true,
+                reason: true,
+                description: true,
+                status: true,
+                createdAt: true,
+                updatedAt: true,
+                handledAt: true,
+                response: true,
+                reporterId: true,
+            },
+        });
+
+        if (!report) {
+            throw new NotFoundException('Report not found');
+        }
+
+        // Check if the report belongs to the user
+        if (report.reporterId !== userId) {
+            throw new ForbiddenException('You do not have permission to view this report');
+        }
+
+        // Remove reporterId from the response
+        const { reporterId, ...reportData } = report;
+        return reportData;
+    }
+
+    async cancelReport(userId: string, reportId: string) {
+        const report = await prisma.report.findUnique({
+            where: { id: reportId },
+            select: {
+                id: true,
+                reporterId: true,
+                status: true,
+            },
+        });
+
+        if (!report) {
+            throw new NotFoundException('Report not found');
+        }
+
+        // Check if the report belongs to the user
+        if (report.reporterId !== userId) {
+            throw new ForbiddenException('You do not have permission to cancel this report');
+        }
+
+        // Only allow canceling PENDING reports
+        if (report.status !== 'PENDING') {
+            throw new BadRequestException('Only pending reports can be canceled');
+        }
+
+        // Delete the report
+        await prisma.report.delete({
+            where: { id: reportId },
+        });
+
+        return { message: 'Report canceled successfully' };
+    }
+
     // ============================================
     // MODERATION METHODS
     // ============================================

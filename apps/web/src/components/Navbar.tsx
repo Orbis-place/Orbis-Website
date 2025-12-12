@@ -148,6 +148,7 @@ export default function Navbar({ session }: NavbarProps) {
                                 align="end"
                                 className="w-56 bg-accent border border-border font-hebden"
                             >
+                                {/* General Section */}
                                 <DropdownMenuItem asChild className="text-foreground cursor-pointer">
                                     <Link href={`/users/${session.user.name}`}
                                         className="flex items-center gap-2 w-full px-2 py-2">
@@ -156,13 +157,12 @@ export default function Navbar({ session }: NavbarProps) {
                                     </Link>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem asChild className="text-foreground cursor-pointer">
-                                    <Link href="/dashboard/settings"
+                                    <Link href="/dashboard/reports"
                                         className="flex items-center gap-2 w-full px-2 py-2">
-                                        <Settings size={16} />
-                                        Settings
+                                        <Icon icon="mdi:flag" width="16" height="16" />
+                                        My Reports
                                     </Link>
                                 </DropdownMenuItem>
-                                <DropdownMenuSeparator className="bg-[#084B54]" />
                                 <DropdownMenuItem asChild className="text-foreground cursor-pointer">
                                     <Link href="/dashboard/notifications"
                                         className="flex items-center gap-2 w-full px-2 py-2">
@@ -177,7 +177,10 @@ export default function Navbar({ session }: NavbarProps) {
                                         Collections
                                     </Link>
                                 </DropdownMenuItem>*/}
+
                                 <DropdownMenuSeparator className="bg-[#084B54]" />
+
+                                {/* Content Section */}
                                 <DropdownMenuItem asChild className="text-foreground cursor-pointer">
                                     <Link href="/dashboard/resources"
                                         className="flex items-center gap-2 w-full px-2 py-2">
@@ -199,7 +202,20 @@ export default function Navbar({ session }: NavbarProps) {
                                         My Servers
                                     </Link>
                                 </DropdownMenuItem>
+
                                 <DropdownMenuSeparator className="bg-[#084B54]" />
+
+                                {/* Settings Section */}
+                                <DropdownMenuItem asChild className="text-foreground cursor-pointer">
+                                    <Link href="/dashboard/settings"
+                                        className="flex items-center gap-2 w-full px-2 py-2">
+                                        <Settings size={16} />
+                                        Settings
+                                    </Link>
+                                </DropdownMenuItem>
+
+                                <DropdownMenuSeparator className="bg-[#084B54]" />
+
                                 <DropdownMenuItem
                                     onClick={handleSignOut}
                                     className="text-destructive cursor-pointer data-[highlighted]:text-destructive"
@@ -369,7 +385,7 @@ export default function Navbar({ session }: NavbarProps) {
                             {/* Profile & Settings */}
                             <div className="space-y-1">
                                 <h3 className="font-hebden font-semibold text-sm text-foreground/60 uppercase tracking-wider mb-3">
-                                    Account
+                                    General
                                 </h3>
 
                                 <Link href={`/users/${session.user.name}`} onClick={closeMobileProfile}
@@ -378,10 +394,10 @@ export default function Navbar({ session }: NavbarProps) {
                                     <span className="font-hebden font-medium text-foreground">Profile</span>
                                 </Link>
 
-                                <Link href="/dashboard/settings" onClick={closeMobileProfile}
+                                <Link href="/dashboard/reports" onClick={closeMobileProfile}
                                     className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent transition-colors">
-                                    <Settings size={20} className="text-primary" />
-                                    <span className="font-hebden font-medium text-foreground">Settings</span>
+                                    <Icon icon="mdi:flag" width="20" height="20" className="text-primary" />
+                                    <span className="font-hebden font-medium text-foreground">My Reports</span>
                                 </Link>
 
                                 <Link href="/dashboard/notifications" onClick={closeMobileProfile}
@@ -400,7 +416,7 @@ export default function Navbar({ session }: NavbarProps) {
                             {/* Dashboard Links */}
                             <div className="space-y-1">
                                 <h3 className="font-hebden font-semibold text-sm text-foreground/60 uppercase tracking-wider mb-3">
-                                    Dashboard
+                                    Content
                                 </h3>
 
                                 <Link href="/dashboard/resources" onClick={closeMobileProfile}
@@ -419,6 +435,19 @@ export default function Navbar({ session }: NavbarProps) {
                                     className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent transition-colors">
                                     <Icon icon="mdi:server" width="20" height="20" className="text-primary" />
                                     <span className="font-hebden font-medium text-foreground">My Servers</span>
+                                </Link>
+                            </div>
+
+                            {/* Settings */}
+                            <div className="space-y-1">
+                                <h3 className="font-hebden font-semibold text-sm text-foreground/60 uppercase tracking-wider mb-3">
+                                    Settings
+                                </h3>
+
+                                <Link href="/dashboard/settings" onClick={closeMobileProfile}
+                                    className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent transition-colors">
+                                    <Settings size={20} className="text-primary" />
+                                    <span className="font-hebden font-medium text-foreground">Settings</span>
                                 </Link>
                             </div>
                         </div>

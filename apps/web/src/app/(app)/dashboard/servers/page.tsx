@@ -8,7 +8,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Area, AreaChart, XAxis, YAxis } from 'recharts';
 import Image from 'next/image';
-import { OrbisConfirmDialog } from '@/components/OrbisDialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { OrbisConfirmDialog, OrbisFormDialog } from '@/components/OrbisDialog';
+import { toast } from 'sonner';
 
 interface ServerCategory {
   id: string;
@@ -28,8 +33,7 @@ interface Server {
   slug: string;
   description: string;
   shortDesc?: string;
-  serverIp: string;
-  port: number;
+  serverAddress: string;
   status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'SUSPENDED' | 'ARCHIVED';
   logo?: string;
   banner?: string;
@@ -38,7 +42,7 @@ interface Server {
   currentPlayers: number;
   maxPlayers: number;
   isOnline: boolean;
-  votesCount: number;
+  voteCount: number;
   websiteUrl?: string;
   discordUrl?: string;
   youtubeUrl?: string;
@@ -57,15 +61,75 @@ interface Server {
   }>;
 }
 
+interface Team {
+  id: string;
+  name: string;
+  displayName: string;
+  logo?: string;
+}
+
 export default function ServersPage() {
   const router = useRouter();
   const [servers, setServers] = useState<Server[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingServerId, setDeletingServerId] = useState<string | null>(null);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [categories, setCategories] = useState<ServerCategory[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [loadingTeams, setLoadingTeams] = useState(false);
+  const [createFormData, setCreateFormData] = useState({
+    name: '',
+    description: '',
+    serverAddress: '',
+    gameVersion: '1.0.0',
+    primaryCategoryId: '',
+    teamId: undefined as string | undefined,
+  });
 
   useEffect(() => {
     fetchServers();
+    fetchCategories();
   }, []);
+
+  useEffect(() => {
+    if (isCreateOpen) {
+      fetchTeams();
+    }
+  }, [isCreateOpen]);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/server-categories`);
+      if (response.ok) {
+        const data = await response.json();
+        setCategories(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch categories:', error);
+    }
+  };
+
+  const fetchTeams = async () => {
+    setLoadingTeams(true);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/teams/user/my-teams`, {
+        credentials: 'include',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        // Filter to only teams where user is owner or admin
+        const filteredTeams = data.filter((team: any) =>
+          team.memberRole === 'OWNER' || team.memberRole === 'ADMIN'
+        );
+        setTeams(filteredTeams);
+      }
+    } catch (error) {
+      console.error('Failed to fetch teams:', error);
+    } finally {
+      setLoadingTeams(false);
+    }
+  };
 
   const fetchServers = async () => {
     try {
@@ -100,6 +164,66 @@ export default function ServersPage() {
       console.error('Failed to delete server:', error);
     } finally {
       setDeletingServerId(null);
+    }
+  };
+
+  const handleCreateInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setCreateFormData({
+      ...createFormData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleCreateServer = async (e: React.FormEvent) => {
+    setIsCreating(true);
+
+    try {
+      const serverData = {
+        name: createFormData.name,
+        description: createFormData.description,
+        serverAddress: createFormData.serverAddress,
+        gameVersion: createFormData.gameVersion,
+        primaryCategoryId: createFormData.primaryCategoryId,
+        supportedVersions: [createFormData.gameVersion],
+        teamId: createFormData.teamId,
+      };
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/servers`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(serverData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create server');
+      }
+
+      const data = await response.json();
+      console.log('Server created:', data);
+
+      // Reset form and close dialog
+      setCreateFormData({
+        name: '',
+        description: '',
+        serverAddress: '',
+        gameVersion: '1.0.0',
+        primaryCategoryId: '',
+        teamId: undefined,
+      });
+      setIsCreateOpen(false);
+
+      toast.success('Server created successfully!');
+
+      // Refresh the servers list
+      fetchServers();
+    } catch (error) {
+      console.error('Error creating server:', error);
+      toast.error('Failed to create server. Please try again.');
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -140,7 +264,7 @@ export default function ServersPage() {
       data.push({
         date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
         players: i === 0 ? server.currentPlayers : 0,
-        votes: i === 0 ? server.votesCount : 0,
+        votes: i === 0 ? server.voteCount : 0,
       });
     }
 
@@ -167,10 +291,169 @@ export default function ServersPage() {
             Manage your Hytale servers and monitor their status
           </p>
         </div>
-        <Button className="font-hebden" onClick={() => router.push('/dashboard/servers/new')}>
-          <Icon icon="mdi:plus" width="20" height="20" />
-          Add Server
-        </Button>
+        <OrbisFormDialog
+          open={isCreateOpen}
+          onOpenChange={setIsCreateOpen}
+          trigger={
+            <Button className="font-hebden">
+              <Icon icon="mdi:plus" width="20" height="20" />
+              Add Server
+            </Button>
+          }
+          title="Add New Server"
+          description="Fill in the details to add your server"
+          size="lg"
+          onSubmit={handleCreateServer}
+          submitText="Add Server"
+          submitLoading={isCreating}
+          onCancel={() => setIsCreateOpen(false)}
+        >
+          <div className="space-y-4">
+            {/* Owner Selection */}
+            <div className="space-y-2">
+              <Label htmlFor="owner">
+                Owner *
+              </Label>
+              <Select
+                value={createFormData.teamId || 'personal'}
+                onValueChange={(value) => setCreateFormData({ ...createFormData, teamId: value === 'personal' ? undefined : value })}
+              >
+                <SelectTrigger id="owner" className="w-full">
+                  <SelectValue placeholder="Select owner" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="personal">
+                    <span className="flex items-center gap-2">
+                      <Icon icon="mdi:account" width="16" height="16" />
+                      Personal
+                    </span>
+                  </SelectItem>
+                  {loadingTeams ? (
+                    <SelectItem value="loading" disabled>
+                      <span className="flex items-center gap-2">
+                        <Icon icon="mdi:loading" width="16" height="16" className="animate-spin" />
+                        Loading teams...
+                      </span>
+                    </SelectItem>
+                  ) : (
+                    teams.map((team) => (
+                      <SelectItem key={team.id} value={team.id}>
+                        <span className="flex items-center gap-2">
+                          <Icon icon="mdi:account-group" width="16" height="16" />
+                          {team.displayName}
+                        </span>
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground/60 font-nunito">
+                Choose whether this server belongs to you or one of your teams
+              </p>
+            </div>
+
+            {/* Server Name */}
+            <div className="space-y-2">
+              <Label htmlFor="name">
+                Server Name *
+              </Label>
+              <Input
+                id="name"
+                name="name"
+                value={createFormData.name}
+                onChange={handleCreateInputChange}
+                placeholder="My Awesome Server"
+                required
+              />
+            </div>
+
+            {/* Description */}
+            <div className="space-y-2">
+              <Label htmlFor="description">
+                Description *
+              </Label>
+              <Textarea
+                id="description"
+                name="description"
+                value={createFormData.description}
+                onChange={handleCreateInputChange}
+                placeholder="A brief description of your server..."
+                rows={3}
+                maxLength={200}
+                required
+              />
+              <p className="text-xs text-muted-foreground/60 font-nunito">
+                {createFormData.description.length}/200 characters (minimum 10)
+              </p>
+            </div>
+
+            {/* Server Address */}
+            <div className="space-y-2">
+              <Label htmlFor="serverAddress">
+                Server Address *
+              </Label>
+              <Input
+                id="serverAddress"
+                name="serverAddress"
+                value={createFormData.serverAddress}
+                onChange={handleCreateInputChange}
+                placeholder="1.1.1.1:25565 or play.myserver.com"
+                required
+              />
+              <p className="text-xs text-muted-foreground/60 font-nunito">
+                Enter IP:port or domain:port (port defaults to 25565)
+              </p>
+            </div>
+
+            {/* Game Version */}
+            <div className="space-y-2">
+              <Label htmlFor="gameVersion">
+                Game Version *
+              </Label>
+              <Input
+                id="gameVersion"
+                name="gameVersion"
+                value={createFormData.gameVersion}
+                onChange={handleCreateInputChange}
+                placeholder="1.0.0"
+                required
+              />
+            </div>
+
+            {/* Primary Category */}
+            <div className="space-y-2">
+              <Label htmlFor="primaryCategoryId">
+                Primary Category *
+              </Label>
+              <Select
+                value={createFormData.primaryCategoryId}
+                onValueChange={(value) => setCreateFormData({ ...createFormData, primaryCategoryId: value })}
+                required
+              >
+                <SelectTrigger id="primaryCategoryId" className="w-full">
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Info Box */}
+            <div className="bg-primary/10 p-4 rounded-lg border border-primary/20">
+              <div className="flex gap-3">
+                <Icon icon="mdi:information" className="text-primary flex-shrink-0 mt-0.5" width="20" height="20" />
+                <p className="text-sm text-foreground/80 font-nunito">
+                  Your server will be created with <strong>pending</strong> status. You can add more details and customize it after creation.
+                </p>
+              </div>
+            </div>
+          </div>
+        </OrbisFormDialog>
       </div>
 
       {/* Stats */}
@@ -255,11 +538,11 @@ export default function ServersPage() {
                       </span>
                       <span className="flex items-center gap-1">
                         <Icon icon="mdi:thumb-up" width="16" height="16" />
-                        {server.votesCount} votes
+                        {server.voteCount} votes
                       </span>
                     </div>
                     <div className="text-xs text-muted-foreground font-nunito">
-                      {server.serverIp}:{server.port}
+                      {server.serverAddress}
                     </div>
                   </div>
                 </div>
@@ -311,9 +594,9 @@ export default function ServersPage() {
                     <Icon icon="mdi:eye" width="16" height="16" />
                     View
                   </Button>
-                  <Button size="sm" variant="outline" className="font-nunito text-sm" onClick={() => router.push(`/dashboard/servers/${server.id}/edit`)}>
+                  <Button size="sm" variant="outline" className="font-nunito text-sm" onClick={() => router.push(`/servers/${server.slug}/manage`)}>
                     <Icon icon="mdi:pencil" width="16" height="16" />
-                    Edit
+                    Manage
                   </Button>
                   <Button size="sm" variant="destructive" className="font-nunito text-sm" onClick={() => setDeletingServerId(server.id)}>
                     <Icon icon="mdi:delete" width="16" height="16" />
@@ -332,7 +615,7 @@ export default function ServersPage() {
             <p className="text-muted-foreground font-nunito text-sm mb-6 text-center max-w-md">
               Add your Hytale servers to track their status, manage players, and showcase them to the community.
             </p>
-            <Button className="font-hebden" onClick={() => router.push('/dashboard/servers/new')}>
+            <Button className="font-hebden" onClick={() => setIsCreateOpen(true)}>
               <Icon icon="mdi:plus" width="20" height="20" />
               Add Your First Server
             </Button>

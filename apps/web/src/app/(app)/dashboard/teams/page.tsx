@@ -4,9 +4,13 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Icon } from '@iconify-icon/react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { useSessionStore } from '@/stores/useSessionStore';
 import Image from 'next/image';
-import { OrbisConfirmDialog } from '@/components/OrbisDialog';
+import { OrbisFormDialog, OrbisConfirmDialog } from '@/components/OrbisDialog';
+import { toast } from 'sonner';
 
 interface TeamMember {
   id: string;
@@ -24,8 +28,6 @@ interface Team {
   name: string;
   displayName: string;
   description?: string;
-  websiteUrl?: string;
-  discordUrl?: string;
   logo?: string;
   banner?: string;
   members: TeamMember[];
@@ -61,7 +63,8 @@ export default function TeamsPage() {
   const [teams, setTeams] = useState<Team[]>([]);
   const [invitations, setInvitations] = useState<TeamInvitation[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     displayName: '',
@@ -109,8 +112,16 @@ export default function TeamsPage() {
     }
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
   const handleCreateTeam = async (e: React.FormEvent) => {
-    e.preventDefault();
+    setIsLoading(true);
+
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/teams`, {
         method: 'POST',
@@ -121,20 +132,32 @@ export default function TeamsPage() {
         body: JSON.stringify(formData),
       });
 
-      if (response.ok) {
-        const newTeam = await response.json();
-        setTeams([...teams, newTeam]);
-        setShowCreateForm(false);
-        setFormData({
-          name: '',
-          displayName: '',
-          description: '',
-          websiteUrl: '',
-          discordUrl: '',
-        });
+      if (!response.ok) {
+        throw new Error('Failed to create team');
       }
+
+      const newTeam = await response.json();
+      console.log('Team created:', newTeam);
+
+      // Reset form and close dialog
+      setFormData({
+        name: '',
+        displayName: '',
+        description: '',
+        websiteUrl: '',
+        discordUrl: '',
+      });
+      setIsCreateOpen(false);
+
+      toast.success('Team created successfully!');
+
+      // Refresh the teams list
+      fetchTeams();
     } catch (error) {
-      console.error('Failed to create team:', error);
+      console.error('Error creating team:', error);
+      toast.error('Failed to create team. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -243,91 +266,77 @@ export default function TeamsPage() {
             Collaborate with other creators and manage team projects
           </p>
         </div>
-        <Button className="font-hebden" onClick={() => setShowCreateForm(!showCreateForm)}>
-          <Icon icon="mdi:plus" width="20" height="20" />
-          Create Team
-        </Button>
-      </div>
 
-      {/* Create Team Form */}
-      {showCreateForm && (
-        <div className="bg-secondary/30 rounded-lg p-6">
-          <h2 className="font-hebden text-xl font-semibold mb-4 text-foreground">Create New Team</h2>
-          <form onSubmit={handleCreateTeam} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-nunito text-foreground mb-2">Team Name (URL)*</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="my-awesome-team"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground font-nunito focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-                <p className="text-xs text-muted-foreground mt-1 font-nunito">Lowercase letters, numbers, and hyphens only</p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-nunito text-foreground mb-2">Display Name*</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="My Awesome Team"
-                  value={formData.displayName}
-                  onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
-                  className="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground font-nunito focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-              </div>
+        {/* Create Team Dialog */}
+        <OrbisFormDialog
+          open={isCreateOpen}
+          onOpenChange={setIsCreateOpen}
+          trigger={
+            <Button className="font-hebden">
+              <Icon icon="mdi:plus" width="20" height="20" />
+              Create Team
+            </Button>
+          }
+          title="Create New Team"
+          description="Fill in the details to create your team"
+          size="lg"
+          onSubmit={handleCreateTeam}
+          submitText="Create Team"
+          submitLoading={isLoading}
+          onCancel={() => setIsCreateOpen(false)}
+        >
+          <div className="space-y-4">
+            {/* Team Name (URL) */}
+            <div className="space-y-2">
+              <Label htmlFor="name">
+                Team Name (URL) *
+              </Label>
+              <Input
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                placeholder="my-awesome-team"
+                required
+              />
+              <p className="text-xs text-muted-foreground/60 font-nunito">
+                Lowercase letters, numbers, and hyphens only
+              </p>
             </div>
 
-            <div>
-              <label className="block text-sm font-nunito text-foreground mb-2">Description</label>
-              <textarea
-                rows={3}
-                placeholder="Describe your team..."
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground font-nunito focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+            {/* Display Name */}
+            <div className="space-y-2">
+              <Label htmlFor="displayName">
+                Display Name *
+              </Label>
+              <Input
+                id="displayName"
+                name="displayName"
+                value={formData.displayName}
+                onChange={handleInputChange}
+                placeholder="My Awesome Team"
+                required
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-nunito text-foreground mb-2">Website URL</label>
-                <input
-                  type="url"
-                  placeholder="https://example.com"
-                  value={formData.websiteUrl}
-                  onChange={(e) => setFormData({ ...formData, websiteUrl: e.target.value })}
-                  className="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground font-nunito focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-nunito text-foreground mb-2">Discord URL</label>
-                <input
-                  type="url"
-                  placeholder="https://discord.gg/example"
-                  value={formData.discordUrl}
-                  onChange={(e) => setFormData({ ...formData, discordUrl: e.target.value })}
-                  className="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground font-nunito focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-              </div>
+            {/* Description */}
+            <div className="space-y-2">
+              <Label htmlFor="description">
+                Description
+              </Label>
+              <Textarea
+                id="description"
+                name="description"
+                value={formData.description}
+                onChange={handleInputChange}
+                placeholder="Describe your team..."
+                rows={3}
+                className="resize-none"
+              />
             </div>
-
-            <div className="flex gap-3">
-              <Button type="submit" className="font-hebden">
-                <Icon icon="mdi:check" width="20" height="20" />
-                Create Team
-              </Button>
-              <Button type="button" variant="outline" className="font-hebden" onClick={() => setShowCreateForm(false)}>
-                Cancel
-              </Button>
-            </div>
-          </form>
-        </div>
-      )}
+          </div>
+        </OrbisFormDialog>
+      </div>
 
       {/* Pending Invitations */}
       {invitations.length > 0 && (
@@ -427,22 +436,10 @@ export default function TeamsPage() {
                         </span>
                       )}
                     </div>
-                    <div className="flex gap-2 mt-3">
-                      {team.websiteUrl && (
-                        <a href={team.websiteUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-sm">
-                          <Icon icon="mdi:web" width="16" height="16" className="inline" />
-                        </a>
-                      )}
-                      {team.discordUrl && (
-                        <a href={team.discordUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-sm">
-                          <Icon icon="mdi:discord" width="16" height="16" className="inline" />
-                        </a>
-                      )}
-                    </div>
                   </div>
                 </div>
                 <div className="flex gap-2 mt-4">
-                  <Button size="sm" variant="outline" className="font-nunito text-sm" onClick={() => router.push(`/dashboard/teams/${team.name}`)}>
+                  <Button size="sm" variant="outline" className="font-nunito text-sm" onClick={() => router.push(`/team/${team.name}/manage`)}>
                     <Icon icon="mdi:cog" width="16" height="16" />
                     Manage
                   </Button>
@@ -492,18 +489,6 @@ export default function TeamsPage() {
                         </span>
                       )}
                     </div>
-                    <div className="flex gap-2 mt-3">
-                      {team.websiteUrl && (
-                        <a href={team.websiteUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-sm">
-                          <Icon icon="mdi:web" width="16" height="16" className="inline" />
-                        </a>
-                      )}
-                      {team.discordUrl && (
-                        <a href={team.discordUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-sm">
-                          <Icon icon="mdi:discord" width="16" height="16" className="inline" />
-                        </a>
-                      )}
-                    </div>
                   </div>
                 </div>
                 <div className="flex gap-2 mt-4">
@@ -511,7 +496,7 @@ export default function TeamsPage() {
                     <Icon icon="mdi:eye" width="16" height="16" />
                     View
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => router.push(`/dashboard/teams/${team.name}`)}>
+                  <Button size="sm" variant="outline" onClick={() => router.push(`/team/${team.name}/manage`)}>
                     <Icon icon="mdi:cog" width="16" height="16" />
                     Manage
                   </Button>
@@ -527,7 +512,7 @@ export default function TeamsPage() {
       )}
 
       {/* Empty State */}
-      {teams.length === 0 && !showCreateForm && (
+      {teams.length === 0 && (
         <div className="bg-secondary/30 rounded-lg p-6">
           <div className="flex flex-col items-center justify-center py-12">
             <div className="p-4 bg-accent rounded-full mb-4">
@@ -537,7 +522,7 @@ export default function TeamsPage() {
             <p className="text-muted-foreground font-nunito text-sm mb-6 text-center max-w-md">
               Create or join teams to collaborate on projects, share resources, and work together with other creators.
             </p>
-            <Button className="font-hebden" onClick={() => setShowCreateForm(true)}>
+            <Button className="font-hebden" onClick={() => setIsCreateOpen(true)}>
               <Icon icon="mdi:plus" width="20" height="20" />
               Create Your First Team
             </Button>

@@ -22,6 +22,27 @@ export class ResourceService {
      * Create a new resource
      */
     async create(userId: string, createDto: CreateResourceDto) {
+        // Verify team ownership if teamId provided
+        if (createDto.teamId) {
+            const team = await prisma.team.findUnique({
+                where: { id: createDto.teamId },
+                include: {
+                    members: {
+                        where: {
+                            userId,
+                            role: { in: ['OWNER', 'ADMIN'] },
+                        },
+                    },
+                },
+            });
+
+            if (!team || team.members.length === 0) {
+                throw new ForbiddenException(
+                    'You must be a team owner or admin to create resources for this team',
+                );
+            }
+        }
+
         // Generate unique slug
         const slug = await this.generateUniqueSlug(createDto.name);
 
@@ -35,6 +56,7 @@ export class ResourceService {
                 visibility: createDto.visibility,
                 status: ResourceStatus.DRAFT,
                 ownerId: userId,
+                teamId: createDto.teamId,
                 // Default values for required fields
                 licenseType: 'MIT', // Default license, should be updated later
                 priceType: 'FREE', // Default to free
@@ -268,9 +290,10 @@ export class ResourceService {
             throw new NotFoundException('Resource not found');
         }
 
-        // Check if user is owner
-        if (resource.ownerId !== userId) {
-            throw new ForbiddenException('You can only update your own resources');
+        // Check if user has edit permission (owner or team admin)
+        const canEdit = await this.checkEditPermission(userId, resource);
+        if (!canEdit) {
+            throw new ForbiddenException('You do not have permission to edit this resource');
         }
 
         // Validate license if provided
@@ -556,15 +579,16 @@ export class ResourceService {
 
         const resource = await prisma.resource.findUnique({
             where: { id: resourceId },
-            select: { iconUrl: true, ownerId: true },
+            select: { iconUrl: true, ownerId: true, teamId: true },
         });
 
         if (!resource) {
             throw new NotFoundException('Resource not found');
         }
 
-        if (resource.ownerId !== userId) {
-            throw new ForbiddenException('You can only upload icons for your own resources');
+        const canEdit = await this.checkEditPermission(userId, resource);
+        if (!canEdit) {
+            throw new ForbiddenException('You do not have permission to edit this resource');
         }
 
         const iconUrl = await this.storage.uploadFile(
@@ -620,15 +644,16 @@ export class ResourceService {
 
         const resource = await prisma.resource.findUnique({
             where: { id: resourceId },
-            select: { bannerUrl: true, ownerId: true },
+            select: { bannerUrl: true, ownerId: true, teamId: true },
         });
 
         if (!resource) {
             throw new NotFoundException('Resource not found');
         }
 
-        if (resource.ownerId !== userId) {
-            throw new ForbiddenException('You can only upload banners for your own resources');
+        const canEdit = await this.checkEditPermission(userId, resource);
+        if (!canEdit) {
+            throw new ForbiddenException('You do not have permission to edit this resource');
         }
 
         const bannerUrl = await this.storage.uploadFile(
@@ -1495,5 +1520,36 @@ export class ResourceService {
         };
 
         return messages[status] || 'updated';
+    }
+
+    /**
+     * Check edit permission for resources
+     */
+    private async checkEditPermission(
+        userId: string,
+        resource: { ownerId: string; teamId: string | null },
+    ): Promise<boolean> {
+        // Direct owner
+        if (resource.ownerId === userId) {
+            return true;
+        }
+
+        // Team member with permission
+        if (resource.teamId) {
+            const member = await prisma.teamMember.findUnique({
+                where: {
+                    teamId_userId: {
+                        teamId: resource.teamId,
+                        userId,
+                    },
+                },
+            });
+
+            if (member && ['OWNER', 'ADMIN'].includes(member.role)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

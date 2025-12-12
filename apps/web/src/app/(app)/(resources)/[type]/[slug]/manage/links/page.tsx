@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { OrbisFormDialog, OrbisConfirmDialog } from '@/components/OrbisDialog';
 import { toast } from 'sonner';
 
 interface Resource {
@@ -15,20 +16,20 @@ interface Resource {
 }
 
 interface ExternalLink {
-    id: string;
+    id?: string;
     type: string;
     url: string;
     label?: string;
 }
 
 const LINK_TYPES = [
-    { value: 'ISSUE_TRACKER', label: 'Issue Tracker', icon: 'mdi:bug' },
-    { value: 'SOURCE_CODE', label: 'Source Code', icon: 'mdi:github' },
-    { value: 'WIKI', label: 'Wiki', icon: 'mdi:book-open-variant' },
-    { value: 'DISCORD', label: 'Discord', icon: 'mdi:discord' },
-    { value: 'DONATION', label: 'Donation', icon: 'mdi:heart' },
-    { value: 'WEBSITE', label: 'Website', icon: 'mdi:web' },
-    { value: 'OTHER', label: 'Other', icon: 'mdi:link' },
+    { value: 'ISSUE_TRACKER', label: 'Issue Tracker', icon: 'mdi:bug', color: '#F87171' },
+    { value: 'SOURCE_CODE', label: 'Source Code', icon: 'mdi:github', color: '#A78BFA' },
+    { value: 'WIKI', label: 'Wiki', icon: 'mdi:book-open-variant', color: '#60A5FA' },
+    { value: 'DISCORD', label: 'Discord', icon: 'mdi:discord', color: '#818CF8' },
+    { value: 'DONATION', label: 'Donation', icon: 'mdi:heart', color: '#FB7185' },
+    { value: 'WEBSITE', label: 'Website', icon: 'mdi:web', color: '#34D399' },
+    { value: 'OTHER', label: 'Other', icon: 'mdi:link', color: '#94A3B8' },
 ];
 
 export default function ManageLinksPage() {
@@ -39,7 +40,10 @@ export default function ManageLinksPage() {
     const [saving, setSaving] = useState(false);
     const [resource, setResource] = useState<Resource | null>(null);
     const [externalLinks, setExternalLinks] = useState<ExternalLink[]>([]);
-    const [newLink, setNewLink] = useState({ type: 'WEBSITE', url: '', label: '' });
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [editingIndex, setEditingIndex] = useState<number | null>(null);
+    const [deletingIndex, setDeletingIndex] = useState<number | null>(null);
+    const [formData, setFormData] = useState({ type: 'WEBSITE', url: '', label: '' });
 
     useEffect(() => {
         fetchResource();
@@ -65,32 +69,26 @@ export default function ManageLinksPage() {
         }
     };
 
-    const addExternalLink = () => {
-        if (!newLink.url) {
-            toast.error('URL is required');
-            return;
-        }
-
-        setExternalLinks([...externalLinks, { ...newLink, id: '' }]);
-        setNewLink({ type: 'WEBSITE', url: '', label: '' });
-        toast.success('Link added');
+    const openAddDialog = () => {
+        setFormData({ type: 'WEBSITE', url: '', label: '' });
+        setEditingIndex(null);
+        setIsDialogOpen(true);
     };
 
-    const removeExternalLink = (index: number) => {
-        setExternalLinks(externalLinks.filter((_, i) => i !== index));
+    const openEditDialog = (index: number) => {
+        const link = externalLinks[index];
+        if (!link) return;
+        setFormData({ type: link.type, url: link.url, label: link.label || '' });
+        setEditingIndex(index);
+        setIsDialogOpen(true);
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-
+    const saveLinks = async (updatedLinks: ExternalLink[]) => {
         if (!resource) return;
 
-        setSaving(true);
-
         try {
-            const currentLinkIds = resource.externalLinks?.map(l => l.id) || [];
-            const existingLinks = externalLinks.filter(l => l.id);
-            const newLinks = externalLinks.filter(l => !l.id);
+            const existingLinks = updatedLinks.filter(l => l.id);
+            const newLinks = updatedLinks.filter(l => !l.id);
 
             const updateData = {
                 externalLinks: [...existingLinks, ...newLinks],
@@ -110,11 +108,67 @@ export default function ManageLinksPage() {
                 throw new Error(errorData.message || 'Failed to update links');
             }
 
-            toast.success('Links updated successfully!');
             fetchResource(); // Refresh to get new IDs
         } catch (error) {
             console.error('Failed to update links:', error);
             toast.error(error instanceof Error ? error.message : 'Failed to update links');
+            throw error;
+        }
+    };
+
+    const handleSubmitDialog = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!formData.url) {
+            toast.error('URL is required');
+            return;
+        }
+
+        // Basic URL validation
+        try {
+            new URL(formData.url);
+        } catch {
+            toast.error('Please enter a valid URL');
+            return;
+        }
+
+        setSaving(true);
+        let updatedLinks: ExternalLink[];
+
+        if (editingIndex !== null) {
+            // Update existing link
+            updatedLinks = [...externalLinks];
+            updatedLinks[editingIndex] = { ...updatedLinks[editingIndex], ...formData };
+        } else {
+            // Add new link
+            updatedLinks = [...externalLinks, { ...formData, id: '' }];
+        }
+
+        try {
+            await saveLinks(updatedLinks);
+            setExternalLinks(updatedLinks);
+            toast.success(editingIndex !== null ? 'Link updated successfully' : 'Link added successfully');
+            setIsDialogOpen(false);
+        } catch {
+            // Error already shown in saveLinks
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleDeleteLink = async () => {
+        if (deletingIndex === null || !resource) return;
+
+        setSaving(true);
+        const updatedLinks = externalLinks.filter((_, i) => i !== deletingIndex);
+
+        try {
+            await saveLinks(updatedLinks);
+            setExternalLinks(updatedLinks);
+            toast.success('Link removed successfully');
+            setDeletingIndex(null);
+        } catch {
+            // Error already shown in saveLinks
         } finally {
             setSaving(false);
         }
@@ -123,123 +177,194 @@ export default function ManageLinksPage() {
     if (loading) {
         return (
             <div className="flex items-center justify-center py-12">
-                <Icon icon="mdi:loading" width="48" height="48" className="text-[#109EB1] animate-spin" />
+                <Icon icon="mdi:loading" width="48" height="48" className="text-primary animate-spin" />
             </div>
         );
     }
 
     if (!resource) {
         return (
-            <div className="flex flex-col items-center justify-center py-12 text-[#C7F4FA]">
-                <p className="font-nunito text-lg mb-4">Resource not found</p>
+            <div className="flex flex-col items-center justify-center py-12">
+                <Icon icon="mdi:alert-circle" width="48" height="48" className="text-destructive mb-4" />
+                <p className="font-nunito text-lg text-foreground/60">Resource not found</p>
             </div>
         );
     }
 
-    return (
-        <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-                <h2 className="font-hebden text-xl font-semibold mb-6 text-[#C7F4FA]">External Links</h2>
+    const getLinkTypeInfo = (type: string) => LINK_TYPES.find(t => t.value === type) || LINK_TYPES[LINK_TYPES.length - 1];
 
-                <div className="space-y-6">
-                    {externalLinks.length > 0 && (
-                        <div className="space-y-2">
-                            <Label className="font-nunito text-[#C7F4FA]">Current Links</Label>
-                            <div className="space-y-2">
-                                {externalLinks.map((link, index) => {
-                                    const linkType = LINK_TYPES.find(t => t.value === link.type);
-                                    return (
-                                        <div key={index} className="flex items-center gap-3 p-3 bg-[#032125] border border-[#084B54] rounded-lg">
-                                            <Icon icon={linkType?.icon || 'mdi:link'} width="20" height="20" className="text-[#109EB1]" />
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-sm font-semibold font-hebden text-[#C7F4FA]">{link.label || linkType?.label}</p>
-                                                <p className="text-xs text-[#C7F4FA]/60 font-nunito truncate">{link.url}</p>
-                                            </div>
+    return (
+        <div className="space-y-6">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h1 className="font-hebden text-3xl font-bold text-foreground">External Links</h1>
+                    <p className="text-muted-foreground mt-1 font-nunito">
+                        Add links to external resources like source code, documentation, or community channels
+                    </p>
+                </div>
+                <Button className="font-hebden" onClick={openAddDialog}>
+                    <Icon icon="mdi:plus" width="20" height="20" />
+                    Add Link
+                </Button>
+            </div>
+
+            {/* Links List */}
+            {externalLinks.length > 0 ? (
+                <div className="space-y-3">
+                    {externalLinks.map((link, index) => {
+                        const linkType = getLinkTypeInfo(link.type);
+
+                        return (
+                            <div key={index} className="bg-secondary/30 rounded-lg p-4 hover:bg-accent/50 transition-colors">
+                                <div className="flex items-start gap-4">
+                                    <div
+                                        className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0"
+                                        style={{ backgroundColor: linkType?.color + '20' }}
+                                    >
+                                        <Icon
+                                            icon={linkType?.icon || 'mdi:link'}
+                                            width="24"
+                                            height="24"
+                                            style={{ color: linkType?.color }}
+                                        />
+                                    </div>
+
+                                    <div className="flex-1 min-w-0">
+                                        <h3 className="font-hebden text-lg font-semibold text-foreground mb-1">
+                                            {link.label || linkType?.label}
+                                        </h3>
+                                        <a
+                                            href={link.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-sm text-primary hover:underline font-nunito truncate block mb-3"
+                                        >
+                                            {link.url}
+                                        </a>
+
+                                        <div className="flex gap-2">
                                             <Button
-                                                type="button"
-                                                variant="ghost"
                                                 size="sm"
-                                                onClick={() => removeExternalLink(index)}
-                                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                                variant="outline"
+                                                className="font-nunito text-sm"
+                                                onClick={() => openEditDialog(index)}
                                             >
-                                                <Icon icon="mdi:delete" width="18" height="18" />
+                                                <Icon icon="mdi:pencil" width="16" height="16" />
+                                                Edit
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                variant="destructive"
+                                                className="font-nunito text-sm"
+                                                onClick={() => setDeletingIndex(index)}
+                                            >
+                                                <Icon icon="mdi:delete" width="16" height="16" />
+                                                Delete
                                             </Button>
                                         </div>
-                                    );
-                                })}
+                                    </div>
+                                </div>
                             </div>
+                        );
+                    })}
+                </div>
+            ) : (
+                <div className="bg-secondary/30 rounded-lg p-12">
+                    <div className="flex flex-col items-center justify-center text-center">
+                        <div className="p-4 bg-accent rounded-full mb-4">
+                            <Icon icon="mdi:link-variant-off" width="48" height="48" className="text-muted-foreground" />
                         </div>
-                    )}
-
-                    <div className="space-y-2">
-                        <Label className="font-nunito text-[#C7F4FA]">Add New Link</Label>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                            <Select
-                                value={newLink.type}
-                                onValueChange={(value) => setNewLink({ ...newLink, type: value })}
-                            >
-                                <SelectTrigger className="bg-[#032125] border-[#084B54] text-[#C7F4FA]">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent className="bg-[#032125] border-[#084B54] text-[#C7F4FA]">
-                                    {LINK_TYPES.map((type) => (
-                                        <SelectItem key={type.value} value={type.value}>
-                                            <div className="flex items-center gap-2">
-                                                <Icon icon={type.icon} width="16" height="16" />
-                                                {type.label}
-                                            </div>
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-
-                            <Input
-                                placeholder="https://..."
-                                value={newLink.url}
-                                onChange={(e) => setNewLink({ ...newLink, url: e.target.value })}
-                                className="bg-[#032125] border-[#084B54] text-[#C7F4FA] placeholder:text-[#C7F4FA]/30 focus:border-[#109EB1]"
-                            />
-
-                            <Input
-                                placeholder="Label (optional)"
-                                value={newLink.label}
-                                onChange={(e) => setNewLink({ ...newLink, label: e.target.value })}
-                                className="bg-[#032125] border-[#084B54] text-[#C7F4FA] placeholder:text-[#C7F4FA]/30 focus:border-[#109EB1]"
-                            />
-                        </div>
-                        <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={addExternalLink}
-                            className="mt-2 border-[#084B54] text-[#C7F4FA] hover:bg-[#06363D] hover:text-[#C7F4FA]"
-                        >
-                            <Icon icon="mdi:plus" width="16" height="16" className="mr-2" />
-                            Add Link
+                        <p className="text-foreground font-nunito text-lg mb-2">No external links yet</p>
+                        <p className="text-muted-foreground font-nunito text-sm mb-6 max-w-md">
+                            Add links to help users find related resources like your source code, documentation, or community channels.
+                        </p>
+                        <Button className="font-hebden" onClick={openAddDialog}>
+                            <Icon icon="mdi:plus" width="20" height="20" />
+                            Add Your First Link
                         </Button>
                     </div>
                 </div>
-            </div>
+            )}
 
-            <div className="flex justify-end pt-6 border-t border-[#084B54]">
-                <Button
-                    type="submit"
-                    disabled={saving}
-                    className="font-hebden bg-[#109EB1] hover:bg-[#0D8A9A] text-[#C7F4FA]"
-                >
-                    {saving ? (
-                        <>
-                            <Icon icon="mdi:loading" width="20" height="20" className="animate-spin mr-2" />
-                            Saving Changes...
-                        </>
-                    ) : (
-                        <>
-                            <Icon icon="mdi:check" width="20" height="20" className="mr-2" />
-                            Save Changes
-                        </>
-                    )}
-                </Button>
-            </div>
-        </form>
+
+
+            {/* Add/Edit Link Dialog */}
+            <OrbisFormDialog
+                open={isDialogOpen}
+                onOpenChange={setIsDialogOpen}
+                title={editingIndex !== null ? 'Edit Link' : 'Add External Link'}
+                description={editingIndex !== null ? 'Update the link details below' : 'Add a new external link to your resource'}
+                onSubmit={handleSubmitDialog}
+                submitText={editingIndex !== null ? 'Update Link' : 'Add Link'}
+                submitLoading={false}
+                onCancel={() => setIsDialogOpen(false)}
+                size="md"
+            >
+                <div className="space-y-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="link-type" className="font-nunito">Type</Label>
+                        <Select
+                            value={formData.type}
+                            onValueChange={(value) => setFormData({ ...formData, type: value })}
+                        >
+                            <SelectTrigger id="link-type">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {LINK_TYPES.map((type) => (
+                                    <SelectItem key={type.value} value={type.value}>
+                                        <div className="flex items-center gap-2">
+                                            <Icon icon={type.icon} width="16" height="16" style={{ color: type.color }} />
+                                            {type.label}
+                                        </div>
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="link-url" className="font-nunito">
+                            URL <span className="text-destructive">*</span>
+                        </Label>
+                        <Input
+                            id="link-url"
+                            placeholder="https://example.com"
+                            value={formData.url}
+                            onChange={(e) => setFormData({ ...formData, url: e.target.value })}
+                            className="font-mono text-sm"
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="link-label" className="font-nunito">
+                            Custom Label <span className="text-muted-foreground text-xs">(optional)</span>
+                        </Label>
+                        <Input
+                            id="link-label"
+                            placeholder={`e.g., "Official Documentation"`}
+                            value={formData.label}
+                            onChange={(e) => setFormData({ ...formData, label: e.target.value })}
+                        />
+                    </div>
+                </div>
+            </OrbisFormDialog>
+
+            {/* Delete Confirmation Dialog */}
+            <OrbisConfirmDialog
+                open={deletingIndex !== null}
+                onOpenChange={(open) => !open && setDeletingIndex(null)}
+                title="Delete Link"
+                description="Are you sure you want to delete this link? This action cannot be undone."
+                confirmText="Delete Link"
+                cancelText="Cancel"
+                variant="destructive"
+                onConfirm={handleDeleteLink}
+                onCancel={() => setDeletingIndex(null)}
+            >
+                <></>
+            </OrbisConfirmDialog>
+        </div>
     );
 }

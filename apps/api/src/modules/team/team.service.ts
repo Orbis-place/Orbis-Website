@@ -41,8 +41,6 @@ export class TeamService {
                 name: createDto.name.toLowerCase(),
                 displayName: createDto.displayName,
                 description: createDto.description,
-                website: createDto.websiteUrl,
-                discordUrl: createDto.discordUrl,
                 ownerId: userId,
                 members: {
                     create: {
@@ -110,6 +108,9 @@ export class TeamService {
                             image: true,
                         },
                     },
+                    socialLinks: {
+                        orderBy: { order: 'asc' },
+                    },
                     _count: {
                         select: {
                             members: true,
@@ -133,6 +134,7 @@ export class TeamService {
             },
         };
     }
+
 
     /**
      * Find team by name
@@ -178,6 +180,9 @@ export class TeamService {
                     take: 10,
                     orderBy: { createdAt: 'desc' },
                 },
+                socialLinks: {
+                    orderBy: { order: 'asc' },
+                },
                 _count: {
                     select: {
                         members: true,
@@ -193,6 +198,7 @@ export class TeamService {
 
         return team;
     }
+
 
     /**
      * Find team by ID (internal use)
@@ -240,8 +246,6 @@ export class TeamService {
 
         if (updateDto.displayName !== undefined) updateData.displayName = updateDto.displayName;
         if (updateDto.description !== undefined) updateData.description = updateDto.description;
-        if (updateDto.websiteUrl !== undefined) updateData.website = updateDto.websiteUrl;
-        if (updateDto.discordUrl !== undefined) updateData.discordUrl = updateDto.discordUrl;
 
         const updated = await prisma.team.update({
             where: { id: teamId },
@@ -940,6 +944,84 @@ export class TeamService {
     }
 
     /**
+     * Get team resources
+     */
+    async getTeamResources(teamId: string) {
+        const team = await prisma.team.findUnique({
+            where: { id: teamId },
+        });
+
+        if (!team) {
+            throw new NotFoundException('Team not found');
+        }
+
+        const resources = await prisma.resource.findMany({
+            where: { teamId },
+            include: {
+                owner: {
+                    select: {
+                        id: true,
+                        username: true,
+                        displayName: true,
+                        image: true,
+                    },
+                },
+                latestVersion: {
+                    select: {
+                        id: true,
+                        versionNumber: true,
+                        channel: true,
+                        createdAt: true,
+                    },
+                },
+                _count: {
+                    select: {
+                        versions: true,
+                        likes: true,
+                    },
+                },
+            },
+            orderBy: { createdAt: 'desc' },
+        });
+
+        return resources;
+    }
+
+    /**
+     * Get team servers
+     */
+    async getTeamServers(teamId: string) {
+        const team = await prisma.team.findUnique({
+            where: { id: teamId },
+        });
+
+        if (!team) {
+            throw new NotFoundException('Team not found');
+        }
+
+        const servers = await prisma.server.findMany({
+            where: { teamId },
+            select: {
+                id: true,
+                name: true,
+                slug: true,
+                description: true,
+                logo: true,
+                banner: true,
+                currentPlayers: true,
+                maxPlayers: true,
+                isOnline: true,
+                lastPing: true,
+                createdAt: true,
+                updatedAt: true,
+            },
+            orderBy: { createdAt: 'desc' },
+        });
+
+        return servers;
+    }
+
+    /**
      * Check if user has edit permission
      */
     private async checkEditPermission(userId: string, teamId: string): Promise<boolean> {
@@ -977,5 +1059,152 @@ export class TeamService {
         }
 
         return (member.role === TeamMemberRole.OWNER || member.role === TeamMemberRole.ADMIN);
+    }
+
+    // ============================================
+    // SOCIAL LINKS MANAGEMENT
+    // ============================================
+
+    /**
+     * Get team social links
+     */
+    async getSocialLinks(teamId: string) {
+        return prisma.teamSocialLink.findMany({
+            where: { teamId },
+            orderBy: { order: 'asc' },
+        });
+    }
+
+    /**
+     * Create team social link
+     */
+    async createSocialLink(userId: string, teamId: string, data: { type: string; url: string; label?: string }) {
+        // Check permission
+        const canEdit = await this.checkEditPermission(userId, teamId);
+        if (!canEdit) {
+            throw new ForbiddenException('You do not have permission to edit this team');
+        }
+
+        // Check if team already has a link of this type
+        const existingLink = await prisma.teamSocialLink.findUnique({
+            where: {
+                teamId_type: {
+                    teamId,
+                    type: data.type as any,
+                },
+            },
+        });
+
+        if (existingLink) {
+            throw new ConflictException('Team already has a link of this type');
+        }
+
+        // Get current max order
+        const maxOrderLink = await prisma.teamSocialLink.findFirst({
+            where: { teamId },
+            orderBy: { order: 'desc' },
+        });
+
+        return prisma.teamSocialLink.create({
+            data: {
+                teamId,
+                type: data.type as any,
+                url: data.url,
+                label: data.label,
+                order: maxOrderLink ? maxOrderLink.order + 1 : 0,
+            },
+        });
+    }
+
+    /**
+     * Update team social link
+     */
+    async updateSocialLink(userId: string, teamId: string, linkId: string, data: { url?: string; label?: string }) {
+        // Check permission
+        const canEdit = await this.checkEditPermission(userId, teamId);
+        if (!canEdit) {
+            throw new ForbiddenException('You do not have permission to edit this team');
+        }
+
+        const link = await prisma.teamSocialLink.findUnique({
+            where: { id: linkId },
+        });
+
+        if (!link) {
+            throw new NotFoundException('Social link not found');
+        }
+
+        if (link.teamId !== teamId) {
+            throw new BadRequestException('This social link does not belong to this team');
+        }
+
+        return prisma.teamSocialLink.update({
+            where: { id: linkId },
+            data,
+        });
+    }
+
+    /**
+     * Delete team social link
+     */
+    async deleteSocialLink(userId: string, teamId: string, linkId: string) {
+        // Check permission
+        const canEdit = await this.checkEditPermission(userId, teamId);
+        if (!canEdit) {
+            throw new ForbiddenException('You do not have permission to edit this team');
+        }
+
+        const link = await prisma.teamSocialLink.findUnique({
+            where: { id: linkId },
+        });
+
+        if (!link) {
+            throw new NotFoundException('Social link not found');
+        }
+
+        if (link.teamId !== teamId) {
+            throw new BadRequestException('This social link does not belong to this team');
+        }
+
+        await prisma.teamSocialLink.delete({
+            where: { id: linkId },
+        });
+
+        return { message: 'Social link deleted successfully' };
+    }
+
+    /**
+     * Reorder team social links
+     */
+    async reorderSocialLinks(userId: string, teamId: string, linkIds: string[]) {
+        // Check permission
+        const canEdit = await this.checkEditPermission(userId, teamId);
+        if (!canEdit) {
+            throw new ForbiddenException('You do not have permission to edit this team');
+        }
+
+        // Verify all links belong to the team
+        const links = await prisma.teamSocialLink.findMany({
+            where: {
+                id: { in: linkIds },
+                teamId,
+            },
+        });
+
+        if (links.length !== linkIds.length) {
+            throw new BadRequestException('Some link IDs are invalid or do not belong to this team');
+        }
+
+        // Update order for each link
+        const updates = linkIds.map((linkId, index) =>
+            prisma.teamSocialLink.update({
+                where: { id: linkId },
+                data: { order: index },
+            })
+        );
+
+        await Promise.all(updates);
+
+        return this.getSocialLinks(teamId);
     }
 }

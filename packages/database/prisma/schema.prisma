@@ -92,7 +92,7 @@ enum SocialLinkType {
 model User {
   // Core fields (Better Auth)
   id            String   @id @default(cuid())
-  username      String @unique
+  username      String   @unique
   email         String   @unique
   emailVerified Boolean  @default(false)
   image         String?
@@ -143,9 +143,9 @@ model User {
   approvedServers Server[] @relation("ServerApprover")
 
   // Team relations
-  ownedTeams        Team[]           @relation("TeamOwner")
-  teamMemberships   TeamMember[]     @relation("TeamMemberships")
-  sentInvitations   TeamInvitation[] @relation("TeamInvitationsSent")
+  ownedTeams          Team[]           @relation("TeamOwner")
+  teamMemberships     TeamMember[]     @relation("TeamMemberships")
+  sentInvitations     TeamInvitation[] @relation("TeamInvitationsSent")
   receivedInvitations TeamInvitation[] @relation("TeamInvitationsReceived")
 
   // Server status changes
@@ -170,8 +170,8 @@ model User {
 
   // Marketplace - Status & Images
   resourceStatusChanges     ResourceStatusHistory[]
-  resourceDescriptionImages ResourceDescriptionImage[] @relation("ResourceDescriptionImages")
-  versionChangelogImages    ResourceVersionChangelogImage[]    @relation("VersionChangelogImages")
+  resourceDescriptionImages ResourceDescriptionImage[]      @relation("ResourceDescriptionImages")
+  versionChangelogImages    ResourceVersionChangelogImage[] @relation("VersionChangelogImages")
 
   // Social Links
   socialLinks UserSocialLink[] @relation("UserSocialLinks")
@@ -280,10 +280,9 @@ model Team {
   description String?  @db.Text
   logo        String?
   banner      String?
-  website     String?
-  discordUrl  String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
 
   // Ownership
   ownerId String
@@ -294,6 +293,7 @@ model Team {
   invitations TeamInvitation[]
   servers     Server[]
   resources   Resource[]
+  socialLinks TeamSocialLink[] @relation("TeamSocialLinks")
 
   @@index([ownerId])
   @@map("teams")
@@ -327,9 +327,9 @@ model TeamInvitation {
   updatedAt DateTime             @updatedAt
   expiresAt DateTime // Invitation expiration date
 
-  team     Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  inviter  User @relation("TeamInvitationsSent", fields: [inviterId], references: [id], onDelete: Cascade)
-  invitee  User @relation("TeamInvitationsReceived", fields: [inviteeId], references: [id], onDelete: Cascade)
+  team    Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  inviter User @relation("TeamInvitationsSent", fields: [inviterId], references: [id], onDelete: Cascade)
+  invitee User @relation("TeamInvitationsReceived", fields: [inviteeId], references: [id], onDelete: Cascade)
 
   @@unique([teamId, inviteeId, status]) // Prevent multiple pending invitations
   @@index([teamId])
@@ -338,6 +338,23 @@ model TeamInvitation {
   @@index([status])
   @@index([expiresAt])
   @@map("team_invitations")
+}
+
+model TeamSocialLink {
+  id        String         @id @default(cuid())
+  teamId    String
+  type      SocialLinkType
+  url       String
+  label     String? // Optional custom label
+  order     Int            @default(0)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  team Team @relation("TeamSocialLinks", fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, type])
+  @@index([teamId])
+  @@map("team_social_links")
 }
 
 // ============================================
@@ -351,13 +368,12 @@ model Server {
   publishedAt DateTime?
 
   // Basic Information
-  name        String
-  slug        String       @unique
-  description String       @db.Text
-  shortDesc   String?      @db.VarChar(200)
-  serverIp    String
-  port        Int          @default(25565)
-  status      ServerStatus @default(PENDING)
+  name          String
+  slug          String       @unique
+  description   String       @db.Text
+  shortDesc     String?      @db.VarChar(200)
+  serverAddress String       // Format: "ip:port" or just "ip" (default port 25565)
+  status        ServerStatus @default(PENDING)
 
   // Media
   logo   String?
@@ -380,10 +396,7 @@ model Server {
 
   // Links
   websiteUrl String?
-  discordUrl String?
-  youtubeUrl String?
-  twitterUrl String?
-  tiktokUrl  String?
+  country    String?
 
   // Visibility & Features
   featured Boolean @default(false)
@@ -405,6 +418,7 @@ model Server {
   tags          ServerTagRelation[]
   categories    ServerCategoryRelation[]
   statusHistory ServerStatusHistory[]
+  socialLinks   ServerSocialLink[]   @relation("ServerSocialLinks")
 
   @@index([slug])
   @@index([status])
@@ -518,6 +532,24 @@ model ServerPlayerHistory {
   @@map("server_player_history")
 }
 
+model ServerSocialLink {
+  id        String         @id @default(cuid())
+  serverId  String
+  type      SocialLinkType
+  url       String
+  label     String? // Optional custom label
+  order     Int            @default(0)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  server Server @relation("ServerSocialLinks", fields: [serverId], references: [id], onDelete: Cascade)
+
+  @@unique([serverId, type])
+  @@index([serverId])
+  @@map("server_social_links")
+}
+
+
 // ============================================
 // REPORT SYSTEM
 // ============================================
@@ -604,7 +636,7 @@ model Resource {
   name        String
   slug        String             @unique
   tagline     String             @db.VarChar(200) // Short description
-  description String?             @db.Text // Full description (Markdown/HTML with images)
+  description String?            @db.Text // Full description (Markdown/HTML with images)
   type        ResourceType
   status      ResourceStatus     @default(DRAFT)
   visibility  ResourceVisibility @default(PUBLIC)
@@ -651,9 +683,9 @@ model Resource {
 
   // Ownership
   ownerId      String
-  owner        User          @relation("OwnedResources", fields: [ownerId], references: [id], onDelete: Cascade)
+  owner        User                  @relation("OwnedResources", fields: [ownerId], references: [id], onDelete: Cascade)
   teamId       String?
-  team         Team?         @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  team         Team?                 @relation(fields: [teamId], references: [id], onDelete: SetNull)
   contributors ResourceContributor[]
 
   // Relations
@@ -661,7 +693,7 @@ model Resource {
   favorites     ResourceFavorite[]
   downloads     ResourceDownload[]
   statusHistory ResourceStatusHistory[]
-  usedBy       ResourceVersionDependency[] @relation("ResourceDependencies")
+  usedBy        ResourceVersionDependency[] @relation("ResourceDependencies")
 
   // Moderation
   moderationNotes String? // Internal staff notes
@@ -758,18 +790,18 @@ enum LicenseType {
 
 // Gallery images (screenshots, banners, etc.)
 model ResourceGalleryImage {
-  id         String   @id @default(cuid())
+  id         String  @id @default(cuid())
   resourceId String
   url        String
   storageKey String
   caption    String?
-  order      Int      @default(0)
+  order      Int     @default(0)
   size       Int // Bytes
 
-  title     String?
+  title       String?
   description String? @db.Text
 
-  createdAt  DateTime @default(now())
+  createdAt DateTime @default(now())
 
   resource Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
 
@@ -842,20 +874,20 @@ enum ExternalLinkType {
 // ============================================================================
 
 model ResourceCategory {
-  id          String             @id @default(cuid())
-  name        String             @unique
-  slug        String             @unique
+  id          String  @id @default(cuid())
+  name        String  @unique
+  slug        String  @unique
   description String?
   icon        String? // Icon name or emoji
   color       String? // Hex color for UI
-  order       Int                @default(0)
-  usageCount  Int                @default(0) // Global usage count
-  
+  order       Int     @default(0)
+  usageCount  Int     @default(0) // Global usage count
+
   // Resource types this category applies to (empty = all types)
   resourceTypes ResourceType[] @default([])
-  
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   resources   ResourceToCategory[]
   usageByType ResourceCategoryUsageByType[] // Usage statistics per resource type
@@ -899,15 +931,15 @@ model ResourceCategoryUsageByType {
 // ============================================================================
 
 model ResourceTag {
-  id          String            @id @default(cuid())
-  name        String            @unique
-  slug        String            @unique
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
   description String?
   icon        String? // Optional: emoji or icon name
   color       String? // Hex color for UI
-  usageCount  Int               @default(0) // Global usage count
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
+  usageCount  Int      @default(0) // Global usage count
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   resources   ResourceToTag[]
   usageByType ResourceTagUsageByType[] // Usage statistics per resource type
@@ -982,10 +1014,10 @@ model ResourceVersion {
   updatedAt   DateTime  @updatedAt
 
   // Relations
-  resource     Resource            @relation(fields: [resourceId], references: [id], onDelete: Cascade)
-  latestFor    Resource[]          @relation("LatestVersion")
-  dependencies ResourceVersionDependency[]
-  downloadCount Int      @default(0)
+  resource      Resource                    @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  latestFor     Resource[]                  @relation("LatestVersion")
+  dependencies  ResourceVersionDependency[]
+  downloadCount Int                         @default(0)
 
   @@unique([resourceId, versionNumber])
   @@index([resourceId, channel])
@@ -1043,7 +1075,7 @@ model ResourceVersionChangelogImage {
   movedAt    DateTime? // When moved to PERMANENT
 
   version  ResourceVersion? @relation(fields: [versionId], references: [id], onDelete: Cascade)
-  uploader User     @relation("VersionChangelogImages", fields: [uploadedBy], references: [id], onDelete: Cascade)
+  uploader User             @relation("VersionChangelogImages", fields: [uploadedBy], references: [id], onDelete: Cascade)
 
   @@index([versionId])
   @@index([status, expiresAt]) // For cleanup cron
@@ -1073,7 +1105,7 @@ model ResourceVersionFile {
   hash       String // SHA256 for verification
 
   // Metadata
-  uploadedAt    DateTime @default(now())
+  uploadedAt DateTime @default(now())
 
   // Relations
   version    ResourceVersion   @relation(fields: [versionId], references: [id], onDelete: Cascade)
@@ -1099,8 +1131,8 @@ model ResourceVersionDependency {
   dependencyType     DependencyType
   versionRequirement String? // ">=1.0.0", "^2.1.0", etc.
 
-  version    ResourceVersion  @relation(fields: [versionId], references: [id], onDelete: Cascade)
-  dependency Resource @relation("ResourceDependencies", fields: [dependencyId], references: [id], onDelete: Cascade)
+  version    ResourceVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  dependency Resource        @relation("ResourceDependencies", fields: [dependencyId], references: [id], onDelete: Cascade)
 
   @@unique([versionId, dependencyId])
   @@index([dependencyId])

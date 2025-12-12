@@ -2,9 +2,17 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Download, Heart, Bookmark, MoreVertical, Tag, Calendar } from 'lucide-react';
+import { Download, Heart, Bookmark, MoreVertical, Tag, Calendar, Flag, Copy } from 'lucide-react';
 import { Icon } from '@iconify-icon/react';
 import { EntityAvatar } from '@/components/EntityAvatar';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { useState } from 'react';
 
 export interface ResourceHeaderProps {
     title: string;
@@ -25,6 +33,7 @@ export interface ResourceHeaderProps {
     onToggleFavorite?: () => void;
     isLiking?: boolean;
     isFavoriting?: boolean;
+    resourceId?: string; // For copy ID and report functionality
 }
 
 export default function ResourceHeader({
@@ -45,8 +54,18 @@ export default function ResourceHeader({
     onToggleLike,
     onToggleFavorite,
     isLiking = false,
-    isFavoriting = false
+    isFavoriting = false,
+    resourceId
 }: ResourceHeaderProps) {
+    const [copySuccess, setCopySuccess] = useState(false);
+
+    const handleCopyId = () => {
+        if (resourceId) {
+            navigator.clipboard.writeText(resourceId);
+            setCopySuccess(true);
+            setTimeout(() => setCopySuccess(false), 2000);
+        }
+    };
     return (
         <div className="mb-4">
             {/* Banner and Avatar Container */}
@@ -122,38 +141,53 @@ export default function ResourceHeader({
                             <button
                                 onClick={onToggleLike}
                                 disabled={isLiking}
-                                className={`group flex items-center justify-center w-12 h-12 border rounded-full transition-all ${isLiked
+                                className={`group flex items-center justify-center w-12 h-12 border rounded-full transition-all duration-200 ${isLiked
                                     ? 'bg-[#109EB1] border-[#109EB1]'
                                     : 'bg-[#06363D] hover:bg-[#084B54] border-[#084B54]'
-                                    } ${isLiking ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    } ${isLiking ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 active:scale-95'}`}
                             >
                                 <Heart
-                                    className={`w-5 h-5 transition-all ${isLiked
+                                    className={`w-5 h-5 transition-all duration-200 ${isLiked
                                         ? 'text-white fill-white scale-110'
                                         : 'text-[#C7F4FA] group-hover:scale-110'
-                                        } ${isLiking ? 'animate-pulse' : ''}`}
+                                        } ${isLiking ? 'animate-[pulse_1s_ease-in-out_infinite]' : ''}`}
                                 />
                             </button>
 
                             <button
                                 onClick={onToggleFavorite}
                                 disabled={isFavoriting}
-                                className={`group flex items-center justify-center w-12 h-12 border rounded-full transition-all ${isFavorited
+                                className={`group flex items-center justify-center w-12 h-12 border rounded-full transition-all duration-200 ${isFavorited
                                     ? 'bg-[#109EB1] border-[#109EB1]'
                                     : 'bg-[#06363D] hover:bg-[#084B54] border-[#084B54]'
-                                    } ${isFavoriting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    } ${isFavoriting ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 active:scale-95'}`}
                             >
                                 <Bookmark
-                                    className={`w-5 h-5 transition-all ${isFavorited
+                                    className={`w-5 h-5 transition-all duration-200 ${isFavorited
                                         ? 'text-white fill-white scale-110'
                                         : 'text-[#C7F4FA] group-hover:scale-110'
-                                        } ${isFavoriting ? 'animate-pulse' : ''}`}
+                                        } ${isFavoriting ? 'animate-[pulse_1s_ease-in-out_infinite]' : ''}`}
                                 />
                             </button>
 
-                            <button className="flex items-center justify-center w-12 h-12 hover:bg-[#06363D] border border-transparent hover:border-[#084B54] rounded-full transition-all">
-                                <MoreVertical className="w-5 h-5 text-[#C7F4FA]" />
-                            </button>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <button className="flex items-center justify-center w-12 h-12 hover:bg-[#06363D] border border-transparent hover:border-[#084B54] rounded-full transition-all">
+                                        <MoreVertical className="w-5 h-5 text-[#C7F4FA]" />
+                                    </button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-48 bg-accent border border-border font-hebden">
+                                    <DropdownMenuItem className="text-destructive cursor-pointer flex items-center gap-2 data-[highlighted]:text-destructive">
+                                        <Flag className="w-4 h-4 text-destructive" />
+                                        Report
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator className="bg-[#084B54]" />
+                                    <DropdownMenuItem onClick={handleCopyId} className="text-foreground cursor-pointer flex items-center gap-2">
+                                        <Copy className="w-4 h-4" />
+                                        {copySuccess ? 'Copied!' : 'Copy ID'}
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
                         </div>
                     </div>
 

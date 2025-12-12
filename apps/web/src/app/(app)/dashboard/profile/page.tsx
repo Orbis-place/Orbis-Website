@@ -627,11 +627,6 @@ export default function ProfilePage() {
           </div>
 
           <div className="text-center">
-            <p className="text-2xl font-bold font-hebden text-foreground">{profile?.reputation || 0}</p>
-            <p className="text-sm text-muted-foreground font-nunito">Reputation</p>
-          </div>
-
-          <div className="text-center">
             <p className="text-2xl font-bold font-hebden text-foreground">{profile?._count.ownedResources || 0}</p>
             <p className="text-sm text-muted-foreground font-nunito">Resources</p>
           </div>

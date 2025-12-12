@@ -20,6 +20,7 @@ interface Resource {
     tagline: string;
     type: string;
     visibility: string;
+    priceType?: string;
     iconUrl?: string;
     bannerUrl?: string;
     tags?: Array<{
@@ -64,6 +65,7 @@ export default function ManageGeneralPage() {
         tagline: '',
         type: 'PLUGIN',
         visibility: 'PUBLIC',
+        priceType: 'FREE',
     });
 
     const [iconFile, setIconFile] = useState<File | null>(null);
@@ -106,6 +108,7 @@ export default function ManageGeneralPage() {
                     tagline: res.tagline,
                     type: res.type,
                     visibility: res.visibility,
+                    priceType: res.priceType || 'FREE',
                 });
 
                 if (res.iconUrl) setIconPreview(res.iconUrl);
@@ -220,6 +223,7 @@ export default function ManageGeneralPage() {
                 tagline: formData.tagline,
                 type: formData.type,
                 visibility: formData.visibility,
+                priceType: formData.priceType,
             };
 
             // Handle tags - Send tag names to the backend
@@ -499,6 +503,117 @@ export default function ManageGeneralPage() {
                 </div>
             </div>
 
+            {/* Pricing Section */}
+            <div className="space-y-6">
+                <div>
+                    <h2 className="font-hebden text-xl font-semibold text-foreground">Pricing</h2>
+                    <p className="text-muted-foreground mt-1 font-nunito text-sm">
+                        Choose how users can access your resource
+                    </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Free Option */}
+                    <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, priceType: 'FREE' })}
+                        className={cn(
+                            "p-6 rounded-lg border-2 transition-all text-left",
+                            "hover:shadow-lg",
+                            formData.priceType === 'FREE'
+                                ? "border-primary bg-primary/10 shadow-md"
+                                : "border-border bg-secondary/30 hover:border-primary/50"
+                        )}
+                    >
+                        <div className="flex items-start gap-4">
+                            <div className={cn(
+                                "w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0",
+                                formData.priceType === 'FREE'
+                                    ? "bg-primary/20"
+                                    : "bg-accent"
+                            )}>
+                                <Icon
+                                    icon="mdi:gift"
+                                    width="24"
+                                    height="24"
+                                    className={formData.priceType === 'FREE' ? "text-primary" : "text-muted-foreground"}
+                                />
+                            </div>
+                            <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <h3 className="font-hebden text-lg font-semibold text-foreground">
+                                        Free
+                                    </h3>
+                                    {formData.priceType === 'FREE' && (
+                                        <Icon icon="mdi:check-circle" width="20" height="20" className="text-primary" />
+                                    )}
+                                </div>
+                                <p className="text-sm text-muted-foreground font-nunito">
+                                    Users can download your resource immediately without any payment.
+                                </p>
+                            </div>
+                        </div>
+                    </button>
+
+                    {/* Donation Option */}
+                    <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, priceType: 'DONATION' })}
+                        className={cn(
+                            "p-6 rounded-lg border-2 transition-all text-left",
+                            "hover:shadow-lg",
+                            formData.priceType === 'DONATION'
+                                ? "border-primary bg-primary/10 shadow-md"
+                                : "border-border bg-secondary/30 hover:border-primary/50"
+                        )}
+                    >
+                        <div className="flex items-start gap-4">
+                            <div className={cn(
+                                "w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0",
+                                formData.priceType === 'DONATION'
+                                    ? "bg-primary/20"
+                                    : "bg-accent"
+                            )}>
+                                <Icon
+                                    icon="mdi:heart"
+                                    width="24"
+                                    height="24"
+                                    className={formData.priceType === 'DONATION' ? "text-primary" : "text-muted-foreground"}
+                                />
+                            </div>
+                            <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <h3 className="font-hebden text-lg font-semibold text-foreground">
+                                        Donation
+                                    </h3>
+                                    {formData.priceType === 'DONATION' && (
+                                        <Icon icon="mdi:check-circle" width="20" height="20" className="text-primary" />
+                                    )}
+                                </div>
+                                <p className="text-sm text-muted-foreground font-nunito">
+                                    Prompt users to donate before downloading. They can choose "Later" and we'll send a reminder email.
+                                </p>
+                            </div>
+                        </div>
+                    </button>
+                </div>
+
+                {formData.priceType === 'DONATION' && (
+                    <div className="bg-accent/50 rounded-lg p-4 border border-primary/20">
+                        <div className="flex gap-3">
+                            <Icon icon="mdi:information" width="20" height="20" className="text-primary flex-shrink-0 mt-0.5" />
+                            <div className="flex-1">
+                                <p className="text-sm font-nunito text-foreground">
+                                    <span className="font-semibold">How donations work:</span> When users download your resource,
+                                    they'll see a donation prompt. If they choose "Later", we'll send them a friendly reminder
+                                    email to support your work.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+
             <div className="space-y-6">
                 <h2 className="font-hebden text-xl font-semibold text-[#C7F4FA]">Tags</h2>
 
@@ -549,19 +664,11 @@ export default function ManageGeneralPage() {
 
             {/* Categories Section */}
             <div className="space-y-6">
-                <h2 className="font-hebden text-xl font-semibold text-[#C7F4FA]">Categories</h2>
+                <h2 className="font-hebden text-xl font-semibold text-foreground">Categories</h2>
 
                 <div className="space-y-4">
                     <div className="space-y-2">
-                        <Label className="font-nunito text-[#C7F4FA]">Select Categories (max 3)</Label>
-                        <p className="text-sm text-[#C7F4FA]/50 font-nunito">
-                            Choose up to 3 categories that best describe your resource.
-                            {availableCategories.length === 0 && formData.type && (
-                                <span className="block mt-1 text-yellow-400">
-                                    Loading categories for {formData.type}...
-                                </span>
-                            )}
-                        </p>
+                        <Label className="font-nunito text-foreground">Select up to 3 categories</Label>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                             {availableCategories.map((category) => {
                                 const isSelected = selectedCategories.includes(category.id);
@@ -582,76 +689,40 @@ export default function ManageGeneralPage() {
                                         }}
                                         disabled={!canSelect}
                                         className={cn(
-                                            "p-3 rounded-lg border-2 transition-all text-left",
-                                            "flex items-start gap-3",
+                                            "p-4 rounded-lg border-2 transition-all text-left flex items-center gap-3",
                                             isSelected
-                                                ? "border-[#109EB1] bg-[#109EB1]/10"
+                                                ? "border-primary bg-primary/10"
                                                 : canSelect
-                                                    ? "border-[#084B54] bg-[#032125] hover:border-[#109EB1]/50 hover:bg-[#032125]/80"
-                                                    : "border-[#084B54]/30 bg-[#032125]/30 opacity-50 cursor-not-allowed"
+                                                    ? "border-border bg-secondary/30 hover:border-primary/50"
+                                                    : "border-border/30 bg-secondary/20 opacity-50 cursor-not-allowed"
                                         )}
                                     >
                                         {category.icon && (
-                                            <span className="text-2xl flex-shrink-0">{category.icon}</span>
+                                            <Icon
+                                                icon={category.icon}
+                                                width="24"
+                                                height="24"
+                                                className={isSelected ? "text-primary" : "text-muted-foreground"}
+                                            />
                                         )}
                                         <div className="flex-1 min-w-0">
-                                            <div className="font-nunito font-medium text-[#C7F4FA] flex items-center gap-2">
+                                            <div className="font-nunito font-medium text-foreground flex items-center gap-2">
                                                 {category.name}
-                                                {isSelected && (
-                                                    <Icon
-                                                        icon="mdi:check-circle"
-                                                        width="16"
-                                                        height="16"
-                                                        className="text-[#109EB1] flex-shrink-0"
-                                                    />
-                                                )}
                                             </div>
-                                            {category.description && (
-                                                <p className="text-xs text-[#C7F4FA]/60 mt-1 line-clamp-2">
-                                                    {category.description}
-                                                </p>
-                                            )}
                                         </div>
+                                        {isSelected && (
+                                            <Icon
+                                                icon="mdi:check-circle"
+                                                width="20"
+                                                height="20"
+                                                className="text-primary flex-shrink-0"
+                                            />
+                                        )}
                                     </button>
                                 );
                             })}
                         </div>
                     </div>
-
-                    {/* Selected Categories Summary */}
-                    {selectedCategories.length > 0 && (
-                        <div className="space-y-2">
-                            <Label className="font-nunito text-[#C7F4FA]">Selected Categories</Label>
-                            <div className="flex flex-wrap gap-2">
-                                {selectedCategories.map((categoryId) => {
-                                    const category = availableCategories.find(c => c.id === categoryId);
-                                    if (!category) return null;
-
-                                    return (
-                                        <div
-                                            key={categoryId}
-                                            className="px-3 py-1.5 rounded-md text-sm font-nunito bg-[#109EB1] text-[#C7F4FA] shadow-md flex items-center gap-2"
-                                        >
-                                            {category.icon && <span>{category.icon}</span>}
-                                            {category.name}
-                                            <button
-                                                type="button"
-                                                onClick={() => setSelectedCategories(current =>
-                                                    current.filter(id => id !== categoryId)
-                                                )}
-                                                className="hover:text-red-400 transition-colors"
-                                            >
-                                                <Icon icon="mdi:close" width="14" height="14" />
-                                            </button>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                            <p className="text-xs text-[#C7F4FA]/50 font-nunito">
-                                {selectedCategories.length} / 3 categories selected
-                            </p>
-                        </div>
-                    )}
                 </div>
             </div>
 

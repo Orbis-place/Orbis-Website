@@ -19,11 +19,15 @@ import { UpdateTeamDto } from './dtos/update-team.dto';
 import { FilterTeamsDto } from './dtos/filter-teams.dto';
 import { AddTeamMemberDto, UpdateTeamMemberDto } from './dtos/manage-member.dto';
 import { CreateInvitationDto, RespondToInvitationDto, FilterInvitationsDto } from './dtos/invitation.dto';
+import { CreateTeamSocialLinkDto } from './dtos/create-team-social-link.dto';
+import { UpdateTeamSocialLinkDto } from './dtos/update-team-social-link.dto';
+import { ReorderTeamSocialLinksDto } from './dtos/reorder-team-social-links.dto';
+
 
 @ApiTags('teams')
 @Controller('teams')
 export class TeamController {
-    constructor(private readonly teamService: TeamService) {}
+    constructor(private readonly teamService: TeamService) { }
 
     // ============================================
     // PUBLIC ENDPOINTS
@@ -240,10 +244,93 @@ export class TeamController {
         return this.teamService.leaveTeam(session.user.id, teamId);
     }
 
+    // ============================================
+    // TEAM CONTENT ENDPOINTS
+    // ============================================
+
+    @Get(':id/resources')
+    @AllowAnonymous()
+    @ApiOperation({ summary: 'Get team resources' })
+    @ApiParam({ name: 'id', description: 'Team ID' })
+    async getTeamResources(@Param('id') teamId: string) {
+        return this.teamService.getTeamResources(teamId);
+    }
+
+    @Get(':id/servers')
+    @AllowAnonymous()
+    @ApiOperation({ summary: 'Get team servers' })
+    @ApiParam({ name: 'id', description: 'Team ID' })
+    async getTeamServers(@Param('id') teamId: string) {
+        return this.teamService.getTeamServers(teamId);
+    }
+
     @Get('user/my-teams')
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Get current user teams' })
     async getMyTeams(@Session() session: UserSession) {
         return this.teamService.getUserTeams(session.user.id);
+    }
+
+    // ============================================
+    // SOCIAL LINKS MANAGEMENT ENDPOINTS
+    // ============================================
+
+    @Get(':id/social-links')
+    @AllowAnonymous()
+    @ApiOperation({ summary: 'Get team social links' })
+    @ApiParam({ name: 'id', description: 'Team ID' })
+    async getSocialLinks(@Param('id') teamId: string) {
+        return this.teamService.getSocialLinks(teamId);
+    }
+
+    @Post(':id/social-links')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Create team social link' })
+    @ApiParam({ name: 'id', description: 'Team ID' })
+    async createSocialLink(
+        @Session() session: UserSession,
+        @Param('id') teamId: string,
+        @Body() createDto: CreateTeamSocialLinkDto,
+    ) {
+        return this.teamService.createSocialLink(session.user.id, teamId, createDto);
+    }
+
+    @Patch(':id/social-links/:linkId')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Update team social link' })
+    @ApiParam({ name: 'id', description: 'Team ID' })
+    @ApiParam({ name: 'linkId', description: 'Social link ID' })
+    async updateSocialLink(
+        @Session() session: UserSession,
+        @Param('id') teamId: string,
+        @Param('linkId') linkId: string,
+        @Body() updateDto: UpdateTeamSocialLinkDto,
+    ) {
+        return this.teamService.updateSocialLink(session.user.id, teamId, linkId, updateDto);
+    }
+
+    @Delete(':id/social-links/:linkId')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Delete team social link' })
+    @ApiParam({ name: 'id', description: 'Team ID' })
+    @ApiParam({ name: 'linkId', description: 'Social link ID' })
+    async deleteSocialLink(
+        @Session() session: UserSession,
+        @Param('id') teamId: string,
+        @Param('linkId') linkId: string,
+    ) {
+        return this.teamService.deleteSocialLink(session.user.id, teamId, linkId);
+    }
+
+    @Patch(':id/social-links/reorder')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Reorder team social links' })
+    @ApiParam({ name: 'id', description: 'Team ID' })
+    async reorderSocialLinks(
+        @Session() session: UserSession,
+        @Param('id') teamId: string,
+        @Body() reorderDto: ReorderTeamSocialLinksDto,
+    ) {
+        return this.teamService.reorderSocialLinks(session.user.id, teamId, reorderDto.linkIds);
     }
 }

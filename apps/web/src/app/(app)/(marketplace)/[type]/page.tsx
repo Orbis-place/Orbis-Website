@@ -55,12 +55,11 @@ export default function MarketplacePage({ params }: { params: Promise<{ type: st
 
     const filterOptions: FilterOption[] = [
         { id: 'all', label: 'All' },
-        { id: 'gaia-selection', label: "Gaia's Selection" },
         { id: 'favorites', label: 'Favorites' },
         { id: 'featured', label: 'Featured' },
         { id: 'trending', label: 'Trending' },
-        { id: 'new', label: 'New' },
-        { id: 'updated', label: 'Updated' },
+        { id: 'newest', label: 'Newest' },
+        { id: 'last-updated', label: 'Last Updated' },
     ];
 
     // Fetch resources from API

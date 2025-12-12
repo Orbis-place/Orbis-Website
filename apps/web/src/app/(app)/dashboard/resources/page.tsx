@@ -4,10 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Icon } from '@iconify-icon/react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { OrbisFormDialog, OrbisConfirmDialog } from '@/components/OrbisDialog';
+import { OrbisConfirmDialog } from '@/components/OrbisDialog';
+import { CreateResourceDialog } from '@/components/CreateResourceDialog';
 import { toast } from 'sonner';
 import Image from 'next/image';
 
@@ -79,15 +77,8 @@ interface Resource {
 export default function ResourcesPage() {
   const router = useRouter();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [resources, setResources] = useState<Resource[]>([]);
-  const [formData, setFormData] = useState({
-    name: '',
-    tagline: '',
-    type: 'PLUGIN',
-    visibility: 'PUBLIC'
-  });
   const [deletingResourceId, setDeletingResourceId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -108,54 +99,6 @@ export default function ResourcesPage() {
       console.error('Failed to fetch resources:', error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  const handleCreateResource = async (e: React.FormEvent) => {
-    setIsLoading(true);
-
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/resources`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create resource');
-      }
-
-      const data = await response.json();
-      console.log('Resource created:', data);
-
-      // Reset form and close dialog
-      setFormData({
-        name: '',
-        tagline: '',
-        type: 'PLUGIN',
-        visibility: 'PUBLIC'
-      });
-      setIsCreateOpen(false);
-
-      toast.success('Resource created successfully!');
-
-      // Refresh the resources list
-      fetchResources();
-    } catch (error) {
-      console.error('Error creating resource:', error);
-      toast.error('Failed to create resource. Please try again.');
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -243,130 +186,17 @@ export default function ResourcesPage() {
         </div>
 
         {/* Create Resource Dialog */}
-        <OrbisFormDialog
+        <CreateResourceDialog
           open={isCreateOpen}
           onOpenChange={setIsCreateOpen}
+          onSuccess={fetchResources}
           trigger={
             <Button className="font-hebden">
               <Icon icon="mdi:plus" width="20" height="20" />
               Create Resource
             </Button>
           }
-          title="Create New Resource"
-          description="Fill in the details to create your resource"
-          size="lg"
-          onSubmit={handleCreateResource}
-          submitText="Create Resource"
-          submitLoading={isLoading}
-          onCancel={() => setIsCreateOpen(false)}
-        >
-          <div className="space-y-4">
-            {/* Name */}
-            <div className="space-y-2">
-              <Label htmlFor="name">
-                Resource Name *
-              </Label>
-              <Input
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                placeholder="My Awesome Plugin"
-                required
-              />
-            </div>
-
-            {/* Tagline */}
-            <div className="space-y-2">
-              <Label htmlFor="tagline">
-                Tagline *
-              </Label>
-              <Input
-                id="tagline"
-                name="tagline"
-                value={formData.tagline}
-                onChange={handleInputChange}
-                maxLength={200}
-                placeholder="A short description of your resource"
-                required
-              />
-              <p className="text-xs text-muted-foreground/60 font-nunito">
-                {formData.tagline.length}/200 characters
-              </p>
-            </div>
-
-            {/* Type */}
-            <div className="space-y-2">
-              <Label htmlFor="type">
-                Resource Type *
-              </Label>
-              <Select
-                value={formData.type}
-                onValueChange={(value) => setFormData({ ...formData, type: value })}
-                required
-              >
-                <SelectTrigger id="type" className="w-full">
-                  <SelectValue placeholder="Select a type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="PLUGIN">Plugin</SelectItem>
-                  <SelectItem value="MOD">Mod</SelectItem>
-                  <SelectItem value="WORLD">World</SelectItem>
-                  <SelectItem value="DATA_PACK">Data Pack</SelectItem>
-                  <SelectItem value="ASSET_PACK">Asset Pack</SelectItem>
-                  <SelectItem value="PREFAB">Prefab</SelectItem>
-                  <SelectItem value="MODPACK">Modpack</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Visibility */}
-            <div className="space-y-2">
-              <Label htmlFor="visibility">
-                Visibility *
-              </Label>
-              <Select
-                value={formData.visibility}
-                onValueChange={(value) => setFormData({ ...formData, visibility: value })}
-                required
-              >
-                <SelectTrigger id="visibility" className="w-full">
-                  <SelectValue placeholder="Select visibility" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="PUBLIC">
-                    <span className="flex items-center gap-2">
-                      <Icon icon="mdi:earth" width="16" height="16" />
-                      Public - Visible to everyone
-                    </span>
-                  </SelectItem>
-                  <SelectItem value="UNLISTED">
-                    <span className="flex items-center gap-2">
-                      <Icon icon="mdi:link-variant" width="16" height="16" />
-                      Unlisted - Accessible via link only
-                    </span>
-                  </SelectItem>
-                  <SelectItem value="PRIVATE">
-                    <span className="flex items-center gap-2">
-                      <Icon icon="mdi:lock" width="16" height="16" />
-                      Private - Only visible to you
-                    </span>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Info Box */}
-            <div className="bg-primary/10 p-4 rounded-lg border border-primary/20">
-              <div className="flex gap-3">
-                <Icon icon="mdi:information" className="text-primary flex-shrink-0 mt-0.5" width="20" height="20" />
-                <p className="text-sm text-foreground/80 font-nunito">
-                  Your resource will be created as a <strong>draft</strong>. You can add versions, images, and other details before publishing.
-                </p>
-              </div>
-            </div>
-          </div>
-        </OrbisFormDialog>
+        />
       </div>
 
       {/* Stats */}

@@ -29,22 +29,7 @@ export class CreateTeamDto {
     })
     @IsString()
     @IsOptional()
+    @IsOptional()
     @MaxLength(2000)
     description?: string;
-
-    @ApiPropertyOptional({
-        example: 'https://example.com',
-        description: 'Team website URL',
-    })
-    @IsUrl()
-    @IsOptional()
-    websiteUrl?: string;
-
-    @ApiPropertyOptional({
-        example: 'https://discord.gg/example',
-        description: 'Discord server URL',
-    })
-    @IsUrl()
-    @IsOptional()
-    discordUrl?: string;
 }

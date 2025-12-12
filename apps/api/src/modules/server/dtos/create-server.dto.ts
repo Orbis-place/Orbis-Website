@@ -21,15 +21,15 @@ export class CreateServerDto {
     @MaxLength(50)
     name: string;
 
-    @ApiProperty({
+    @ApiPropertyOptional({
         example: 'The best Hytale server with incredible mini-games...',
         description: 'Full server description',
     })
     @IsString()
-    @IsNotEmpty()
-    @MinLength(50)
+    @IsOptional()
+    @MinLength(10)
     @MaxLength(5000)
-    description: string;
+    description?: string;
 
     @ApiPropertyOptional({
         example: 'Join the best Hytale server!',
@@ -41,23 +41,16 @@ export class CreateServerDto {
     shortDesc?: string;
 
     @ApiProperty({
-        example: 'play.hypixel.net',
-        description: 'Server IP address or domain',
+        example: 'play.hypixel.net:25565',
+        description: 'Server address (IP:port or domain:port, port defaults to 25565 if not specified)',
     })
     @IsString()
     @IsNotEmpty()
     @Matches(
-        /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/,
-        { message: 'Invalid IP address or domain' },
+        /^(?:(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)|(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,})(?::\d{1,5})?$/,
+        { message: 'Invalid server address format. Use IP:port or domain:port (port is optional)' },
     )
-    serverIp: string;
-
-    @ApiPropertyOptional({ example: 25565, description: 'Server port' })
-    @IsInt()
-    @IsOptional()
-    @Min(1)
-    @Max(65535)
-    port?: number = 25565;
+    serverAddress: string;
 
     @ApiProperty({ example: '1.0.0', description: 'Main game version' })
     @IsString()
@@ -82,28 +75,12 @@ export class CreateServerDto {
     websiteUrl?: string;
 
     @ApiPropertyOptional({
-        example: 'https://discord.gg/example',
-        description: 'Discord server URL',
+        example: 'France',
+        description: 'Server country/location',
     })
-    @IsUrl()
+    @IsString()
     @IsOptional()
-    discordUrl?: string;
-
-    @ApiPropertyOptional({
-        example: 'https://youtube.com/@example',
-        description: 'YouTube channel URL',
-    })
-    @IsUrl()
-    @IsOptional()
-    youtubeUrl?: string;
-
-    @ApiPropertyOptional({
-        example: 'https://twitter.com/example',
-        description: 'Twitter/X profile URL',
-    })
-    @IsUrl()
-    @IsOptional()
-    twitterUrl?: string;
+    country?: string;
 
     @ApiProperty({
         example: 'category-id-123',
@@ -112,6 +89,7 @@ export class CreateServerDto {
     @IsString()
     @IsNotEmpty()
     primaryCategoryId: string;
+
 
     @ApiPropertyOptional({
         example: ['category-id-456', 'category-id-789'],
@@ -122,14 +100,14 @@ export class CreateServerDto {
     @IsOptional()
     categoryIds?: string[];
 
-    @ApiProperty({
+    @ApiPropertyOptional({
         example: ['tag-id-123', 'tag-id-456'],
-        description: 'Tag IDs (min 1, max 10)',
+        description: 'Tag IDs (optional, max 10)',
     })
     @IsArray()
     @IsString({ each: true })
-    @IsNotEmpty()
-    tagIds: string[];
+    @IsOptional()
+    tagIds?: string[];
 
     @ApiPropertyOptional({
         example: 'team-id-123',

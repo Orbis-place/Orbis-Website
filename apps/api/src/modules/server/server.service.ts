@@ -53,17 +53,19 @@ export class ServerService {
             }
         }
 
-        // Verify all tag IDs exist
-        if (createDto.tagIds.length < 1 || createDto.tagIds.length > 10) {
-            throw new BadRequestException('Between 1 and 10 tags required');
-        }
+        // Verify all tag IDs exist (if provided)
+        if (createDto.tagIds && createDto.tagIds.length > 0) {
+            if (createDto.tagIds.length > 10) {
+                throw new BadRequestException('Maximum 10 tags allowed');
+            }
 
-        const tags = await prisma.serverTag.findMany({
-            where: { id: { in: createDto.tagIds } },
-        });
+            const tags = await prisma.serverTag.findMany({
+                where: { id: { in: createDto.tagIds } },
+            });
 
-        if (tags.length !== createDto.tagIds.length) {
-            throw new BadRequestException('One or more tags not found');
+            if (tags.length !== createDto.tagIds.length) {
+                throw new BadRequestException('One or more tags not found');
+            }
         }
 
         // Verify team ownership if teamId provided
@@ -97,16 +99,13 @@ export class ServerService {
                 slug,
                 description: createDto.description,
                 shortDesc: createDto.shortDesc,
-                serverIp: createDto.serverIp,
-                port: createDto.port || 25565,
+                serverAddress: createDto.serverAddress,
                 gameVersion: createDto.gameVersion,
                 supportedVersions: createDto.supportedVersions || [
                     createDto.gameVersion,
                 ],
                 websiteUrl: createDto.websiteUrl,
-                discordUrl: createDto.discordUrl,
-                youtubeUrl: createDto.youtubeUrl,
-                twitterUrl: createDto.twitterUrl,
+                country: createDto.country,
                 ownerId: userId,
                 teamId: createDto.teamId,
                 status: ServerStatus.PENDING,
@@ -129,12 +128,16 @@ export class ServerService {
                     ],
                 },
 
-                // Create tag relations
-                tags: {
-                    create: createDto.tagIds.map((tagId) => ({
-                        tagId,
-                    })),
-                },
+                // Create tag relations (if provided)
+                ...(createDto.tagIds && createDto.tagIds.length > 0
+                    ? {
+                        tags: {
+                            create: createDto.tagIds.map((tagId) => ({
+                                tagId,
+                            })),
+                        },
+                    }
+                    : {}),
 
                 // Create status history
                 statusHistory: {
@@ -436,21 +439,16 @@ export class ServerService {
             updateData.description = updateDto.description;
         if (updateDto.shortDesc !== undefined)
             updateData.shortDesc = updateDto.shortDesc;
-        if (updateDto.serverIp !== undefined)
-            updateData.serverIp = updateDto.serverIp;
-        if (updateDto.port !== undefined) updateData.port = updateDto.port;
+        if (updateDto.serverAddress !== undefined)
+            updateData.serverAddress = updateDto.serverAddress;
         if (updateDto.gameVersion !== undefined)
             updateData.gameVersion = updateDto.gameVersion;
         if (updateDto.supportedVersions !== undefined)
             updateData.supportedVersions = updateDto.supportedVersions;
         if (updateDto.websiteUrl !== undefined)
             updateData.websiteUrl = updateDto.websiteUrl;
-        if (updateDto.discordUrl !== undefined)
-            updateData.discordUrl = updateDto.discordUrl;
-        if (updateDto.youtubeUrl !== undefined)
-            updateData.youtubeUrl = updateDto.youtubeUrl;
-        if (updateDto.twitterUrl !== undefined)
-            updateData.twitterUrl = updateDto.twitterUrl;
+        if (updateDto.country !== undefined)
+            updateData.country = updateDto.country;
 
         const updated = await prisma.server.update({
             where: { id: serverId },
@@ -466,7 +464,7 @@ export class ServerService {
     }
 
     /**
-     * Delete server (archive)
+     * Delete server (archive or hard delete based on history)
      */
     async delete(userId: string, serverId: string) {
         const server = await prisma.server.findUnique({
@@ -483,21 +481,10 @@ export class ServerService {
             throw new ForbiddenException('You do not have permission to delete this server');
         }
 
-        // Archive instead of delete
-        await prisma.server.update({
-            where: { id: serverId },
-            data: {
-                status: ServerStatus.ARCHIVED,
-                statusHistory: {
-                    create: {
-                        oldStatus: server.status,
-                        newStatus: ServerStatus.ARCHIVED,
-                        changedBy: userId,
-                        reason: 'Server archived by owner',
-                    },
-                },
-            },
-        });
+        // Check if server has player history
+        const hasPlayerHistory = await prisma.serverPlayerHistory.count({
+            where: { serverId },
+        }) > 0;
 
         // Delete files
         if (server.logo) {
@@ -509,7 +496,32 @@ export class ServerService {
             });
         }
 
-        return { message: 'Server archived successfully' };
+        if (hasPlayerHistory) {
+            // Archive if there is player history
+            await prisma.server.update({
+                where: { id: serverId },
+                data: {
+                    status: ServerStatus.ARCHIVED,
+                    statusHistory: {
+                        create: {
+                            oldStatus: server.status,
+                            newStatus: ServerStatus.ARCHIVED,
+                            changedBy: userId,
+                            reason: 'Server archived by owner',
+                        },
+                    },
+                },
+            });
+
+            return { message: 'Server archived successfully' };
+        } else {
+            // Hard delete if no player history
+            await prisma.server.delete({
+                where: { id: serverId },
+            });
+
+            return { message: 'Server deleted successfully' };
+        }
     }
 
     /**
@@ -855,7 +867,7 @@ export class ServerService {
     private buildOrderBy(sortBy?: ServerSortOption) {
         switch (sortBy) {
             case ServerSortOption.VOTES:
-                return { votesCount: 'desc' as const };
+                return { voteCount: 'desc' as const };
             case ServerSortOption.PLAYERS:
                 return { currentPlayers: 'desc' as const };
             case ServerSortOption.NEWEST:
@@ -867,7 +879,185 @@ export class ServerService {
             case ServerSortOption.NAME_DESC:
                 return { name: 'desc' as const };
             default:
-                return { votesCount: 'desc' as const };
+                return { voteCount: 'desc' as const };
         }
+    }
+
+    // ============================================
+    // SOCIAL LINKS MANAGEMENT
+    // ============================================
+
+    /**
+     * Get server social links
+     */
+    async getSocialLinks(serverId: string) {
+        return prisma.serverSocialLink.findMany({
+            where: { serverId },
+            orderBy: { order: 'asc' },
+        });
+    }
+
+    /**
+     * Create server social link
+     */
+    async createSocialLink(
+        userId: string,
+        serverId: string,
+        createDto: { type: string; url: string; label?: string },
+    ) {
+        const server = await prisma.server.findUnique({
+            where: { id: serverId },
+            select: { ownerId: true, teamId: true },
+        });
+
+        if (!server) {
+            throw new NotFoundException('Server not found');
+        }
+
+        const canEdit = await this.checkEditPermission(userId, server);
+        if (!canEdit) {
+            throw new ForbiddenException('You do not have permission to edit this server');
+        }
+
+        // Check if link type already exists
+        const existing = await prisma.serverSocialLink.findUnique({
+            where: {
+                serverId_type: {
+                    serverId,
+                    type: createDto.type as any,
+                },
+            },
+        });
+
+        if (existing) {
+            throw new ConflictException('A social link of this type already exists');
+        }
+
+        // Get current max order
+        const maxOrder = await prisma.serverSocialLink.findFirst({
+            where: { serverId },
+            orderBy: { order: 'desc' },
+            select: { order: true },
+        });
+
+        return prisma.serverSocialLink.create({
+            data: {
+                serverId,
+                type: createDto.type as any,
+                url: createDto.url,
+                label: createDto.label,
+                order: maxOrder ? maxOrder.order + 1 : 0,
+            },
+        });
+    }
+
+    /**
+     * Update server social link
+     */
+    async updateSocialLink(
+        userId: string,
+        serverId: string,
+        linkId: string,
+        updateDto: { url?: string; label?: string },
+    ) {
+        const server = await prisma.server.findUnique({
+            where: { id: serverId },
+            select: { ownerId: true, teamId: true },
+        });
+
+        if (!server) {
+            throw new NotFoundException('Server not found');
+        }
+
+        const canEdit = await this.checkEditPermission(userId, server);
+        if (!canEdit) {
+            throw new ForbiddenException('You do not have permission to edit this server');
+        }
+
+        const link = await prisma.serverSocialLink.findUnique({
+            where: { id: linkId },
+        });
+
+        if (!link || link.serverId !== serverId) {
+            throw new NotFoundException('Social link not found');
+        }
+
+        return prisma.serverSocialLink.update({
+            where: { id: linkId },
+            data: updateDto,
+        });
+    }
+
+    /**
+     * Delete server social link
+     */
+    async deleteSocialLink(userId: string, serverId: string, linkId: string) {
+        const server = await prisma.server.findUnique({
+            where: { id: serverId },
+            select: { ownerId: true, teamId: true },
+        });
+
+        if (!server) {
+            throw new NotFoundException('Server not found');
+        }
+
+        const canEdit = await this.checkEditPermission(userId, server);
+        if (!canEdit) {
+            throw new ForbiddenException('You do not have permission to edit this server');
+        }
+
+        const link = await prisma.serverSocialLink.findUnique({
+            where: { id: linkId },
+        });
+
+        if (!link || link.serverId !== serverId) {
+            throw new NotFoundException('Social link not found');
+        }
+
+        await prisma.serverSocialLink.delete({
+            where: { id: linkId },
+        });
+
+        return { message: 'Social link deleted successfully' };
+    }
+
+    /**
+     * Reorder server social links
+     */
+    async reorderSocialLinks(userId: string, serverId: string, linkIds: string[]) {
+        const server = await prisma.server.findUnique({
+            where: { id: serverId },
+            select: { ownerId: true, teamId: true },
+        });
+
+        if (!server) {
+            throw new NotFoundException('Server not found');
+        }
+
+        const canEdit = await this.checkEditPermission(userId, server);
+        if (!canEdit) {
+            throw new ForbiddenException('You do not have permission to edit this server');
+        }
+
+        // Verify all links belong to this server
+        const links = await prisma.serverSocialLink.findMany({
+            where: { id: { in: linkIds } },
+        });
+
+        if (links.some((link) => link.serverId !== serverId)) {
+            throw new BadRequestException('Some links do not belong to this server');
+        }
+
+        // Update order for each link
+        await Promise.all(
+            linkIds.map((linkId, index) =>
+                prisma.serverSocialLink.update({
+                    where: { id: linkId },
+                    data: { order: index },
+                }),
+            ),
+        );
+
+        return this.getSocialLinks(serverId);
     }
 }

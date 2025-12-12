@@ -12,15 +12,19 @@ import {
     UploadedFile,
     UseInterceptors,
 } from '@nestjs/common';
-import {ApiBearerAuth, ApiConsumes, ApiOperation, ApiParam, ApiTags,} from '@nestjs/swagger';
-import {FileInterceptor} from '@nestjs/platform-express';
-import {AllowAnonymous, Roles, Session, UserSession} from '@thallesp/nestjs-better-auth';
-import {ServerService} from './server.service';
-import {CreateServerDto} from './dtos/create-server.dto';
-import {UpdateServerDto} from './dtos/update-server.dto';
-import {FilterServersDto} from './dtos/filter-servers.dto';
-import {ModerateServerDto, RejectServerDto} from './dtos/moderate-server.dto';
-import {UserRole} from '@repo/db';
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiParam, ApiTags, } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { AllowAnonymous, Roles, Session, UserSession } from '@thallesp/nestjs-better-auth';
+import { ServerService } from './server.service';
+import { CreateServerDto } from './dtos/create-server.dto';
+import { UpdateServerDto } from './dtos/update-server.dto';
+import { FilterServersDto } from './dtos/filter-servers.dto';
+import { ModerateServerDto, RejectServerDto } from './dtos/moderate-server.dto';
+import { UserRole } from '@repo/db';
+import { CreateServerSocialLinkDto } from './dtos/create-server-social-link.dto';
+import { UpdateServerSocialLinkDto } from './dtos/update-server-social-link.dto';
+import { ReorderServerSocialLinksDto } from './dtos/reorder-server-social-links.dto';
+
 
 @ApiTags('servers')
 @Controller('servers')
@@ -34,15 +38,15 @@ export class ServerController {
 
     @Get()
     @AllowAnonymous()
-    @ApiOperation({summary: 'Get all servers with filters and pagination'})
+    @ApiOperation({ summary: 'Get all servers with filters and pagination' })
     async findAll(@Query() filterDto: FilterServersDto) {
         return this.serverService.findAll(filterDto);
     }
 
     @Get(':slug')
     @AllowAnonymous()
-    @ApiOperation({summary: 'Get server by slug'})
-    @ApiParam({name: 'slug', description: 'Server slug'})
+    @ApiOperation({ summary: 'Get server by slug' })
+    @ApiParam({ name: 'slug', description: 'Server slug' })
     async findBySlug(@Param('slug') slug: string) {
         return this.serverService.findBySlug(slug);
     }
@@ -53,7 +57,7 @@ export class ServerController {
 
     @Post()
     @ApiBearerAuth()
-    @ApiOperation({summary: 'Create a new server'})
+    @ApiOperation({ summary: 'Create a new server' })
     async create(
         @Session() session: UserSession,
         @Body() createDto: CreateServerDto,
@@ -63,8 +67,8 @@ export class ServerController {
 
     @Patch(':id')
     @ApiBearerAuth()
-    @ApiOperation({summary: 'Update server'})
-    @ApiParam({name: 'id', description: 'Server ID'})
+    @ApiOperation({ summary: 'Update server' })
+    @ApiParam({ name: 'id', description: 'Server ID' })
     async update(
         @Session() session: UserSession,
         @Param('id') serverId: string,
@@ -75,8 +79,8 @@ export class ServerController {
 
     @Delete(':id')
     @ApiBearerAuth()
-    @ApiOperation({summary: 'Delete server (archive)'})
-    @ApiParam({name: 'id', description: 'Server ID'})
+    @ApiOperation({ summary: 'Delete server (archive)' })
+    @ApiParam({ name: 'id', description: 'Server ID' })
     async delete(
         @Session() session: UserSession,
         @Param('id') serverId: string,
@@ -91,8 +95,8 @@ export class ServerController {
     @Post(':id/logo')
     @ApiBearerAuth()
     @ApiConsumes('multipart/form-data')
-    @ApiOperation({summary: 'Upload server logo'})
-    @ApiParam({name: 'id', description: 'Server ID'})
+    @ApiOperation({ summary: 'Upload server logo' })
+    @ApiParam({ name: 'id', description: 'Server ID' })
     @UseInterceptors(FileInterceptor('logo'))
     async uploadLogo(
         @Session() session: UserSession,
@@ -105,8 +109,8 @@ export class ServerController {
     @Post(':id/banner')
     @ApiBearerAuth()
     @ApiConsumes('multipart/form-data')
-    @ApiOperation({summary: 'Upload server banner'})
-    @ApiParam({name: 'id', description: 'Server ID'})
+    @ApiOperation({ summary: 'Upload server banner' })
+    @ApiParam({ name: 'id', description: 'Server ID' })
     @UseInterceptors(FileInterceptor('banner'))
     async uploadBanner(
         @Session() session: UserSession,
@@ -118,8 +122,8 @@ export class ServerController {
 
     @Delete(':id/logo')
     @ApiBearerAuth()
-    @ApiOperation({summary: 'Delete server logo'})
-    @ApiParam({name: 'id', description: 'Server ID'})
+    @ApiOperation({ summary: 'Delete server logo' })
+    @ApiParam({ name: 'id', description: 'Server ID' })
     async deleteLogo(
         @Session() session: UserSession,
         @Param('id') serverId: string,
@@ -129,8 +133,8 @@ export class ServerController {
 
     @Delete(':id/banner')
     @ApiBearerAuth()
-    @ApiOperation({summary: 'Delete server banner'})
-    @ApiParam({name: 'id', description: 'Server ID'})
+    @ApiOperation({ summary: 'Delete server banner' })
+    @ApiParam({ name: 'id', description: 'Server ID' })
     async deleteBanner(
         @Session() session: UserSession,
         @Param('id') serverId: string,
@@ -147,8 +151,8 @@ export class ServerController {
     @Roles([
         UserRole.ADMIN, UserRole.SUPER_ADMIN
     ])
-    @ApiOperation({summary: 'Approve server (Admin only)'})
-    @ApiParam({name: 'id', description: 'Server ID'})
+    @ApiOperation({ summary: 'Approve server (Admin only)' })
+    @ApiParam({ name: 'id', description: 'Server ID' })
     async approve(
         @Session() session: UserSession,
         @Param('id') serverId: string,
@@ -164,8 +168,8 @@ export class ServerController {
     @Post(':id/reject')
     @ApiBearerAuth()
     @Roles([UserRole.ADMIN, UserRole.SUPER_ADMIN])
-    @ApiOperation({summary: 'Reject server (Admin only)'})
-    @ApiParam({name: 'id', description: 'Server ID'})
+    @ApiOperation({ summary: 'Reject server (Admin only)' })
+    @ApiParam({ name: 'id', description: 'Server ID' })
     async reject(
         @Session() session: UserSession,
         @Param('id') serverId: string,
@@ -181,8 +185,8 @@ export class ServerController {
     @Post(':id/suspend')
     @ApiBearerAuth()
     @Roles([UserRole.ADMIN, UserRole.SUPER_ADMIN])
-    @ApiOperation({summary: 'Suspend server (Admin only)'})
-    @ApiParam({name: 'id', description: 'Server ID'})
+    @ApiOperation({ summary: 'Suspend server (Admin only)' })
+    @ApiParam({ name: 'id', description: 'Server ID' })
     async suspend(
         @Session() session: UserSession,
         @Param('id') serverId: string,
@@ -196,5 +200,68 @@ export class ServerController {
             serverId,
             moderateDto.reason,
         );
+    }
+
+    // ============================================
+    // SOCIAL LINKS MANAGEMENT ENDPOINTS
+    // ============================================
+
+    @Get(':id/social-links')
+    @AllowAnonymous()
+    @ApiOperation({ summary: 'Get server social links' })
+    @ApiParam({ name: 'id', description: 'Server ID' })
+    async getSocialLinks(@Param('id') serverId: string) {
+        return this.serverService.getSocialLinks(serverId);
+    }
+
+    @Post(':id/social-links')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Create server social link' })
+    @ApiParam({ name: 'id', description: 'Server ID' })
+    async createSocialLink(
+        @Session() session: UserSession,
+        @Param('id') serverId: string,
+        @Body() createDto: CreateServerSocialLinkDto,
+    ) {
+        return this.serverService.createSocialLink(session.user.id, serverId, createDto);
+    }
+
+    @Patch(':id/social-links/:linkId')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Update server social link' })
+    @ApiParam({ name: 'id', description: 'Server ID' })
+    @ApiParam({ name: 'linkId', description: 'Social link ID' })
+    async updateSocialLink(
+        @Session() session: UserSession,
+        @Param('id') serverId: string,
+        @Param('linkId') linkId: string,
+        @Body() updateDto: UpdateServerSocialLinkDto,
+    ) {
+        return this.serverService.updateSocialLink(session.user.id, serverId, linkId, updateDto);
+    }
+
+    @Delete(':id/social-links/:linkId')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Delete server social link' })
+    @ApiParam({ name: 'id', description: 'Server ID' })
+    @ApiParam({ name: 'linkId', description: 'Social link ID' })
+    async deleteSocialLink(
+        @Session() session: UserSession,
+        @Param('id') serverId: string,
+        @Param('linkId') linkId: string,
+    ) {
+        return this.serverService.deleteSocialLink(session.user.id, serverId, linkId);
+    }
+
+    @Patch(':id/social-links/reorder')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Reorder server social links' })
+    @ApiParam({ name: 'id', description: 'Server ID' })
+    async reorderSocialLinks(
+        @Session() session: UserSession,
+        @Param('id') serverId: string,
+        @Body() reorderDto: ReorderServerSocialLinksDto,
+    ) {
+        return this.serverService.reorderSocialLinks(session.user.id, serverId, reorderDto.linkIds);
     }
 }

@@ -1,10 +1,10 @@
-import {Body, Controller, Delete, Get, Param, Patch, Post, Query} from '@nestjs/common';
-import {ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiTags} from '@nestjs/swagger';
-import {Roles, Session, UserSession} from '@thallesp/nestjs-better-auth';
-import {ReportService} from './report.service';
-import {CreateReportDto} from './dtos/create-report.dto';
-import {ModerateReportDto} from './dtos/moderate-report.dto';
-import {UserRole} from '@repo/db';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { Roles, Session, UserSession } from '@thallesp/nestjs-better-auth';
+import { ReportService } from './report.service';
+import { CreateReportDto } from './dtos/create-report.dto';
+import { ModerateReportDto } from './dtos/moderate-report.dto';
+import { UserRole } from '@repo/db';
 
 @ApiTags('reports')
 @Controller('reports')
@@ -14,7 +14,7 @@ export class ReportController {
 
     @Post('users/:userId')
     @ApiBearerAuth()
-    @ApiOperation({summary: 'Report a user'})
+    @ApiOperation({ summary: 'Report a user' })
     async reportUser(
         @Session() session: UserSession,
         @Param('userId') userId: string,
@@ -25,9 +25,31 @@ export class ReportController {
 
     @Get('me')
     @ApiBearerAuth()
-    @ApiOperation({summary: 'Get my submitted reports'})
+    @ApiOperation({ summary: 'Get my submitted reports' })
     async getMyReports(@Session() session: UserSession) {
         return this.reportService.getMyReports(session.user.id);
+    }
+
+    @Get(':reportId')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Get details of one of my reports' })
+    @ApiParam({ name: 'reportId', description: 'Report ID' })
+    async getMyReportById(
+        @Session() session: UserSession,
+        @Param('reportId') reportId: string,
+    ) {
+        return this.reportService.getMyReportById(session.user.id, reportId);
+    }
+
+    @Delete(':reportId')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Cancel a pending report' })
+    @ApiParam({ name: 'reportId', description: 'Report ID' })
+    async cancelReport(
+        @Session() session: UserSession,
+        @Param('reportId') reportId: string,
+    ) {
+        return this.reportService.cancelReport(session.user.id, reportId);
     }
 
     // ============================================
@@ -37,7 +59,7 @@ export class ReportController {
     @Get('moderation/all')
     @ApiBearerAuth()
     @Roles([UserRole.MODERATOR, UserRole.ADMIN, UserRole.SUPER_ADMIN])
-    @ApiOperation({summary: 'Get all reports (Moderator+ only)'})
+    @ApiOperation({ summary: 'Get all reports (Moderator+ only)' })
     @ApiQuery({
         name: 'status',
         required: false,
@@ -53,8 +75,8 @@ export class ReportController {
     @Get('moderation/:reportId')
     @ApiBearerAuth()
     @Roles([UserRole.MODERATOR, UserRole.ADMIN, UserRole.SUPER_ADMIN])
-    @ApiOperation({summary: 'Get report details (Moderator+ only)'})
-    @ApiParam({name: 'reportId', description: 'Report ID'})
+    @ApiOperation({ summary: 'Get report details (Moderator+ only)' })
+    @ApiParam({ name: 'reportId', description: 'Report ID' })
     async getReportById(
         @Session() session: UserSession,
         @Param('reportId') reportId: string,
@@ -65,8 +87,8 @@ export class ReportController {
     @Patch('moderation/:reportId')
     @ApiBearerAuth()
     @Roles([UserRole.MODERATOR, UserRole.ADMIN, UserRole.SUPER_ADMIN])
-    @ApiOperation({summary: 'Moderate a report (Moderator+ only)'})
-    @ApiParam({name: 'reportId', description: 'Report ID'})
+    @ApiOperation({ summary: 'Moderate a report (Moderator+ only)' })
+    @ApiParam({ name: 'reportId', description: 'Report ID' })
     async moderateReport(
         @Session() session: UserSession,
         @Param('reportId') reportId: string,
@@ -78,8 +100,8 @@ export class ReportController {
     @Delete('moderation/:reportId')
     @ApiBearerAuth()
     @Roles([UserRole.ADMIN, UserRole.SUPER_ADMIN])
-    @ApiOperation({summary: 'Delete a report (Admin+ only)'})
-    @ApiParam({name: 'reportId', description: 'Report ID'})
+    @ApiOperation({ summary: 'Delete a report (Admin+ only)' })
+    @ApiParam({ name: 'reportId', description: 'Report ID' })
     async deleteReport(
         @Session() session: UserSession,
         @Param('reportId') reportId: string,

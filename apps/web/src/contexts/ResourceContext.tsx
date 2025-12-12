@@ -80,8 +80,8 @@ export function ResourceProvider({ children }: { children: ReactNode }) {
                     hasLikedResource(resource.id),
                     hasFavoritedResource(resource.id)
                 ]);
-                setIsLiked(likeStatus.hasLiked);
-                setIsFavorited(favoriteStatus.hasFavorited);
+                setIsLiked(likeStatus.liked);
+                setIsFavorited(favoriteStatus.favorited);
             } catch (err) {
                 console.error('Failed to load like/favorite status:', err);
             }

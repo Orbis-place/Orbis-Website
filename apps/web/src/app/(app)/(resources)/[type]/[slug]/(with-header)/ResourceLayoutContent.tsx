@@ -74,6 +74,8 @@ export default function ResourceLayoutContent({ children }: { children: ReactNod
 
         const previousLiked = isLiked;
         const previousCount = likeCount;
+
+        // Optimistic update
         setIsLiked(!isLiked);
         setLikeCount(isLiked ? likeCount - 1 : likeCount + 1);
         setIsLiking(true);
@@ -82,11 +84,12 @@ export default function ResourceLayoutContent({ children }: { children: ReactNod
             if (isLiked) {
                 await unlikeResource(resource.id);
             } else {
-                const response = await likeResource(resource.id);
-                setLikeCount(response.likeCount);
+                await likeResource(resource.id);
             }
+            // Success - keep the optimistic update
         } catch (err) {
             console.error('Failed to toggle like:', err);
+            // Rollback on error
             setIsLiked(previousLiked);
             setLikeCount(previousCount);
         } finally {
@@ -136,7 +139,6 @@ export default function ResourceLayoutContent({ children }: { children: ReactNod
     const author = resource.team?.name || resource.owner.username;
     const authorDisplay = resource.team?.displayName || resource.owner.displayName;
 
-    // Get featured tags
     const tags = resource.tags && resource.tags.length > 0
         ? resource.tags.map(t => t.tag.name).slice(0, 5)
         : resource.categories
@@ -147,12 +149,32 @@ export default function ResourceLayoutContent({ children }: { children: ReactNod
     console.log('Resource categories:', resource.categories);
     console.log('Mapped tags:', tags);
 
-    // Map external links
+    // Map external links with appropriate icons based on type
+    const getExternalLinkIcon = (type: string) => {
+        switch (type) {
+            case 'SOURCE_CODE':
+                return <Icon icon="mdi:github" width="20" height="20" />;
+            case 'ISSUE_TRACKER':
+                return <Icon icon="mdi:bug" width="20" height="20" />;
+            case 'WIKI':
+                return <Icon icon="mdi:book-open-page-variant" width="20" height="20" />;
+            case 'DISCORD':
+                return <Icon icon="ic:baseline-discord" width="20" height="20" />;
+            case 'DONATION':
+                return <Icon icon="mdi:heart" width="20" height="20" />;
+            case 'WEBSITE':
+                return <Icon icon="mdi:web" width="20" height="20" />;
+            case 'OTHER':
+            default:
+                return <Icon icon="mdi:link" width="20" height="20" />;
+        }
+    };
+
     const externalLinks = (resource as any).externalLinks || [];
     const links = externalLinks.map((link: any) => ({
         label: link.label || link.type,
         url: link.url,
-        icon: <Icon icon="mdi:link" width="20" height="20" />
+        icon: getExternalLinkIcon(link.type)
     }));
 
     // Map creators
@@ -199,6 +221,7 @@ export default function ResourceLayoutContent({ children }: { children: ReactNod
                 onToggleFavorite={handleToggleFavorite}
                 isLiking={isLiking}
                 isFavoriting={isFavoriting}
+                resourceId={resource.id}
             />
 
             {/* Main Content + Sidebar */}

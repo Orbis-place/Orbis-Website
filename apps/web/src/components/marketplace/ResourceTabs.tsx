@@ -17,7 +17,6 @@ export interface ResourceTabsProps {
 const defaultTabs: Tab[] = [
     { id: 'description', label: 'Description', href: '' },
     { id: 'gallery', label: 'Gallery', href: '/gallery' },
-    { id: 'changelog', label: 'Changelog', href: '/changelog' },
     { id: 'versions', label: 'Versions', href: '/versions' },
 ];
 

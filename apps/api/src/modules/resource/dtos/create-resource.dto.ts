@@ -1,4 +1,4 @@
-import {ApiProperty, ApiPropertyOptional} from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
     IsString,
     IsNotEmpty,
@@ -26,7 +26,7 @@ export enum ResourceVisibility {
 }
 
 export class CreateResourceDto {
-    @ApiProperty({example: 'My Awesome Plugin', description: 'Resource name'})
+    @ApiProperty({ example: 'My Awesome Plugin', description: 'Resource name' })
     @IsString()
     @IsNotEmpty()
     @MinLength(3)
@@ -60,4 +60,12 @@ export class CreateResourceDto {
     @IsEnum(ResourceVisibility)
     @IsOptional()
     visibility?: ResourceVisibility = ResourceVisibility.PUBLIC;
+
+    @ApiPropertyOptional({
+        example: 'team-id-123',
+        description: 'Team ID (if resource belongs to a team)',
+    })
+    @IsString()
+    @IsOptional()
+    teamId?: string;
 }

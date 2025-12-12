@@ -1,13 +1,14 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, UploadedFile, UseInterceptors, BadRequestException } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags, ApiConsumes } from '@nestjs/swagger';
 import { Session, UserSession, AllowAnonymous } from '@thallesp/nestjs-better-auth';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ResourceGalleryImageService } from './resource-gallery-image.service';
 import { CreateGalleryImageDto, UpdateGalleryImageDto, ReorderGalleryImagesDto } from './dtos/gallery-image.dto';
 
 @ApiTags('resources/gallery-images')
 @Controller('resources/:resourceId/gallery-images')
 export class ResourceGalleryImageController {
-    constructor(private readonly galleryImageService: ResourceGalleryImageService) {}
+    constructor(private readonly galleryImageService: ResourceGalleryImageService) { }
 
     // ============================================
     // AUTHENTICATED ENDPOINTS
@@ -15,13 +16,20 @@ export class ResourceGalleryImageController {
 
     @Post()
     @ApiBearerAuth()
+    @UseInterceptors(FileInterceptor('image'))
+    @ApiConsumes('multipart/form-data')
     @ApiOperation({ summary: 'Add a gallery image to a resource' })
     async create(
         @Param('resourceId') resourceId: string,
         @Session() session: UserSession,
+        @UploadedFile() file: Express.Multer.File,
         @Body() createDto: CreateGalleryImageDto,
     ) {
-        return this.galleryImageService.create(resourceId, session.user.id, createDto);
+        if (!file) {
+            throw new BadRequestException('Image file is required');
+        }
+
+        return this.galleryImageService.createFromFile(resourceId, session.user.id, file, createDto);
     }
 
     @Patch(':imageId')
@@ -56,6 +64,24 @@ export class ResourceGalleryImageController {
         @Body() reorderDto: ReorderGalleryImagesDto,
     ) {
         return this.galleryImageService.reorder(resourceId, session.user.id, reorderDto);
+    }
+
+    @Post(':imageId/replace')
+    @ApiBearerAuth()
+    @UseInterceptors(FileInterceptor('image'))
+    @ApiConsumes('multipart/form-data')
+    @ApiOperation({ summary: 'Replace the image file of a gallery image' })
+    async replaceImage(
+        @Param('resourceId') resourceId: string,
+        @Param('imageId') imageId: string,
+        @Session() session: UserSession,
+        @UploadedFile() file: Express.Multer.File,
+    ) {
+        if (!file) {
+            throw new BadRequestException('Image file is required');
+        }
+
+        return this.galleryImageService.replaceImage(resourceId, imageId, session.user.id, file);
     }
 
     // ============================================

@@ -66,6 +66,53 @@ export const getAuth = () => {
                     ? 'https://orbis.place/'
                     : 'http://localhost:3001/',
             },
+            databaseHooks: {
+                user: {
+                    create: {
+                        before: async (user) => {
+                            // Check if username already exists (case-insensitive)
+                            const existingUser = await prisma.user.findFirst({
+                                where: {
+                                    username: {
+                                        equals: user.username,
+                                        mode: 'insensitive'
+                                    }
+                                }
+                            });
+
+                            // If username exists, add a suffix
+                            if (existingUser) {
+                                let suffix = 2;
+                                let newUsername = `${user.username}_${suffix}`;
+
+                                // Keep incrementing suffix until we find an available username
+                                while (await prisma.user.findFirst({
+                                    where: {
+                                        username: {
+                                            equals: newUsername,
+                                            mode: 'insensitive'
+                                        }
+                                    }
+                                })) {
+                                    suffix++;
+                                    newUsername = `${user.username}_${suffix}`;
+                                }
+
+                                return {
+                                    data: {
+                                        ...user,
+                                        username: newUsername
+                                    }
+                                };
+                            }
+
+                            return {
+                                data: user
+                            };
+                        },
+                    },
+                },
+            },
             database: prismaAdapter(prisma, {
                 provider: "postgresql",
             }),

@@ -2,16 +2,6 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsInt, IsNotEmpty, IsOptional, IsString, IsUrl, Min } from 'class-validator';
 
 export class CreateGalleryImageDto {
-    @ApiProperty({ description: 'Image URL' })
-    @IsNotEmpty()
-    @IsUrl()
-    url: string;
-
-    @ApiProperty({ description: 'Storage key for the image' })
-    @IsNotEmpty()
-    @IsString()
-    storageKey: string;
-
     @ApiPropertyOptional({ description: 'Image caption' })
     @IsOptional()
     @IsString()
@@ -27,15 +17,11 @@ export class CreateGalleryImageDto {
     @IsString()
     description?: string;
 
-    @ApiProperty({ description: 'Display order', default: 0 })
+    @ApiPropertyOptional({ description: 'Display order', default: 0 })
+    @IsOptional()
     @IsInt()
     @Min(0)
-    order: number = 0;
-
-    @ApiProperty({ description: 'File size in bytes' })
-    @IsInt()
-    @Min(0)
-    size: number;
+    order?: number = 0;
 }
 
 export class UpdateGalleryImageDto {
