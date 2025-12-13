@@ -3,6 +3,28 @@ import { betterAuth } from "better-auth";
 import { prisma } from "@repo/db";
 import { sendResetPasswordEmail, sendVerificationEmail } from "./email";
 import { admin } from "better-auth/plugins";
+import { createAccessControl } from "better-auth/plugins/access";
+import { defaultStatements, adminAc } from "better-auth/plugins/admin/access";
+
+const statement = {
+    ...defaultStatements,
+    resource: ["create", "read", "update", "delete"]
+} as const;
+
+const ac = createAccessControl(statement);
+
+const USER = ac.newRole({
+    resource: ["read"],
+});
+const MODERATOR = ac.newRole({
+    resource: ["read", "update"],
+});
+const ADMIN = ac.newRole({
+    ...adminAc.statements,
+});
+const SUPER_ADMIN = ac.newRole({
+    ...adminAc.statements,
+});
 
 let authInstance: ReturnType<typeof betterAuth> | null = null;
 
@@ -131,7 +153,13 @@ export const getAuth = () => {
             },
             plugins: [
                 admin({
-                    adminRoles: ["ADMIN", "SUPER_ADMIN"],
+                    ac,
+                    roles: {
+                        USER,
+                        MODERATOR,
+                        ADMIN,
+                        SUPER_ADMIN,
+                    },
                     defaultRole: "USER",
                 })
             ]
@@ -140,4 +168,4 @@ export const getAuth = () => {
     return authInstance;
 };
 
-export const auth = getAuth(); // Export compatible
+export const auth = getAuth();
