@@ -15,7 +15,7 @@ export default function UserResourcesPage() {
                     user.ownedResources.map((resource) => (
                         <a
                             key={resource.id}
-                            href={`/resources/${resource.slug}`}
+                            href={`/${resource.type}/${resource.slug}`}
                             className="bg-[#06363D]/50 border border-[#084B54] rounded-[15px] p-4 hover:border-[#109EB1]/50 hover:bg-[#084B54]/30 transition-all"
                         >
                             <div className="flex items-start gap-3 mb-3">

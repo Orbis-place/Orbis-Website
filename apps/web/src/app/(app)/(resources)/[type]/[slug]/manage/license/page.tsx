@@ -154,7 +154,7 @@ export default function ManageLicensePage() {
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-                <h2 className="font-hebden text-xl font-semibold mb-6 text-[#C7F4FA]">License Configuration</h2>
+                <h2 className="font-hebden text-2xl font-semibold mb-6 text-[#C7F4FA]">License Configuration</h2>
 
                 <div className="space-y-6">
                     <div className="space-y-2">

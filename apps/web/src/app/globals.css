@@ -235,6 +235,140 @@ button {
   color: var(--foreground);
 }
 
+/* Tiptap Editor - Dark theme styles */
+.tiptap.ProseMirror {
+  color: #c7f4fa;
+}
+
+.tiptap h1,
+.tiptap h2,
+.tiptap h3,
+.tiptap h4,
+.tiptap h5,
+.tiptap h6 {
+  color: #c7f4fa;
+  font-weight: 700;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.tiptap h1 {
+  font-size: 2em;
+}
+
+.tiptap h2 {
+  font-size: 1.5em;
+}
+
+.tiptap h3 {
+  font-size: 1.25em;
+}
+
+.tiptap p {
+  color: #c7f4fa;
+  margin: 1em 0;
+}
+
+.tiptap strong,
+.tiptap b {
+  color: #c7f4fa;
+  font-weight: 700;
+}
+
+.tiptap em,
+.tiptap i {
+  color: #c7f4fa;
+}
+
+.tiptap u {
+  color: #c7f4fa;
+}
+
+.tiptap s {
+  color: #c7f4fa/80;
+}
+
+.tiptap ul,
+.tiptap ol {
+  color: #c7f4fa;
+  padding-left: 1.5em;
+  margin: 1em 0;
+}
+
+.tiptap li {
+  color: #c7f4fa;
+  margin: 0.25em 0;
+}
+
+.tiptap li::marker {
+  color: #109eb1;
+}
+
+.tiptap blockquote {
+  color: #c7f4fa/90;
+  border-left: 4px solid #109eb1;
+  padding-left: 1em;
+  margin: 1em 0;
+  font-style: italic;
+}
+
+.tiptap code {
+  color: #109eb1;
+  background-color: rgba(16, 158, 177, 0.15);
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.9em;
+}
+
+.tiptap pre {
+  background-color: #0a1f24;
+  border: 1px solid #1e5a63;
+  border-radius: 8px;
+  padding: 1em;
+  overflow-x: auto;
+  margin: 1em 0;
+}
+
+.tiptap pre code {
+  color: #c7f4fa;
+  background-color: transparent;
+  padding: 0;
+  border-radius: 0;
+}
+
+.tiptap a {
+  color: #109eb1;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.tiptap a:hover {
+  color: #0d8a9a;
+}
+
+.tiptap hr {
+  border: none;
+  border-top: 1px solid #1e5a63;
+  margin: 2em 0;
+}
+
+.tiptap img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 1em 0;
+}
+
+/* Placeholder styling */
+.tiptap p.is-editor-empty:first-child::before {
+  color: rgba(199, 244, 250, 0.4);
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
 /* Custom scrollbar for filter cards */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;

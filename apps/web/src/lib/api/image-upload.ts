@@ -46,14 +46,10 @@ export async function uploadResourceDescriptionImage(
 
   // Préparation de la requête
   const formData = new FormData()
-  formData.append('image', file)
+  formData.append('file', file)
 
-  // TODO: Adapter cette URL selon votre API backend
-  // Exemple d'endpoints possibles:
-  // - /resources/:id/description-images
-  // - /resources/:id/images
-  // - /uploads/resource-images/:id
-  const response = await fetch(`${API_URL}/resources/${resourceId}/description-images`, {
+  // Upload vers l'endpoint du backend
+  const response = await fetch(`${API_URL}/resources/description-images/upload`, {
     method: 'POST',
     credentials: 'include',
     body: formData
@@ -66,16 +62,17 @@ export async function uploadResourceDescriptionImage(
 
   const data = await response.json()
 
-  // Assurez-vous que votre API retourne un objet avec au minimum une propriété 'url'
-  if (!data.url) {
+  // Le backend renvoie { image: { url, ... } }
+  const imageData = data.image
+  if (!imageData?.url) {
     throw new Error('Invalid response from server: missing image URL')
   }
 
   return {
-    url: data.url,
-    filename: data.filename || file.name,
-    size: data.size || file.size,
-    mimeType: data.mimeType || file.type
+    url: imageData.url,
+    filename: imageData.storageKey || file.name,
+    size: imageData.size || file.size,
+    mimeType: file.type
   }
 }
 
@@ -149,7 +146,9 @@ export function extractImageUrls(html: string): string[] {
   let match
 
   while ((match = imgRegex.exec(html)) !== null) {
-    urls.push(match[1])
+    if (match[1]) {
+      urls.push(match[1])
+    }
   }
 
   return urls

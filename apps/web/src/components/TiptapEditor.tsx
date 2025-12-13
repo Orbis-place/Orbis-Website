@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useEditor, EditorContent, Editor } from '@tiptap/react'
-import { BubbleMenu, FloatingMenu } from '@tiptap/react/menus'
 import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
 import Link from '@tiptap/extension-link'
@@ -189,164 +188,128 @@ export function TiptapEditor({
   }
 
   return (
-    <div className={`relative border rounded-lg overflow-hidden bg-background ${className}`}>
-      {/* Bubble Menu - Appears when text is selected */}
-      <BubbleMenu
-        editor={editor}
-        tippyOptions={{ duration: 100, maxWidth: 'none' }}
-        className="flex items-center gap-1 bg-popover border border-border rounded-lg shadow-lg p-1"
-      >
-        <MenuButton
-          onClick={() => editor.chain().focus().toggleBold().run()}
-          active={editor.isActive('bold')}
-          icon="mdi:format-bold"
-          tooltip="Bold (Ctrl+B)"
-        />
-        <MenuButton
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          active={editor.isActive('italic')}
-          icon="mdi:format-italic"
-          tooltip="Italic (Ctrl+I)"
-        />
-        <MenuButton
-          onClick={() => editor.chain().focus().toggleUnderline().run()}
-          active={editor.isActive('underline')}
-          icon="mdi:format-underline"
-          tooltip="Underline (Ctrl+U)"
-        />
-        <MenuButton
-          onClick={() => editor.chain().focus().toggleStrike().run()}
-          active={editor.isActive('strike')}
-          icon="mdi:format-strikethrough"
-          tooltip="Strikethrough"
-        />
+    <div className={`relative border border-[#1E5A63] rounded-lg overflow-hidden bg-[#041518] ${className}`}>
+      {/* Fixed Top Toolbar */}
+      <div className="sticky top-0 z-20 border-b border-[#1E5A63] bg-[#0A1F24] p-2">
+        <div className="flex flex-wrap items-center gap-1">
+          {/* Text Formatting */}
+          <div className="flex items-center gap-0.5">
+            <MenuButton
+              onClick={() => editor.chain().focus().toggleBold().run()}
+              active={editor.isActive('bold')}
+              icon="mdi:format-bold"
+              tooltip="Bold (Ctrl+B)"
+            />
+            <MenuButton
+              onClick={() => editor.chain().focus().toggleItalic().run()}
+              active={editor.isActive('italic')}
+              icon="mdi:format-italic"
+              tooltip="Italic (Ctrl+I)"
+            />
+            <MenuButton
+              onClick={() => editor.chain().focus().toggleUnderline().run()}
+              active={editor.isActive('underline')}
+              icon="mdi:format-underline"
+              tooltip="Underline (Ctrl+U)"
+            />
+            <MenuButton
+              onClick={() => editor.chain().focus().toggleStrike().run()}
+              active={editor.isActive('strike')}
+              icon="mdi:format-strikethrough"
+              tooltip="Strikethrough"
+            />
+          </div>
 
-        <div className="w-px h-6 bg-border mx-1" />
+          <div className="w-px h-6 bg-[#1E5A63] mx-1" />
 
-        <MenuButton
-          onClick={() => editor.chain().focus().toggleCode().run()}
-          active={editor.isActive('code')}
-          icon="mdi:code-tags"
-          tooltip="Inline Code"
-        />
-        <MenuButton
-          onClick={setLink}
-          active={editor.isActive('link')}
-          icon="mdi:link"
-          tooltip="Add Link"
-        />
+          {/* Headings */}
+          <div className="flex items-center gap-0.5">
+            <MenuButton
+              onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+              active={editor.isActive('heading', { level: 1 })}
+              icon="mdi:format-header-1"
+              tooltip="Heading 1"
+            />
+            <MenuButton
+              onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+              active={editor.isActive('heading', { level: 2 })}
+              icon="mdi:format-header-2"
+              tooltip="Heading 2"
+            />
+            <MenuButton
+              onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+              active={editor.isActive('heading', { level: 3 })}
+              icon="mdi:format-header-3"
+              tooltip="Heading 3"
+            />
+          </div>
 
-        {editor.isActive('link') && (
-          <MenuButton
-            onClick={() => editor.chain().focus().unsetLink().run()}
-            active={false}
-            icon="mdi:link-off"
-            tooltip="Remove Link"
-          />
-        )}
-      </BubbleMenu>
+          <div className="w-px h-6 bg-[#1E5A63] mx-1" />
 
-      {/* Floating Menu - Appears on empty lines */}
-      <FloatingMenu
-        editor={editor}
-        tippyOptions={{ duration: 100, placement: 'left' }}
-        className="flex items-center gap-1 bg-popover border border-border rounded-lg shadow-lg p-1"
-      >
-        <MenuButton
-          onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-          active={editor.isActive('heading', { level: 1 })}
-          icon="mdi:format-header-1"
-          tooltip="Heading 1"
-        />
-        <MenuButton
-          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-          active={editor.isActive('heading', { level: 2 })}
-          icon="mdi:format-header-2"
-          tooltip="Heading 2"
-        />
-        <MenuButton
-          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-          active={editor.isActive('heading', { level: 3 })}
-          icon="mdi:format-header-3"
-          tooltip="Heading 3"
-        />
+          {/* Lists */}
+          <div className="flex items-center gap-0.5">
+            <MenuButton
+              onClick={() => editor.chain().focus().toggleBulletList().run()}
+              active={editor.isActive('bulletList')}
+              icon="mdi:format-list-bulleted"
+              tooltip="Bullet List"
+            />
+            <MenuButton
+              onClick={() => editor.chain().focus().toggleOrderedList().run()}
+              active={editor.isActive('orderedList')}
+              icon="mdi:format-list-numbered"
+              tooltip="Numbered List"
+            />
+          </div>
 
-        <div className="w-px h-6 bg-border mx-1" />
+          <div className="w-px h-6 bg-[#1E5A63] mx-1" />
 
-        <MenuButton
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-          active={editor.isActive('bulletList')}
-          icon="mdi:format-list-bulleted"
-          tooltip="Bullet List"
-        />
-        <MenuButton
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          active={editor.isActive('orderedList')}
-          icon="mdi:format-list-numbered"
-          tooltip="Numbered List"
-        />
+          {/* Code & Quote */}
+          <div className="flex items-center gap-0.5">
+            <MenuButton
+              onClick={() => editor.chain().focus().toggleCode().run()}
+              active={editor.isActive('code')}
+              icon="mdi:code-tags"
+              tooltip="Inline Code"
+            />
+            <MenuButton
+              onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+              active={editor.isActive('codeBlock')}
+              icon="mdi:code-block-tags"
+              tooltip="Code Block"
+            />
+            <MenuButton
+              onClick={() => editor.chain().focus().toggleBlockquote().run()}
+              active={editor.isActive('blockquote')}
+              icon="mdi:format-quote-close"
+              tooltip="Quote"
+            />
+          </div>
 
-        <div className="w-px h-6 bg-border mx-1" />
+          <div className="w-px h-6 bg-[#1E5A63] mx-1" />
 
-        <MenuButton
-          onClick={() => editor.chain().focus().toggleBlockquote().run()}
-          active={editor.isActive('blockquote')}
-          icon="mdi:format-quote-close"
-          tooltip="Quote"
-        />
-        <MenuButton
-          onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-          active={editor.isActive('codeBlock')}
-          icon="mdi:code-block-tags"
-          tooltip="Code Block"
-        />
-      </FloatingMenu>
-
-      {/* Fixed bottom toolbar for images and other actions */}
-      <div className="absolute bottom-4 right-4 z-10">
-        <div className="flex items-center gap-2">
-          {showImageInput && (
-            <div className="flex items-center gap-2 bg-popover border border-border rounded-lg shadow-lg p-2 animate-in slide-in-from-right-5 duration-200">
-              <input
-                type="text"
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                placeholder="Enter image URL..."
-                className="px-3 py-1.5 bg-background border border-border rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 w-64 font-nunito"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    addImageByUrl()
-                  } else if (e.key === 'Escape') {
-                    setShowImageInput(false)
-                    setImageUrl('')
-                  }
-                }}
-                autoFocus
+          {/* Links */}
+          <div className="flex items-center gap-0.5">
+            <MenuButton
+              onClick={setLink}
+              active={editor.isActive('link')}
+              icon="mdi:link"
+              tooltip="Add Link"
+            />
+            {editor.isActive('link') && (
+              <MenuButton
+                onClick={() => editor.chain().focus().unsetLink().run()}
+                active={false}
+                icon="mdi:link-off"
+                tooltip="Remove Link"
               />
-              <Button
-                type="button"
-                size="sm"
-                onClick={addImageByUrl}
-                className="h-8 px-3 font-nunito"
-              >
-                Add
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                variant="ghost"
-                onClick={() => {
-                  setShowImageInput(false)
-                  setImageUrl('')
-                }}
-                className="h-8 px-3 font-nunito"
-              >
-                Cancel
-              </Button>
-            </div>
-          )}
+            )}
+          </div>
 
-          <div className="flex items-center gap-1 bg-popover border border-border rounded-lg shadow-lg p-1">
+          <div className="w-px h-6 bg-[#1E5A63] mx-1" />
+
+          {/* Images */}
+          <div className="flex items-center gap-0.5">
             <MenuButton
               onClick={triggerImageUpload}
               active={false}
@@ -359,9 +322,12 @@ export function TiptapEditor({
               icon="mdi:link-variant"
               tooltip="Add Image by URL"
             />
+          </div>
 
-            <div className="w-px h-6 bg-border mx-1" />
+          <div className="flex-1" />
 
+          {/* Undo/Redo */}
+          <div className="flex items-center gap-0.5">
             <MenuButton
               onClick={() => editor.chain().focus().undo().run()}
               disabled={!editor.can().undo()}
@@ -378,22 +344,64 @@ export function TiptapEditor({
             />
           </div>
         </div>
+
+        {/* Image URL Input */}
+        {showImageInput && (
+          <div className="flex items-center gap-2 mt-2 p-2 bg-[#041518] border border-[#1E5A63] rounded-lg animate-in slide-in-from-top-2 duration-200">
+            <input
+              type="text"
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              placeholder="Enter image URL..."
+              className="flex-1 px-3 py-1.5 bg-[#0A1F24] border border-[#1E5A63] rounded text-sm text-[#C7F4FA] placeholder:text-[#C7F4FA]/40 focus:outline-none focus:ring-2 focus:ring-[#109EB1]/50 font-nunito"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  addImageByUrl()
+                } else if (e.key === 'Escape') {
+                  setShowImageInput(false)
+                  setImageUrl('')
+                }
+              }}
+              autoFocus
+            />
+            <Button
+              type="button"
+              size="sm"
+              onClick={addImageByUrl}
+              className="h-8 px-3 font-nunito bg-[#109EB1] hover:bg-[#0D8A9A] text-white"
+            >
+              Add
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={() => {
+                setShowImageInput(false)
+                setImageUrl('')
+              }}
+              className="h-8 px-3 font-nunito text-[#C7F4FA]/70 hover:text-[#C7F4FA] hover:bg-[#1E5A63]/30"
+            >
+              Cancel
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Editor Content */}
       <div
-        className="bg-background overflow-y-auto"
+        className="bg-[#041518] overflow-y-auto"
         style={{ minHeight }}
       >
         <EditorContent editor={editor} />
       </div>
 
       {/* Info footer */}
-      <div className="border-t bg-secondary/30 p-3 text-xs text-muted-foreground font-nunito">
+      <div className="border-t border-[#1E5A63] bg-[#0A1F24]/50 p-3 text-xs text-[#C7F4FA]/50 font-nunito">
         <div className="flex items-center gap-2">
           <Icon icon="mdi:information-outline" width="14" height="14" />
           <span>
-            Select text to format it • Use / on a new line for commands • Paste or drag & drop images
+            Select text to format it • Paste or drag & drop images
           </span>
         </div>
       </div>
@@ -418,8 +426,8 @@ function MenuButton({ onClick, active, icon, tooltip, disabled = false }: MenuBu
       disabled={disabled}
       className={`
         p-2 rounded-md transition-all duration-150 
-        hover:bg-accent
-        ${active ? 'bg-primary/20 text-primary' : 'text-foreground/70'}
+        hover:bg-[#1E5A63]/50
+        ${active ? 'bg-[#109EB1]/30 text-[#109EB1]' : 'text-[#C7F4FA]/80'}
         ${disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}
       `}
       title={tooltip}

@@ -113,9 +113,16 @@ export default function TeamsPage() {
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+
+    // Format team name (URL): lowercase, replace spaces with hyphens, prevent double hyphens
+    const formattedValue = name === 'name'
+      ? value.toLowerCase().replace(/\s+/g, '-').replace(/-+/g, '-')
+      : value;
+
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [name]: formattedValue
     });
   };
 
@@ -123,13 +130,19 @@ export default function TeamsPage() {
     setIsLoading(true);
 
     try {
+      // Clean up team name: remove leading/trailing hyphens before submission
+      const cleanedFormData = {
+        ...formData,
+        name: formData.name.replace(/^-+|-+$/g, '')
+      };
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/teams`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify(formData),
+        body: JSON.stringify(cleanedFormData),
       });
 
       if (!response.ok) {

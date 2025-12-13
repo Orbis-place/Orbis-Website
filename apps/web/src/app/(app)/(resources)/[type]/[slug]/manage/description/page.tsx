@@ -107,7 +107,7 @@ export default function ManageDescriptionPage() {
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-                <h2 className="font-hebden text-xl font-semibold mb-2 text-[#C7F4FA]">Description</h2>
+                <h2 className="font-hebden text-2xl font-semibold mb-2 text-[#C7F4FA]">Description</h2>
                 <p className="text-sm text-[#C7F4FA]/50 font-nunito mb-6">
                     Write a detailed description of your resource. You can paste images directly!
                 </p>
