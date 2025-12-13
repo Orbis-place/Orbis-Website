@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Icon } from '@iconify-icon/react';
+import { Icon } from '@iconify/react';
 import { cn } from '@/lib/utils';
 
 const dashboardNav = [

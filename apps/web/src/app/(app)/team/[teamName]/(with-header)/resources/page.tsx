@@ -1,6 +1,6 @@
 "use client";
 
-import { Icon } from '@iconify-icon/react';
+import { Icon } from '@iconify/react';
 import { useTeam } from '@/contexts/TeamContext';
 
 export default function TeamResourcesPage() {

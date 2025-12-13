@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react';
-import { Icon } from '@iconify-icon/react';
+import { Icon } from '@iconify/react';
 import { Input } from '@/components/ui/input';
 import Image from 'next/image';
 

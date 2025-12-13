@@ -132,7 +132,7 @@ export default function AuthPage() {
         try {
             await authClient.signIn.social({
                 provider,
-                callbackURL: `${window.location.origin}/dashboard${isSignup ? '' : '/profile'}`,
+                callbackURL: `${process.env.NEXT_PUBLIC_WEBSITE_URL}/dashboard${isSignup ? '' : '/profile'}`,
             });
         } catch (err) {
             setError('Social sign-in failed');

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Icon } from '@iconify-icon/react';
+import { Icon } from '@iconify/react';
 import { Button } from '@/components/ui/button';
 import { OrbisConfirmDialog } from '@/components/OrbisDialog';
 import { CreateResourceDialog } from '@/components/CreateResourceDialog';

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Icon } from '@iconify-icon/react';
+import { Icon } from '@iconify/react';
 import { Button } from '@/components/ui/button';
 import { useSessionStore } from '@/stores/useSessionStore';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';

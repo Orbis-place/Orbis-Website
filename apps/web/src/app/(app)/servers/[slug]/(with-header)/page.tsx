@@ -1,7 +1,7 @@
 "use client";
 
 import { useServer } from '@/contexts/ServerContext';
-import { Icon } from '@iconify-icon/react';
+import { Icon } from '@iconify/react';
 import {
     Accordion,
     AccordionContent,

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Icon } from '@iconify-icon/react';
+import { Icon } from '@iconify/react';
 
 export default function Footer() {
     const currentYear = new Date().getFullYear();

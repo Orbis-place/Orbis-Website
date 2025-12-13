@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useParams } from 'next/navigation';
-import { Icon } from '@iconify-icon/react';
+import { Icon } from '@iconify/react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { notFound, useRouter } from 'next/navigation';

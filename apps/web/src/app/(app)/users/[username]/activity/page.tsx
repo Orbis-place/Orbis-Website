@@ -1,6 +1,6 @@
 "use client";
 
-import { Icon } from '@iconify-icon/react';
+import { Icon } from '@iconify/react';
 
 export default function UserActivityPage() {
     return (

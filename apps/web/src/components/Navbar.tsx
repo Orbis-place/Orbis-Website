@@ -3,7 +3,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 
-import { LogInIcon, Menu, X, User, Settings, ChevronRight } from 'lucide-react';
 import {
     NavigationMenu,
     NavigationMenuContent,
@@ -21,12 +20,11 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Icon } from "@iconify-icon/react";
+import { Icon } from "@iconify/react";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@repo/auth/client";
 import { useSessionStore } from "@/stores/useSessionStore";
 import { Session } from '@repo/auth';
-import { EvaArrowDownFill } from "@/components/icons/EvaArrowDownFill";
 import * as React from "react";
 
 const marketplaceCategories = [
@@ -148,7 +146,8 @@ export default function Navbar({ session }: NavbarProps) {
                                 <span className="font-hebden text-base text-foreground hidden xl:block">
                                     {session.user.name || session.user.email}
                                 </span>
-                                <EvaArrowDownFill
+                                <Icon
+                                    icon="eva:arrow-down-fill"
                                     className="relative top-[1px] ml-1 transition duration-300 group-data-[state=open]:rotate-180"
                                     aria-hidden="true"
                                 />
@@ -161,21 +160,21 @@ export default function Navbar({ session }: NavbarProps) {
                                 <DropdownMenuItem asChild className="text-foreground cursor-pointer">
                                     <Link href={`/users/${session.user.name}`}
                                         className="flex items-center gap-2 w-full px-2 py-2">
-                                        <User size={16} />
+                                        <Icon icon="mdi:account" width="16" height="16" className="text-current" />
                                         Profile
                                     </Link>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem asChild className="text-foreground cursor-pointer">
                                     <Link href="/dashboard/reports"
                                         className="flex items-center gap-2 w-full px-2 py-2">
-                                        <Icon icon="mdi:flag" width="16" height="16" />
+                                        <Icon icon="mdi:flag" width="16" height="16" className="text-current" />
                                         My Reports
                                     </Link>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem asChild className="text-foreground cursor-pointer">
                                     <Link href="/dashboard/notifications"
                                         className="flex items-center gap-2 w-full px-2 py-2">
-                                        <Icon icon="mdi:bell" width="16" height="16" />
+                                        <Icon icon="mdi:bell" width="16" height="16" className="text-current" />
                                         Notifications
                                     </Link>
                                 </DropdownMenuItem>
@@ -193,21 +192,21 @@ export default function Navbar({ session }: NavbarProps) {
                                 <DropdownMenuItem asChild className="text-foreground cursor-pointer">
                                     <Link href="/dashboard/resources"
                                         className="flex items-center gap-2 w-full px-2 py-2">
-                                        <Icon icon="mdi:package-variant" width="16" height="16" />
+                                        <Icon icon="mdi:package-variant" width="16" height="16" className="text-current" />
                                         My Resources
                                     </Link>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem asChild className="text-foreground cursor-pointer">
                                     <Link href="/dashboard/teams"
                                         className="flex items-center gap-2 w-full px-2 py-2">
-                                        <Icon icon="mdi:account-group" width="16" height="16" />
+                                        <Icon icon="mdi:account-group" width="16" height="16" className="text-current" />
                                         My Teams
                                     </Link>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem asChild className="text-foreground cursor-pointer">
                                     <Link href="/dashboard/servers"
                                         className="flex items-center gap-2 w-full px-2 py-2">
-                                        <Icon icon="mdi:server" width="16" height="16" />
+                                        <Icon icon="mdi:server" width="16" height="16" className="text-current" />
                                         My Servers
                                     </Link>
                                 </DropdownMenuItem>
@@ -218,7 +217,7 @@ export default function Navbar({ session }: NavbarProps) {
                                 <DropdownMenuItem asChild className="text-foreground cursor-pointer">
                                     <Link href="/dashboard/settings"
                                         className="flex items-center gap-2 w-full px-2 py-2">
-                                        <Settings size={16} />
+                                        <Icon icon="mdi:cog" width="16" height="16" className="text-current" />
                                         Settings
                                     </Link>
                                 </DropdownMenuItem>
@@ -229,7 +228,7 @@ export default function Navbar({ session }: NavbarProps) {
                                     onClick={handleSignOut}
                                     className="text-destructive cursor-pointer data-[highlighted]:text-destructive"
                                 >
-                                    <Icon icon="mdi:logout" width="16" height="16" />
+                                    <Icon icon="mdi:logout" width="16" height="16" className="text-current" />
                                     Sign Out
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
@@ -240,7 +239,7 @@ export default function Navbar({ session }: NavbarProps) {
                             <Link
                                 href="/login"
                                 className="w-full flex items-center gap-2.5 justify-center">
-                                <LogInIcon size={24} /> Sign In
+                                <Icon icon="mdi:login" width="24" height="24" className="text-current" /> Sign In
                             </Link>
                         </button>
                     )}
@@ -256,7 +255,7 @@ export default function Navbar({ session }: NavbarProps) {
                         className="p-2 text-foreground hover:text-primary transition-colors z-50"
                         aria-label="Toggle navigation"
                     >
-                        {mobileNavOpen ? <X size={28} /> : <Menu size={28} />}
+                        {mobileNavOpen ? <Icon icon="mdi:close" width="28" height="28" className="text-current" /> : <Icon icon="mdi:menu" width="28" height="28" className="text-current" />}
                     </button>
 
                     {/* Logo au centre */}
@@ -291,7 +290,7 @@ export default function Navbar({ session }: NavbarProps) {
                                 href="/login"
                                 className="flex items-center justify-center gap-2 px-4 py-2 bg-primary/80 hover:bg-primary rounded-full transition-all"
                             >
-                                <LogInIcon size={18} className="text-white" />
+                                <Icon icon="mdi:login" width="18" height="18" className="text-white" />
                                 <span className="font-hebden text-sm text-white font-semibold">Sign In</span>
                             </Link>
                         )}
@@ -323,7 +322,7 @@ export default function Navbar({ session }: NavbarProps) {
                                     <span className="font-hebden font-semibold text-base text-foreground">
                                         Marketplace
                                     </span>
-                                    <ChevronRight size={20} className="text-foreground/40 group-hover:text-foreground/60" />
+                                    <Icon icon="mdi:chevron-right" width="20" height="20" className="text-foreground/40 group-hover:text-foreground/60" />
                                 </Link>
 
                                 {/* Server Discovery */}
@@ -335,7 +334,7 @@ export default function Navbar({ session }: NavbarProps) {
                                     <span className="font-hebden font-semibold text-base text-foreground">
                                         Server Discovery
                                     </span>
-                                    <ChevronRight size={20} className="text-foreground/40 group-hover:text-foreground/60" />
+                                    <Icon icon="mdi:chevron-right" width="20" height="20" className="text-foreground/40 group-hover:text-foreground/60" />
                                 </Link>
                             </div>
 
@@ -401,7 +400,7 @@ export default function Navbar({ session }: NavbarProps) {
 
                                 <Link href={`/users/${session.user.name}`} onClick={closeMobileProfile}
                                     className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent transition-colors">
-                                    <User size={20} className="text-primary" />
+                                    <Icon icon="mdi:account" width="20" height="20" className="text-primary" />
                                     <span className="font-hebden font-medium text-foreground">Profile</span>
                                 </Link>
 
@@ -457,7 +456,7 @@ export default function Navbar({ session }: NavbarProps) {
 
                                 <Link href="/dashboard/settings" onClick={closeMobileProfile}
                                     className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent transition-colors">
-                                    <Settings size={20} className="text-primary" />
+                                    <Icon icon="mdi:cog" width="20" height="20" className="text-primary" />
                                     <span className="font-hebden font-medium text-foreground">Settings</span>
                                 </Link>
                             </div>

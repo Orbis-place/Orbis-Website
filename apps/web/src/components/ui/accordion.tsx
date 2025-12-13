@@ -1,6 +1,6 @@
 import * as React from "react"
 import * as AccordionPrimitive from "@radix-ui/react-accordion"
-import { Icon } from "@iconify-icon/react"
+import { Icon } from "@iconify/react"
 
 import { cn } from "@/lib/utils"
 

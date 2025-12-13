@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactNode, useState } from 'react';
-import { Icon } from '@iconify-icon/react';
+import { Icon } from '@iconify/react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Image from 'next/image';
 import Link from 'next/link';

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Download, Heart, Bookmark, MoreVertical, Tag, Calendar, Flag, Copy } from 'lucide-react';
-import { Icon } from '@iconify-icon/react';
+import { Icon } from '@iconify/react';
 import { EntityAvatar } from '@/components/EntityAvatar';
 import {
     DropdownMenu,

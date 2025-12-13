@@ -1,6 +1,6 @@
 "use client";
 
-import { Icon } from '@iconify-icon/react';
+import { Icon } from '@iconify/react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
 import { useTeam } from '@/contexts/TeamContext';

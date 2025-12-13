@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Icon } from '@iconify-icon/react';
+import { Icon } from '@iconify/react';
 import { formatDistanceToNow } from 'date-fns';
 import { OrbisDialog, OrbisConfirmDialog } from '@/components/OrbisDialog';
 import { Button } from '@/components/ui/button';

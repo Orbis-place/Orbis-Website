@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { Icon } from '@iconify-icon/react';
+import { Icon } from '@iconify/react';
 import {
     ChartContainer,
     ChartTooltip,

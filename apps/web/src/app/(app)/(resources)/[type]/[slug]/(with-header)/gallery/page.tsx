@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useResource } from '@/contexts/ResourceContext';
 import { fetchGalleryImages, type GalleryImage } from '@/lib/api/resources';
-import { Icon } from '@iconify-icon/react';
+import { Icon } from '@iconify/react';
 import { X } from 'lucide-react';
 
 export default function GalleryPage() {

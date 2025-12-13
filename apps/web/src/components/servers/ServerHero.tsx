@@ -1,6 +1,6 @@
 "use client";
 
-import { Icon } from '@iconify-icon/react';
+import { Icon } from '@iconify/react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 

@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import ResourceHeader from '@/components/marketplace/ResourceHeader';
 import ResourceSidebar from '@/components/marketplace/ResourceSidebar';
 import ResourceTabs from '@/components/marketplace/ResourceTabs';
-import { Icon } from '@iconify-icon/react';
+import { Icon } from '@iconify/react';
 import { getResourceTypeBySingular } from '@/config/resource-types';
 import { useResource } from '@/contexts/ResourceContext';
 import { likeResource, unlikeResource, favoriteResource, unfavoriteResource } from '@/lib/api/resources';

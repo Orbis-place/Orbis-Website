@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { Icon } from '@iconify-icon/react';
+import { Icon } from '@iconify/react';
 
 export const metadata: Metadata = {
     title: 'Privacy Policy',
