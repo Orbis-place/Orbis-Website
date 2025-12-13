@@ -132,12 +132,10 @@ export default function AuthPage() {
         try {
             await authClient.signIn.social({
                 provider,
-                callbackURL: `${process.env.NEXT_PUBLIC_WEBSITE_URL}/dashboard${isSignup ? '' : '/profile'}`,
+                callbackURL: `https://www.orbis.place/dashboard/profile`,
             });
         } catch (err) {
-            setError('Social sign-in failed ' + err
-
-            );
+            setError('Social sign-in failed ' + err);
             setIsLoading(false);
         }
     };
