@@ -41,8 +41,8 @@ export class CreateServerDto {
     shortDesc?: string;
 
     @ApiProperty({
-        example: 'play.hypixel.net:25565',
-        description: 'Server address (IP:port or domain:port, port defaults to 25565 if not specified)',
+        example: 'play.hypixel.net:5520',
+        description: 'Server address (IP:port or domain:port, port defaults to 5520 if not specified)',
     })
     @IsString()
     @IsNotEmpty()

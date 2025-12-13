@@ -372,7 +372,7 @@ model Server {
   slug          String       @unique
   description   String       @db.Text
   shortDesc     String?      @db.VarChar(200)
-  serverAddress String       // Format: "ip:port" or just "ip" (default port 25565)
+  serverAddress String       // Format: "ip:port" or just "ip" (default port 5520)
   status        ServerStatus @default(PENDING)
 
   // Media

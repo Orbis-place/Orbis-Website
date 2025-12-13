@@ -610,11 +610,11 @@ export default function ServerManagePage() {
                     id="serverAddress"
                     value={formData.serverAddress}
                     onChange={(e) => setFormData({ ...formData, serverAddress: e.target.value })}
-                    placeholder="1.1.1.1:25565 or play.myserver.com"
+                    placeholder="1.1.1.1:5520 or play.myserver.com"
                     required
                   />
                   <p className="text-xs text-muted-foreground/60 font-nunito">
-                    Enter IP:port or domain:port (port defaults to 25565)
+                    Enter IP:port or domain:port (port defaults to 5520)
                   </p>
                 </div>
                 <div className="space-y-2">

@@ -397,11 +397,11 @@ export default function ServersPage() {
                 name="serverAddress"
                 value={createFormData.serverAddress}
                 onChange={handleCreateInputChange}
-                placeholder="1.1.1.1:25565 or play.myserver.com"
+                placeholder="1.1.1.1:5520 or play.myserver.com"
                 required
               />
               <p className="text-xs text-muted-foreground/60 font-nunito">
-                Enter IP:port or domain:port (port defaults to 25565)
+                Enter IP:port or domain:port (port defaults to 5520)
               </p>
             </div>
 
