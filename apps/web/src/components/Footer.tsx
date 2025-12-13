@@ -97,8 +97,8 @@ export default function Footer() {
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/datapacks" className="text-[#C7F4FA]/70 hover:text-[#109EB1] transition-colors">
-                                    Datapacks
+                                <Link href="/data-packs" className="text-[#C7F4FA]/70 hover:text-[#109EB1] transition-colors">
+                                    Data packs
                                 </Link>
                             </li>
                             <li>

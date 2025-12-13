@@ -34,7 +34,7 @@ const marketplaceCategories = [
     { name: 'Plugins', href: '/plugins', icon: 'mdi:power-plug' },
     { name: 'Asset Packs', href: '/asset-packs', icon: 'mdi:image-multiple' },
     { name: 'Prefabs', href: '/prefabs', icon: 'mdi:cube-outline' },
-    { name: 'Datapacks', href: '/datapacks', icon: 'mdi:database' },
+    { name: 'Data packs', href: '/data-packs', icon: 'mdi:database' },
     { name: 'Tools & Scripts', href: '/tools-scripts', icon: 'mdi:tools' },
 ];
 

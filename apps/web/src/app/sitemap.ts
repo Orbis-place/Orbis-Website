@@ -46,7 +46,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
         'plugins',
         'asset-packs',
         'prefabs',
-        'datapacks',
+        'data-packs',
         'tools-scripts',
     ]
 
