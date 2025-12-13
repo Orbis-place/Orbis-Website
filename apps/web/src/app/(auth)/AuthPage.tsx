@@ -130,9 +130,9 @@ export default function AuthPage() {
     const handleSocialSignIn = async (provider: 'discord' | 'google') => {
         setIsLoading(true);
         try {
-            await authClient.signIn.social({
+            authClient.signIn.social({
                 provider,
-                callbackURL: `https://www.orbis.place/dashboard/profile`,
+                callbackURL: `${window.location.origin}/dashboard/profile`,
             });
         } catch (err) {
             setError('Social sign-in failed ' + err);
