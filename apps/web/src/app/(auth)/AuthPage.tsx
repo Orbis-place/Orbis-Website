@@ -135,7 +135,9 @@ export default function AuthPage() {
                 callbackURL: `${process.env.NEXT_PUBLIC_WEBSITE_URL}/dashboard${isSignup ? '' : '/profile'}`,
             });
         } catch (err) {
-            setError('Social sign-in failed ' + JSON.stringify(err));
+            setError('Social sign-in failed ' + err
+
+            );
             setIsLoading(false);
         }
     };
