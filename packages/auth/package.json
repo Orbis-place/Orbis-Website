@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@repo/db": "workspace:*",
-    "better-auth": "^1.4.1",
+    "better-auth": "^1.4.6",
     "resend": "^6.5.2"
   }
 }

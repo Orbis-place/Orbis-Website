@@ -20,7 +20,18 @@ import { ResourceModule } from "./modules/resource/resource.module";
             isGlobal: true,
             envFilePath: '.env',
         }),
-        AuthModule.forRoot({ auth }), UserModule, OrbisAuthModule, ServerModule, TeamModule, ReportModule, BadgeModule, ResourceModule],
+        AuthModule.forRoot({
+            auth,
+            // Fix for Express 5: The /*path pattern sets req.url=/ and req.baseUrl=full_path
+            // better-call concatenates baseUrl+url creating a trailing slash that causes 404
+            // This middleware restores req.url to the full path before the handler runs
+            middleware: (req, _res, next) => {
+                req.url = req.originalUrl;
+                req.baseUrl = "";
+                next();
+            },
+        }),
+        UserModule, OrbisAuthModule, ServerModule, TeamModule, ReportModule, BadgeModule, ResourceModule],
     controllers: [AppController],
     providers: [AppService],
 })
