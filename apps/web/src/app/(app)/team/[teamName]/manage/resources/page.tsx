@@ -196,7 +196,7 @@ export default function TeamResourcesPage() {
                 <div className="bg-gradient-to-br from-accent/80 to-accent/40 rounded-lg p-6">
                     <div className="flex items-center gap-3">
                         <div className="flex flex-col items-center justify-center p-3 bg-primary/20 rounded-lg">
-                            <Icon icon="mdi:star" width="24" height="24" className="text-primary" />
+                            <Icon icon="mdi:heart" width="24" height="24" className="text-primary" />
                         </div>
                         <div>
                             <p className="text-2xl font-bold font-hebden text-foreground">{totalLikes}</p>

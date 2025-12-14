@@ -1,4 +1,10 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+    BadRequestException,
+    ConflictException,
+    ForbiddenException,
+    Injectable,
+    NotFoundException,
+} from '@nestjs/common';
 
 import { CreateResourceDto } from './dtos/create-resource.dto';
 import { LicenseType, UpdateResourceDto } from './dtos/update-resource.dto';
@@ -43,8 +49,11 @@ export class ResourceService {
             }
         }
 
-        // Generate unique slug
-        const slug = await this.generateUniqueSlug(createDto.name);
+        // Validate slug uniqueness
+        const slug = await this.generateUniqueSlug(createDto.slug);
+        if (slug !== createDto.slug.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')) {
+            throw new ConflictException('Slug is already taken');
+        }
 
         // Create resource
         const resource = await prisma.resource.create({
@@ -53,16 +62,15 @@ export class ResourceService {
                 slug,
                 tagline: createDto.tagline,
                 type: createDto.type,
-                visibility: createDto.visibility,
                 status: ResourceStatus.DRAFT,
-                ownerId: userId,
-                teamId: createDto.teamId,
+                ownerUserId: createDto.teamId ? null : userId,
+                ownerTeamId: createDto.teamId,
                 // Default values for required fields
                 licenseType: 'MIT', // Default license, should be updated later
                 priceType: 'FREE', // Default to free
             },
             include: {
-                owner: {
+                ownerUser: {
                     select: {
                         id: true,
                         username: true,
@@ -97,7 +105,7 @@ export class ResourceService {
         const resource = await prisma.resource.findUnique({
             where: { id: resourceId },
             include: {
-                owner: {
+                ownerUser: {
                     select: {
                         id: true,
                         username: true,
@@ -105,11 +113,10 @@ export class ResourceService {
                         image: true,
                     },
                 },
-                team: {
+                ownerTeam: {
                     select: {
                         id: true,
                         name: true,
-                        displayName: true,
                         logo: true,
                     },
                 },
@@ -187,7 +194,7 @@ export class ResourceService {
         const resource = await prisma.resource.findUnique({
             where: { slug },
             include: {
-                owner: {
+                ownerUser: {
                     select: {
                         id: true,
                         username: true,
@@ -195,11 +202,10 @@ export class ResourceService {
                         image: true,
                     },
                 },
-                team: {
+                ownerTeam: {
                     select: {
                         id: true,
                         name: true,
-                        displayName: true,
                         logo: true,
                     },
                 },
@@ -306,14 +312,23 @@ export class ResourceService {
 
         if (updateDto.name !== undefined) {
             updateData.name = updateDto.name;
-            // Only regenerate slug if name actually changed
-            if (updateDto.name !== resource.name) {
-                updateData.slug = await this.generateUniqueSlug(updateDto.name);
+        }
+
+        // Handle slug update - either explicit or auto-generated from name change
+        if (updateDto.slug !== undefined) {
+            // Explicit slug update
+            const uniqueSlug = await this.generateUniqueSlug(updateDto.slug);
+            // If generated slug is different from provided, it means there was a conflict
+            if (uniqueSlug !== updateDto.slug.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')) {
+                throw new ConflictException('Slug is already taken');
             }
+            updateData.slug = uniqueSlug;
+        } else if (updateDto.name !== undefined && updateDto.name !== resource.name) {
+            // Auto-generate slug from new name if name changed and no explicit slug provided
+            updateData.slug = await this.generateUniqueSlug(updateDto.name);
         }
         if (updateDto.tagline !== undefined) updateData.tagline = updateDto.tagline;
         if (updateDto.description !== undefined) updateData.description = updateDto.description;
-        if (updateDto.visibility !== undefined) updateData.visibility = updateDto.visibility;
 
         // Validate description images if description was updated
         if (updateDto.description !== undefined && this.descriptionImageService) {
@@ -328,7 +343,11 @@ export class ResourceService {
         if (updateDto.licenseType !== undefined) updateData.licenseType = updateDto.licenseType;
         if (updateDto.customLicenseName !== undefined) updateData.customLicenseName = updateDto.customLicenseName;
         if (updateDto.licenseSpdxId !== undefined) updateData.licenseSpdxId = updateDto.licenseSpdxId;
+
         if (updateDto.licenseUrl !== undefined) updateData.licenseUrl = updateDto.licenseUrl;
+
+        // Price fields
+        if (updateDto.priceType !== undefined) updateData.priceType = updateDto.priceType;
 
         // Use transaction to handle all updates atomically
         const updatedResource = await prisma.$transaction(async (tx) => {
@@ -419,7 +438,7 @@ export class ResourceService {
                 // Enforce max 3 categories per resource
                 if (currentCategoryCount + newCategoriesCount > 3) {
                     throw new BadRequestException(
-                        `Cannot add categories: resource would have ${currentCategoryCount + newCategoriesCount} categories (max 3 allowed)`
+                        `Cannot add categories: resource would have ${currentCategoryCount + newCategoriesCount} categories(max 3 allowed)`
                     );
                 }
 
@@ -499,7 +518,7 @@ export class ResourceService {
                 // Enforce max 10 tags per resource
                 if (currentTagCount + newTagsCount > 10) {
                     throw new BadRequestException(
-                        `Cannot add tags: resource would have ${currentTagCount + newTagsCount} tags (max 10 allowed)`
+                        `Cannot add tags: resource would have ${currentTagCount + newTagsCount} tags(max 10 allowed)`
                     );
                 }
 
@@ -533,7 +552,7 @@ export class ResourceService {
             return tx.resource.findUnique({
                 where: { id: resourceId },
                 include: {
-                    owner: {
+                    ownerUser: {
                         select: {
                             id: true,
                             username: true,
@@ -554,6 +573,53 @@ export class ResourceService {
         return {
             message: 'Resource updated successfully',
             resource: updatedResource,
+        };
+    }
+
+    /**
+     * Delete a resource
+     */
+    async delete(resourceId: string, userId: string) {
+        const resource = await prisma.resource.findUnique({
+            where: { id: resourceId },
+            include: {
+                galleryImages: true,
+            },
+        });
+
+        if (!resource) {
+            throw new NotFoundException('Resource not found');
+        }
+
+        // Check permission (owner or team admin)
+        const canDelete = await this.checkEditPermission(userId, resource);
+        if (!canDelete) {
+            throw new ForbiddenException('You do not have permission to delete this resource');
+        }
+
+        // Delete files
+        if (resource.iconUrl) {
+            await this.storage.deleteFile(resource.iconUrl).catch(() => { });
+        }
+        if (resource.bannerUrl) {
+            await this.storage.deleteFile(resource.bannerUrl).catch(() => { });
+        }
+
+        // Delete gallery images files
+        if (resource.galleryImages && resource.galleryImages.length > 0) {
+            for (const image of resource.galleryImages) {
+                if (image.storageKey) {
+                    await this.storage.deleteFile(image.storageKey).catch(() => { });
+                }
+            }
+        }
+
+        await prisma.resource.delete({
+            where: { id: resourceId },
+        });
+
+        return {
+            message: 'Resource deleted successfully',
         };
     }
 
@@ -579,7 +645,7 @@ export class ResourceService {
 
         const resource = await prisma.resource.findUnique({
             where: { id: resourceId },
-            select: { iconUrl: true, ownerId: true, teamId: true },
+            select: { iconUrl: true, ownerUserId: true, ownerTeamId: true },
         });
 
         if (!resource) {
@@ -593,14 +659,14 @@ export class ResourceService {
 
         const iconUrl = await this.storage.uploadFile(
             file,
-            `resources/${resourceId}/icon`,
+            `resources / ${resourceId}/icon`,
         );
 
         const updated = await prisma.resource.update({
             where: { id: resourceId },
             data: { iconUrl: iconUrl },
             include: {
-                owner: {
+                ownerUser: {
                     select: {
                         id: true,
                         username: true,
@@ -644,7 +710,7 @@ export class ResourceService {
 
         const resource = await prisma.resource.findUnique({
             where: { id: resourceId },
-            select: { bannerUrl: true, ownerId: true, teamId: true },
+            select: { bannerUrl: true, ownerUserId: true, ownerTeamId: true },
         });
 
         if (!resource) {
@@ -665,7 +731,7 @@ export class ResourceService {
             where: { id: resourceId },
             data: { bannerUrl: bannerUrl },
             include: {
-                owner: {
+                ownerUser: {
                     select: {
                         id: true,
                         username: true,
@@ -700,20 +766,34 @@ export class ResourceService {
 
     /**
      * Get user resources with pagination
+     * This includes both personal resources and resources from teams the user belongs to
      */
     async getUserResources(userId: string, pagination: PaginationDto) {
         const { page = 1, limit = 20, name } = pagination;
         const skip = (page - 1) * limit;
 
-        // Build where clause
+        // Get all teams the user belongs to
+        const userTeams = await prisma.teamMember.findMany({
+            where: { userId },
+            select: { teamId: true },
+        });
+        const teamIds = userTeams.map(tm => tm.teamId);
+
+        // Build where clause to include both personal and team resources
         const where: any = {
-            ownerId: userId,
+            OR: [
+                { ownerUserId: userId }, // Personal resources
+                { ownerTeamId: { in: teamIds } }, // Team resources
+            ],
         };
 
+        // If searching by name
         if (name) {
-            where.name = {
-                contains: name,
-                mode: 'insensitive',
+            where.AND = {
+                name: {
+                    contains: name,
+                    mode: 'insensitive',
+                },
             };
         }
 
@@ -729,7 +809,7 @@ export class ResourceService {
                 createdAt: 'desc',
             },
             include: {
-                owner: {
+                ownerUser: {
                     select: {
                         id: true,
                         username: true,
@@ -737,11 +817,11 @@ export class ResourceService {
                         image: true,
                     },
                 },
-                team: {
+                ownerTeam: {
                     select: {
                         id: true,
                         name: true,
-                        displayName: true,
+                        slug: true,
                         logo: true,
                     },
                 },
@@ -803,7 +883,7 @@ export class ResourceService {
                 createdAt: 'desc',
             },
             include: {
-                owner: {
+                ownerUser: {
                     select: {
                         id: true,
                         username: true,
@@ -811,11 +891,10 @@ export class ResourceService {
                         image: true,
                     },
                 },
-                team: {
+                ownerTeam: {
                     select: {
                         id: true,
                         name: true,
-                        displayName: true,
                         logo: true,
                     },
                 },
@@ -981,7 +1060,6 @@ export class ResourceService {
         // Build where clause
         const where: any = {
             status: ResourceStatus.APPROVED,
-            visibility: 'PUBLIC',
         };
 
         // Filter by resource type
@@ -1028,7 +1106,7 @@ export class ResourceService {
             take: limit,
             orderBy,
             include: {
-                owner: {
+                ownerUser: {
                     select: {
                         id: true,
                         username: true,
@@ -1036,11 +1114,11 @@ export class ResourceService {
                         image: true,
                     },
                 },
-                team: {
+                ownerTeam: {
                     select: {
                         id: true,
+                        slug: true,
                         name: true,
-                        displayName: true,
                         logo: true,
                     },
                 },
@@ -1100,7 +1178,7 @@ export class ResourceService {
                 createdAt: 'asc', // Oldest first for moderation queue
             },
             include: {
-                owner: {
+                ownerUser: {
                     select: {
                         id: true,
                         username: true,
@@ -1109,11 +1187,10 @@ export class ResourceService {
                         role: true,
                     },
                 },
-                team: {
+                ownerTeam: {
                     select: {
                         id: true,
                         name: true,
-                        displayName: true,
                         logo: true,
                     },
                 },
@@ -1160,7 +1237,7 @@ export class ResourceService {
         const resource = await prisma.resource.findUnique({
             where: { id: resourceId },
             include: {
-                owner: {
+                ownerUser: {
                     select: {
                         id: true,
                         username: true,
@@ -1209,7 +1286,7 @@ export class ResourceService {
                             : resource.publishedAt,
                 },
                 include: {
-                    owner: {
+                    ownerUser: {
                         select: {
                             id: true,
                             username: true,
@@ -1269,7 +1346,7 @@ export class ResourceService {
                 moderatedAt: 'desc',
             },
             include: {
-                owner: {
+                ownerUser: {
                     select: {
                         id: true,
                         username: true,
@@ -1308,7 +1385,7 @@ export class ResourceService {
         const resource = await prisma.resource.findUnique({
             where: { id: resourceId },
             include: {
-                owner: {
+                ownerUser: {
                     select: {
                         id: true,
                         username: true,
@@ -1527,19 +1604,19 @@ export class ResourceService {
      */
     private async checkEditPermission(
         userId: string,
-        resource: { ownerId: string; teamId: string | null },
+        resource: { ownerUserId?: string | null; ownerTeamId?: string | null },
     ): Promise<boolean> {
         // Direct owner
-        if (resource.ownerId === userId) {
+        if (resource.ownerUserId === userId) {
             return true;
         }
 
         // Team member with permission
-        if (resource.teamId) {
+        if (resource.ownerTeamId) {
             const member = await prisma.teamMember.findUnique({
                 where: {
                     teamId_userId: {
-                        teamId: resource.teamId,
+                        teamId: resource.ownerTeamId,
                         userId,
                     },
                 },
@@ -1551,5 +1628,147 @@ export class ResourceService {
         }
 
         return false;
+    }
+
+    /**
+     * Transfer resource ownership
+     */
+    async transferOwnership(
+        resourceId: string,
+        userId: string,
+        transferToUserId?: string,
+        transferToTeamId?: string,
+    ) {
+        // Validate exactly one target is provided
+        if (!transferToUserId && !transferToTeamId) {
+            throw new BadRequestException('Either transferToUserId or transferToTeamId must be provided');
+        }
+        if (transferToUserId && transferToTeamId) {
+            throw new BadRequestException('Cannot provide both transferToUserId and transferToTeamId');
+        }
+
+        // Get current resource
+        const resource = await prisma.resource.findUnique({
+            where: { id: resourceId },
+            select: {
+                id: true,
+                name: true,
+                ownerUserId: true,
+                ownerTeamId: true,
+            },
+        });
+
+        if (!resource) {
+            throw new NotFoundException('Resource not found');
+        }
+
+        // Check permission: must be current owner or team owner/admin
+        const hasPermission = await this.checkEditPermission(userId, resource);
+        if (!hasPermission) {
+            throw new ForbiddenException('You do not have permission to transfer this resource');
+        }
+
+        // Transfer to user
+        if (transferToUserId) {
+            // Verify new owner exists
+            const newOwner = await prisma.user.findUnique({
+                where: { id: transferToUserId },
+                select: { id: true, username: true },
+            });
+
+            if (!newOwner) {
+                throw new NotFoundException('Target user not found');
+            }
+
+            // Update ownership
+            const updatedResource = await prisma.resource.update({
+                where: { id: resourceId },
+                data: {
+                    ownerUserId: transferToUserId,
+                    ownerTeamId: null,
+                },
+                include: {
+                    ownerUser: {
+                        select: {
+                            id: true,
+                            username: true,
+                            displayName: true,
+                            image: true,
+                        },
+                    },
+                    ownerTeam: {
+                        select: {
+                            id: true,
+                            slug: true,
+                            name: true,
+                            logo: true,
+                        },
+                    },
+                },
+            });
+
+            return {
+                message: `Resource ownership transferred to user ${newOwner.username}`,
+                resource: updatedResource,
+            };
+        }
+
+        // Transfer to team
+        if (transferToTeamId) {
+            // Verify team exists
+            const team = await prisma.team.findUnique({
+                where: { id: transferToTeamId },
+                include: {
+                    members: {
+                        where: {
+                            userId,
+                            role: { in: ['OWNER', 'ADMIN'] },
+                        },
+                    },
+                },
+            });
+
+            if (!team) {
+                throw new NotFoundException('Target team not found');
+            }
+
+            // Verify user is team owner/admin
+            if (team.members.length === 0) {
+                throw new ForbiddenException(
+                    'You must be a team owner or admin to transfer resources to this team',
+                );
+            }
+
+            // Update ownership
+            const updatedResource = await prisma.resource.update({
+                where: { id: resourceId },
+                data: {
+                    ownerUserId: null,
+                    ownerTeamId: transferToTeamId,
+                },
+                include: {
+                    ownerUser: {
+                        select: {
+                            id: true,
+                            username: true,
+                            displayName: true,
+                            image: true,
+                        },
+                    },
+                    ownerTeam: {
+                        select: {
+                            id: true,
+                            name: true,
+                            logo: true,
+                        },
+                    },
+                },
+            });
+
+            return {
+                message: `Resource ownership transferred to team ${team.name}`,
+                resource: updatedResource,
+            };
+        }
     }
 }

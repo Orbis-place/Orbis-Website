@@ -20,8 +20,10 @@ export class ContributorService {
             throw new NotFoundException('Resource not found');
         }
 
-        if (resource.ownerId !== userId) {
-            throw new ForbiddenException('Only the resource owner can add contributors');
+        // Check permission
+        const canManage = await this.checkManagePermission(userId, resource);
+        if (!canManage) {
+            throw new ForbiddenException('Only the resource owner or team admins can add contributors');
         }
 
         // Check if user to add exists
@@ -85,8 +87,10 @@ export class ContributorService {
             throw new NotFoundException('Resource not found');
         }
 
-        if (resource.ownerId !== userId) {
-            throw new ForbiddenException('Only the resource owner can update contributors');
+        // Check permission
+        const canManage = await this.checkManagePermission(userId, resource);
+        if (!canManage) {
+            throw new ForbiddenException('Only the resource owner or team admins can update contributors');
         }
 
         // Check if contributor exists
@@ -145,8 +149,10 @@ export class ContributorService {
             throw new NotFoundException('Resource not found');
         }
 
-        if (resource.ownerId !== userId) {
-            throw new ForbiddenException('Only the resource owner can remove contributors');
+        // Check permission
+        const canManage = await this.checkManagePermission(userId, resource);
+        if (!canManage) {
+            throw new ForbiddenException('Only the resource owner or team admins can remove contributors');
         }
 
         // Check if contributor exists
@@ -202,5 +208,37 @@ export class ContributorService {
         return {
             contributors,
         };
+    }
+
+
+    /**
+     * Check if user has permission to manage contributors
+     */
+    private async checkManagePermission(
+        userId: string,
+        resource: { ownerUserId?: string | null; ownerTeamId?: string | null },
+    ): Promise<boolean> {
+        // Direct owner
+        if (resource.ownerUserId === userId) {
+            return true;
+        }
+
+        // Team member with permission
+        if (resource.ownerTeamId) {
+            const member = await prisma.teamMember.findUnique({
+                where: {
+                    teamId_userId: {
+                        teamId: resource.ownerTeamId,
+                        userId,
+                    },
+                },
+            });
+
+            if (member && ['OWNER', 'ADMIN'].includes(member.role)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

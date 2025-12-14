@@ -19,7 +19,6 @@ interface Resource {
     slug: string;
     tagline: string;
     type: string;
-    visibility: string;
     priceType?: string;
     iconUrl?: string;
     bannerUrl?: string;
@@ -64,7 +63,6 @@ export default function ManageGeneralPage() {
         name: '',
         tagline: '',
         type: 'PLUGIN',
-        visibility: 'PUBLIC',
         priceType: 'FREE',
     });
 
@@ -107,7 +105,6 @@ export default function ManageGeneralPage() {
                     name: res.name,
                     tagline: res.tagline,
                     type: res.type,
-                    visibility: res.visibility,
                     priceType: res.priceType || 'FREE',
                 });
 
@@ -222,7 +219,6 @@ export default function ManageGeneralPage() {
                 name: formData.name,
                 tagline: formData.tagline,
                 type: formData.type,
-                visibility: formData.visibility,
                 priceType: formData.priceType,
             };
 
@@ -479,23 +475,6 @@ export default function ManageGeneralPage() {
                                     <SelectItem value="ASSET_PACK">Asset Pack</SelectItem>
                                     <SelectItem value="PREFAB">Prefab</SelectItem>
                                     <SelectItem value="MODPACK">Modpack</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="visibility" className="font-nunito text-[#C7F4FA]">Visibility *</Label>
-                            <Select
-                                value={formData.visibility}
-                                onValueChange={(value) => setFormData({ ...formData, visibility: value })}
-                            >
-                                <SelectTrigger className="bg-[#032125] border-[#084B54] text-[#C7F4FA]">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent className="bg-[#032125] border-[#084B54] text-[#C7F4FA]">
-                                    <SelectItem value="PUBLIC">Public - Visible to everyone</SelectItem>
-                                    <SelectItem value="UNLISTED">Unlisted - Accessible via link only</SelectItem>
-                                    <SelectItem value="PRIVATE">Private - Only visible to you</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>

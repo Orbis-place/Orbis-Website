@@ -20,7 +20,7 @@ import { UserProvider, useUser } from '@/contexts/UserContext';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
 function UserProfileLayoutContent({ children }: { children: ReactNode }) {
-    const { user, isLoading, error, isFollowing, setIsFollowing, currentUser } = useUser();
+    const { user, setUser, isLoading, error, isFollowing, setIsFollowing, currentUser } = useUser();
     const [followLoading, setFollowLoading] = useState(false);
     const [copySuccess, setCopySuccess] = useState(false);
     const [reportDialogOpen, setReportDialogOpen] = useState(false);
@@ -58,6 +58,15 @@ function UserProfileLayoutContent({ children }: { children: ReactNode }) {
 
             if (response.ok) {
                 setIsFollowing(!isFollowing);
+                if (user) {
+                    setUser({
+                        ...user,
+                        _count: {
+                            ...user._count,
+                            followers: isFollowing ? user._count.followers - 1 : user._count.followers + 1,
+                        },
+                    });
+                }
             }
         } catch (error) {
             console.error('Failed to toggle follow:', error);
@@ -340,12 +349,12 @@ function UserProfileLayoutContent({ children }: { children: ReactNode }) {
                                             key={membership.id}
                                             href={`/team/${membership.team.name}`}
                                             className="group relative"
-                                            title={membership.team.displayName}
+                                            title={membership.team.name}
                                         >
                                             <Avatar className="h-12 w-12 border-2 border-[#084B54] group-hover:border-[#109EB1] transition-colors">
-                                                <AvatarImage src={membership.team.logo || undefined} alt={membership.team.displayName} />
+                                                <AvatarImage src={membership.team.logo || undefined} alt={membership.team.name} />
                                                 <AvatarFallback className="bg-gradient-to-br from-primary to-primary/70 text-white font-hebden text-sm">
-                                                    {getInitials(membership.team.displayName)}
+                                                    {getInitials(membership.team.name)}
                                                 </AvatarFallback>
                                             </Avatar>
                                         </Link>

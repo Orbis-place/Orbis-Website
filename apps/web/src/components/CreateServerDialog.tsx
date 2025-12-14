@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Icon } from '@iconify/react';
 import { Input } from '@/components/ui/input';
+import { InputWithPrefix } from '@/components/ui/input-with-prefix';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -37,12 +38,23 @@ export function CreateServerDialog({ open, onOpenChange, trigger, onSuccess, def
     const [loadingTeams, setLoadingTeams] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
+        slug: '',
         description: '',
         serverAddress: '',  // Changed from serverIp + port
         gameVersion: '1.0.0',
         primaryCategoryId: '',
         teamId: defaultTeamId,
     });
+
+    // Helper function to generate slug from name
+    const generateSlug = (text: string): string => {
+        return text
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '');
+    };
 
     useEffect(() => {
         if (open) {
@@ -97,6 +109,7 @@ export function CreateServerDialog({ open, onOpenChange, trigger, onSuccess, def
         try {
             const serverData = {
                 name: formData.name,
+                slug: formData.slug,
                 description: formData.description,
                 serverAddress: formData.serverAddress,
                 gameVersion: formData.gameVersion,
@@ -122,6 +135,7 @@ export function CreateServerDialog({ open, onOpenChange, trigger, onSuccess, def
             // Reset form and close dialog
             setFormData({
                 name: '',
+                slug: '',
                 description: '',
                 serverAddress: '',
                 gameVersion: '1.0.0',
@@ -188,7 +202,7 @@ export function CreateServerDialog({ open, onOpenChange, trigger, onSuccess, def
                                     <SelectItem key={team.id} value={team.id}>
                                         <span className="flex items-center gap-2">
                                             <Icon icon="mdi:account-group" width="16" height="16" />
-                                            {team.displayName}
+                                            {team.name}
                                         </span>
                                     </SelectItem>
                                 ))
@@ -216,6 +230,38 @@ export function CreateServerDialog({ open, onOpenChange, trigger, onSuccess, def
                         placeholder="My Awesome Server"
                         required
                     />
+                </div>
+
+                {/* Slug */}
+                <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                        <Label htmlFor="slug">
+                            URL Slug *
+                        </Label>
+                        <button
+                            type="button"
+                            onClick={() => setFormData({ ...formData, slug: generateSlug(formData.name) })}
+                            disabled={!formData.name}
+                            className="text-xs text-primary hover:text-primary/80 disabled:text-muted-foreground disabled:cursor-not-allowed font-nunito"
+                        >
+                            <Icon icon="mdi:auto-fix" width="14" height="14" className="inline mr-1" />
+                            Generate from name
+                        </button>
+                    </div>
+                    <InputWithPrefix
+                        id="slug"
+                        name="slug"
+                        prefix="orbis.place/servers/"
+                        value={formData.slug}
+                        onChange={(e) => {
+                            const formatted = generateSlug(e.target.value);
+                            setFormData({ ...formData, slug: formatted });
+                        }}
+                        required
+                    />
+                    <p className="text-xs text-muted-foreground/60 font-nunito">
+                        Lowercase letters, numbers, and hyphens only. This will be your server's URL.
+                    </p>
                 </div>
 
                 {/* Short Description */}

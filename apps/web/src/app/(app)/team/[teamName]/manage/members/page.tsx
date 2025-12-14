@@ -51,7 +51,7 @@ interface TeamInvitation {
 interface Team {
     id: string;
     name: string;
-    displayName: string;
+    slug: string;
     members: TeamMember[];
 }
 

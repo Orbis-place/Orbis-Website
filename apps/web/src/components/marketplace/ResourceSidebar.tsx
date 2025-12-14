@@ -9,6 +9,7 @@ interface Creator {
     username: string;
     avatar: string;
     role: 'Owner' | 'Contributor';
+    isTeam?: boolean;
 }
 
 interface ResourceLink {
@@ -94,13 +95,13 @@ export default function ResourceSidebar({
                     {creators.map((creator, i) => (
                         <Link
                             key={i}
-                            href={`/users/${creator.username.toLowerCase()}`}
+                            href={creator.isTeam ? `/team/${creator.username.toLowerCase()}` : `/users/${creator.username.toLowerCase()}`}
                             className="flex items-center gap-3 group hover:bg-[#032125] p-2 -m-2 rounded-xl transition-colors"
                         >
                             <EntityAvatar
                                 src={creator.avatar}
                                 name={creator.username}
-                                variant="user"
+                                variant={creator.isTeam ? "team" : "user"}
                                 className="w-8 h-8 border-2 border-[#084B54] flex-shrink-0"
                             />
                             <div className="flex flex-col flex-1 min-w-0">

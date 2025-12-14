@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Icon } from '@iconify/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { InputWithPrefix } from '@/components/ui/input-with-prefix';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useSessionStore } from '@/stores/useSessionStore';
@@ -26,7 +27,7 @@ interface TeamMember {
 interface Team {
   id: string;
   name: string;
-  displayName: string;
+  slug: string;
   description?: string;
   logo?: string;
   banner?: string;
@@ -46,7 +47,7 @@ interface TeamInvitation {
   team: {
     id: string;
     name: string;
-    displayName: string;
+    slug: string;
     logo?: string;
   };
   inviter: {
@@ -66,14 +67,24 @@ export default function TeamsPage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
     displayName: '',
+    slug: '',
     description: '',
     websiteUrl: '',
     discordUrl: '',
   });
   const [leavingTeamId, setLeavingTeamId] = useState<string | null>(null);
   const [deletingTeamId, setDeletingTeamId] = useState<string | null>(null);
+
+  // Helper function to generate slug from name
+  const generateSlug = (text: string): string => {
+    return text
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  };
 
   useEffect(() => {
     fetchTeams();
@@ -112,28 +123,17 @@ export default function TeamsPage() {
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-
-    // Format team name (URL): lowercase, replace spaces with hyphens, prevent double hyphens
-    const formattedValue = name === 'name'
-      ? value.toLowerCase().replace(/\s+/g, '-').replace(/-+/g, '-')
-      : value;
-
-    setFormData({
-      ...formData,
-      [name]: formattedValue
-    });
-  };
-
   const handleCreateTeam = async (e: React.FormEvent) => {
     setIsLoading(true);
 
     try {
-      // Clean up team name: remove leading/trailing hyphens before submission
+      // Clean up team slug: remove leading/trailing hyphens before submission
       const cleanedFormData = {
-        ...formData,
-        name: formData.name.replace(/^-+|-+$/g, '')
+        slug: formData.slug.replace(/^-+|-+$/g, ''),
+        name: formData.displayName,
+        description: formData.description,
+        websiteUrl: formData.websiteUrl,
+        discordUrl: formData.discordUrl,
       };
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/teams`, {
@@ -154,8 +154,8 @@ export default function TeamsPage() {
 
       // Reset form and close dialog
       setFormData({
-        name: '',
         displayName: '',
+        slug: '',
         description: '',
         websiteUrl: '',
         discordUrl: '',
@@ -299,37 +299,51 @@ export default function TeamsPage() {
           onCancel={() => setIsCreateOpen(false)}
         >
           <div className="space-y-4">
-            {/* Team Name (URL) */}
-            <div className="space-y-2">
-              <Label htmlFor="name">
-                Team Name (URL) *
-              </Label>
-              <Input
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                placeholder="my-awesome-team"
-                required
-              />
-              <p className="text-xs text-muted-foreground/60 font-nunito">
-                Lowercase letters, numbers, and hyphens only
-              </p>
-            </div>
-
             {/* Display Name */}
             <div className="space-y-2">
               <Label htmlFor="displayName">
-                Display Name *
+                Team Name *
               </Label>
               <Input
                 id="displayName"
                 name="displayName"
                 value={formData.displayName}
-                onChange={handleInputChange}
+                onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
                 placeholder="My Awesome Team"
                 required
               />
+            </div>
+
+            {/* Slug */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="slug">
+                  URL Slug *
+                </Label>
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, slug: generateSlug(formData.displayName) })}
+                  disabled={!formData.displayName}
+                  className="text-xs text-primary hover:text-primary/80 disabled:text-muted-foreground disabled:cursor-not-allowed font-nunito"
+                >
+                  <Icon icon="mdi:auto-fix" width="14" height="14" className="inline mr-1" />
+                  Generate from name
+                </button>
+              </div>
+              <InputWithPrefix
+                id="slug"
+                name="slug"
+                prefix="orbis.place/team/"
+                value={formData.slug}
+                onChange={(e) => {
+                  const formatted = generateSlug(e.target.value);
+                  setFormData({ ...formData, slug: formatted });
+                }}
+                required
+              />
+              <p className="text-xs text-muted-foreground/60 font-nunito">
+                Lowercase letters, numbers, and hyphens only. This will be your team's URL.
+              </p>
             </div>
 
             {/* Description */}
@@ -341,7 +355,7 @@ export default function TeamsPage() {
                 id="description"
                 name="description"
                 value={formData.description}
-                onChange={handleInputChange}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Describe your team..."
                 rows={3}
                 className="resize-none"
@@ -367,13 +381,13 @@ export default function TeamsPage() {
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
                     {invitation.team.logo ? (
-                      <Image src={invitation.team.logo} alt={invitation.team.displayName} width={48} height={48} className="rounded-lg" />
+                      <Image src={invitation.team.logo} alt={invitation.team.name} width={48} height={48} className="rounded-lg" />
                     ) : (
                       <Icon icon="mdi:account-group" width="24" height="24" className="text-primary" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-hebden text-lg font-semibold text-foreground">{invitation.team.displayName}</h3>
+                    <h3 className="font-hebden text-lg font-semibold text-foreground">{invitation.team.name}</h3>
                     <p className="text-sm text-muted-foreground font-nunito mb-2">
                       <span className="font-semibold text-foreground">{invitation.inviter.displayName || invitation.inviter.username}</span>
                       {' '}invited you to join as{' '}
@@ -426,13 +440,13 @@ export default function TeamsPage() {
                 <div className="flex items-start gap-4">
                   <div className="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
                     {team.logo ? (
-                      <Image src={team.logo} alt={team.displayName} width={64} height={64} className="rounded-lg" />
+                      <Image src={team.logo} alt={team.name} width={64} height={64} className="rounded-lg" />
                     ) : (
                       <Icon icon="mdi:account-group" width="32" height="32" className="text-primary" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-hebden text-lg font-semibold text-foreground">{team.displayName}</h3>
+                    <h3 className="font-hebden text-lg font-semibold text-foreground">{team.name}</h3>
                     <p className="text-sm text-muted-foreground font-nunito mb-2">@{team.name}</p>
                     {team.description && (
                       <p className="text-sm text-foreground/70 font-nunito line-clamp-2 mb-3">{team.description}</p>
@@ -477,13 +491,13 @@ export default function TeamsPage() {
                 <div className="flex items-start gap-4">
                   <div className="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
                     {team.logo ? (
-                      <Image src={team.logo} alt={team.displayName} width={64} height={64} className="rounded-lg" />
+                      <Image src={team.logo} alt={team.name} width={64} height={64} className="rounded-lg" />
                     ) : (
                       <Icon icon="mdi:account-group" width="32" height="32" className="text-primary" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-hebden text-lg font-semibold text-foreground">{team.displayName}</h3>
+                    <h3 className="font-hebden text-lg font-semibold text-foreground">{team.name}</h3>
                     <p className="text-sm text-muted-foreground font-nunito mb-2">
                       @{team.name} · {getUserRole(team)}
                     </p>
@@ -505,11 +519,11 @@ export default function TeamsPage() {
                   </div>
                 </div>
                 <div className="flex gap-2 mt-4">
-                  <Button size="sm" variant="outline" className="font-nunito text-sm" onClick={() => router.push(`/team/${team.name}`)}>
+                  <Button size="sm" variant="outline" className="font-nunito text-sm" onClick={() => router.push(`/team/${team.slug}`)}>
                     <Icon icon="mdi:eye" width="16" height="16" />
                     View
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => router.push(`/team/${team.name}/manage`)}>
+                  <Button size="sm" variant="outline" onClick={() => router.push(`/team/${team.slug}/manage`)}>
                     <Icon icon="mdi:cog" width="16" height="16" />
                     Manage
                   </Button>

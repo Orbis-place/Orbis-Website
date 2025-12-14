@@ -25,6 +25,8 @@ export interface ResourceHeaderProps {
     type: string;
     slug: string;
     author: string;
+    team?: { name: string; displayName?: string } | null;
+    owner?: { username: string; displayName?: string } | null;
     updatedAt: string;
     isOwner?: boolean;
     isLiked?: boolean;
@@ -47,6 +49,8 @@ export default function ResourceHeader({
     type,
     slug,
     author,
+    team,
+    owner,
     updatedAt,
     isOwner = false,
     isLiked = false,
@@ -111,7 +115,9 @@ export default function ResourceHeader({
                 <div className="absolute -bottom-16 right-2 flex gap-3">
                     {/* Primary buttons - Desktop only */}
                     <div className="hidden sm:flex gap-3">
-                        <button className="flex items-center justify-center gap-3 px-6 py-3 bg-[#109EB1] hover:bg-[#0D8A9A] rounded-full font-hebden font-extrabold text-base text-[#C7F4FA] transition-all shadow-lg">
+                        <button
+                            disabled
+                            className="flex items-center justify-center gap-3 px-6 py-3 bg-[#109EB1] hover:bg-[#0D8A9A] rounded-full font-hebden font-extrabold text-base text-[#C7F4FA] transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#109EB1]">
                             <Download className="w-5 h-5" />
                             <span>Download</span>
                         </button>
@@ -195,7 +201,7 @@ export default function ResourceHeader({
 
                 {/* Metadata Row */}
                 <div className="flex flex-wrap items-center gap-4 text-sm text-[#C7F4FA]/60 font-nunito mb-4">
-                    <span>by <Link href={`/users/${author.toLowerCase()}`} className="text-[#109EB1] font-semibold hover:underline">{author}</Link></span>
+                    <span>by <Link href={team ? `/team/${team.name.toLowerCase()}` : owner ? `/users/${owner.username.toLowerCase()}` : '#'} className="text-[#109EB1] font-semibold hover:underline">{author}</Link></span>
                     <span>•</span>
                     <span className="flex items-center gap-1.5">
                         <Calendar className="w-4 h-4" />

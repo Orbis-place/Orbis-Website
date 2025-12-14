@@ -144,7 +144,7 @@ export class FavoriteService {
             include: {
                 resource: {
                     include: {
-                        owner: {
+                        ownerUser: {
                             select: {
                                 id: true,
                                 username: true,

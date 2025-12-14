@@ -64,7 +64,7 @@ interface Server {
 interface Team {
   id: string;
   name: string;
-  displayName: string;
+  slug: string;
   logo?: string;
 }
 
@@ -340,7 +340,7 @@ export default function ServersPage() {
                       <SelectItem key={team.id} value={team.id}>
                         <span className="flex items-center gap-2">
                           <Icon icon="mdi:account-group" width="16" height="16" />
-                          {team.displayName}
+                          {team.name}
                         </span>
                       </SelectItem>
                     ))

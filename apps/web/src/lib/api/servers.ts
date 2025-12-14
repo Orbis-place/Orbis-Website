@@ -55,24 +55,32 @@ export interface Server {
     id: string;
     name: string;
     slug: string;
-    description?: string;
-    logoUrl?: string;
-    bannerUrl?: string;
-    serverIp?: string;
-    serverPort?: number;
-    onlineStatus: boolean;
+    description: string;
+    shortDesc?: string;
+    serverIp: string;
+    gameVersion: string;
+    supportedVersions: string[];
     currentPlayers: number;
     maxPlayers: number;
+    onlineStatus: boolean;
     voteCount: number;
-    verified: boolean;
+    logoUrl?: string;
+    bannerUrl?: string;
     featured: boolean;
+    verified: boolean;
     createdAt: string;
     updatedAt: string;
     owner: ServerOwner;
-    tags: Array<{
+    team?: {
+        id: string;
+        name: string;
+        displayName?: string;
+        logo?: string;
+    } | null;
+    tags?: Array<{
         tag: ServerTag;
     }>;
-    categories: Array<{
+    categories?: Array<{
         category: ServerCategory;
     }>;
 }

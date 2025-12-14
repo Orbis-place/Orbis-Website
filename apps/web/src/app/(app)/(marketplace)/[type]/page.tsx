@@ -94,8 +94,8 @@ export default function MarketplacePage({ params }: { params: Promise<{ type: st
 
     // Map backend resource to MarketplaceItem
     const mapToMarketplaceItem = (resource: Resource): MarketplaceItem => {
-        const author = resource.team?.name || resource.owner.username;
-        const authorDisplay = resource.team?.displayName || resource.owner.displayName;
+        const author = resource.ownerTeam?.name || resource.ownerUser?.username || 'Unknown';
+        const authorDisplay = resource.ownerTeam?.displayName || resource.ownerUser?.displayName || author;
 
         // Get tags (no limit, we'll show all)
         const tagNames = resource.tags
@@ -110,6 +110,7 @@ export default function MarketplacePage({ params }: { params: Promise<{ type: st
             title: resource.name,
             author,
             authorDisplay,
+            isOwnedByTeam: !!resource.ownerTeam,
             description: resource.tagline || resource.description || '',
             image: resource.iconUrl || resource.bannerUrl || '',
             rating: 4.5, // TODO: Add rating system

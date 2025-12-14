@@ -12,25 +12,26 @@ export interface Tab {
 
 export interface TeamProfileTabsProps {
     teamName: string;
+    teamSlug: string;
     resourceCount?: number;
     serverCount?: number;
     memberCount: number;
 }
 
-export default function TeamProfileTabs({ teamName, resourceCount = 0, serverCount = 0, memberCount }: TeamProfileTabsProps) {
+export default function TeamProfileTabs({ teamName, teamSlug, resourceCount = 0, serverCount = 0, memberCount }: TeamProfileTabsProps) {
     const pathname = usePathname();
 
     const tabs: Tab[] = [
-        { id: 'overview', label: 'Overview', href: `/team/${teamName}` },
-        { id: 'resources', label: 'Resources', href: `/team/${teamName}/resources`, count: resourceCount },
-        { id: 'servers', label: 'Servers', href: `/team/${teamName}/servers`, count: serverCount },
-        { id: 'members', label: 'Members', href: `/team/${teamName}/members`, count: memberCount },
+        { id: 'overview', label: 'Overview', href: `/team/${teamSlug}` },
+        { id: 'resources', label: 'Resources', href: `/team/${teamSlug}/resources`, count: resourceCount },
+        { id: 'servers', label: 'Servers', href: `/team/${teamSlug}/servers`, count: serverCount },
+        { id: 'members', label: 'Members', href: `/team/${teamSlug}/members`, count: memberCount },
     ];
 
     const isActive = (tab: Tab) => {
         const normalizedPathname = pathname?.toLowerCase();
         if (tab.id === 'overview') {
-            return normalizedPathname === `/team/${teamName.toLowerCase()}`;
+            return normalizedPathname === `/team/${teamSlug.toLowerCase()}`;
         }
         return normalizedPathname === tab.href.toLowerCase();
     };

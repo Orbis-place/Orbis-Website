@@ -73,7 +73,7 @@ function TeamProfileLayoutContent({ children }: { children: ReactNode }) {
                         {team.banner ? (
                             <Image
                                 src={team.banner}
-                                alt={`${team.displayName} banner`}
+                                alt={`${team.slug} banner`}
                                 fill
                                 className="object-cover"
                             />
@@ -86,9 +86,9 @@ function TeamProfileLayoutContent({ children }: { children: ReactNode }) {
                     <div className="absolute -bottom-16 left-8">
                         <div className="relative w-32 h-32 rounded-[25px] overflow-hidden border-4 border-[#032125] shadow-2xl bg-[#032125]">
                             <Avatar className="h-full w-full rounded-none">
-                                <AvatarImage src={team.logo || undefined} alt={team.displayName} />
+                                <AvatarImage src={team.logo || undefined} alt={team.slug} />
                                 <AvatarFallback className="bg-gradient-to-br from-primary to-primary/70 text-white font-hebden text-3xl rounded-none">
-                                    {getInitials(team.displayName)}
+                                    {getInitials(team.slug)}
                                 </AvatarFallback>
                             </Avatar>
                         </div>
@@ -102,7 +102,7 @@ function TeamProfileLayoutContent({ children }: { children: ReactNode }) {
                         <div className="flex items-start justify-between gap-4 mb-3">
                             <div className="flex-1">
                                 <h1 className="font-hebden font-extrabold text-3xl sm:text-4xl leading-tight text-[#C7F4FA] mb-2">
-                                    {team.displayName}
+                                    {team.name}
                                 </h1>
                                 {team.description && (
                                     <p className="font-nunito text-base text-[#C7F4FA]/80 leading-relaxed max-w-3xl">
@@ -114,8 +114,6 @@ function TeamProfileLayoutContent({ children }: { children: ReactNode }) {
 
                         {/* Metadata Row */}
                         <div className="flex flex-wrap items-center gap-4 text-sm text-[#C7F4FA]/60 font-nunito mb-4">
-                            <span className="text-[#109EB1] font-semibold">@{team.name}</span>
-                            <span>•</span>
                             <span className="flex items-center gap-1.5">
                                 <Icon icon="mdi:calendar" className="w-4 h-4" />
                                 Created {formatDate(team.createdAt)}
@@ -160,6 +158,7 @@ function TeamProfileLayoutContent({ children }: { children: ReactNode }) {
             {/* Tabs Navigation */}
             <TeamProfileTabs
                 teamName={team.name}
+                teamSlug={team.slug}
                 resourceCount={team._count?.resources || 0}
                 serverCount={team._count?.servers || 0}
                 memberCount={team._count?.members || team.members.length}

@@ -28,7 +28,7 @@ export class TeamService {
     async create(userId: string, createDto: CreateTeamDto) {
         // Check if team name is already taken
         const existing = await prisma.team.findUnique({
-            where: { name: createDto.name.toLowerCase() },
+            where: { slug: createDto.slug.toLowerCase() },
         });
 
         if (existing) {
@@ -39,7 +39,7 @@ export class TeamService {
         const team = await prisma.team.create({
             data: {
                 name: createDto.name.toLowerCase(),
-                displayName: createDto.displayName,
+                slug: createDto.slug.toLowerCase(),
                 description: createDto.description,
                 ownerId: userId,
                 members: {
@@ -139,9 +139,9 @@ export class TeamService {
     /**
      * Find team by name
      */
-    async findByName(name: string) {
+    async findBySlug(slug: string) {
         const team = await prisma.team.findUnique({
-            where: { name: name.toLowerCase() },
+            where: { slug: slug.toLowerCase() },
             include: {
                 owner: {
                     select: {
@@ -193,7 +193,7 @@ export class TeamService {
         });
 
         if (!team) {
-            throw new NotFoundException(`Team ${name} not found`);
+            throw new NotFoundException(`Team ${slug} not found`);
         }
 
         return team;
@@ -244,7 +244,7 @@ export class TeamService {
 
         const updateData: any = {};
 
-        if (updateDto.displayName !== undefined) updateData.displayName = updateDto.displayName;
+        if (updateDto.slug !== undefined) updateData.slug = updateDto.slug;
         if (updateDto.description !== undefined) updateData.description = updateDto.description;
 
         const updated = await prisma.team.update({
@@ -552,7 +552,7 @@ export class TeamService {
                     select: {
                         id: true,
                         name: true,
-                        displayName: true,
+                        slug: true,
                         logo: true,
                     },
                 },
@@ -634,7 +634,7 @@ export class TeamService {
                     select: {
                         id: true,
                         name: true,
-                        displayName: true,
+                        slug: true,
                         logo: true,
                     },
                 },
@@ -714,7 +714,7 @@ export class TeamService {
                             select: {
                                 id: true,
                                 name: true,
-                                displayName: true,
+                                slug: true,
                                 logo: true,
                             },
                         },
@@ -748,7 +748,7 @@ export class TeamService {
                         select: {
                             id: true,
                             name: true,
-                            displayName: true,
+                            slug: true,
                             logo: true,
                         },
                     },
@@ -956,9 +956,18 @@ export class TeamService {
         }
 
         const resources = await prisma.resource.findMany({
-            where: { teamId },
+            where: { ownerTeamId: teamId },
             include: {
-                owner: {
+                ownerTeam: {
+                    select: {
+                        id: true,
+                        slug: true,
+                        name: true,
+                        logo: true,
+                        banner: true,
+                    },
+                },
+                ownerUser: {
                     select: {
                         id: true,
                         username: true,
@@ -1000,7 +1009,7 @@ export class TeamService {
         }
 
         const servers = await prisma.server.findMany({
-            where: { teamId },
+            where: { ownerTeamId: teamId },
             select: {
                 id: true,
                 name: true,

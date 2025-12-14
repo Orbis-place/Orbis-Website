@@ -611,33 +611,6 @@ export default function ProfilePage() {
         )}
       </div>
 
-      {/* Statistics */}
-      <div className="bg-secondary/30 rounded-lg p-6">
-        <h2 className="font-hebden text-xl font-semibold mb-6 text-foreground">Statistics</h2>
-
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          <div className="text-center">
-            <p className="text-2xl font-bold font-hebden text-foreground">{profile?._count.followers || 0}</p>
-            <p className="text-sm text-muted-foreground font-nunito">Followers</p>
-          </div>
-
-          <div className="text-center">
-            <p className="text-2xl font-bold font-hebden text-foreground">{profile?._count.following || 0}</p>
-            <p className="text-sm text-muted-foreground font-nunito">Following</p>
-          </div>
-
-          <div className="text-center">
-            <p className="text-2xl font-bold font-hebden text-foreground">{profile?._count.ownedResources || 0}</p>
-            <p className="text-sm text-muted-foreground font-nunito">Resources</p>
-          </div>
-
-          <div className="text-center">
-            <p className="text-2xl font-bold font-hebden text-foreground">{profile?._count.ownedServers || 0}</p>
-            <p className="text-sm text-muted-foreground font-nunito">Servers</p>
-          </div>
-        </div>
-      </div>
-
       {/* Add/Edit Social Link Dialog */}
       <OrbisFormDialog
         open={showAddLinkDialog}

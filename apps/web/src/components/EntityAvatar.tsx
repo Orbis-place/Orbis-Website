@@ -55,7 +55,7 @@ const variantStyles = {
  * // Team avatar
  * <EntityAvatar 
  *   src={team.logo} 
- *   name={team.displayName}
+ *   name={team.name}
  *   variant="team"
  *   className="h-12 w-12"
  * />

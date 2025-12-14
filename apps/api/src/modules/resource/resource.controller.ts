@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AllowAnonymous, Roles, Session, UserSession } from '@thallesp/nestjs-better-auth';
@@ -92,6 +92,16 @@ export class ResourceController {
         @Body() updateDto: UpdateResourceDto,
     ) {
         return this.resourceService.update(id, session.user.id, updateDto);
+    }
+
+    @Delete(':id')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Delete a resource' })
+    async delete(
+        @Session() session: UserSession,
+        @Param('id') id: string,
+    ) {
+        return this.resourceService.delete(id, session.user.id);
     }
 
     // ============================================

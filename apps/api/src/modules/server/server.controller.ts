@@ -24,6 +24,7 @@ import { UserRole } from '@repo/db';
 import { CreateServerSocialLinkDto } from './dtos/create-server-social-link.dto';
 import { UpdateServerSocialLinkDto } from './dtos/update-server-social-link.dto';
 import { ReorderServerSocialLinksDto } from './dtos/reorder-server-social-links.dto';
+import { TransferServerOwnershipDto } from './dtos/transfer-server-ownership.dto';
 
 
 @ApiTags('servers')
@@ -47,13 +48,27 @@ export class ServerController {
     @AllowAnonymous()
     @ApiOperation({ summary: 'Get server by slug' })
     @ApiParam({ name: 'slug', description: 'Server slug' })
-    async findBySlug(@Param('slug') slug: string) {
-        return this.serverService.findBySlug(slug);
+    async findBySlug(
+        @Param('slug') slug: string,
+        @Session({ required: false }) session?: UserSession,
+    ) {
+        return this.serverService.findBySlug(slug, session?.user?.id);
     }
 
     // ============================================
     // AUTHENTICATED ENDPOINTS
     // ============================================
+
+    @Get('user/:userId')
+    @AllowAnonymous()
+    @ApiOperation({ summary: 'Get servers by user' })
+    @ApiParam({ name: 'userId', description: 'User ID' })
+    async getUserServers(
+        @Param('userId') userId: string,
+        @Session({ required: false }) session?: UserSession,
+    ) {
+        return this.serverService.getUserServers(userId, session?.user?.id);
+    }
 
     @Post()
     @ApiBearerAuth()
@@ -75,6 +90,23 @@ export class ServerController {
         @Body() updateDto: UpdateServerDto,
     ) {
         return this.serverService.update(session.user.id, serverId, updateDto);
+    }
+
+    @Patch(':id/transfer-ownership')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Transfer server ownership to another user or team' })
+    @ApiParam({ name: 'id', description: 'Server ID' })
+    async transferOwnership(
+        @Session() session: UserSession,
+        @Param('id') serverId: string,
+        @Body() transferDto: TransferServerOwnershipDto,
+    ) {
+        return this.serverService.transferOwnership(
+            serverId,
+            session.user.id,
+            transferDto.transferToUserId,
+            transferDto.transferToTeamId,
+        );
     }
 
     @Delete(':id')

@@ -32,7 +32,7 @@ export default function TeamManageLayout({ children }: ManageLayoutProps) {
                 });
                 if (response.ok) {
                     const data = await response.json();
-                    setTeamDisplayName(data.displayName);
+                    setTeamDisplayName(data.name);
                 } else if (response.status === 404) {
                     notFound();
                 } else if (response.status === 403) {

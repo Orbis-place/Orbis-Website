@@ -13,14 +13,14 @@ export class CreateTeamDto {
     @IsNotEmpty()
     @MinLength(3)
     @MaxLength(30)
-    name: string;
+    slug: string;
 
     @ApiProperty({ example: 'Hypixel Studios', description: 'Display name for the team' })
     @IsString()
     @IsNotEmpty()
     @MinLength(3)
     @MaxLength(50)
-    displayName: string;
+    name: string;
 
     @ApiPropertyOptional({
         example: 'A team dedicated to creating amazing Hytale servers...',

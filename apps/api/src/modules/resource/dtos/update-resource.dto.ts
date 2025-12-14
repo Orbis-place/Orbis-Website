@@ -11,7 +11,8 @@ import {
     ArrayMaxSize,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ResourceType, ResourceVisibility } from './create-resource.dto';
+import { ResourceType } from './create-resource.dto';
+import { PriceType } from '@repo/db';
 
 export enum LicenseType {
     // Common open source
@@ -98,13 +99,14 @@ export class UpdateResourceDto {
     description?: string;
 
     @ApiPropertyOptional({
-        example: 'PUBLIC',
-        description: 'Resource visibility',
-        enum: ResourceVisibility,
+        example: 'my-awesome-plugin',
+        description: 'URL-friendly slug',
     })
-    @IsEnum(ResourceVisibility)
+    @IsString()
     @IsOptional()
-    visibility?: ResourceVisibility;
+    @MinLength(3)
+    @MaxLength(100)
+    slug?: string;
 
     // License
     @ApiPropertyOptional({
@@ -141,6 +143,16 @@ export class UpdateResourceDto {
     @IsUrl()
     @IsOptional()
     licenseUrl?: string;
+
+    // Price
+    @ApiPropertyOptional({
+        example: 'FREE',
+        description: 'Price type',
+        enum: PriceType,
+    })
+    @IsEnum(PriceType)
+    @IsOptional()
+    priceType?: PriceType;
 
     // External Links
     @ApiPropertyOptional({

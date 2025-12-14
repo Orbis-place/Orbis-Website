@@ -91,7 +91,16 @@ export function ResourceProvider({ children }: { children: ReactNode }) {
     }, [resource, session?.user]);
 
     // Check if current user is the owner
-    const isOwner = !!session?.user?.id && !!resource && session.user.id === resource.owner.id;
+    // For personal resources: check if user id matches ownerUser id
+    // For team resources: we'll need to check team membership (for now just mark as not owner)
+    // TODO: Implement team membership check
+    const isOwner = !!session?.user?.id && !!resource && (
+        // Check personal ownership
+        (resource.ownerUser && session.user.id === resource.ownerUser.id) ||
+        // For team resources, we'd need to check if user is team admin/owner
+        // This would require an API call or additional data in the resource
+        false
+    );
 
     const value: ResourceContextType = {
         resource,

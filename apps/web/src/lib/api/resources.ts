@@ -87,8 +87,8 @@ export interface Resource {
     createdAt: string;
     updatedAt: string;
     publishedAt?: string;
-    owner: ResourceOwner;
-    team?: ResourceTeam;
+    ownerUser: ResourceOwner | null;
+    ownerTeam?: ResourceTeam | null;
     latestVersion?: ResourceVersion;
     tags: Array<{
         tag: ResourceTag;
@@ -549,7 +549,7 @@ export async function fetchHytaleVersions(): Promise<string[]> {
 export interface Team {
     id: string;
     name: string;
-    displayName: string;
+    slug: string;
     logo?: string;
 }
 
@@ -585,9 +585,9 @@ export async function fetchUserTeams(): Promise<Team[]> {
 
 export interface CreateResourceData {
     name: string;
+    slug: string;
     tagline: string;
     type: ResourceType;
-    visibility?: 'PUBLIC' | 'UNLISTED' | 'PRIVATE';
     teamId?: string;
 }
 

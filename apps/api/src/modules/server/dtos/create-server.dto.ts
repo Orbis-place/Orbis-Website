@@ -57,6 +57,16 @@ export class CreateServerDto {
     @IsNotEmpty()
     gameVersion: string;
 
+    @ApiProperty({
+        example: 'hypixel-hytale',
+        description: 'URL-friendly slug',
+    })
+    @IsString()
+    @IsNotEmpty()
+    @MinLength(3)
+    @MaxLength(100)
+    slug: string;
+
     @ApiPropertyOptional({
         example: ['1.0.0', '1.0.1'],
         description: 'Supported game versions',

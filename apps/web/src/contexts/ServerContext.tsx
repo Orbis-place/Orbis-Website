@@ -1,7 +1,8 @@
 'use client';
 
 import { createContext, useContext, ReactNode, useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
+import { notFound } from 'next/navigation';
 
 interface ServerCategory {
     id: string;
@@ -74,7 +75,6 @@ const ServerContext = createContext<ServerContextType | undefined>(undefined);
 
 export function ServerProvider({ children }: { children: ReactNode }) {
     const params = useParams();
-    const router = useRouter();
     const slug = params.slug as string;
     const [server, setServer] = useState<Server | null>(null);
     const [loading, setLoading] = useState(true);
@@ -83,7 +83,9 @@ export function ServerProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         const fetchServer = async () => {
             try {
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/servers/${slug}`);
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/servers/${slug}`, {
+                    credentials: 'include', // Include credentials for session
+                });
 
                 if (response.ok) {
                     const data = await response.json();
@@ -103,19 +105,20 @@ export function ServerProvider({ children }: { children: ReactNode }) {
                         console.error('Failed to fetch user:', userError);
                     }
                 } else {
-                    console.error('Server not found:', response.status, response.statusText);
-                    router.push('/servers');
+                    // Server not found or access denied - show 404 page
+                    notFound();
                 }
             } catch (error) {
                 console.error('Failed to fetch server:', error);
-                router.push('/servers');
+                // Network error or other issue - show 404 page
+                notFound();
             } finally {
                 setLoading(false);
             }
         };
 
         fetchServer();
-    }, [slug, router]);
+    }, [slug]);
 
     return (
         <ServerContext.Provider value={{ server, isLoading: loading, isOwner }}>

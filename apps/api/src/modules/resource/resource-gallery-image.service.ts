@@ -297,10 +297,27 @@ export class ResourceGalleryImageService {
             throw new NotFoundException('Resource not found');
         }
 
-        if (resource.ownerId !== userId) {
-            throw new ForbiddenException('You can only manage gallery images for your own resources');
+        // Direct owner
+        if (resource.ownerUserId === userId) {
+            return resource;
         }
 
-        return resource;
+        // Team member with permission
+        if (resource.ownerTeamId) {
+            const member = await prisma.teamMember.findUnique({
+                where: {
+                    teamId_userId: {
+                        teamId: resource.ownerTeamId,
+                        userId,
+                    },
+                },
+            });
+
+            if (member && ['OWNER', 'ADMIN'].includes(member.role)) {
+                return resource;
+            }
+        }
+
+        throw new ForbiddenException('You can only manage gallery images for your own resources');
     }
 }

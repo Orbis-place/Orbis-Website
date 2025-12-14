@@ -58,7 +58,7 @@ interface Server {
 export interface TeamProfile {
     id: string;
     name: string;
-    displayName: string;
+    slug: string;
     description: string | null;
     logo: string | null;
     banner: string | null;

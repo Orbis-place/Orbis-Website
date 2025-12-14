@@ -44,7 +44,7 @@ interface SocialLink {
 interface Team {
     id: string;
     name: string;
-    displayName: string;
+    slug: string;
     description?: string;
     logo?: string;
     banner?: string;
@@ -113,7 +113,6 @@ export default function TeamManageGeneralPage() {
 
     useEffect(() => {
         fetchTeam();
-        fetchSocialLinks();
     }, [teamName]);
 
     const fetchTeam = async () => {
@@ -129,6 +128,10 @@ export default function TeamManageGeneralPage() {
 
             const data = await response.json();
             setTeam(data);
+            // Initialize social links from the team data
+            if (data.socialLinks) {
+                setSocialLinks(data.socialLinks);
+            }
             setFormData({
                 displayName: data.displayName,
                 description: data.description || '',
@@ -411,6 +414,11 @@ export default function TeamManageGeneralPage() {
         // Send to backend
         try {
             const linkIds = newLinks.map(link => link.id);
+            console.log('Reorder Debug:', {
+                teamId: team.id,
+                linkIds,
+                socialLinks: newLinks,
+            });
             const response = await fetch(`${API_URL}/teams/${team.id}/social-links/reorder`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
@@ -479,7 +487,7 @@ export default function TeamManageGeneralPage() {
                 {team.banner && (
                     <Image
                         src={team.banner}
-                        alt={`${team.displayName} banner`}
+                        alt={`${team.name} banner`}
                         fill
                         className="object-cover"
                     />
@@ -523,7 +531,7 @@ export default function TeamManageGeneralPage() {
                         {team.logo ? (
                             <Image
                                 src={team.logo}
-                                alt={team.displayName}
+                                alt={team.name}
                                 width={96}
                                 height={96}
                                 className="rounded-lg"
@@ -569,7 +577,7 @@ export default function TeamManageGeneralPage() {
                             <div className="space-y-3">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <h2 className="text-2xl font-bold font-hebden text-foreground">{team.displayName}</h2>
+                                        <h2 className="text-2xl font-bold font-hebden text-foreground">{team.name}</h2>
                                         <p className="text-muted-foreground font-nunito">@{team.name}</p>
                                     </div>
                                     {canEdit && (
@@ -627,7 +635,7 @@ export default function TeamManageGeneralPage() {
                                         onClick={() => {
                                             setIsEditing(false);
                                             setFormData({
-                                                displayName: team.displayName,
+                                                displayName: team.name,
                                                 description: team.description || '',
                                             });
                                         }}

@@ -26,7 +26,7 @@ interface TeamMembership {
     team: {
         id: string;
         name: string;
-        displayName: string;
+        slug: string;
         logo: string | null;
     };
 }
@@ -96,10 +96,12 @@ export interface UserProfile {
     ownedResources: Resource[];
     ownedServers: Server[];
     socialLinks: SocialLink[];
+    isFollowing?: boolean;
 }
 
 interface UserContextType {
     user: UserProfile | null;
+    setUser: (user: UserProfile | null) => void;
     isLoading: boolean;
     error: string | null;
     isFollowing: boolean;
@@ -121,7 +123,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
         async function fetchUserProfile() {
             try {
                 setIsLoading(true);
-                const response = await fetch(`${API_URL}/users/username/${username}`);
+                const response = await fetch(`${API_URL}/users/username/${username}`, {
+                    credentials: 'include',
+                });
 
                 if (!response.ok) {
                     if (response.status === 404) {
@@ -134,6 +138,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
                 const data = await response.json();
                 setUser(data);
+                if (typeof data.isFollowing === 'boolean') {
+                    setIsFollowing(data.isFollowing);
+                }
             } catch (err) {
                 console.error('Error fetching user:', err);
                 setError('Failed to load user profile');
@@ -166,6 +173,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         <UserContext.Provider
             value={{
                 user,
+                setUser,
                 isLoading,
                 error,
                 isFollowing,

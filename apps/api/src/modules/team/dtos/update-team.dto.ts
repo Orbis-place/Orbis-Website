@@ -8,12 +8,19 @@ import {
 } from 'class-validator';
 
 export class UpdateTeamDto {
+    @ApiPropertyOptional({ example: 'hypixel', description: 'Unique team identifier (lowercase, no spaces)' })
+    @IsString()
+    @IsOptional()
+    @MinLength(3)
+    @MaxLength(30)
+    slug?: string;
+
     @ApiPropertyOptional({ example: 'Hypixel Studios', description: 'Display name for the team' })
     @IsString()
     @IsOptional()
     @MinLength(3)
     @MaxLength(50)
-    displayName?: string;
+    name?: string;
 
     @ApiPropertyOptional({
         example: 'A team dedicated to creating amazing Hytale servers...',

@@ -275,8 +275,8 @@ model UserSocialLink {
 
 model Team {
   id          String   @id @default(cuid())
-  name        String   @unique
-  displayName String
+  slug        String   @unique
+  name        String
   description String?  @db.Text
   logo        String?
   banner      String?
@@ -398,7 +398,7 @@ model Server {
   websiteUrl String?
   country    String?
 
-  // Visibility & Features
+  // Features
   featured Boolean @default(false)
   verified Boolean @default(false)
 
@@ -408,11 +408,11 @@ model Server {
   approvedBy      String?
   approver        User?     @relation("ServerApprover", fields: [approvedBy], references: [id], onDelete: SetNull)
 
-  // Ownership (User OR Team)
-  ownerId String
-  owner   User    @relation("ServerOwner", fields: [ownerId], references: [id], onDelete: Cascade)
-  teamId  String?
-  team    Team?   @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  // Ownership (Exclusive: either ownerUserId OR ownerTeamId, never both)
+  ownerUserId String?
+  ownerUser   User?   @relation("ServerOwner", fields: [ownerUserId], references: [id], onDelete: Cascade)
+  ownerTeamId String?
+  ownerTeam   Team?   @relation(fields: [ownerTeamId], references: [id], onDelete: SetNull)
 
   // Relations
   tags          ServerTagRelation[]
@@ -422,8 +422,8 @@ model Server {
 
   @@index([slug])
   @@index([status])
-  @@index([ownerId])
-  @@index([teamId])
+  @@index([ownerUserId])
+  @@index([ownerTeamId])
   @@index([featured])
   @@index([voteCount])
   @@index([createdAt])
@@ -639,7 +639,6 @@ model Resource {
   description String?            @db.Text // Full description (Markdown/HTML with images)
   type        ResourceType
   status      ResourceStatus     @default(DRAFT)
-  visibility  ResourceVisibility @default(PUBLIC)
 
   // Media
   iconUrl           String?
@@ -681,11 +680,11 @@ model Resource {
   verified  Boolean @default(false)
   staffPick Boolean @default(false)
 
-  // Ownership
-  ownerId      String
-  owner        User                  @relation("OwnedResources", fields: [ownerId], references: [id], onDelete: Cascade)
-  teamId       String?
-  team         Team?                 @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  // Ownership (Exclusive: either ownerUserId OR ownerTeamId, never both)
+  ownerUserId  String?
+  ownerUser    User?                 @relation("OwnedResources", fields: [ownerUserId], references: [id], onDelete: Cascade)
+  ownerTeamId  String?
+  ownerTeam    Team?                 @relation(fields: [ownerTeamId], references: [id], onDelete: SetNull)
   contributors ResourceContributor[]
 
   // Relations
@@ -709,11 +708,10 @@ model Resource {
   lastActivityAt DateTime  @default(now()) // Last update/version
   deletedAt      DateTime? // Soft delete
 
-  @@index([ownerId])
-  @@index([teamId])
+  @@index([ownerUserId])
+  @@index([ownerTeamId])
   @@index([type])
   @@index([status])
-  @@index([visibility])
   @@index([featured])
   @@index([publishedAt])
   @@index([lastActivityAt])
@@ -744,12 +742,6 @@ enum ResourceStatus {
   SUSPENDED // Suspended (violation)
   ARCHIVED // Archived by owner
   DELETED // Soft deleted
-}
-
-enum ResourceVisibility {
-  PUBLIC // Visible to everyone
-  UNLISTED // Accessible via direct link only
-  PRIVATE // Only visible to owner/team
 }
 
 enum PriceType {

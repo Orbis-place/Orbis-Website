@@ -385,7 +385,7 @@ export class UserService {
         return user;
     }
 
-    async getUserProfileByUsername(username: string) {
+    async getUserProfileByUsername(username: string, currentUserId?: string) {
         const user = await prisma.user.findFirst({
             where: { username: { equals: username, mode: 'insensitive' } },
             select: {
@@ -450,7 +450,6 @@ export class UserService {
                             select: {
                                 id: true,
                                 name: true,
-                                displayName: true,
                                 logo: true,
                             },
                         },
@@ -522,7 +521,25 @@ export class UserService {
             throw new NotFoundException('User not found');
         }
 
-        return user;
+        let isFollowing = false;
+        if (currentUserId) {
+            console.log('Checking follow status for:', { currentUserId, targetUserId: user.id });
+            const follow = await prisma.follow.findUnique({
+                where: {
+                    followerId_followingId: {
+                        followerId: currentUserId,
+                        followingId: user.id,
+                    },
+                },
+            });
+            console.log('Follow result:', follow);
+            isFollowing = !!follow;
+        }
+
+        return {
+            ...user,
+            isFollowing,
+        };
     }
 
     /**

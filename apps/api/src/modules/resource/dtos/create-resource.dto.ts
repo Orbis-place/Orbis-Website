@@ -19,11 +19,6 @@ export enum ResourceType {
     DATA_PACK = 'DATA_PACK',
 }
 
-export enum ResourceVisibility {
-    PUBLIC = 'PUBLIC',      // Visible to everyone
-    UNLISTED = 'UNLISTED',  // Accessible via direct link only
-    PRIVATE = 'PRIVATE',    // Only visible to owner/team
-}
 
 export class CreateResourceDto {
     @ApiProperty({ example: 'My Awesome Plugin', description: 'Resource name' })
@@ -51,15 +46,15 @@ export class CreateResourceDto {
     @IsNotEmpty()
     type: ResourceType;
 
-    @ApiPropertyOptional({
-        example: 'PUBLIC',
-        description: 'Resource visibility',
-        enum: ResourceVisibility,
-        default: 'PUBLIC',
+    @ApiProperty({
+        example: 'my-awesome-plugin',
+        description: 'URL-friendly slug',
     })
-    @IsEnum(ResourceVisibility)
-    @IsOptional()
-    visibility?: ResourceVisibility = ResourceVisibility.PUBLIC;
+    @IsString()
+    @IsNotEmpty()
+    @MinLength(3)
+    @MaxLength(100)
+    slug: string;
 
     @ApiPropertyOptional({
         example: 'team-id-123',

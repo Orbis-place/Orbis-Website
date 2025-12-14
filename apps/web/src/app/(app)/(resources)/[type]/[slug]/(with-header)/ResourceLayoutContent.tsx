@@ -136,8 +136,8 @@ export default function ResourceLayoutContent({ children }: { children: ReactNod
     }
 
     const typeConfig = getResourceTypeBySingular(type!);
-    const author = resource.team?.name || resource.owner.username;
-    const authorDisplay = resource.team?.displayName || resource.owner.displayName;
+    const author = resource.ownerTeam?.name || resource.ownerUser?.username || 'Unknown';
+    const authorDisplay = resource.ownerTeam?.displayName || resource.ownerUser?.displayName || author;
 
     const tags = resource.tags && resource.tags.length > 0
         ? resource.tags.map(t => t.tag.name).slice(0, 5)
@@ -178,13 +178,21 @@ export default function ResourceLayoutContent({ children }: { children: ReactNod
     }));
 
     // Map creators
-    const creators = [
+    const creators = resource.ownerTeam ? [
         {
-            username: resource.owner.username,
-            avatar: resource.owner.image || '',
-            role: 'Owner' as const
+            username: resource.ownerTeam.name,
+            avatar: (resource.ownerTeam as any).logo || '',
+            role: 'Owner' as const,
+            isTeam: true
         }
-    ];
+    ] : resource.ownerUser ? [
+        {
+            username: resource.ownerUser.username,
+            avatar: resource.ownerUser.image || '',
+            role: 'Owner' as const,
+            isTeam: false
+        }
+    ] : [];
 
     // Compatibility info
     const compatibility = {
@@ -213,6 +221,8 @@ export default function ResourceLayoutContent({ children }: { children: ReactNod
                 type={type! as 'mod' | 'plugin' | 'world' | 'prefab' | 'asset-pack' | 'data-pack' | 'modpack' | 'tool'}
                 slug={resource.slug}
                 author={author}
+                team={resource.ownerTeam}
+                owner={resource.ownerUser || undefined}
                 updatedAt={formatDate(resource.updatedAt)}
                 isOwner={isOwner}
                 isLiked={isLiked}

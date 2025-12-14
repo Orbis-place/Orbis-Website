@@ -40,12 +40,12 @@ export class TeamController {
         return this.teamService.findAll(filterDto);
     }
 
-    @Get(':name')
+    @Get(':slug')
     @AllowAnonymous()
-    @ApiOperation({ summary: 'Get team by name' })
-    @ApiParam({ name: 'name', description: 'Team name' })
-    async findByName(@Param('name') name: string) {
-        return this.teamService.findByName(name);
+    @ApiOperation({ summary: 'Get team by slug' })
+    @ApiParam({ name: 'slug', description: 'Team slug' })
+    async findBySlug(@Param('slug') slug: string) {
+        return this.teamService.findBySlug(slug);
     }
 
     // ============================================
@@ -275,6 +275,18 @@ export class TeamController {
     // SOCIAL LINKS MANAGEMENT ENDPOINTS
     // ============================================
 
+    @Patch(':id/social-links/reorder')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Reorder team social links' })
+    @ApiParam({ name: 'id', description: 'Team ID' })
+    async reorderSocialLinks(
+        @Session() session: UserSession,
+        @Param('id') teamId: string,
+        @Body() reorderDto: ReorderTeamSocialLinksDto,
+    ) {
+        return this.teamService.reorderSocialLinks(session.user.id, teamId, reorderDto.linkIds);
+    }
+
     @Get(':id/social-links')
     @AllowAnonymous()
     @ApiOperation({ summary: 'Get team social links' })
@@ -320,17 +332,5 @@ export class TeamController {
         @Param('linkId') linkId: string,
     ) {
         return this.teamService.deleteSocialLink(session.user.id, teamId, linkId);
-    }
-
-    @Patch(':id/social-links/reorder')
-    @ApiBearerAuth()
-    @ApiOperation({ summary: 'Reorder team social links' })
-    @ApiParam({ name: 'id', description: 'Team ID' })
-    async reorderSocialLinks(
-        @Session() session: UserSession,
-        @Param('id') teamId: string,
-        @Body() reorderDto: ReorderTeamSocialLinksDto,
-    ) {
-        return this.teamService.reorderSocialLinks(session.user.id, teamId, reorderDto.linkIds);
     }
 }

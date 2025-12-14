@@ -4,12 +4,14 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Heart, Download, Star, Calendar } from 'lucide-react';
 import { ViewMode } from './ViewSwitcher';
+import { EntityAvatar } from '@/components/EntityAvatar';
 
 export interface MarketplaceItem {
     id: number | string;
     title: string;
     author: string;
     authorDisplay: string;
+    isOwnedByTeam?: boolean;
     description: string;
     image: string;
     rating: number;
@@ -42,7 +44,13 @@ export default function MarketplaceCard({ item, viewMode }: MarketplaceCardProps
                 {/* Icon/Logo - 96x96 */}
                 <div className="w-24 h-24 flex-shrink-0 relative" style={{ gridArea: 'icon' }}>
                     <div className="relative w-full h-full rounded-[15px] overflow-hidden bg-[#032125]">
-                        <Image src={item.image} alt={item.title} fill className="object-cover" />
+                        <EntityAvatar
+                            src={item.image}
+                            name={item.title}
+                            variant="resource"
+                            className="h-full w-full rounded-[15px]"
+                            fallbackClassName="text-3xl rounded-[15px]"
+                        />
                     </div>
                 </div>
 
@@ -52,7 +60,7 @@ export default function MarketplaceCard({ item, viewMode }: MarketplaceCardProps
                         {item.title}
                     </h2>
                     <Link
-                        href={`/users/${item.author}`}
+                        href={item.isOwnedByTeam ? `/team/${item.author}` : `/users/${item.author}`}
                         className="font-hebden font-semibold text-sm leading-4 text-[#C7F4FA]/50 hover:text-[#109EB1] transition-colors"
                         onClick={(e) => e.stopPropagation()}
                     >
@@ -125,7 +133,13 @@ export default function MarketplaceCard({ item, viewMode }: MarketplaceCardProps
             <div className="bg-[#06363D] border border-[#084B54] rounded-[25px] overflow-hidden">
                 {/* Image */}
                 <div className="w-full aspect-video relative">
-                    <Image src={item.image} alt={item.title} fill className="object-cover" />
+                    <EntityAvatar
+                        src={item.image}
+                        name={item.title}
+                        variant="resource"
+                        className="h-full w-full rounded-none"
+                        fallbackClassName="text-6xl rounded-none"
+                    />
                     <div className="relative z-10 p-3 flex justify-between">
                         <div className="px-2 py-1 bg-[#109EB1] rounded-[36px]">
                             <span className="font-hebden font-semibold text-xs leading-[14px] text-[#C7F4FA]">
@@ -144,7 +158,7 @@ export default function MarketplaceCard({ item, viewMode }: MarketplaceCardProps
                         {item.title}
                     </h3>
                     <Link
-                        href={`/users/${item.author}`}
+                        href={item.isOwnedByTeam ? `/team/${item.author}` : `/users/${item.author}`}
                         className="font-hebden font-semibold text-xs leading-[14px] text-[#C7F4FA]/50 hover:text-[#109EB1] transition-colors"
                         onClick={(e) => e.stopPropagation()}
                     >
@@ -179,7 +193,13 @@ export default function MarketplaceCard({ item, viewMode }: MarketplaceCardProps
             <div className="flex gap-3 p-3">
                 {/* Logo - 96x96 */}
                 <div className="relative w-24 h-24 flex-shrink-0 rounded-[15px] overflow-hidden bg-[#032125]">
-                    <Image src={item.image} alt={item.title} fill className="object-cover" />
+                    <EntityAvatar
+                        src={item.image}
+                        name={item.title}
+                        variant="resource"
+                        className="h-full w-full rounded-[15px]"
+                        fallbackClassName="text-3xl rounded-[15px]"
+                    />
                 </div>
 
                 {/* Content */}
@@ -191,7 +211,7 @@ export default function MarketplaceCard({ item, viewMode }: MarketplaceCardProps
                                 {item.title}
                             </h3>
                             <Link
-                                href={`/users/${item.author}`}
+                                href={item.isOwnedByTeam ? `/team/${item.author}` : `/users/${item.author}`}
                                 className="font-hebden font-semibold text-xs leading-4 text-[#C7F4FA]/50 hover:text-[#109EB1] transition-colors"
                                 onClick={(e) => e.stopPropagation()}
                             >

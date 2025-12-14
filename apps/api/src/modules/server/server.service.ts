@@ -89,25 +89,28 @@ export class ServerService {
             }
         }
 
-        // Generate unique slug
-        const slug = await this.generateUniqueSlug(createDto.name);
+        // Validate slug uniqueness
+        const slug = await this.generateUniqueSlug(createDto.slug);
+        if (slug !== createDto.slug.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')) {
+            throw new ConflictException('Slug is already taken');
+        }
 
-        // Create server with relations
+        // Create server
         const server = await prisma.server.create({
             data: {
                 name: createDto.name,
                 slug,
-                description: createDto.description,
+                description: createDto.description || '',
                 shortDesc: createDto.shortDesc,
                 serverAddress: createDto.serverAddress,
                 gameVersion: createDto.gameVersion,
                 supportedVersions: createDto.supportedVersions || [
-                    createDto.gameVersion,
+                    '0.0.1',
                 ],
                 websiteUrl: createDto.websiteUrl,
                 country: createDto.country,
-                ownerId: userId,
-                teamId: createDto.teamId,
+                ownerUserId: userId,
+                ownerTeamId: createDto.teamId,
                 status: ServerStatus.PENDING,
 
                 // Create category relations
@@ -149,7 +152,7 @@ export class ServerService {
                 },
             },
             include: {
-                owner: {
+                ownerUser: {
                     select: {
                         id: true,
                         username: true,
@@ -157,12 +160,13 @@ export class ServerService {
                         image: true,
                     },
                 },
-                team: {
+                ownerTeam: {
                     select: {
                         id: true,
+                        slug: true,
                         name: true,
-                        displayName: true,
                         logo: true,
+                        banner: true,
                     },
                 },
                 categories: {
@@ -270,7 +274,7 @@ export class ServerService {
                 skip,
                 take: limit,
                 include: {
-                    owner: {
+                    ownerUser: {
                         select: {
                             username: true,
                             displayName: true,
@@ -294,7 +298,7 @@ export class ServerService {
                                 },
                             },
                         },
-                        take: 5,
+                        take: 3,
                     },
                 },
             }),
@@ -318,11 +322,11 @@ export class ServerService {
     /**
      * Find server by slug
      */
-    async findBySlug(slug: string) {
+    async findBySlug(slug: string, userId?: string) {
         const server = await prisma.server.findUnique({
             where: { slug },
             include: {
-                owner: {
+                ownerUser: {
                     select: {
                         id: true,
                         username: true,
@@ -331,11 +335,10 @@ export class ServerService {
                         reputation: true,
                     },
                 },
-                team: {
+                ownerTeam: {
                     select: {
                         id: true,
                         name: true,
-                        displayName: true,
                         logo: true,
                         banner: true,
                     },
@@ -371,13 +374,13 @@ export class ServerService {
         });
 
         if (!server) {
-            throw new NotFoundException(`Server ${slug} not found`);
+            throw new NotFoundException(`Server not found`);
         }
 
-        // Only show non-approved servers to owner/admin
-        if (server.status !== ServerStatus.APPROVED) {
-            // This check should be done in controller with user context
-            // For now, we just return it and let controller handle visibility
+        // Check if user has access to this server
+        const hasAccess = await this.checkServerAccess(server, userId);
+        if (!hasAccess) {
+            throw new NotFoundException('Server not found');
         }
 
         return server;
@@ -390,8 +393,8 @@ export class ServerService {
         const server = await prisma.server.findUnique({
             where: { id: serverId },
             include: {
-                owner: true,
-                team: true,
+                ownerUser: true,
+                ownerTeam: true,
                 categories: {
                     include: {
                         category: true,
@@ -418,7 +421,7 @@ export class ServerService {
     async update(userId: string, serverId: string, updateDto: UpdateServerDto) {
         const server = await prisma.server.findUnique({
             where: { id: serverId },
-            select: { ownerId: true, teamId: true },
+            select: { ownerUserId: true, ownerTeamId: true },
         });
 
         if (!server) {
@@ -454,7 +457,7 @@ export class ServerService {
             where: { id: serverId },
             data: updateData,
             include: {
-                owner: true,
+                ownerUser: true,
                 categories: { include: { category: true } },
                 tags: { include: { tag: true } },
             },
@@ -469,7 +472,7 @@ export class ServerService {
     async delete(userId: string, serverId: string) {
         const server = await prisma.server.findUnique({
             where: { id: serverId },
-            select: { ownerId: true, teamId: true, logo: true, banner: true, status: true },
+            select: { ownerUserId: true, ownerTeamId: true, logo: true, banner: true, status: true },
         });
 
         if (!server) {
@@ -547,7 +550,7 @@ export class ServerService {
 
         const server = await prisma.server.findUnique({
             where: { id: serverId },
-            select: { ownerId: true, teamId: true, logo: true },
+            select: { ownerUserId: true, ownerTeamId: true, logo: true },
         });
 
         if (!server) {
@@ -605,7 +608,7 @@ export class ServerService {
 
         const server = await prisma.server.findUnique({
             where: { id: serverId },
-            select: { ownerId: true, teamId: true, banner: true },
+            select: { ownerUserId: true, ownerTeamId: true, banner: true },
         });
 
         if (!server) {
@@ -642,7 +645,7 @@ export class ServerService {
     async deleteLogo(userId: string, serverId: string) {
         const server = await prisma.server.findUnique({
             where: { id: serverId },
-            select: { ownerId: true, teamId: true, logo: true },
+            select: { ownerUserId: true, ownerTeamId: true, logo: true },
         });
 
         if (!server) {
@@ -670,7 +673,7 @@ export class ServerService {
     async deleteBanner(userId: string, serverId: string) {
         const server = await prisma.server.findUnique({
             where: { id: serverId },
-            select: { ownerId: true, teamId: true, banner: true },
+            select: { ownerUserId: true, ownerTeamId: true, banner: true },
         });
 
         if (!server) {
@@ -791,9 +794,19 @@ export class ServerService {
     /**
      * Get user's servers
      */
-    async getUserServers(userId: string) {
+    async getUserServers(userId: string, requestingUserId?: string) {
+        // Build where clause
+        const where: any = {
+            ownerUserId: userId,
+        };
+
+        // If viewing another user's servers, only show APPROVED servers
+        if (requestingUserId !== userId) {
+            where.status = ServerStatus.APPROVED;
+        }
+
         return prisma.server.findMany({
-            where: { ownerId: userId },
+            where,
             include: {
                 categories: {
                     where: { isPrimary: true },
@@ -835,25 +848,71 @@ export class ServerService {
      */
     private async checkEditPermission(
         userId: string,
-        server: { ownerId: string; teamId: string | null },
+        server: { ownerUserId?: string | null; ownerTeamId?: string | null },
     ): Promise<boolean> {
         // Direct owner
-        if (server.ownerId === userId) {
+        if (server.ownerUserId === userId) {
             return true;
         }
 
         // Team member with permission
-        if (server.teamId) {
+        if (server.ownerTeamId) {
             const member = await prisma.teamMember.findUnique({
                 where: {
                     teamId_userId: {
-                        teamId: server.teamId,
+                        teamId: server.ownerTeamId,
                         userId,
                     },
                 },
             });
 
             if (member && ['OWNER', 'ADMIN'].includes(member.role)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if a user can access a server (based on status and ownership)
+     * Returns true if:
+     * - Server status is APPROVED
+     * - User is the server owner
+     * - User is a member of the server's team
+     */
+    private async checkServerAccess(
+        server: { status: ServerStatus; ownerUserId?: string | null; ownerTeamId?: string | null },
+        userId?: string,
+    ): Promise<boolean> {
+        // If server is approved, everyone can access it
+        if (server.status === ServerStatus.APPROVED) {
+            return true;
+        }
+
+        // If no user is logged in, deny access to non-approved servers
+        if (!userId) {
+            return false;
+        }
+
+        // If user is the server owner, allow access
+        if (server.ownerUserId === userId) {
+            return true;
+        }
+
+        // If server belongs to a team, check if user is a team member
+        if (server.ownerTeamId) {
+            const member = await prisma.teamMember.findUnique({
+                where: {
+                    teamId_userId: {
+                        teamId: server.ownerTeamId,
+                        userId,
+                    },
+                },
+            });
+
+            // Any team member can view the server
+            if (member) {
                 return true;
             }
         }
@@ -883,6 +942,149 @@ export class ServerService {
         }
     }
 
+    /**
+     * Transfer server ownership
+     */
+    async transferOwnership(
+        serverId: string,
+        userId: string,
+        transferToUserId?: string,
+        transferToTeamId?: string,
+    ) {
+        // Validate exactly one target is provided
+        if (!transferToUserId && !transferToTeamId) {
+            throw new BadRequestException('Either transferToUserId or transferToTeamId must be provided');
+        }
+        if (transferToUserId && transferToTeamId) {
+            throw new BadRequestException('Cannot provide both transferToUserId and transferToTeamId');
+        }
+
+        // Get current server
+        const server = await prisma.server.findUnique({
+            where: { id: serverId },
+            select: {
+                id: true,
+                name: true,
+                ownerUserId: true,
+                ownerTeamId: true,
+            },
+        });
+
+        if (!server) {
+            throw new NotFoundException('Server not found');
+        }
+
+        // Check permission: must be current owner or team owner/admin
+        const hasPermission = await this.checkEditPermission(userId, server);
+        if (!hasPermission) {
+            throw new ForbiddenException('You do not have permission to transfer this server');
+        }
+
+        // Transfer to user
+        if (transferToUserId) {
+            // Verify new owner exists
+            const newOwner = await prisma.user.findUnique({
+                where: { id: transferToUserId },
+                select: { id: true, username: true },
+            });
+
+            if (!newOwner) {
+                throw new NotFoundException('Target user not found');
+            }
+
+            // Update ownership
+            const updatedServer = await prisma.server.update({
+                where: { id: serverId },
+                data: {
+                    ownerUserId: transferToUserId,
+                    ownerTeamId: null,
+                },
+                include: {
+                    ownerUser: {
+                        select: {
+                            id: true,
+                            username: true,
+                            displayName: true,
+                            image: true,
+                        },
+                    },
+                    ownerTeam: {
+                        select: {
+                            id: true,
+                            slug: true,
+                            name: true,
+                            logo: true,
+                        },
+                    },
+                },
+            });
+
+            return {
+                message: `Server ownership transferred to user ${newOwner.username}`,
+                server: updatedServer,
+            };
+        }
+
+        // Transfer to team
+        if (transferToTeamId) {
+            // Verify team exists
+            const team = await prisma.team.findUnique({
+                where: { id: transferToTeamId },
+                include: {
+                    members: {
+                        where: {
+                            userId,
+                            role: { in: ['OWNER', 'ADMIN'] },
+                        },
+                    },
+                },
+            });
+
+            if (!team) {
+                throw new NotFoundException('Target team not found');
+            }
+
+            // Verify user is team owner/admin
+            if (team.members.length === 0) {
+                throw new ForbiddenException(
+                    'You must be a team owner or admin to transfer servers to this team',
+                );
+            }
+
+            // Update ownership
+            const updatedServer = await prisma.server.update({
+                where: { id: serverId },
+                data: {
+                    ownerUserId: null,
+                    ownerTeamId: transferToTeamId,
+                },
+                include: {
+                    ownerUser: {
+                        select: {
+                            id: true,
+                            username: true,
+                            displayName: true,
+                            image: true,
+                        },
+                    },
+                    ownerTeam: {
+                        select: {
+                            id: true,
+                            slug: true,
+                            name: true,
+                            logo: true,
+                        },
+                    },
+                },
+            });
+
+            return {
+                message: `Server ownership transferred to team ${team.name}`,
+                server: updatedServer,
+            };
+        }
+    }
+
     // ============================================
     // SOCIAL LINKS MANAGEMENT
     // ============================================
@@ -907,7 +1109,7 @@ export class ServerService {
     ) {
         const server = await prisma.server.findUnique({
             where: { id: serverId },
-            select: { ownerId: true, teamId: true },
+            select: { ownerUserId: true, ownerTeamId: true },
         });
 
         if (!server) {
@@ -962,7 +1164,7 @@ export class ServerService {
     ) {
         const server = await prisma.server.findUnique({
             where: { id: serverId },
-            select: { ownerId: true, teamId: true },
+            select: { ownerUserId: true, ownerTeamId: true },
         });
 
         if (!server) {
@@ -994,7 +1196,7 @@ export class ServerService {
     async deleteSocialLink(userId: string, serverId: string, linkId: string) {
         const server = await prisma.server.findUnique({
             where: { id: serverId },
-            select: { ownerId: true, teamId: true },
+            select: { ownerUserId: true, ownerTeamId: true },
         });
 
         if (!server) {
@@ -1027,7 +1229,7 @@ export class ServerService {
     async reorderSocialLinks(userId: string, serverId: string, linkIds: string[]) {
         const server = await prisma.server.findUnique({
             where: { id: serverId },
-            select: { ownerId: true, teamId: true },
+            select: { ownerUserId: true, ownerTeamId: true },
         });
 
         if (!server) {

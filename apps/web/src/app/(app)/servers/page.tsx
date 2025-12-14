@@ -133,8 +133,10 @@ export default function ServersPage() {
 
     // Map backend server to ServerItem
     const mapToServerItem = (server: Server, index: number): ServerItem => {
-        const owner = server.owner.username;
-        const ownerDisplay = server.owner.displayName;
+        // If server has a team, use team info; otherwise use owner info
+        const owner = server.ownerTeam?.name || server.ownerUser.username;
+        const ownerDisplay = server.ownerTeam?.displayName || server.ownerUser.displayName;
+        const isOwnedByTeam = !!server.ownerTeam;
 
         // Get tags
         const tagNames = server.tags?.map(t => t.tag.name) || [];
@@ -148,6 +150,7 @@ export default function ServersPage() {
             name: server.name,
             owner,
             ownerDisplay,
+            isOwnedByTeam,
             logoUrl: server.logoUrl,
             bannerUrl: server.bannerUrl,
             serverIp: server.serverIp,

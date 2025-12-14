@@ -12,6 +12,7 @@ export interface ServerItem {
     name: string;
     owner: string;
     ownerDisplay: string;
+    isOwnedByTeam?: boolean;
     logoUrl?: string;
     bannerUrl?: string;
     serverIp?: string;
@@ -254,7 +255,7 @@ export default function ServerCard({ item, viewMode }: ServerCardProps) {
                         )}
                     </div>
                     <Link
-                        href={`/users/${item.owner}`}
+                        href={item.isOwnedByTeam ? `/team/${item.owner}` : `/users/${item.owner}`}
                         className="font-hebden font-semibold text-xs leading-[14px] text-[#C7F4FA]/50 hover:text-[#109EB1] transition-colors"
                         onClick={(e) => e.stopPropagation()}
                     >
@@ -324,7 +325,7 @@ export default function ServerCard({ item, viewMode }: ServerCardProps) {
                                 )}
                             </div>
                             <Link
-                                href={`/users/${item.owner}`}
+                                href={item.isOwnedByTeam ? `/team/${item.owner}` : `/users/${item.owner}`}
                                 className="font-hebden font-semibold text-xs leading-4 text-[#C7F4FA]/50 hover:text-[#109EB1] transition-colors"
                                 onClick={(e) => e.stopPropagation()}
                             >

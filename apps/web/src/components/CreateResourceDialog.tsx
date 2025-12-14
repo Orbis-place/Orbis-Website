@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Icon } from '@iconify/react';
 import { Input } from '@/components/ui/input';
+import { InputWithPrefix } from '@/components/ui/input-with-prefix';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { OrbisFormDialog } from '@/components/OrbisDialog';
@@ -23,11 +24,36 @@ export function CreateResourceDialog({ open, onOpenChange, trigger, onSuccess, d
     const [loadingTeams, setLoadingTeams] = useState(false);
     const [formData, setFormData] = useState<CreateResourceData>({
         name: '',
+        slug: '',
         tagline: '',
         type: ResourceType.PLUGIN,
-        visibility: 'PUBLIC',
         teamId: defaultTeamId, // Use default team if provided
     });
+
+    // Helper function to generate slug from name
+    const generateSlug = (text: string): string => {
+        return text
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '');
+    };
+
+    // Map ResourceType to URL path
+    const getResourcePath = (type: ResourceType): string => {
+        const pathMap: Record<ResourceType, string> = {
+            [ResourceType.PLUGIN]: 'plugins',
+            [ResourceType.MOD]: 'mods',
+            [ResourceType.WORLD]: 'worlds',
+            [ResourceType.PREFAB]: 'prefabs',
+            [ResourceType.ASSET_PACK]: 'asset-packs',
+            [ResourceType.DATA_PACK]: 'data-packs',
+            [ResourceType.MODPACK]: 'modpacks',
+            [ResourceType.PREMADE_SERVER]: 'premade-servers',
+        };
+        return `orbis.place/${pathMap[type]}/`;
+    };
 
     useEffect(() => {
         if (open) {
@@ -39,6 +65,7 @@ export function CreateResourceDialog({ open, onOpenChange, trigger, onSuccess, d
         setLoadingTeams(true);
         try {
             const userTeams = await fetchUserTeams();
+            console.log('ttt', userTeams);
             setTeams(userTeams);
         } catch (error) {
             console.error('Failed to fetch teams:', error);
@@ -63,9 +90,9 @@ export function CreateResourceDialog({ open, onOpenChange, trigger, onSuccess, d
             // Reset form and close dialog
             setFormData({
                 name: '',
+                slug: '',
                 tagline: '',
                 type: ResourceType.PLUGIN,
-                visibility: 'PUBLIC',
                 teamId: undefined,
             });
             onOpenChange(false);
@@ -128,7 +155,7 @@ export function CreateResourceDialog({ open, onOpenChange, trigger, onSuccess, d
                                     <SelectItem key={team.id} value={team.id}>
                                         <span className="flex items-center gap-2">
                                             <Icon icon="mdi:account-group" width="16" height="16" />
-                                            {team.displayName}
+                                            {team.name}
                                         </span>
                                     </SelectItem>
                                 ))
@@ -156,6 +183,38 @@ export function CreateResourceDialog({ open, onOpenChange, trigger, onSuccess, d
                         placeholder="My Awesome Plugin"
                         required
                     />
+                </div>
+
+                {/* Slug */}
+                <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                        <Label htmlFor="slug">
+                            URL Slug *
+                        </Label>
+                        <button
+                            type="button"
+                            onClick={() => setFormData({ ...formData, slug: generateSlug(formData.name) })}
+                            disabled={!formData.name}
+                            className="text-xs text-primary hover:text-primary/80 disabled:text-muted-foreground disabled:cursor-not-allowed font-nunito"
+                        >
+                            <Icon icon="mdi:auto-fix" width="14" height="14" className="inline mr-1" />
+                            Generate from name
+                        </button>
+                    </div>
+                    <InputWithPrefix
+                        id="slug"
+                        name="slug"
+                        prefix={getResourcePath(formData.type)}
+                        value={formData.slug}
+                        onChange={(e) => {
+                            const formatted = generateSlug(e.target.value);
+                            setFormData({ ...formData, slug: formatted });
+                        }}
+                        required
+                    />
+                    <p className="text-xs text-muted-foreground/60 font-nunito">
+                        Lowercase letters, numbers, and hyphens only. This will be your resource's URL.
+                    </p>
                 </div>
 
                 {/* Tagline */}
@@ -198,42 +257,6 @@ export function CreateResourceDialog({ open, onOpenChange, trigger, onSuccess, d
                             <SelectItem value={ResourceType.ASSET_PACK}>Asset Pack</SelectItem>
                             <SelectItem value={ResourceType.PREFAB}>Prefab</SelectItem>
                             <SelectItem value={ResourceType.MODPACK}>Modpack</SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
-
-                {/* Visibility */}
-                <div className="space-y-2">
-                    <Label htmlFor="visibility">
-                        Visibility *
-                    </Label>
-                    <Select
-                        value={formData.visibility}
-                        onValueChange={(value) => setFormData({ ...formData, visibility: value as 'PUBLIC' | 'UNLISTED' | 'PRIVATE' })}
-                        required
-                    >
-                        <SelectTrigger id="visibility" className="w-full">
-                            <SelectValue placeholder="Select visibility" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="PUBLIC">
-                                <span className="flex items-center gap-2">
-                                    <Icon icon="mdi:earth" width="16" height="16" />
-                                    Public - Visible to everyone
-                                </span>
-                            </SelectItem>
-                            <SelectItem value="UNLISTED">
-                                <span className="flex items-center gap-2">
-                                    <Icon icon="mdi:link-variant" width="16" height="16" />
-                                    Unlisted - Accessible via link only
-                                </span>
-                            </SelectItem>
-                            <SelectItem value="PRIVATE">
-                                <span className="flex items-center gap-2">
-                                    <Icon icon="mdi:lock" width="16" height="16" />
-                                    Private - Only visible to you
-                                </span>
-                            </SelectItem>
                         </SelectContent>
                     </Select>
                 </div>

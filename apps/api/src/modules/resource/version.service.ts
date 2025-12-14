@@ -25,7 +25,7 @@ export class VersionService {
         const resource = await prisma.resource.findUnique({
             where: { id: resourceId },
             include: {
-                team: {
+                ownerTeam: {
                     include: {
                         members: true,
                     },
@@ -39,9 +39,9 @@ export class VersionService {
 
         // Check permission
         const hasPermission =
-            resource.ownerId === userId ||
-            (resource.team &&
-                resource.team.members.some(
+            resource.ownerUserId === userId ||
+            (resource.ownerTeam &&
+                resource.ownerTeam.members.some(
                     (member) => member.userId === userId && member.role !== 'MEMBER',
                 ));
 
@@ -136,7 +136,7 @@ export class VersionService {
                         id: true,
                         name: true,
                         slug: true,
-                        ownerId: true,
+                        ownerUserId: true,
                     },
                 },
             },
@@ -167,7 +167,7 @@ export class VersionService {
             include: {
                 resource: {
                     include: {
-                        team: {
+                        ownerTeam: {
                             include: {
                                 members: true,
                             },
@@ -183,9 +183,9 @@ export class VersionService {
 
         // Check permission
         const hasPermission =
-            version.resource.ownerId === userId ||
-            (version.resource.team &&
-                version.resource.team.members.some(
+            version.resource.ownerUserId === userId ||
+            (version.resource.ownerTeam &&
+                version.resource.ownerTeam.members.some(
                     (member) => member.userId === userId && member.role !== 'MEMBER',
                 ));
 
@@ -257,7 +257,7 @@ export class VersionService {
             include: {
                 resource: {
                     include: {
-                        team: {
+                        ownerTeam: {
                             include: {
                                 members: true,
                             },
@@ -274,9 +274,9 @@ export class VersionService {
 
         // Check permission
         const hasPermission =
-            version.resource.ownerId === userId ||
-            (version.resource.team &&
-                version.resource.team.members.some(
+            version.resource.ownerUserId === userId ||
+            (version.resource.ownerTeam &&
+                version.resource.ownerTeam.members.some(
                     (member) => member.userId === userId && member.role !== 'MEMBER',
                 ));
 
@@ -329,7 +329,7 @@ export class VersionService {
             include: {
                 resource: {
                     include: {
-                        team: {
+                        ownerTeam: {
                             include: {
                                 members: true,
                             },
@@ -345,9 +345,9 @@ export class VersionService {
 
         // Check permission
         const hasPermission =
-            version.resource.ownerId === userId ||
-            (version.resource.team &&
-                version.resource.team.members.some(
+            version.resource.ownerUserId === userId ||
+            (version.resource.ownerTeam &&
+                version.resource.ownerTeam.members.some(
                     (member) => member.userId === userId && member.role !== 'MEMBER',
                 ));
 
@@ -429,7 +429,7 @@ export class VersionService {
             include: {
                 resource: {
                     include: {
-                        team: {
+                        ownerTeam: {
                             include: {
                                 members: true,
                             },
@@ -451,9 +451,9 @@ export class VersionService {
 
         // Check permission
         const hasPermission =
-            version.resource.ownerId === userId ||
-            (version.resource.team &&
-                version.resource.team.members.some(
+            version.resource.ownerUserId === userId ||
+            (version.resource.ownerTeam &&
+                version.resource.ownerTeam.members.some(
                     (member) => member.userId === userId && member.role !== 'MEMBER',
                 ));
 
@@ -511,7 +511,7 @@ export class VersionService {
             include: {
                 resource: {
                     include: {
-                        team: {
+                        ownerTeam: {
                             include: {
                                 members: true,
                             },
@@ -534,9 +534,9 @@ export class VersionService {
 
         // Check permission
         const hasPermission =
-            version.resource.ownerId === userId ||
-            (version.resource.team &&
-                version.resource.team.members.some(
+            version.resource.ownerUserId === userId ||
+            (version.resource.ownerTeam &&
+                version.resource.ownerTeam.members.some(
                     (member) => member.userId === userId && member.role !== 'MEMBER',
                 ));
 
@@ -632,7 +632,7 @@ export class VersionService {
             include: {
                 resource: {
                     include: {
-                        team: {
+                        ownerTeam: {
                             include: {
                                 members: true,
                             },
@@ -648,9 +648,9 @@ export class VersionService {
 
         // Check permission
         const hasPermission =
-            version.resource.ownerId === userId ||
-            (version.resource.team &&
-                version.resource.team.members.some(
+            version.resource.ownerUserId === userId ||
+            (version.resource.ownerTeam &&
+                version.resource.ownerTeam.members.some(
                     (member) => member.userId === userId && member.role !== 'MEMBER',
                 ));
 
