@@ -866,7 +866,8 @@ export class ResourceService {
 
         // Build where clause
         const where: any = {
-            teamId,
+            ownerTeamId: teamId,
+            status: ResourceStatus.APPROVED, // Only show approved resources
         };
 
         if (name) {

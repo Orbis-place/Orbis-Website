@@ -167,6 +167,26 @@ export class TeamService {
                         { joinedAt: 'asc' },
                     ],
                 },
+                resources: {
+                    where: {
+                        status: 'APPROVED', // Only show approved resources
+                    },
+                    select: {
+                        id: true,
+                        name: true,
+                        slug: true,
+                        tagline: true,
+                        iconUrl: true,
+                        type: true,
+                        status: true,
+                        downloadCount: true,
+                        likeCount: true,
+                        createdAt: true,
+                        updatedAt: true,
+                    },
+                    take: 10,
+                    orderBy: { createdAt: 'desc' },
+                },
                 servers: {
                     select: {
                         id: true,
@@ -186,6 +206,7 @@ export class TeamService {
                 _count: {
                     select: {
                         members: true,
+                        resources: true,
                         servers: true,
                     },
                 },
