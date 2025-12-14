@@ -40,37 +40,6 @@ export enum LicenseType {
     CUSTOM = 'CUSTOM',
 }
 
-export enum ExternalLinkType {
-    ISSUE_TRACKER = 'ISSUE_TRACKER',
-    SOURCE_CODE = 'SOURCE_CODE',
-    WIKI = 'WIKI',
-    DISCORD = 'DISCORD',
-    DONATION = 'DONATION',
-    WEBSITE = 'WEBSITE',
-    OTHER = 'OTHER',
-}
-
-export class ExternalLinkDto {
-    @ApiPropertyOptional({ description: 'Link ID (for updates/deletes)' })
-    @IsString()
-    @IsOptional()
-    id?: string;
-
-    @ApiPropertyOptional({ example: 'SOURCE_CODE', enum: ExternalLinkType })
-    @IsEnum(ExternalLinkType)
-    type: ExternalLinkType;
-
-    @ApiPropertyOptional({ example: 'https://github.com/user/repo' })
-    @IsUrl()
-    url: string;
-
-    @ApiPropertyOptional({ example: 'Main Repository' })
-    @IsString()
-    @IsOptional()
-    @MaxLength(100)
-    label?: string;
-}
-
 export class UpdateResourceDto {
     @ApiPropertyOptional({ example: 'My Awesome Plugin', description: 'Resource name' })
     @IsString()
@@ -153,26 +122,6 @@ export class UpdateResourceDto {
     @IsEnum(PriceType)
     @IsOptional()
     priceType?: PriceType;
-
-    // External Links
-    @ApiPropertyOptional({
-        description: 'External links to add/update',
-        type: [ExternalLinkDto],
-    })
-    @IsArray()
-    @IsOptional()
-    @ValidateNested({ each: true })
-    @Type(() => ExternalLinkDto)
-    externalLinks?: ExternalLinkDto[];
-
-    @ApiPropertyOptional({
-        description: 'External link IDs to remove',
-        example: ['link-id-1', 'link-id-2'],
-    })
-    @IsArray()
-    @IsOptional()
-    @IsString({ each: true })
-    removeExternalLinks?: string[];
 
     // Tags
     @ApiPropertyOptional({

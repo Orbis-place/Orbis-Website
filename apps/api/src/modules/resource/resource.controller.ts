@@ -8,6 +8,9 @@ import { UpdateResourceDto } from './dtos/update-resource.dto';
 import { PaginationDto } from '../../common/dtos/pagination.dto';
 import { ModerateResourceDto } from './dtos/moderate-resource.dto';
 import { ResourceStatus, UserRole } from '@repo/db';
+import { CreateResourceExternalLinkDto } from './dtos/create-resource-external-link.dto';
+import { UpdateResourceExternalLinkDto } from './dtos/update-resource-external-link.dto';
+import { ReorderResourceExternalLinksDto } from './dtos/reorder-resource-external-links.dto';
 import { FilterResourcesDto } from './dtos/filter-resources.dto';
 
 
@@ -79,8 +82,11 @@ export class ResourceController {
     @Get('slug/:slug')
     @AllowAnonymous()
     @ApiOperation({ summary: 'Get resource by slug' })
-    async getBySlug(@Param('slug') slug: string) {
-        return this.resourceService.getBySlug(slug);
+    async getBySlug(
+        @Param('slug') slug: string,
+        @Session() session?: UserSession,
+    ) {
+        return this.resourceService.getBySlug(slug, session?.user?.id);
     }
 
     @Patch(':id')
@@ -215,5 +221,61 @@ export class ResourceController {
         @Param('id') id: string,
     ) {
         return this.resourceService.getResourceModerationHistory(session.user.id, id);
+    }
+
+    // ============================================
+    // EXTERNAL LINKS
+    // ============================================
+
+    @Get(':id/external-links')
+    @AllowAnonymous()
+    @ApiOperation({ summary: 'Get resource external links' })
+    async getExternalLinks(@Param('id') id: string) {
+        return this.resourceService.getExternalLinks(id);
+    }
+
+    @Post(':id/external-links')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Create an external link' })
+    async createExternalLink(
+        @Session() session: UserSession,
+        @Param('id') id: string,
+        @Body() createDto: CreateResourceExternalLinkDto,
+    ) {
+        return this.resourceService.createExternalLink(id, session.user.id, createDto);
+    }
+
+    @Patch(':id/external-links/reorder')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Reorder external links' })
+    async reorderExternalLinks(
+        @Session() session: UserSession,
+        @Param('id') id: string,
+        @Body() reorderDto: ReorderResourceExternalLinksDto,
+    ) {
+        return this.resourceService.reorderExternalLinks(id, session.user.id, reorderDto.linkIds);
+    }
+
+    @Patch(':id/external-links/:linkId')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Update an external link' })
+    async updateExternalLink(
+        @Session() session: UserSession,
+        @Param('id') id: string,
+        @Param('linkId') linkId: string,
+        @Body() updateDto: UpdateResourceExternalLinkDto,
+    ) {
+        return this.resourceService.updateExternalLink(id, session.user.id, linkId, updateDto);
+    }
+
+    @Delete(':id/external-links/:linkId')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Delete an external link' })
+    async deleteExternalLink(
+        @Session() session: UserSession,
+        @Param('id') id: string,
+        @Param('linkId') linkId: string,
+    ) {
+        return this.resourceService.deleteExternalLink(id, session.user.id, linkId);
     }
 }

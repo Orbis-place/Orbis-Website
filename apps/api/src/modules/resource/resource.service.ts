@@ -190,7 +190,7 @@ export class ResourceService {
     /**
      * Get resource by slug
      */
-    async getBySlug(slug: string) {
+    async getBySlug(slug: string, userId?: string) {
         const resource = await prisma.resource.findUnique({
             where: { slug },
             include: {
@@ -200,6 +200,7 @@ export class ResourceService {
                         username: true,
                         displayName: true,
                         image: true,
+                        role: true, // Include role for permission checks
                     },
                 },
                 ownerTeam: {
@@ -207,6 +208,14 @@ export class ResourceService {
                         id: true,
                         name: true,
                         logo: true,
+                        slug: true,
+                        members: userId ? {
+                            where: { userId },
+                            select: {
+                                userId: true,
+                                role: true,
+                            },
+                        } : false,
                     },
                 },
                 externalLinks: {
@@ -269,6 +278,38 @@ export class ResourceService {
 
         if (!resource) {
             throw new NotFoundException('Resource not found');
+        }
+
+        // Check if resource is approved - if not, verify permissions
+        if (resource.status !== ResourceStatus.APPROVED) {
+            // If no user is logged in, deny access
+            if (!userId) {
+                throw new ForbiddenException('This resource is not publicly available');
+            }
+
+            // Get user details to check role
+            const user = await prisma.user.findUnique({
+                where: { id: userId },
+                select: { role: true },
+            });
+
+            if (!user) {
+                throw new ForbiddenException('This resource is not publicly available');
+            }
+
+            // Check if user is moderator or admin
+            const isModerator = user.role === UserRole.MODERATOR || user.role === UserRole.ADMIN || user.role === UserRole.SUPER_ADMIN;
+
+            // Check if user is the owner
+            const isOwner = resource.ownerUserId === userId;
+
+            // Check if user is a team member (for team-owned resources)
+            const isTeamMember = resource.ownerTeam?.members && resource.ownerTeam.members.length > 0;
+
+            // Deny access if user doesn't have permission
+            if (!isModerator && !isOwner && !isTeamMember) {
+                throw new ForbiddenException('You do not have permission to view this resource');
+            }
         }
 
         return {
@@ -356,42 +397,6 @@ export class ResourceService {
                 where: { id: resourceId },
                 data: updateData,
             });
-
-            // Handle External Links
-            if (updateDto.removeExternalLinks && updateDto.removeExternalLinks.length > 0) {
-                await tx.resourceExternalLink.deleteMany({
-                    where: {
-                        id: { in: updateDto.removeExternalLinks },
-                        resourceId: resourceId,
-                    },
-                });
-            }
-
-            if (updateDto.externalLinks && updateDto.externalLinks.length > 0) {
-                for (const link of updateDto.externalLinks) {
-                    if (link.id) {
-                        // Update existing link
-                        await tx.resourceExternalLink.update({
-                            where: { id: link.id },
-                            data: {
-                                type: link.type,
-                                url: link.url,
-                                label: link.label,
-                            },
-                        });
-                    } else {
-                        // Create new link
-                        await tx.resourceExternalLink.create({
-                            data: {
-                                resourceId: resourceId,
-                                type: link.type,
-                                url: link.url,
-                                label: link.label,
-                            },
-                        });
-                    }
-                }
-            }
 
             // Handle Categories - Remove
             if (updateDto.removeCategories && updateDto.removeCategories.length > 0) {
@@ -1770,5 +1775,222 @@ export class ResourceService {
                 resource: updatedResource,
             };
         }
+    }
+
+    // ============================================
+    // EXTERNAL LINKS MANAGEMENT
+    // ============================================
+
+    /**
+     * Get all external links for a resource
+     */
+    async getExternalLinks(resourceId: string) {
+        const resource = await prisma.resource.findUnique({
+            where: { id: resourceId },
+        });
+
+        if (!resource) {
+            throw new NotFoundException('Resource not found');
+        }
+
+        const links = await prisma.resourceExternalLink.findMany({
+            where: { resourceId },
+            orderBy: { order: 'asc' },
+        });
+
+        return links;
+    }
+
+    /**
+     * Create a new external link
+     */
+    async createExternalLink(
+        resourceId: string,
+        userId: string,
+        dto: any,
+    ) {
+        const resource = await prisma.resource.findUnique({
+            where: { id: resourceId },
+        });
+
+        if (!resource) {
+            throw new NotFoundException('Resource not found');
+        }
+
+        // Check permission
+        const canEdit = await this.checkEditPermission(userId, resource);
+        if (!canEdit) {
+            throw new ForbiddenException('You do not have permission to edit this resource');
+        }
+
+        // Check if link type already exists for this resource
+        const existingLink = await prisma.resourceExternalLink.findUnique({
+            where: {
+                resourceId_type: {
+                    resourceId,
+                    type: dto.type,
+                },
+            },
+        });
+
+        if (existingLink) {
+            throw new ConflictException(`A link of type ${dto.type} already exists for this resource`);
+        }
+
+        // Get current max order
+        const maxOrderLink = await prisma.resourceExternalLink.findFirst({
+            where: { resourceId },
+            orderBy: { order: 'desc' },
+        });
+
+        const newOrder = (maxOrderLink?.order ?? -1) + 1;
+
+        const link = await prisma.resourceExternalLink.create({
+            data: {
+                resourceId,
+                type: dto.type,
+                url: dto.url,
+                label: dto.label,
+                order: newOrder,
+            },
+        });
+
+        return {
+            message: 'External link created successfully',
+            link,
+        };
+    }
+
+    /**
+     * Update an external link
+     */
+    async updateExternalLink(
+        resourceId: string,
+        userId: string,
+        linkId: string,
+        dto: any,
+    ) {
+        const resource = await prisma.resource.findUnique({
+            where: { id: resourceId },
+        });
+
+        if (!resource) {
+            throw new NotFoundException('Resource not found');
+        }
+
+        // Check permission
+        const canEdit = await this.checkEditPermission(userId, resource);
+        if (!canEdit) {
+            throw new ForbiddenException('You do not have permission to edit this resource');
+        }
+
+        const link = await prisma.resourceExternalLink.findUnique({
+            where: { id: linkId },
+        });
+
+        if (!link || link.resourceId !== resourceId) {
+            throw new NotFoundException('External link not found');
+        }
+
+        const updatedLink = await prisma.resourceExternalLink.update({
+            where: { id: linkId },
+            data: {
+                url: dto.url,
+                label: dto.label,
+            },
+        });
+
+        return {
+            message: 'External link updated successfully',
+            link: updatedLink,
+        };
+    }
+
+    /**
+     * Delete an external link
+     */
+    async deleteExternalLink(
+        resourceId: string,
+        userId: string,
+        linkId: string,
+    ) {
+        const resource = await prisma.resource.findUnique({
+            where: { id: resourceId },
+        });
+
+        if (!resource) {
+            throw new NotFoundException('Resource not found');
+        }
+
+        // Check permission
+        const canEdit = await this.checkEditPermission(userId, resource);
+        if (!canEdit) {
+            throw new ForbiddenException('You do not have permission to edit this resource');
+        }
+
+        const link = await prisma.resourceExternalLink.findUnique({
+            where: { id: linkId },
+        });
+
+        if (!link || link.resourceId !== resourceId) {
+            throw new NotFoundException('External link not found');
+        }
+
+        await prisma.resourceExternalLink.delete({
+            where: { id: linkId },
+        });
+
+        return {
+            message: 'External link deleted successfully',
+        };
+    }
+
+    /**
+     * Reorder external links
+     */
+    async reorderExternalLinks(
+        resourceId: string,
+        userId: string,
+        linkIds: string[],
+    ) {
+        const resource = await prisma.resource.findUnique({
+            where: { id: resourceId },
+        });
+
+        if (!resource) {
+            throw new NotFoundException('Resource not found');
+        }
+
+        // Check permission
+        const canEdit = await this.checkEditPermission(userId, resource);
+        if (!canEdit) {
+            throw new ForbiddenException('You do not have permission to edit this resource');
+        }
+
+        // Verify all links belong to this resource
+        const links = await prisma.resourceExternalLink.findMany({
+            where: {
+                id: { in: linkIds },
+                resourceId,
+            },
+        });
+
+        if (links.length !== linkIds.length) {
+            throw new BadRequestException('One or more links do not belong to this resource');
+        }
+
+        // Update order for each link
+        await prisma.$transaction(
+            linkIds.map((linkId, index) =>
+                prisma.resourceExternalLink.update({
+                    where: { id: linkId },
+                    data: { order: index },
+                })
+            )
+        );
+
+        return {
+            message: 'External links reordered successfully',
+        };
     }
 }

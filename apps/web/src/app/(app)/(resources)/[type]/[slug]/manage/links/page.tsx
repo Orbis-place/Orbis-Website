@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
 import { Icon } from '@iconify/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,18 +8,16 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { OrbisFormDialog, OrbisConfirmDialog } from '@/components/OrbisDialog';
 import { toast } from 'sonner';
-
-interface Resource {
-    id: string;
-    externalLinks?: ExternalLink[];
-}
-
-interface ExternalLink {
-    id?: string;
-    type: string;
-    url: string;
-    label?: string;
-}
+import { GripVertical, ExternalLink, Edit2, Trash2, Plus } from 'lucide-react';
+import { useResource } from '@/contexts/ResourceContext';
+import {
+    fetchExternalLinks,
+    createExternalLink,
+    updateExternalLink,
+    deleteExternalLink,
+    reorderExternalLinks,
+    type ExternalLink as ExternalLinkType
+} from '@/lib/api/resources';
 
 const LINK_TYPES = [
     { value: 'ISSUE_TRACKER', label: 'Issue Tracker', icon: 'mdi:bug', color: '#F87171' },
@@ -33,37 +30,35 @@ const LINK_TYPES = [
 ];
 
 export default function ManageLinksPage() {
-    const params = useParams();
-    const resourceSlug = params.slug as string;
+    const { resource } = useResource();
 
     const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState(false);
-    const [resource, setResource] = useState<Resource | null>(null);
-    const [externalLinks, setExternalLinks] = useState<ExternalLink[]>([]);
+    const [externalLinks, setExternalLinks] = useState<ExternalLinkType[]>([]);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [editingIndex, setEditingIndex] = useState<number | null>(null);
-    const [deletingIndex, setDeletingIndex] = useState<number | null>(null);
+    const [editingLink, setEditingLink] = useState<ExternalLinkType | null>(null);
+    const [deletingLink, setDeletingLink] = useState<ExternalLinkType | null>(null);
     const [formData, setFormData] = useState({ type: 'WEBSITE', url: '', label: '' });
 
+    // Drag and drop state
+    const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+    const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
     useEffect(() => {
-        fetchResource();
-    }, [resourceSlug]);
+        if (resource?.id) {
+            loadLinks();
+        }
+    }, [resource?.id]);
 
-    const fetchResource = async () => {
+    const loadLinks = async () => {
+        if (!resource?.id) return;
+
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/resources/slug/${resourceSlug}`, {
-                credentials: 'include',
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                const res = data.resource as Resource;
-                setResource(res);
-                if (res.externalLinks) setExternalLinks(res.externalLinks);
-            }
+            setLoading(true);
+            const links = await fetchExternalLinks(resource.id);
+            setExternalLinks(links);
         } catch (error) {
-            console.error('Failed to fetch resource:', error);
-            toast.error('Failed to load resource');
+            console.error('Failed to fetch links:', error);
+            toast.error('Failed to load external links');
         } finally {
             setLoading(false);
         }
@@ -71,53 +66,20 @@ export default function ManageLinksPage() {
 
     const openAddDialog = () => {
         setFormData({ type: 'WEBSITE', url: '', label: '' });
-        setEditingIndex(null);
+        setEditingLink(null);
         setIsDialogOpen(true);
     };
 
-    const openEditDialog = (index: number) => {
-        const link = externalLinks[index];
-        if (!link) return;
+    const openEditDialog = (link: ExternalLinkType) => {
         setFormData({ type: link.type, url: link.url, label: link.label || '' });
-        setEditingIndex(index);
+        setEditingLink(link);
         setIsDialogOpen(true);
-    };
-
-    const saveLinks = async (updatedLinks: ExternalLink[]) => {
-        if (!resource) return;
-
-        try {
-            const existingLinks = updatedLinks.filter(l => l.id);
-            const newLinks = updatedLinks.filter(l => !l.id);
-
-            const updateData = {
-                externalLinks: [...existingLinks, ...newLinks],
-            };
-
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/resources/${resource.id}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-                body: JSON.stringify(updateData),
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Failed to update links');
-            }
-
-            fetchResource(); // Refresh to get new IDs
-        } catch (error) {
-            console.error('Failed to update links:', error);
-            toast.error(error instanceof Error ? error.message : 'Failed to update links');
-            throw error;
-        }
     };
 
     const handleSubmitDialog = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!resource?.id) return;
 
         if (!formData.url) {
             toast.error('URL is required');
@@ -132,61 +94,92 @@ export default function ManageLinksPage() {
             return;
         }
 
-        setSaving(true);
-        let updatedLinks: ExternalLink[];
-
-        if (editingIndex !== null) {
-            // Update existing link
-            updatedLinks = [...externalLinks];
-            updatedLinks[editingIndex] = { ...updatedLinks[editingIndex], ...formData };
-        } else {
-            // Add new link
-            updatedLinks = [...externalLinks, { ...formData, id: '' }];
-        }
-
         try {
-            await saveLinks(updatedLinks);
-            setExternalLinks(updatedLinks);
-            toast.success(editingIndex !== null ? 'Link updated successfully' : 'Link added successfully');
+            if (editingLink) {
+                await updateExternalLink(resource.id, editingLink.id, {
+                    url: formData.url,
+                    label: formData.label || undefined,
+                });
+                toast.success('Link updated successfully');
+            } else {
+                await createExternalLink(resource.id, {
+                    type: formData.type,
+                    url: formData.url,
+                    label: formData.label || undefined,
+                });
+                toast.success('Link added successfully');
+            }
             setIsDialogOpen(false);
-        } catch {
-            // Error already shown in saveLinks
-        } finally {
-            setSaving(false);
+            loadLinks();
+        } catch (error: any) {
+            toast.error(error.message || 'Failed to save link');
         }
     };
 
     const handleDeleteLink = async () => {
-        if (deletingIndex === null || !resource) return;
-
-        setSaving(true);
-        const updatedLinks = externalLinks.filter((_, i) => i !== deletingIndex);
+        if (!deletingLink || !resource?.id) return;
 
         try {
-            await saveLinks(updatedLinks);
-            setExternalLinks(updatedLinks);
+            await deleteExternalLink(resource.id, deletingLink.id);
             toast.success('Link removed successfully');
-            setDeletingIndex(null);
-        } catch {
-            // Error already shown in saveLinks
-        } finally {
-            setSaving(false);
+            setDeletingLink(null);
+            loadLinks();
+        } catch (error: any) {
+            toast.error(error.message || 'Failed to delete link');
         }
     };
 
-    if (loading) {
+    // Drag and drop handlers
+    const handleDragStart = (index: number) => {
+        setDraggedIndex(index);
+    };
+
+    const handleDragOver = (e: React.DragEvent, index: number) => {
+        e.preventDefault();
+        setDragOverIndex(index);
+    };
+
+    const handleDragEnd = () => {
+        setDraggedIndex(null);
+        setDragOverIndex(null);
+    };
+
+    const handleDrop = async (e: React.DragEvent, dropIndex: number) => {
+        e.preventDefault();
+
+        if (!resource?.id || draggedIndex === null || draggedIndex === dropIndex) {
+            setDraggedIndex(null);
+            setDragOverIndex(null);
+            return;
+        }
+
+        // Create new order
+        const newLinks = [...externalLinks];
+        const [draggedLink] = newLinks.splice(draggedIndex, 1);
+        if (!draggedLink) return;
+        newLinks.splice(dropIndex, 0, draggedLink);
+
+        // Update local state immediately for responsive UI
+        setExternalLinks(newLinks);
+        setDraggedIndex(null);
+        setDragOverIndex(null);
+
+        // Send to backend
+        try {
+            const linkIds = newLinks.map(link => link.id);
+            await reorderExternalLinks(resource.id, linkIds);
+            toast.success('Links reordered successfully!');
+            loadLinks(); // Refresh to get server order
+        } catch (error: any) {
+            await loadLinks(); // Revert on error
+            toast.error(error.message || 'Failed to reorder links');
+        }
+    };
+
+    if (!resource || loading) {
         return (
             <div className="flex items-center justify-center py-12">
                 <Icon icon="mdi:loading" width="48" height="48" className="text-primary animate-spin" />
-            </div>
-        );
-    }
-
-    if (!resource) {
-        return (
-            <div className="flex flex-col items-center justify-center py-12">
-                <Icon icon="mdi:alert-circle" width="48" height="48" className="text-destructive mb-4" />
-                <p className="font-nunito text-lg text-foreground/60">Resource not found</p>
             </div>
         );
     }
@@ -204,7 +197,7 @@ export default function ManageLinksPage() {
                     </p>
                 </div>
                 <Button className="font-hebden" onClick={openAddDialog}>
-                    <Icon icon="mdi:plus" width="20" height="20" />
+                    <Plus className="w-4 h-4 mr-2" />
                     Add Link
                 </Button>
             </div>
@@ -214,56 +207,73 @@ export default function ManageLinksPage() {
                 <div className="space-y-3">
                     {externalLinks.map((link, index) => {
                         const linkType = getLinkTypeInfo(link.type);
+                        const isDragging = draggedIndex === index;
+                        const isDragOver = dragOverIndex === index;
 
                         return (
-                            <div key={index} className="bg-secondary/30 rounded-lg p-4 hover:bg-accent/50 transition-colors">
-                                <div className="flex items-start gap-4">
-                                    <div
-                                        className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0"
-                                        style={{ backgroundColor: linkType?.color + '20' }}
+                            <div
+                                key={link.id}
+                                draggable
+                                onDragStart={() => handleDragStart(index)}
+                                onDragOver={(e) => handleDragOver(e, index)}
+                                onDragEnd={handleDragEnd}
+                                onDrop={(e) => handleDrop(e, index)}
+                                className={`flex items-center gap-3 p-4 bg-background rounded-lg border group transition-all ${isDragging
+                                    ? 'opacity-50 border-primary'
+                                    : isDragOver
+                                        ? 'border-primary border-2'
+                                        : 'border-border'
+                                    }`}
+                            >
+                                <GripVertical className="w-4 h-4 text-muted-foreground cursor-move group-hover:text-primary transition-colors" />
+
+                                <div
+                                    className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0"
+                                    style={{ backgroundColor: linkType?.color + '20' }}
+                                >
+                                    <Icon
+                                        icon={linkType?.icon || 'mdi:link'}
+                                        width="24"
+                                        height="24"
+                                        style={{ color: linkType?.color }}
+                                    />
+                                </div>
+
+                                <div className="flex-1 min-w-0">
+                                    <h3 className="font-hebden text-lg font-semibold text-foreground">
+                                        {link.label || linkType?.label}
+                                    </h3>
+                                    <a
+                                        href={link.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-sm text-primary hover:underline font-nunito truncate block"
                                     >
-                                        <Icon
-                                            icon={linkType?.icon || 'mdi:link'}
-                                            width="24"
-                                            height="24"
-                                            style={{ color: linkType?.color }}
-                                        />
-                                    </div>
+                                        {link.url}
+                                    </a>
+                                </div>
 
-                                    <div className="flex-1 min-w-0">
-                                        <h3 className="font-hebden text-lg font-semibold text-foreground mb-1">
-                                            {link.label || linkType?.label}
-                                        </h3>
-                                        <a
-                                            href={link.url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-sm text-primary hover:underline font-nunito truncate block mb-3"
-                                        >
-                                            {link.url}
-                                        </a>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => window.open(link.url, '_blank')}
+                                        className="p-2 hover:bg-secondary rounded-lg transition-colors"
+                                    >
+                                        <ExternalLink className="w-4 h-4 text-muted-foreground" />
+                                    </button>
 
-                                        <div className="flex gap-2">
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                className="font-nunito text-sm"
-                                                onClick={() => openEditDialog(index)}
-                                            >
-                                                <Icon icon="mdi:pencil" width="16" height="16" />
-                                                Edit
-                                            </Button>
-                                            <Button
-                                                size="sm"
-                                                variant="destructive"
-                                                className="font-nunito text-sm"
-                                                onClick={() => setDeletingIndex(index)}
-                                            >
-                                                <Icon icon="mdi:delete" width="16" height="16" />
-                                                Delete
-                                            </Button>
-                                        </div>
-                                    </div>
+                                    <button
+                                        onClick={() => openEditDialog(link)}
+                                        className="p-2 hover:bg-secondary rounded-lg transition-colors"
+                                    >
+                                        <Edit2 className="w-4 h-4 text-muted-foreground" />
+                                    </button>
+
+                                    <button
+                                        onClick={() => setDeletingLink(link)}
+                                        className="p-2 hover:bg-destructive/20 rounded-lg transition-colors"
+                                    >
+                                        <Trash2 className="w-4 h-4 text-destructive" />
+                                    </button>
                                 </div>
                             </div>
                         );
@@ -280,49 +290,49 @@ export default function ManageLinksPage() {
                             Add links to help users find related resources like your source code, documentation, or community channels.
                         </p>
                         <Button className="font-hebden" onClick={openAddDialog}>
-                            <Icon icon="mdi:plus" width="20" height="20" />
+                            <Plus className="w-4 h-4 mr-2" />
                             Add Your First Link
                         </Button>
                     </div>
                 </div>
             )}
 
-
-
             {/* Add/Edit Link Dialog */}
             <OrbisFormDialog
                 open={isDialogOpen}
                 onOpenChange={setIsDialogOpen}
-                title={editingIndex !== null ? 'Edit Link' : 'Add External Link'}
-                description={editingIndex !== null ? 'Update the link details below' : 'Add a new external link to your resource'}
+                title={editingLink ? 'Edit Link' : 'Add External Link'}
+                description={editingLink ? 'Update the link details below' : 'Add a new external link to your resource'}
                 onSubmit={handleSubmitDialog}
-                submitText={editingIndex !== null ? 'Update Link' : 'Add Link'}
+                submitText={editingLink ? 'Update Link' : 'Add Link'}
                 submitLoading={false}
                 onCancel={() => setIsDialogOpen(false)}
                 size="md"
             >
                 <div className="space-y-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="link-type" className="font-nunito">Type</Label>
-                        <Select
-                            value={formData.type}
-                            onValueChange={(value) => setFormData({ ...formData, type: value })}
-                        >
-                            <SelectTrigger id="link-type">
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {LINK_TYPES.map((type) => (
-                                    <SelectItem key={type.value} value={type.value}>
-                                        <div className="flex items-center gap-2">
-                                            <Icon icon={type.icon} width="16" height="16" style={{ color: type.color }} />
-                                            {type.label}
-                                        </div>
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
+                    {!editingLink && (
+                        <div className="space-y-2">
+                            <Label htmlFor="link-type" className="font-nunito">Type</Label>
+                            <Select
+                                value={formData.type}
+                                onValueChange={(value) => setFormData({ ...formData, type: value })}
+                            >
+                                <SelectTrigger id="link-type">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {LINK_TYPES.map((type) => (
+                                        <SelectItem key={type.value} value={type.value}>
+                                            <div className="flex items-center gap-2">
+                                                <Icon icon={type.icon} width="16" height="16" style={{ color: type.color }} />
+                                                {type.label}
+                                            </div>
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    )}
 
                     <div className="space-y-2">
                         <Label htmlFor="link-url" className="font-nunito">
@@ -353,15 +363,15 @@ export default function ManageLinksPage() {
 
             {/* Delete Confirmation Dialog */}
             <OrbisConfirmDialog
-                open={deletingIndex !== null}
-                onOpenChange={(open) => !open && setDeletingIndex(null)}
+                open={!!deletingLink}
+                onOpenChange={(open) => !open && setDeletingLink(null)}
                 title="Delete Link"
                 description="Are you sure you want to delete this link? This action cannot be undone."
                 confirmText="Delete Link"
                 cancelText="Cancel"
                 variant="destructive"
                 onConfirm={handleDeleteLink}
-                onCancel={() => setDeletingIndex(null)}
+                onCancel={() => setDeletingLink(null)}
             >
                 <></>
             </OrbisConfirmDialog>

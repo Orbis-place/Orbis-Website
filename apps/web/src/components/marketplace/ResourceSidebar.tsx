@@ -41,7 +41,7 @@ export default function ResourceSidebar({
     return (
         <div className="flex flex-col gap-4 w-full lg:w-[320px]">
             {/* Compatibility */}
-            <div className="bg-[#06363D] border border-[#084B54] rounded-[25px] p-5 flex flex-col gap-4">
+            {/* <div className="bg-[#06363D] border border-[#084B54] rounded-[25px] p-5 flex flex-col gap-4">
                 <h2 className="font-hebden font-semibold text-lg text-[#C7F4FA] m-0">
                     Compatibility
                 </h2>
@@ -60,7 +60,7 @@ export default function ResourceSidebar({
                         ))}
                     </div>
                 </div>
-            </div>
+            </div> */}
 
             {/* Links */}
             {links.length > 0 && (

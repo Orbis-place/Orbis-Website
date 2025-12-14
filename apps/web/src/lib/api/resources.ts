@@ -59,6 +59,7 @@ export interface ResourceOwner {
 export interface ResourceTeam {
     id: string;
     name: string;
+    slug: string;
     displayName: string;
     logo?: string;
 }
@@ -799,6 +800,157 @@ export async function replaceGalleryImage(
     if (!response.ok) {
         const error = await response.json().catch(() => ({
             message: 'Failed to replace gallery image',
+        }));
+        throw new Error(error.message || `Request failed with status ${response.status}`);
+    }
+
+    return response.json();
+}
+
+/**
+ * External Links API
+ */
+
+export interface ExternalLink {
+    id: string;
+    type: string;
+    url: string;
+    label?: string;
+    order: number;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface CreateExternalLinkData {
+    type: string;
+    url: string;
+    label?: string;
+}
+
+export interface UpdateExternalLinkData {
+    url?: string;
+    label?: string;
+}
+
+/**
+ * Get all external links for a resource
+ */
+export async function fetchExternalLinks(resourceId: string): Promise<ExternalLink[]> {
+    const response = await fetch(`${API_URL}/resources/${resourceId}/external-links`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({
+            message: 'Failed to fetch external links',
+        }));
+        throw new Error(error.message || `Request failed with status ${response.status}`);
+    }
+
+    return response.json();
+}
+
+/**
+ * Create a new external link
+ */
+export async function createExternalLink(
+    resourceId: string,
+    data: CreateExternalLinkData
+): Promise<{ message: string; link: ExternalLink }> {
+    const response = await fetch(`${API_URL}/resources/${resourceId}/external-links`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({
+            message: 'Failed to create external link',
+        }));
+        throw new Error(error.message || `Request failed with status ${response.status}`);
+    }
+
+    return response.json();
+}
+
+/**
+ * Update an external link
+ */
+export async function updateExternalLink(
+    resourceId: string,
+    linkId: string,
+    data: UpdateExternalLinkData
+): Promise<{ message: string; link: ExternalLink }> {
+    const response = await fetch(`${API_URL}/resources/${resourceId}/external-links/${linkId}`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({
+            message: 'Failed to update external link',
+        }));
+        throw new Error(error.message || `Request failed with status ${response.status}`);
+    }
+
+    return response.json();
+}
+
+/**
+ * Delete an external link
+ */
+export async function deleteExternalLink(
+    resourceId: string,
+    linkId: string
+): Promise<{ message: string }> {
+    const response = await fetch(`${API_URL}/resources/${resourceId}/external-links/${linkId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({
+            message: 'Failed to delete external link',
+        }));
+        throw new Error(error.message || `Request failed with status ${response.status}`);
+    }
+
+    return response.json();
+}
+
+/**
+ * Reorder external links
+ */
+export async function reorderExternalLinks(
+    resourceId: string,
+    linkIds: string[]
+): Promise<{ message: string }> {
+    const response = await fetch(`${API_URL}/resources/${resourceId}/external-links/reorder`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ linkIds }),
+    });
+
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({
+            message: 'Failed to reorder external links',
         }));
         throw new Error(error.message || `Request failed with status ${response.status}`);
     }

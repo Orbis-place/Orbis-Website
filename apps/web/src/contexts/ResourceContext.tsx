@@ -1,8 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useParams } from 'next/navigation';
-import { notFound } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { fetchResourceBySlug, hasLikedResource, hasFavoritedResource, type Resource } from '@/lib/api/resources';
 import { useSession } from '@repo/auth/client';
 import { getResourceTypeBySingular, isValidSingularType } from '@/config/resource-types';
@@ -34,6 +33,7 @@ export function ResourceProvider({ children }: { children: ReactNode }) {
     const type = params?.type;
     const slug = params?.slug;
     const { data: session } = useSession();
+    const router = useRouter();
 
     const [resource, setResource] = useState<Resource | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -44,9 +44,9 @@ export function ResourceProvider({ children }: { children: ReactNode }) {
     // Validate resource type
     useEffect(() => {
         if (type && !isValidSingularType(type)) {
-            notFound();
+            router.push('/404');
         }
-    }, [type]);
+    }, [type, router]);
 
     // Fetch resource data
     useEffect(() => {
@@ -59,16 +59,15 @@ export function ResourceProvider({ children }: { children: ReactNode }) {
                 const response = await fetchResourceBySlug(slug);
                 setResource(response.resource);
                 setLikeCount(response.resource.likeCount);
+                setIsLoading(false);
             } catch (err) {
                 console.error('Failed to fetch resource:', err);
-                notFound();
-            } finally {
-                setIsLoading(false);
+                router.push('/404');
             }
         };
 
         loadResource();
-    }, [slug, type]);
+    }, [slug, type, router]);
 
     // Load like and favorite status if user is authenticated
     useEffect(() => {

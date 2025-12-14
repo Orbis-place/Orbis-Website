@@ -844,10 +844,15 @@ model ResourceExternalLink {
   type       ExternalLinkType
   url        String
   label      String? // Optional custom label
+  order      Int              @default(0)
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
 
   resource Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
 
+  @@unique([resourceId, type])
   @@index([resourceId])
+  @@index([order])
   @@map("resource_external_links")
 }
 

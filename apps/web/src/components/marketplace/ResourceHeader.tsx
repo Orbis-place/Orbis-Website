@@ -201,7 +201,7 @@ export default function ResourceHeader({
 
                 {/* Metadata Row */}
                 <div className="flex flex-wrap items-center gap-4 text-sm text-[#C7F4FA]/60 font-nunito mb-4">
-                    <span>by <Link href={team ? `/team/${team.name.toLowerCase()}` : owner ? `/users/${owner.username.toLowerCase()}` : '#'} className="text-[#109EB1] font-semibold hover:underline">{author}</Link></span>
+                    <span>by <Link href={team ? `/team/${team.slug.toLowerCase()}` : owner ? `/users/${owner.username.toLowerCase()}` : '#'} className="text-[#109EB1] font-semibold hover:underline">{author}</Link></span>
                     <span>•</span>
                     <span className="flex items-center gap-1.5">
                         <Calendar className="w-4 h-4" />
