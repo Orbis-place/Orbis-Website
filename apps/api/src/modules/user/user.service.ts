@@ -486,7 +486,7 @@ export class UserService {
                         name: true,
                         slug: true,
                         shortDesc: true,
-                        logo: true,
+                        logoUrl: true,
                         serverAddress: true,
                         status: true,
                         isOnline: true,

@@ -8,12 +8,14 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { OrbisFormDialog } from '@/components/OrbisDialog';
+import { ServerTagSearchInput } from '@/components/ServerTagSearchInput';
+import { CountrySelector } from '@/components/CountrySelector';
 import { toast } from 'sonner';
 
 interface Team {
     id: string;
     name: string;
-    displayName: string;
+    slug: string;
     logo?: string;
 }
 
@@ -21,6 +23,12 @@ interface ServerCategory {
     id: string;
     name: string;
     slug: string;
+}
+
+interface HytaleVersion {
+    id: string;
+    hytaleVersion: string;
+    name?: string;
 }
 
 interface CreateServerDialogProps {
@@ -35,13 +43,16 @@ export function CreateServerDialog({ open, onOpenChange, trigger, onSuccess, def
     const [isLoading, setIsLoading] = useState(false);
     const [teams, setTeams] = useState<Team[]>([]);
     const [categories, setCategories] = useState<ServerCategory[]>([]);
+    const [hytaleVersions, setHytaleVersions] = useState<HytaleVersion[]>([]);
     const [loadingTeams, setLoadingTeams] = useState(false);
+    const [tagNames, setTagNames] = useState<string[]>([]);
+    const [country, setCountry] = useState<string>();
     const [formData, setFormData] = useState({
         name: '',
         slug: '',
         description: '',
         serverAddress: '',  // Changed from serverIp + port
-        gameVersion: '1.0.0',
+        gameVersionId: '',
         primaryCategoryId: '',
         teamId: defaultTeamId,
     });
@@ -60,6 +71,7 @@ export function CreateServerDialog({ open, onOpenChange, trigger, onSuccess, def
         if (open) {
             fetchTeams();
             fetchCategories();
+            fetchHytaleVersions();
         }
     }, [open]);
 
@@ -96,6 +108,22 @@ export function CreateServerDialog({ open, onOpenChange, trigger, onSuccess, def
         }
     };
 
+    const fetchHytaleVersions = async () => {
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/hytale-versions`);
+            if (response.ok) {
+                const data = await response.json();
+                setHytaleVersions(data);
+                // Set the first version as default if available
+                if (data.length > 0 && !formData.gameVersionId) {
+                    setFormData(prev => ({ ...prev, gameVersionId: data[0]?.id || '' }));
+                }
+            }
+        } catch (error) {
+            console.error('Failed to fetch Hytale versions:', error);
+        }
+    };
+
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setFormData({
             ...formData,
@@ -112,10 +140,12 @@ export function CreateServerDialog({ open, onOpenChange, trigger, onSuccess, def
                 slug: formData.slug,
                 description: formData.description,
                 serverAddress: formData.serverAddress,
-                gameVersion: formData.gameVersion,
+                gameVersionId: formData.gameVersionId,
+                supportedVersionIds: [formData.gameVersionId],
                 primaryCategoryId: formData.primaryCategoryId,
-                supportedVersions: [formData.gameVersion],
                 teamId: formData.teamId,
+                tagNames: tagNames.length > 0 ? tagNames : undefined,
+                country: country || undefined,
             };
 
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/servers`, {
@@ -138,10 +168,12 @@ export function CreateServerDialog({ open, onOpenChange, trigger, onSuccess, def
                 slug: '',
                 description: '',
                 serverAddress: '',
-                gameVersion: '1.0.0',
+                gameVersionId: hytaleVersions[0]?.id || '',
                 primaryCategoryId: '',
                 teamId: defaultTeamId,
             });
+            setTagNames([]);
+            setCountry(undefined);
             onOpenChange(false);
 
             toast.success('Server created successfully!');
@@ -172,67 +204,79 @@ export function CreateServerDialog({ open, onOpenChange, trigger, onSuccess, def
             <div className="space-y-4">
                 {/* Owner Selection */}
                 <div className="space-y-2">
-                    <Label htmlFor="owner">
+                    <Label htmlFor="teamId">
                         Owner *
                     </Label>
                     <Select
                         value={formData.teamId || 'personal'}
                         onValueChange={(value) => setFormData({ ...formData, teamId: value === 'personal' ? undefined : value })}
-                        disabled={!!defaultTeamId} // Lock selector if creating for specific team
+                        disabled={!!defaultTeamId}
                     >
-                        <SelectTrigger id="owner" className="w-full">
-                            <SelectValue placeholder="Select owner" />
+                        <SelectTrigger id="teamId" className="w-full">
+                            <SelectValue placeholder={loadingTeams ? "Loading teams..." : "Select owner"} />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="personal">
-                                <span className="flex items-center gap-2">
-                                    <Icon icon="mdi:account" width="16" height="16" />
-                                    Personal
-                                </span>
-                            </SelectItem>
-                            {loadingTeams ? (
-                                <SelectItem value="loading" disabled>
-                                    <span className="flex items-center gap-2">
-                                        <Icon icon="mdi:loading" width="16" height="16" className="animate-spin" />
-                                        Loading teams...
-                                    </span>
+                            <SelectItem value="personal">Personal Server</SelectItem>
+                            {teams.map((team) => (
+                                <SelectItem key={team.id} value={team.id}>
+                                    <div className="flex items-center gap-2">
+                                        {team.logo && (
+                                            <img
+                                                src={team.logo}
+                                                alt={team.name}
+                                                className="w-4 h-4 rounded-sm object-cover"
+                                            />
+                                        )}
+                                        <span>{team.name}</span>
+                                    </div>
                                 </SelectItem>
-                            ) : (
-                                teams.map((team) => (
-                                    <SelectItem key={team.id} value={team.id}>
-                                        <span className="flex items-center gap-2">
-                                            <Icon icon="mdi:account-group" width="16" height="16" />
-                                            {team.name}
-                                        </span>
-                                    </SelectItem>
-                                ))
-                            )}
+                            ))}
                         </SelectContent>
                     </Select>
-                    <p className="text-xs text-muted-foreground/60 font-nunito">
-                        {defaultTeamId
-                            ? 'Creating server for this team'
-                            : 'Choose whether this server belongs to you or one of your teams'
-                        }
-                    </p>
                 </div>
 
-                {/* Server Name */}
-                <div className="space-y-2">
-                    <Label htmlFor="name">
-                        Server Name *
-                    </Label>
-                    <Input
-                        id="name"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleInputChange}
-                        placeholder="My Awesome Server"
-                        required
-                    />
+                {/* Two-column grid for basic info */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Server Name */}
+                    <div className="space-y-2">
+                        <Label htmlFor="name">
+                            Server Name *
+                        </Label>
+                        <Input
+                            id="name"
+                            name="name"
+                            value={formData.name}
+                            onChange={handleInputChange}
+                            placeholder="My Awesome Server"
+                            required
+                        />
+                    </div>
+
+                    {/* Primary Category */}
+                    <div className="space-y-2">
+                        <Label htmlFor="primaryCategoryId">
+                            Primary Category *
+                        </Label>
+                        <Select
+                            value={formData.primaryCategoryId}
+                            onValueChange={(value) => setFormData({ ...formData, primaryCategoryId: value })}
+                            required
+                        >
+                            <SelectTrigger id="primaryCategoryId" className="w-full">
+                                <SelectValue placeholder="Select a category" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {categories.map((category) => (
+                                    <SelectItem key={category.id} value={category.id}>
+                                        {category.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </div>
 
-                {/* Slug */}
+                {/* Slug - Full width */}
                 <div className="space-y-2">
                     <div className="flex items-center justify-between">
                         <Label htmlFor="slug">
@@ -259,12 +303,53 @@ export function CreateServerDialog({ open, onOpenChange, trigger, onSuccess, def
                         }}
                         required
                     />
-                    <p className="text-xs text-muted-foreground/60 font-nunito">
-                        Lowercase letters, numbers, and hyphens only. This will be your server's URL.
-                    </p>
                 </div>
 
-                {/* Short Description */}
+                {/* Two-column grid for address and game version */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Server Address */}
+                    <div className="space-y-2">
+                        <Label htmlFor="serverAddress">
+                            Server Address *
+                        </Label>
+                        <Input
+                            id="serverAddress"
+                            name="serverAddress"
+                            value={formData.serverAddress}
+                            onChange={handleInputChange}
+                            placeholder="play.myserver.com:5520"
+                            required
+                        />
+                        <p className="text-xs text-muted-foreground/60 font-nunito">
+                            Format: IP or domain with optional port
+                        </p>
+                    </div>
+
+                    {/* Game Version */}
+                    <div className="space-y-2">
+                        <Label htmlFor="gameVersionId">
+                            Game Version *
+                        </Label>
+                        <Select
+                            value={formData.gameVersionId}
+                            onValueChange={(value) => setFormData({ ...formData, gameVersionId: value })}
+                            required
+                        >
+                            <SelectTrigger id="gameVersionId" className="w-full">
+                                <SelectValue placeholder="Select game version" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {hytaleVersions.map((version) => (
+                                    <SelectItem key={version.id} value={version.id}>
+                                        {version.hytaleVersion}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+
+                {/* Short Description - Full width */}
                 <div className="space-y-2">
                     <Label htmlFor="description">
                         Short description *
@@ -284,69 +369,12 @@ export function CreateServerDialog({ open, onOpenChange, trigger, onSuccess, def
                     </p>
                 </div>
 
-
-                {/* Server Address */}
-                <div className="space-y-2">
-                    <Label htmlFor="serverAddress">
-                        Server Address *
-                    </Label>
-                    <Input
-                        id="serverAddress"
-                        name="serverAddress"
-                        value={formData.serverAddress}
-                        onChange={handleInputChange}
-                        placeholder="1.1.1.1:5520 or play.myserver.com"
-                        required
-                    />
-                    <p className="text-xs text-muted-foreground/60 font-nunito">
-                        Enter IP:port or domain:port (port defaults to 5520)
-                    </p>
-                </div>
-
-                {/* Game Version */}
-                <div className="space-y-2">
-                    <Label htmlFor="gameVersion">
-                        Game Version *
-                    </Label>
-                    <Input
-                        id="gameVersion"
-                        name="gameVersion"
-                        value={formData.gameVersion}
-                        onChange={handleInputChange}
-                        placeholder="1.0.0"
-                        required
-                    />
-                </div>
-
-                {/* Primary Category */}
-                <div className="space-y-2">
-                    <Label htmlFor="primaryCategoryId">
-                        Primary Category *
-                    </Label>
-                    <Select
-                        value={formData.primaryCategoryId}
-                        onValueChange={(value) => setFormData({ ...formData, primaryCategoryId: value })}
-                        required
-                    >
-                        <SelectTrigger id="primaryCategoryId" className="w-full">
-                            <SelectValue placeholder="Select a category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {categories.map((category) => (
-                                <SelectItem key={category.id} value={category.id}>
-                                    {category.name}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-
                 {/* Info Box */}
                 <div className="bg-primary/10 p-4 rounded-lg border border-primary/20">
                     <div className="flex gap-3">
                         <Icon icon="mdi:information" className="text-primary flex-shrink-0 mt-0.5" width="20" height="20" />
                         <p className="text-sm text-foreground/80 font-nunito">
-                            Your server will be created with <strong>pending</strong> status. You can add more details and customize it after creation.
+                            Your server will be created with <strong>pending</strong> status. You can add more details like tags, country, and images after creation.
                         </p>
                     </div>
                 </div>

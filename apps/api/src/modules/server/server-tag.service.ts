@@ -6,20 +6,72 @@ export class ServerTagService {
     constructor() {
     }
 
-    async findAll() {
+    /**
+     * Get all tags with optional search
+     */
+    async getAllTags(search?: string, limit = 100) {
+        const where: any = {};
+
+        if (search) {
+            where.OR = [
+                { name: { contains: search, mode: 'insensitive' } },
+                { slug: { contains: search, mode: 'insensitive' } },
+            ];
+        }
+
         return prisma.serverTag.findMany({
-            orderBy: { name: 'asc' },
-            include: {
-                _count: {
-                    select: {
-                        servers: true,
-                    },
-                },
-            },
+            where,
+            take: limit,
+            orderBy: [
+                { usageCount: 'desc' },
+                { name: 'asc' },
+            ],
         });
     }
 
-    async findBySlug(slug: string) {
+    /**
+     * Search tags by name with autocomplete support
+     */
+    async searchTags(query: string, limit = 10) {
+        if (!query || query.trim().length === 0) {
+            // Return popular tags if no query
+            return prisma.serverTag.findMany({
+                take: limit,
+                orderBy: [
+                    { usageCount: 'desc' },
+                    { name: 'asc' },
+                ],
+            });
+        }
+
+        return prisma.serverTag.findMany({
+            where: {
+                OR: [
+                    { name: { contains: query, mode: 'insensitive' } },
+                    { slug: { contains: query, mode: 'insensitive' } },
+                ],
+            },
+            take: limit,
+            orderBy: [
+                { usageCount: 'desc' },
+                { name: 'asc' },
+            ]
+        });
+    }
+
+    /**
+     * Get tag by ID
+     */
+    async getTagById(tagId: string) {
+        return prisma.serverTag.findUnique({
+            where: { id: tagId },
+        });
+    }
+
+    /**
+     * Get tag by slug
+     */
+    async getTagBySlug(slug: string) {
         return prisma.serverTag.findUnique({
             where: { slug },
             include: {
@@ -32,32 +84,16 @@ export class ServerTagService {
         });
     }
 
+    /**
+     * Get popular tags
+     */
     async findPopular(limit: number = 20) {
-        const tags = await prisma.$queryRaw<
-            Array<{
-                id: string;
-                name: string;
-                slug: string;
-                color: string | null;
-                server_count: bigint;
-            }>
-        >`
-            SELECT st.id,
-                   st.name,
-                   st.slug,
-                   st.color,
-                   COUNT(str."serverId") as server_count
-            FROM server_tags st
-                     LEFT JOIN server_tag_relations str ON st.id = str."tagId"
-                     LEFT JOIN servers s ON str."serverId" = s.id AND s.status = 'APPROVED'
-            GROUP BY st.id, st.name, st.slug, st.color
-            ORDER BY server_count DESC
-                LIMIT ${limit}
-        `;
-
-        return tags.map((tag) => ({
-            ...tag,
-            server_count: Number(tag.server_count),
-        }));
+        return prisma.serverTag.findMany({
+            take: limit,
+            orderBy: [
+                { usageCount: 'desc' },
+                { name: 'asc' },
+            ],
+        });
     }
 }

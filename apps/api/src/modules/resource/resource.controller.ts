@@ -42,13 +42,6 @@ export class ResourceController {
         return this.resourceService.getCategoriesForType(type as any);
     }
 
-    @Get('hytale-versions')
-    @AllowAnonymous()
-    @ApiOperation({ summary: 'Get all available Hytale versions' })
-    async getHytaleVersions() {
-        return this.resourceService.getHytaleVersions();
-    }
-
     // ============================================
     // AUTHENTICATED ENDPOINTS
     // ============================================

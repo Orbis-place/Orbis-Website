@@ -376,12 +376,13 @@ model Server {
   status        ServerStatus @default(PENDING)
 
   // Media
-  logo   String?
-  banner String?
+  logoUrl   String?
+  bannerUrl String?
 
   // Game Information
-  gameVersion       String
-  supportedVersions String[] // Array of supported versions
+  gameVersionId     String? // Primary game version
+  gameVersion       HytaleVersion?           @relation("ServerGameVersion", fields: [gameVersionId], references: [id], onDelete: SetNull)
+  supportedVersions ServerSupportedVersion[] // Supported game versions
 
   // Player Statistics
   currentPlayers Int       @default(0)
@@ -428,6 +429,8 @@ model Server {
   @@index([voteCount])
   @@index([createdAt])
   @@index([isOnline])
+  @@index([country])
+  @@index([gameVersionId])
   @@map("servers")
 }
 
@@ -442,11 +445,13 @@ model ServerTag {
   description String?
   color       String?  @default("#69a024")
   icon        String?
+  usageCount  Int      @default(0) // Global usage count
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   servers ServerTagRelation[]
 
+  @@index([usageCount])
   @@map("server_tags")
 }
 
@@ -472,11 +477,13 @@ model ServerCategory {
   icon        String?
   color       String?  @default("#69a024")
   order       Int      @default(0)
+  usageCount  Int      @default(0) // Global usage count
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   servers ServerCategoryRelation[]
 
+  @@index([usageCount])
   @@map("server_categories")
 }
 
@@ -988,7 +995,7 @@ model ResourceVersion {
   channel       ReleaseChannel @default(RELEASE)
 
   // Compatibility
-  compatibleVersions HytaleVersion[]
+  compatibleVersions ResourceVersionToHytaleVersion[]
 
   // Changelog
   changelog String? @db.Text
@@ -1029,16 +1036,51 @@ model ResourceVersion {
 
 model HytaleVersion {
   id            String   @id @default(cuid())
-  versionId     String
-  hytaleVersion String // "1.0", "1.1", etc.
-  addedAt       DateTime @default(now())
+  hytaleVersion String   @unique // "1.0", "1.1", etc.
+  name          String? // Optional display name
+  releaseDate   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  version ResourceVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  // Relations
+  resourceVersions       ResourceVersionToHytaleVersion[]
+  servers                Server[]                        @relation("ServerGameVersion")
+  supportedByServers     ServerSupportedVersion[]
 
-  @@unique([versionId, hytaleVersion])
-  @@index([versionId])
   @@index([hytaleVersion])
   @@map("hytale_versions")
+}
+
+// Junction table for ResourceVersion to HytaleVersion compatibility
+model ResourceVersionToHytaleVersion {
+  id                String   @id @default(cuid())
+  resourceVersionId String
+  hytaleVersionId   String
+  addedAt           DateTime @default(now())
+
+  resourceVersion ResourceVersion @relation(fields: [resourceVersionId], references: [id], onDelete: Cascade)
+  hytaleVersion   HytaleVersion   @relation(fields: [hytaleVersionId], references: [id], onDelete: Cascade)
+
+  @@unique([resourceVersionId, hytaleVersionId])
+  @@index([resourceVersionId])
+  @@index([hytaleVersionId])
+  @@map("resource_version_to_hytale_versions")
+}
+
+// Join table for Server supported versions
+model ServerSupportedVersion {
+  id              String   @id @default(cuid())
+  serverId        String
+  hytaleVersionId String
+  addedAt         DateTime @default(now())
+
+  server        Server        @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  hytaleVersion HytaleVersion @relation(fields: [hytaleVersionId], references: [id], onDelete: Cascade)
+
+  @@unique([serverId, hytaleVersionId])
+  @@index([serverId])
+  @@index([hytaleVersionId])
+  @@map("server_supported_versions")
 }
 
 enum ReleaseChannel {

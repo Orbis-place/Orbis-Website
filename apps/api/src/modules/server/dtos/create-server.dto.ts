@@ -52,10 +52,13 @@ export class CreateServerDto {
     )
     serverAddress: string;
 
-    @ApiProperty({ example: '1.0.0', description: 'Main game version' })
+    @ApiProperty({
+        example: 'hytale-version-id-123',
+        description: 'Primary game version ID (reference to HytaleVersion)'
+    })
     @IsString()
-    @IsNotEmpty()
-    gameVersion: string;
+    @IsOptional()
+    gameVersionId?: string;
 
     @ApiProperty({
         example: 'hypixel-hytale',
@@ -68,13 +71,13 @@ export class CreateServerDto {
     slug: string;
 
     @ApiPropertyOptional({
-        example: ['1.0.0', '1.0.1'],
-        description: 'Supported game versions',
+        example: ['hytale-version-id-123', 'hytale-version-id-456'],
+        description: 'Supported game version IDs (references to HytaleVersion)',
     })
     @IsArray()
     @IsString({ each: true })
     @IsOptional()
-    supportedVersions?: string[];
+    supportedVersionIds?: string[];
 
     @ApiPropertyOptional({
         example: 'https://example.com',
@@ -118,6 +121,15 @@ export class CreateServerDto {
     @IsString({ each: true })
     @IsOptional()
     tagIds?: string[];
+
+    @ApiPropertyOptional({
+        example: ['PvP', 'Economy', 'Custom Items'],
+        description: 'Tag names to create/assign (optional, max 10 total with tagIds)',
+    })
+    @IsArray()
+    @IsString({ each: true })
+    @IsOptional()
+    tagNames?: string[];
 
     @ApiPropertyOptional({
         example: 'team-id-123',

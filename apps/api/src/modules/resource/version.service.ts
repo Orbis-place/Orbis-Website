@@ -75,13 +75,34 @@ export class VersionService {
                 changelog: createDto.changelog,
                 status: VersionStatus.DRAFT,
                 compatibleVersions: {
-                    create: createDto.compatibleVersions.map((hytaleVersion) => ({
-                        hytaleVersion,
-                    })),
+                    create: await Promise.all(
+                        createDto.compatibleVersions.map(async (hytaleVersionStr) => {
+                            // Find or create the HytaleVersion
+                            let hytaleVersion = await prisma.hytaleVersion.findUnique({
+                                where: { hytaleVersion: hytaleVersionStr },
+                            });
+
+                            if (!hytaleVersion) {
+                                hytaleVersion = await prisma.hytaleVersion.create({
+                                    data: { hytaleVersion: hytaleVersionStr },
+                                });
+                            }
+
+                            return {
+                                hytaleVersion: {
+                                    connect: { id: hytaleVersion.id },
+                                },
+                            };
+                        }),
+                    ),
                 },
             },
             include: {
-                compatibleVersions: true,
+                compatibleVersions: {
+                    include: {
+                        hytaleVersion: true,
+                    },
+                },
                 files: true,
             },
         });
@@ -105,7 +126,11 @@ export class VersionService {
         const versions = await prisma.resourceVersion.findMany({
             where: { resourceId },
             include: {
-                compatibleVersions: true,
+                compatibleVersions: {
+                    include: {
+                        hytaleVersion: true,
+                    },
+                },
                 files: true,
                 primaryFile: true,
             },
@@ -128,7 +153,11 @@ export class VersionService {
                 resourceId,
             },
             include: {
-                compatibleVersions: true,
+                compatibleVersions: {
+                    include: {
+                        hytaleVersion: true,
+                    },
+                },
                 files: true,
                 primaryFile: true,
                 resource: {
@@ -206,7 +235,11 @@ export class VersionService {
             where: { id: versionId },
             data: updateData,
             include: {
-                compatibleVersions: true,
+                compatibleVersions: {
+                    include: {
+                        hytaleVersion: true,
+                    },
+                },
                 files: true,
                 primaryFile: true,
             },
@@ -214,25 +247,43 @@ export class VersionService {
 
         // Update compatible versions if provided
         if (updateDto.compatibleVersions) {
-            // Delete existing compatible versions
-            await prisma.hytaleVersion.deleteMany({
-                where: { versionId },
+            // Delete existing junction table entries
+            await prisma.resourceVersionToHytaleVersion.deleteMany({
+                where: { resourceVersionId: versionId },
             });
 
-            // Create new compatible versions
-            await prisma.hytaleVersion.createMany({
-                data: updateDto.compatibleVersions.map((hytaleVersion) => ({
-                    versionId,
-                    hytaleVersion,
-                })),
-            });
+            // Create new junction table entries
+            for (const hytaleVersionStr of updateDto.compatibleVersions) {
+                // Find or create the HytaleVersion
+                let hytaleVersion = await prisma.hytaleVersion.findUnique({
+                    where: { hytaleVersion: hytaleVersionStr },
+                });
+
+                if (!hytaleVersion) {
+                    hytaleVersion = await prisma.hytaleVersion.create({
+                        data: { hytaleVersion: hytaleVersionStr },
+                    });
+                }
+
+                // Create junction entry
+                await prisma.resourceVersionToHytaleVersion.create({
+                    data: {
+                        resourceVersionId: versionId,
+                        hytaleVersionId: hytaleVersion.id,
+                    },
+                });
+            }
         }
 
         // Fetch updated version with new compatible versions
         const finalVersion = await prisma.resourceVersion.findUnique({
             where: { id: versionId },
             include: {
-                compatibleVersions: true,
+                compatibleVersions: {
+                    include: {
+                        hytaleVersion: true,
+                    },
+                },
                 files: true,
                 primaryFile: true,
             },

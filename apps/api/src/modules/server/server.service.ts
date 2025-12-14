@@ -89,97 +89,165 @@ export class ServerService {
             }
         }
 
+        // Verify gameVersion exists (if provided)
+        if (createDto.gameVersionId) {
+            const gameVersion = await prisma.hytaleVersion.findUnique({
+                where: { id: createDto.gameVersionId },
+            });
+
+            if (!gameVersion) {
+                throw new BadRequestException('Game version not found');
+            }
+        }
+
+        // Verify all supported version IDs exist (if provided)
+        if (createDto.supportedVersionIds && createDto.supportedVersionIds.length > 0) {
+            const versions = await prisma.hytaleVersion.findMany({
+                where: { id: { in: createDto.supportedVersionIds } },
+            });
+
+            if (versions.length !== createDto.supportedVersionIds.length) {
+                throw new BadRequestException('One or more supported versions not found');
+            }
+        }
+
         // Validate slug uniqueness
         const slug = await this.generateUniqueSlug(createDto.slug);
         if (slug !== createDto.slug.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')) {
             throw new ConflictException('Slug is already taken');
         }
 
-        // Create server
-        const server = await prisma.server.create({
-            data: {
-                name: createDto.name,
-                slug,
-                description: createDto.description || '',
-                shortDesc: createDto.shortDesc,
-                serverAddress: createDto.serverAddress,
-                gameVersion: createDto.gameVersion,
-                supportedVersions: createDto.supportedVersions || [
-                    '0.0.1',
-                ],
-                websiteUrl: createDto.websiteUrl,
-                country: createDto.country,
-                ownerUserId: userId,
-                ownerTeamId: createDto.teamId,
-                status: ServerStatus.PENDING,
+        // Use transaction to handle tag usage count updates
+        const server = await prisma.$transaction(async (tx) => {
+            // Handle tags - combine tagIds and tagNames
+            let allTagIds: string[] = [];
 
-                // Create category relations
-                categories: {
-                    create: [
-                        // Primary category
-                        {
-                            categoryId: createDto.primaryCategoryId,
-                            isPrimary: true,
+            // Add existing tag IDs
+            if (createDto.tagIds && createDto.tagIds.length > 0) {
+                allTagIds = [...createDto.tagIds];
+            }
+
+            // Create/find tags from names
+            if (createDto.tagNames && createDto.tagNames.length > 0) {
+                const createdTags = await this.findOrCreateServerTags(createDto.tagNames, tx);
+                allTagIds = [...allTagIds, ...createdTags.map(t => t.id)];
+            }
+
+            // Verify max 10 tags total
+            if (allTagIds.length > 10) {
+                throw new BadRequestException('Maximum 10 tags allowed');
+            }
+
+            // Create server
+            const newServer = await tx.server.create({
+                data: {
+                    name: createDto.name,
+                    slug,
+                    description: createDto.description || '',
+                    shortDesc: createDto.shortDesc,
+                    serverAddress: createDto.serverAddress,
+                    gameVersionId: createDto.gameVersionId,
+                    websiteUrl: createDto.websiteUrl,
+                    country: createDto.country,
+                    // Set either ownerUserId (personal) or ownerTeamId (team), never both
+                    ownerUserId: createDto.teamId ? null : userId,
+                    ownerTeamId: createDto.teamId || null,
+                    status: ServerStatus.PENDING,
+
+                    // Create category relations
+                    categories: {
+                        create: [
+                            // Primary category
+                            {
+                                categoryId: createDto.primaryCategoryId,
+                                isPrimary: true,
+                            },
+                            // Additional categories
+                            ...(createDto.categoryIds
+                                ?.filter((id) => id !== createDto.primaryCategoryId)
+                                .map((id) => ({
+                                    categoryId: id,
+                                    isPrimary: false,
+                                })) || []),
+                        ],
+                    },
+
+                    // Create tag relations
+                    ...(allTagIds.length > 0
+                        ? {
+                            tags: {
+                                create: allTagIds.map((tagId) => ({
+                                    tagId,
+                                })),
+                            },
+                        }
+                        : {}),
+
+                    // Create supported version relations (if provided)
+                    ...(createDto.supportedVersionIds && createDto.supportedVersionIds.length > 0
+                        ? {
+                            supportedVersions: {
+                                create: createDto.supportedVersionIds.map((hytaleVersionId) => ({
+                                    hytaleVersionId,
+                                })),
+                            },
+                        }
+                        : {}),
+
+                    // Create status history
+                    statusHistory: {
+                        create: {
+                            oldStatus: null,
+                            newStatus: ServerStatus.PENDING,
+                            reason: 'Server created',
                         },
-                        // Additional categories
-                        ...(createDto.categoryIds
-                            ?.filter((id) => id !== createDto.primaryCategoryId)
-                            .map((id) => ({
-                                categoryId: id,
-                                isPrimary: false,
-                            })) || []),
-                    ],
+                    },
                 },
-
-                // Create tag relations (if provided)
-                ...(createDto.tagIds && createDto.tagIds.length > 0
-                    ? {
-                        tags: {
-                            create: createDto.tagIds.map((tagId) => ({
-                                tagId,
-                            })),
+                include: {
+                    ownerUser: {
+                        select: {
+                            id: true,
+                            username: true,
+                            displayName: true,
+                            image: true,
                         },
-                    }
-                    : {}),
+                    },
+                    ownerTeam: {
+                        select: {
+                            id: true,
+                            slug: true,
+                            name: true,
+                            logo: true,
+                            banner: true,
+                        },
+                    },
+                    categories: {
+                        include: {
+                            category: true,
+                        },
+                    },
+                    tags: {
+                        include: {
+                            tag: true,
+                        },
+                    },
+                },
+            });
 
-                // Create status history
-                statusHistory: {
-                    create: {
-                        oldStatus: null,
-                        newStatus: ServerStatus.PENDING,
-                        reason: 'Server created',
-                    },
-                },
-            },
-            include: {
-                ownerUser: {
-                    select: {
-                        id: true,
-                        username: true,
-                        displayName: true,
-                        image: true,
-                    },
-                },
-                ownerTeam: {
-                    select: {
-                        id: true,
-                        slug: true,
-                        name: true,
-                        logo: true,
-                        banner: true,
-                    },
-                },
-                categories: {
-                    include: {
-                        category: true,
-                    },
-                },
-                tags: {
-                    include: {
-                        tag: true,
-                    },
-                },
-            },
+            // Increment usage count for each assigned tag
+            if (allTagIds.length > 0) {
+                for (const tagId of allTagIds) {
+                    await this.updateTagUsageCount(tagId, true, tx);
+                }
+            }
+
+            // Increment usage count for each assigned category
+            const allCategoryIds = [createDto.primaryCategoryId, ...(createDto.categoryIds || [])];
+            for (const categoryId of allCategoryIds) {
+                await this.updateCategoryUsageCount(categoryId, true, tx);
+            }
+
+            return newServer;
         });
 
         return server;
@@ -434,33 +502,143 @@ export class ServerService {
             throw new ForbiddenException('You do not have permission to edit this server');
         }
 
-        // Update basic fields
-        const updateData: any = {};
+        // Use transaction for atomic updates
+        const updated = await prisma.$transaction(async (tx) => {
+            // Handle Tags - Remove
+            if (updateDto.removeTags && updateDto.removeTags.length > 0) {
+                // Find tags by name or slug
+                const tagsToRemove = await tx.serverTag.findMany({
+                    where: {
+                        OR: [
+                            { name: { in: updateDto.removeTags } },
+                            { slug: { in: updateDto.removeTags.map(t => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')) } },
+                        ],
+                    },
+                });
 
-        if (updateDto.name !== undefined) updateData.name = updateDto.name;
-        if (updateDto.description !== undefined)
-            updateData.description = updateDto.description;
-        if (updateDto.shortDesc !== undefined)
-            updateData.shortDesc = updateDto.shortDesc;
-        if (updateDto.serverAddress !== undefined)
-            updateData.serverAddress = updateDto.serverAddress;
-        if (updateDto.gameVersion !== undefined)
-            updateData.gameVersion = updateDto.gameVersion;
-        if (updateDto.supportedVersions !== undefined)
-            updateData.supportedVersions = updateDto.supportedVersions;
-        if (updateDto.websiteUrl !== undefined)
-            updateData.websiteUrl = updateDto.websiteUrl;
-        if (updateDto.country !== undefined)
-            updateData.country = updateDto.country;
+                const tagIdsToRemove = tagsToRemove.map(t => t.id);
 
-        const updated = await prisma.server.update({
-            where: { id: serverId },
-            data: updateData,
-            include: {
-                ownerUser: true,
-                categories: { include: { category: true } },
-                tags: { include: { tag: true } },
-            },
+                if (tagIdsToRemove.length > 0) {
+                    // Delete relations
+                    await tx.serverTagRelation.deleteMany({
+                        where: {
+                            serverId: serverId,
+                            tagId: { in: tagIdsToRemove },
+                        },
+                    });
+
+                    // Decrement usage counters and delete if 0
+                    for (const tag of tagsToRemove) {
+                        await this.updateTagUsageCount(tag.id, false, tx);
+
+                        // Check if usage count is now 0
+                        const updatedTag = await tx.serverTag.findUnique({
+                            where: { id: tag.id },
+                            select: { usageCount: true },
+                        });
+
+                        // Delete tag if no longer used
+                        if (updatedTag && updatedTag.usageCount <= 0) {
+                            await tx.serverTag.delete({
+                                where: { id: tag.id },
+                            });
+                        }
+                    }
+                }
+            }
+
+            // Handle Tags - Add
+            if (updateDto.addTags && updateDto.addTags.length > 0) {
+                // Find or create tags
+                const tags = await this.findOrCreateServerTags(updateDto.addTags, tx);
+
+                // Check current tag count
+                const currentTagCount = await tx.serverTagRelation.count({
+                    where: { serverId: serverId },
+                });
+
+                let newTagsCount = 0;
+                for (const tag of tags) {
+                    const existing = await tx.serverTagRelation.findUnique({
+                        where: {
+                            serverId_tagId: {
+                                serverId: serverId,
+                                tagId: tag.id,
+                            },
+                        },
+                    });
+                    if (!existing) {
+                        newTagsCount++;
+                    }
+                }
+
+                // Enforce max 10 tags
+                if (currentTagCount + newTagsCount > 10) {
+                    throw new BadRequestException(
+                        `Cannot add tags: server would have ${currentTagCount + newTagsCount} tags (max 10 allowed)`
+                    );
+                }
+
+                // Create tag relations and update counters
+                for (const tag of tags) {
+                    const existing = await tx.serverTagRelation.findUnique({
+                        where: {
+                            serverId_tagId: {
+                                serverId: serverId,
+                                tagId: tag.id,
+                            },
+                        },
+                    });
+
+                    if (!existing) {
+                        // Create relation
+                        await tx.serverTagRelation.create({
+                            data: {
+                                serverId: serverId,
+                                tagId: tag.id,
+                            },
+                        });
+
+                        // Increment usage counter
+                        await this.updateTagUsageCount(tag.id, true, tx);
+                    }
+                }
+            }
+
+            // Update basic fields
+            const updateData: any = {};
+
+            if (updateDto.name !== undefined) updateData.name = updateDto.name;
+            if (updateDto.description !== undefined)
+                updateData.description = updateDto.description;
+            if (updateDto.shortDesc !== undefined)
+                updateData.shortDesc = updateDto.shortDesc;
+            if (updateDto.serverAddress !== undefined)
+                updateData.serverAddress = updateDto.serverAddress;
+            if (updateDto.gameVersionId !== undefined)
+                updateData.gameVersionId = updateDto.gameVersionId;
+            if (updateDto.websiteUrl !== undefined)
+                updateData.websiteUrl = updateDto.websiteUrl;
+            if (updateDto.country !== undefined)
+                updateData.country = updateDto.country;
+
+            // TODO: Handle supportedVersionIds via separate endpoint for managing version relations
+
+            return tx.server.update({
+                where: { id: serverId },
+                data: updateData,
+                include: {
+                    ownerUser: true,
+                    categories: { include: { category: true } },
+                    tags: { include: { tag: true } },
+                    gameVersion: true,
+                    supportedVersions: {
+                        include: {
+                            hytaleVersion: true,
+                        },
+                    },
+                },
+            });
         });
 
         return updated;
@@ -472,7 +650,7 @@ export class ServerService {
     async delete(userId: string, serverId: string) {
         const server = await prisma.server.findUnique({
             where: { id: serverId },
-            select: { ownerUserId: true, ownerTeamId: true, logo: true, banner: true, status: true },
+            select: { ownerUserId: true, ownerTeamId: true, logoUrl: true, bannerUrl: true, status: true },
         });
 
         if (!server) {
@@ -490,12 +668,12 @@ export class ServerService {
         }) > 0;
 
         // Delete files
-        if (server.logo) {
-            await this.storage.deleteFile(server.logo).catch(() => {
+        if (server.logoUrl) {
+            await this.storage.deleteFile(server.logoUrl).catch(() => {
             });
         }
-        if (server.banner) {
-            await this.storage.deleteFile(server.banner).catch(() => {
+        if (server.bannerUrl) {
+            await this.storage.deleteFile(server.bannerUrl).catch(() => {
             });
         }
 
@@ -550,7 +728,7 @@ export class ServerService {
 
         const server = await prisma.server.findUnique({
             where: { id: serverId },
-            select: { ownerUserId: true, ownerTeamId: true, logo: true },
+            select: { ownerUserId: true, ownerTeamId: true, logoUrl: true },
         });
 
         if (!server) {
@@ -569,12 +747,12 @@ export class ServerService {
 
         const updated = await prisma.server.update({
             where: { id: serverId },
-            data: { logo: logoUrl },
+            data: { logoUrl: logoUrl },
         });
 
         // Delete old logo
-        if (server.logo) {
-            await this.storage.deleteFile(server.logo).catch(() => {
+        if (server.logoUrl) {
+            await this.storage.deleteFile(server.logoUrl).catch(() => {
             });
         }
 
@@ -608,7 +786,7 @@ export class ServerService {
 
         const server = await prisma.server.findUnique({
             where: { id: serverId },
-            select: { ownerUserId: true, ownerTeamId: true, banner: true },
+            select: { ownerUserId: true, ownerTeamId: true, bannerUrl: true },
         });
 
         if (!server) {
@@ -627,12 +805,12 @@ export class ServerService {
 
         const updated = await prisma.server.update({
             where: { id: serverId },
-            data: { banner: bannerUrl },
+            data: { bannerUrl: bannerUrl },
         });
 
         // Delete old banner
-        if (server.banner) {
-            await this.storage.deleteFile(server.banner).catch(() => {
+        if (server.bannerUrl) {
+            await this.storage.deleteFile(server.bannerUrl).catch(() => {
             });
         }
 
@@ -645,7 +823,7 @@ export class ServerService {
     async deleteLogo(userId: string, serverId: string) {
         const server = await prisma.server.findUnique({
             where: { id: serverId },
-            select: { ownerUserId: true, ownerTeamId: true, logo: true },
+            select: { ownerUserId: true, ownerTeamId: true, logoUrl: true },
         });
 
         if (!server) {
@@ -657,13 +835,13 @@ export class ServerService {
             throw new ForbiddenException('You do not have permission to edit this server');
         }
 
-        if (server.logo) {
-            await this.storage.deleteFile(server.logo);
+        if (server.logoUrl) {
+            await this.storage.deleteFile(server.logoUrl);
         }
 
         return prisma.server.update({
             where: { id: serverId },
-            data: { logo: null },
+            data: { logoUrl: null },
         });
     }
 
@@ -673,7 +851,7 @@ export class ServerService {
     async deleteBanner(userId: string, serverId: string) {
         const server = await prisma.server.findUnique({
             where: { id: serverId },
-            select: { ownerUserId: true, ownerTeamId: true, banner: true },
+            select: { ownerUserId: true, ownerTeamId: true, bannerUrl: true },
         });
 
         if (!server) {
@@ -685,13 +863,13 @@ export class ServerService {
             throw new ForbiddenException('You do not have permission to edit this server');
         }
 
-        if (server.banner) {
-            await this.storage.deleteFile(server.banner);
+        if (server.bannerUrl) {
+            await this.storage.deleteFile(server.bannerUrl);
         }
 
         return prisma.server.update({
             where: { id: serverId },
-            data: { banner: null },
+            data: { bannerUrl: null },
         });
     }
 
@@ -795,19 +973,47 @@ export class ServerService {
      * Get user's servers
      */
     async getUserServers(userId: string, requestingUserId?: string) {
-        // Build where clause
+        // Get all teams the user belongs to
+        const userTeams = await prisma.teamMember.findMany({
+            where: { userId },
+            select: { teamId: true },
+        });
+        const teamIds = userTeams.map(tm => tm.teamId);
+
+        // Build where clause to include both personal and team servers
         const where: any = {
-            ownerUserId: userId,
+            OR: [
+                { ownerUserId: userId }, // Personal servers
+                ...(teamIds.length > 0 ? [{ ownerTeamId: { in: teamIds } }] : []), // Team servers (only if user has teams)
+            ],
         };
 
         // If viewing another user's servers, only show APPROVED servers
-        if (requestingUserId !== userId) {
-            where.status = ServerStatus.APPROVED;
+        if (requestingUserId && requestingUserId !== userId) {
+            where.AND = {
+                status: ServerStatus.APPROVED,
+            };
         }
 
         return prisma.server.findMany({
             where,
             include: {
+                ownerUser: {
+                    select: {
+                        id: true,
+                        username: true,
+                        displayName: true,
+                        image: true,
+                    },
+                },
+                ownerTeam: {
+                    select: {
+                        id: true,
+                        name: true,
+                        slug: true,
+                        logo: true,
+                    },
+                },
                 categories: {
                     where: { isPrimary: true },
                     include: { category: true },
@@ -1260,6 +1466,83 @@ export class ServerService {
             ),
         );
 
-        return this.getSocialLinks(serverId);
+    }
+
+    // ============================================
+    // TAG MANAGEMENT HELPERS
+    // ============================================
+
+    /**
+     * Find or create server tags by names
+     * Tags will be created automatically if they don't exist
+     */
+    private async findOrCreateServerTags(tagNames: string[], tx: any) {
+        const tags = [];
+
+        for (const name of tagNames) {
+            const trimmedName = name.trim();
+            const slug = trimmedName
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-+|-+$/g, '');
+
+            // Capitalize first letter of each word for consistent display
+            const normalizedName = trimmedName
+                .split(' ')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                .join(' ');
+
+            const tag = await tx.serverTag.upsert({
+                where: { slug },
+                create: {
+                    name: normalizedName,
+                    slug,
+                    usageCount: 0, // Will be incremented separately
+                },
+                update: {}, // Don't update if exists
+            });
+
+            tags.push(tag);
+        }
+
+        return tags;
+    }
+
+    /**
+     * Update tag usage counter
+     */
+    private async updateTagUsageCount(
+        tagId: string,
+        increment: boolean,
+        tx: any
+    ) {
+        await tx.serverTag.update({
+            where: { id: tagId },
+            data: {
+                usageCount: {
+                    [increment ? 'increment' : 'decrement']: 1
+                }
+            },
+        });
+    }
+
+    /**
+     * Update category usage counter
+     */
+    private async updateCategoryUsageCount(
+        categoryId: string,
+        increment: boolean,
+        tx: any
+    ) {
+        await tx.serverCategory.update({
+            where: { id: categoryId },
+            data: {
+                usageCount: {
+                    [increment ? 'increment' : 'decrement']: 1
+                }
+            },
+        });
     }
 }
