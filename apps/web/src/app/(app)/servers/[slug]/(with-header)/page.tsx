@@ -8,130 +8,30 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion";
-import ServerStatCard from '@/components/servers/ServerStatCard';
-import ServerChart from '@/components/servers/ServerChart';
-import VoterLeaderboard from '@/components/servers/VoterLeaderboard';
 
 export default function ServerDetailPage() {
     const { server } = useServer();
 
     if (!server) return null;
 
-    // Get current month name
-    const currentMonth = new Date().toLocaleDateString('en-US', { month: 'long' });
-
-    // Mock data for votes (will be replaced with real data later)
-    const mockMonthlyVotes = Math.floor(server.voteCount * 0.3); // 30% of total votes this month
-    const mockTotalVotes = server.voteCount;
-
-    // Mock voter leaderboard data
-    const mockTopVoters = [
-        { username: 'player1', displayName: 'SuperGamer', avatar: undefined, votes: 45, rank: 1 },
-        { username: 'player2', displayName: 'MinecraftPro', avatar: undefined, votes: 38, rank: 2 },
-        { username: 'player3', displayName: 'BuildMaster', avatar: undefined, votes: 32, rank: 3 },
-        { username: 'player4', displayName: 'Redstone_Wizard', avatar: undefined, votes: 28, rank: 4 },
-        { username: 'player5', displayName: 'PvPKing', avatar: undefined, votes: 24, rank: 5 },
-    ];
-
-    // Mock player history data (generate last 90 days)
-    const generateMockPlayerHistory = () => {
-        const data = [];
-        const now = new Date();
-        for (let i = 89; i >= 0; i--) {
-            const date = new Date(now);
-            date.setDate(date.getDate() - i);
-            const baseValue = server.currentPlayers || 50;
-            const variance = Math.random() * 30 - 15;
-            data.push({
-                timestamp: date.toISOString(),
-                value: Math.max(0, Math.round(baseValue + variance)),
-                label: i % 7 === 0 ? date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''
-            });
-        }
-        return data;
-    };
-
-    // Mock vote history data
-    const generateMockVoteHistory = () => {
-        const data = [];
-        const now = new Date();
-        let cumulativeVotes = 0;
-        for (let i = 89; i >= 0; i--) {
-            const date = new Date(now);
-            date.setDate(date.getDate() - i);
-            const dailyVotes = Math.floor(Math.random() * 20) + 5;
-            cumulativeVotes += dailyVotes;
-            data.push({
-                timestamp: date.toISOString(),
-                value: dailyVotes,
-                label: i % 7 === 0 ? date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''
-            });
-        }
-        return data;
-    };
-
-    const playerHistoryData = generateMockPlayerHistory();
-    const voteHistoryData = generateMockVoteHistory();
-
     return (
         <div className="space-y-6">
-            {/* Statistics Dashboard */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <ServerStatCard
-                    icon="mdi:vote"
-                    label="Total Votes"
-                    value={mockTotalVotes.toLocaleString()}
-                    description="All-time votes received from the community"
-                    iconColor="#109EB1"
-                />
-                <ServerStatCard
-                    icon="mdi:calendar-month"
-                    label={`Votes (${currentMonth})`}
-                    value={mockMonthlyVotes.toLocaleString()}
-                    description={`Votes received in ${currentMonth}`}
-                    iconColor="#69a024"
-                    trend={{ value: 12, isPositive: true }}
-                />
-                <ServerStatCard
-                    icon="mdi:account-multiple"
-                    label="Players Online"
-                    value={server.onlineStatus ? `${server.currentPlayers}/${server.maxPlayers}` : 'Offline'}
-                    description="Current players connected to the server"
-                    iconColor="#109EB1"
-                />
-                <ServerStatCard
-                    icon="mdi:check-circle"
-                    label="Uptime"
-                    value={server.onlineStatus ? '99.2%' : '0.0%'}
-                    description="Server availability over the last 30 days"
-                    iconColor={server.onlineStatus ? '#69a024' : '#ef4444'}
-                />
-            </div>
-
-            {/* Charts Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <ServerChart
-                    title="Player Activity"
-                    icon="mdi:chart-line"
-                    data={playerHistoryData}
-                    color="#109EB1"
-                    gradientColor="#109EB1"
-                    valueFormatter={(value) => `${value} players`}
-                />
-                <ServerChart
-                    title="Vote History"
-                    icon="mdi:chart-bar"
-                    data={voteHistoryData}
-                    color="#69a024"
-                    gradientColor="#69a024"
-                    valueFormatter={(value) => `${value} votes`}
-                />
-            </div>
-
             {/* Main Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Left Column - Primary Content */}
                 <div className="lg:col-span-2 space-y-6">
+                    {/* Server Description */}
+                    <div className="bg-[#06363D]/50 border border-[#084B54] rounded-[20px] p-6">
+                        <h3 className="font-hebden text-xl font-bold text-[#C7F4FA] mb-4 flex items-center gap-2">
+                            <Icon icon="mdi:information-outline" width="24" height="24" className="text-[#109EB1]" />
+                            About {server.name}
+                        </h3>
+                        <div
+                            className="tiptap font-nunito text-base leading-relaxed"
+                            dangerouslySetInnerHTML={{ __html: server.description || 'No description available.' }}
+                        />
+                    </div>
+
                     {/* Categories & Tags */}
                     {((server.categories && server.categories.length > 0) || (server.tags && server.tags.length > 0)) && (
                         <div className="bg-[#06363D]/50 border border-[#084B54] rounded-[20px] p-6">
@@ -204,17 +104,6 @@ export default function ServerDetailPage() {
                             </div>
                         </div>
                     )}
-
-                    {/* Server Description */}
-                    <div className="bg-[#06363D]/50 border border-[#084B54] rounded-[20px] p-6">
-                        <h3 className="font-hebden text-xl font-bold text-[#C7F4FA] mb-4 flex items-center gap-2">
-                            <Icon icon="mdi:information-outline" width="24" height="24" className="text-[#109EB1]" />
-                            About {server.name}
-                        </h3>
-                        <p className="text-[#C7F4FA]/80 font-nunito whitespace-pre-wrap leading-relaxed">
-                            {server.description || 'No description available.'}
-                        </p>
-                    </div>
 
                     {/* FAQ Accordion */}
                     <div className="bg-[#06363D]/50 border border-[#084B54] rounded-[20px] p-6">
@@ -293,12 +182,6 @@ export default function ServerDetailPage() {
 
                 {/* Right Column - Sidebar */}
                 <div className="space-y-6">
-                    {/* Top Voters Leaderboard */}
-                    <VoterLeaderboard
-                        voters={mockTopVoters}
-                        currentMonth={currentMonth}
-                    />
-
                     {/* Server Information Table */}
                     <div className="bg-[#06363D]/50 border border-[#084B54] rounded-[20px] p-6">
                         <h3 className="font-hebden text-xl font-bold text-[#C7F4FA] mb-4 flex items-center gap-2">

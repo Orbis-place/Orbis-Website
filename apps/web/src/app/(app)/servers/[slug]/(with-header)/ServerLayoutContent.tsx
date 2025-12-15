@@ -222,9 +222,9 @@ export default function ServerLayoutContent({ children }: { children: ReactNode 
                         <h1 className="font-hebden font-extrabold text-3xl sm:text-4xl leading-tight text-[#C7F4FA] mb-2">
                             {server.name}
                         </h1>
-                        {server.description && (
+                        {server.shortDesc && (
                             <p className="font-nunito text-base text-[#C7F4FA]/80 leading-relaxed max-w-3xl">
-                                {server.description}
+                                {server.shortDesc}
                             </p>
                         )}
                     </div>

@@ -152,6 +152,7 @@ export default function ServersPage() {
             name: server.name,
             owner,
             ownerDisplay,
+            slug: server.slug,
             shortDesc: server.shortDesc,
             isOwnedByTeam,
             logoUrl: server.logoUrl,
@@ -385,7 +386,7 @@ export default function ServersPage() {
                             {items.map((item) => (
                                 <Link
                                     key={item.id}
-                                    href={`/servers/${item.name.toLowerCase().replace(/ /g, '-')}`}
+                                    href={`/servers/${item.slug.toLowerCase().replace(/ /g, '-')}`}
                                     className="cursor-pointer"
                                 >
                                     <ServerCard item={item} viewMode="row" />

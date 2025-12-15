@@ -44,17 +44,6 @@ export class ServerController {
         return this.serverService.findAll(filterDto);
     }
 
-    @Get(':slug')
-    @AllowAnonymous()
-    @ApiOperation({ summary: 'Get server by slug' })
-    @ApiParam({ name: 'slug', description: 'Server slug' })
-    async findBySlug(
-        @Param('slug') slug: string,
-        @Session({ required: false }) session?: UserSession,
-    ) {
-        return this.serverService.findBySlug(slug, session?.user?.id);
-    }
-
     // ============================================
     // AUTHENTICATED ENDPOINTS
     // ============================================
@@ -79,6 +68,19 @@ export class ServerController {
     ) {
         return this.serverService.create(session.user.id, createDto);
     }
+
+    @Get(':slug')
+    @AllowAnonymous()
+    @ApiOperation({ summary: 'Get server by slug' })
+    @ApiParam({ name: 'slug', description: 'Server slug' })
+    async findBySlug(
+        @Param('slug') slug: string,
+        @Session({ required: false }) session?: UserSession,
+    ) {
+
+        return this.serverService.findBySlug(slug, session?.user?.id);
+    }
+
 
     @Patch(':id')
     @ApiBearerAuth()
