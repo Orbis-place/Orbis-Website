@@ -133,15 +133,22 @@ export default function MarketplaceCard({ item, viewMode }: MarketplaceCardProps
         return (
             <div className="bg-[#06363D] border border-[#084B54] rounded-[25px] overflow-hidden">
                 {/* Image */}
-                <div className="w-full aspect-video relative">
-                    <EntityAvatar
-                        src={item.image}
-                        name={item.title}
-                        variant="resource"
-                        className="h-full w-full rounded-none"
-                        fallbackClassName="text-6xl rounded-none"
-                    />
-                    <div className="relative z-10 p-3 flex justify-between">
+                <div className="w-full aspect-video relative overflow-hidden bg-gradient-to-br from-[#06363D] via-[#084B54] to-[#109EB1]">
+                    {item.image ? (
+                        <Image
+                            src={item.image}
+                            alt={item.title}
+                            fill
+                            className="object-cover"
+                        />
+                    ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                            <span className="font-hebden text-6xl text-[#C7F4FA]">
+                                {item.title.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                            </span>
+                        </div>
+                    )}
+                    <div className="absolute inset-0 p-3 flex justify-between">
                         <div className="px-2 py-1 bg-[#109EB1] rounded-[36px]">
                             <span className="font-hebden font-semibold text-xs leading-[14px] text-[#C7F4FA]">
                                 {itemType}

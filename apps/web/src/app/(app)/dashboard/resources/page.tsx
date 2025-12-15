@@ -37,7 +37,7 @@ interface Resource {
   slug: string;
   tagline: string;
   description?: string;
-  type: 'PLUGIN' | 'MOD' | 'WORLD' | 'DATA_PACK' | 'ASSET_PACK' | 'PREFAB' | 'MODPACK';
+  type: 'PLUGIN' | 'MOD' | 'WORLD' | 'DATA_PACK' | 'ASSET_PACK' | 'PREFAB' | 'MODPACK' | 'TOOLS_SCRIPTS';
   status: 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'SUSPENDED' | 'ARCHIVED';
   iconUrl?: string;
   bannerUrl?: string;
@@ -112,6 +112,7 @@ export default function ResourcesPage() {
       case 'ASSET_PACK': return 'mdi:image-multiple';
       case 'PREFAB': return 'mdi:cube-outline';
       case 'MODPACK': return 'mdi:apps-box';
+      case 'TOOLS_SCRIPTS': return 'mdi:tools';
       default: return 'mdi:package-variant';
     }
   };

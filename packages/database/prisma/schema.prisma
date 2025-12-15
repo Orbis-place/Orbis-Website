@@ -769,6 +769,7 @@ enum ResourceType {
   WORLD
   PREFAB
   DATA_PACK
+  TOOLS_SCRIPTS
 }
 
 enum ResourceStatus {

@@ -722,6 +722,53 @@ async function main() {
       color: '#FFE66D',
       order: 27,
       resourceTypes: [ResourceType.MODPACK],
+    },
+
+    // Tools & Scripts Categories
+    {
+      name: 'Development Tools',
+      slug: 'development-tools',
+      description: 'IDEs, editors, debuggers, and development utilities',
+      icon: 'mdi:code-braces',
+      color: '#636E72',
+      order: 28,
+      resourceTypes: [ResourceType.TOOLS_SCRIPTS],
+    },
+    {
+      name: 'Build & Deployment',
+      slug: 'build-deployment',
+      description: 'Compilers, bundlers, build tools, and deployment utilities',
+      icon: 'mdi:package-variant-closed',
+      color: '#00B894',
+      order: 29,
+      resourceTypes: [ResourceType.TOOLS_SCRIPTS],
+    },
+    {
+      name: 'Testing & Quality',
+      slug: 'testing-quality',
+      description: 'Unit testing, integration testing, and code quality tools',
+      icon: 'mdi:test-tube',
+      color: '#74B9FF',
+      order: 30,
+      resourceTypes: [ResourceType.TOOLS_SCRIPTS],
+    },
+    {
+      name: 'Automation & Scripts',
+      slug: 'automation-scripts',
+      description: 'CI/CD, task automation, and workflow scripts',
+      icon: 'mdi:robot',
+      color: '#A29BFE',
+      order: 31,
+      resourceTypes: [ResourceType.TOOLS_SCRIPTS],
+    },
+    {
+      name: 'Utilities & Converters',
+      slug: 'utilities-converters',
+      description: 'File management, conversion tools, and general utilities',
+      icon: 'mdi:toolbox',
+      color: '#FD79A8',
+      order: 32,
+      resourceTypes: [ResourceType.TOOLS_SCRIPTS],
     }
   ];
 

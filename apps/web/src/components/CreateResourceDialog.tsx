@@ -51,6 +51,7 @@ export function CreateResourceDialog({ open, onOpenChange, trigger, onSuccess, d
             [ResourceType.DATA_PACK]: 'data-packs',
             [ResourceType.MODPACK]: 'modpacks',
             [ResourceType.PREMADE_SERVER]: 'premade-servers',
+            [ResourceType.TOOLS_SCRIPTS]: 'tools-scripts',
         };
         return `orbis.place/${pathMap[type]}/`;
     };
@@ -257,6 +258,7 @@ export function CreateResourceDialog({ open, onOpenChange, trigger, onSuccess, d
                             <SelectItem value={ResourceType.ASSET_PACK}>Asset Pack</SelectItem>
                             <SelectItem value={ResourceType.PREFAB}>Prefab</SelectItem>
                             <SelectItem value={ResourceType.MODPACK}>Modpack</SelectItem>
+                            <SelectItem value={ResourceType.TOOLS_SCRIPTS}>Tool / Script</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>

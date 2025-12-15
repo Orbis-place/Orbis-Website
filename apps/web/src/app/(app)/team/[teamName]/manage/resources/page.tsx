@@ -15,7 +15,7 @@ interface Resource {
     id: string;
     name: string;
     slug: string;
-    type: 'PLUGIN' | 'MOD' | 'WORLD' | 'DATA_PACK' | 'ASSET_PACK' | 'PREFAB' | 'MODPACK';
+    type: 'PLUGIN' | 'MOD' | 'WORLD' | 'DATA_PACK' | 'ASSET_PACK' | 'PREFAB' | 'MODPACK' | 'TOOLS_SCRIPTS';
     status: 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'SUSPENDED' | 'ARCHIVED';
     tagline?: string;
     iconUrl?: string;
@@ -125,6 +125,7 @@ export default function TeamResourcesPage() {
             case 'ASSET_PACK': return 'mdi:image-multiple';
             case 'PREFAB': return 'mdi:cube-outline';
             case 'MODPACK': return 'mdi:apps-box';
+            case 'TOOLS_SCRIPTS': return 'mdi:tools';
             default: return 'mdi:package-variant';
         }
     };

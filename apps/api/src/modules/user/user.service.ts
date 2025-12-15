@@ -71,13 +71,28 @@ export class UserService {
     }
 
     async updateProfile(userId: string, updateDto: UpdateProfileDto) {
+        const safeData: any = {};
+
+        if (updateDto.username !== undefined) safeData.username = updateDto.username;
+        if (updateDto.displayName !== undefined) safeData.displayName = updateDto.displayName;
+        if (updateDto.banner !== undefined) safeData.banner = updateDto.banner;
+        if (updateDto.bio !== undefined) safeData.bio = updateDto.bio;
+        if (updateDto.location !== undefined) safeData.location = updateDto.location;
+        if (updateDto.website !== undefined) safeData.website = updateDto.website;
+        if (updateDto.emailNotifications !== undefined) safeData.emailNotifications = updateDto.emailNotifications;
+        if (updateDto.marketingEmails !== undefined) safeData.marketingEmails = updateDto.marketingEmails;
+        if (updateDto.showEmail !== undefined) safeData.showEmail = updateDto.showEmail;
+        if (updateDto.showLocation !== undefined) safeData.showLocation = updateDto.showLocation;
+        if (updateDto.showOnlineStatus !== undefined) safeData.showOnlineStatus = updateDto.showOnlineStatus;
+        if (updateDto.theme !== undefined) safeData.theme = updateDto.theme;
+        if (updateDto.language !== undefined) safeData.language = updateDto.language;
+
         try {
             return await prisma.user.update({
                 where: { id: userId },
-                data: updateDto,
+                data: safeData,
             });
         } catch (error: any) {
-            // Handle Prisma unique constraint violation (P2002)
             if (error.code === 'P2002') {
                 const field = error.meta?.target?.[0];
                 if (field === 'username') {

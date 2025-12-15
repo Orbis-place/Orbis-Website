@@ -17,6 +17,7 @@ export enum ResourceType {
     WORLD = 'WORLD',
     PREFAB = 'PREFAB',
     DATA_PACK = 'DATA_PACK',
+    TOOLS_SCRIPTS = 'TOOLS_SCRIPTS',
 }
 
 

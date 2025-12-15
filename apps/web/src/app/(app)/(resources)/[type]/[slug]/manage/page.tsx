@@ -475,6 +475,7 @@ export default function ManageGeneralPage() {
                                     <SelectItem value="ASSET_PACK">Asset Pack</SelectItem>
                                     <SelectItem value="PREFAB">Prefab</SelectItem>
                                     <SelectItem value="MODPACK">Modpack</SelectItem>
+                                    <SelectItem value="TOOLS_SCRIPTS">Tool / Script</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
