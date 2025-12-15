@@ -2,6 +2,7 @@
 
 import { useServer } from '@/contexts/ServerContext';
 import { Icon } from '@iconify/react';
+import { TiptapViewer } from '@/components/TiptapViewer';
 import {
     Accordion,
     AccordionContent,
@@ -26,11 +27,9 @@ export default function ServerDetailPage() {
                             <Icon icon="mdi:information-outline" width="24" height="24" className="text-[#109EB1]" />
                             About {server.name}
                         </h3>
-                        <div
-                            className="tiptap font-nunito text-base leading-relaxed"
-                            dangerouslySetInnerHTML={{ __html: server.description || 'No description available.' }}
-                        />
+                        <TiptapViewer content={server.description || 'No description available.'} />
                     </div>
+
 
                     {/* Categories & Tags */}
                     {((server.categories && server.categories.length > 0) || (server.tags && server.tags.length > 0)) && (
@@ -311,6 +310,6 @@ export default function ServerDetailPage() {
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
