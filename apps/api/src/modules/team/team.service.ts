@@ -826,11 +826,8 @@ export class TeamService {
         memberId: string,
         updateDto: UpdateTeamMemberDto,
     ) {
-        const canManageMembers = await this.checkManageMembersPermission(userId, teamId);
-        if (!canManageMembers) {
-            throw new ForbiddenException('You do not have permission to update members');
-        }
-
+        // SECURITY FIX: Verify member belongs to THIS team BEFORE checking permissions
+        // This prevents IDOR attacks where an attacker could modify members of any team
         const member = await prisma.teamMember.findUnique({
             where: { id: memberId },
             include: { team: true },
@@ -838,6 +835,12 @@ export class TeamService {
 
         if (!member || member.teamId !== teamId) {
             throw new NotFoundException('Team member not found');
+        }
+
+        // Now check permissions for THIS specific team
+        const canManageMembers = await this.checkManageMembersPermission(userId, teamId);
+        if (!canManageMembers) {
+            throw new ForbiddenException('You do not have permission to update members');
         }
 
         // Only owner can change owner role
@@ -874,17 +877,20 @@ export class TeamService {
      * Remove team member
      */
     async removeMember(userId: string, teamId: string, memberId: string) {
-        const canManageMembers = await this.checkManageMembersPermission(userId, teamId);
-        if (!canManageMembers) {
-            throw new ForbiddenException('You do not have permission to remove members');
-        }
-
+        // SECURITY FIX: Verify member belongs to THIS team BEFORE checking permissions
+        // This prevents IDOR attacks where an attacker could remove members from any team
         const member = await prisma.teamMember.findUnique({
             where: { id: memberId },
         });
 
         if (!member || member.teamId !== teamId) {
             throw new NotFoundException('Team member not found');
+        }
+
+        // Now check permissions for THIS specific team
+        const canManageMembers = await this.checkManageMembersPermission(userId, teamId);
+        if (!canManageMembers) {
+            throw new ForbiddenException('You do not have permission to remove members');
         }
 
         // Cannot remove the owner
