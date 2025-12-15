@@ -826,8 +826,7 @@ export class TeamService {
         memberId: string,
         updateDto: UpdateTeamMemberDto,
     ) {
-        // SECURITY FIX: Verify member belongs to THIS team BEFORE checking permissions
-        // This prevents IDOR attacks where an attacker could modify members of any team
+
         const member = await prisma.teamMember.findUnique({
             where: { id: memberId },
             include: { team: true },
@@ -837,13 +836,11 @@ export class TeamService {
             throw new NotFoundException('Team member not found');
         }
 
-        // Now check permissions for THIS specific team
         const canManageMembers = await this.checkManageMembersPermission(userId, teamId);
         if (!canManageMembers) {
             throw new ForbiddenException('You do not have permission to update members');
         }
 
-        // Only owner can change owner role
         if (updateDto.role === TeamMemberRole.OWNER || member.role === TeamMemberRole.OWNER) {
             const team = await prisma.team.findUnique({
                 where: { id: teamId },

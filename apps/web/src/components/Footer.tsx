@@ -172,7 +172,7 @@ export default function Footer() {
                         <Link href="/sitemap" className="text-[#C7F4FA]/70 hover:text-[#109EB1] transition-colors">
                             Sitemap
                         </Link>
-                        <Link href="/status" className="text-[#C7F4FA]/70 hover:text-[#109EB1] transition-colors">
+                        <Link href="https://status.orbis.place/" className="text-[#C7F4FA]/70 hover:text-[#109EB1] transition-colors">
                             Status
                         </Link>
                         <Link href="/support" className="text-[#C7F4FA]/70 hover:text-[#109EB1] transition-colors">
