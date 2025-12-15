@@ -21,6 +21,7 @@ export interface MarketplaceItem {
     updatedAt?: string; // "Updated X weeks ago"
     tags: string[];
     categories: string[];
+    remainingCount?: number; // Number of remaining tags/categories not shown
     type?: string; // 'Mod', 'Plugin', 'World', etc.
 }
 
@@ -91,9 +92,9 @@ export default function MarketplaceCard({ item, viewMode }: MarketplaceCardProps
                             {tag}
                         </span>
                     ))}
-                    {item.tags.length > 3 && (
+                    {(item.remainingCount !== undefined && item.remainingCount > 0) && (
                         <span className="px-2.5 py-1 font-nunito text-xs leading-4 text-[#109EB1]">
-                            +{item.tags.length - 3}
+                            +{item.remainingCount}
                         </span>
                     )}
                 </div>
@@ -245,9 +246,9 @@ export default function MarketplaceCard({ item, viewMode }: MarketplaceCardProps
                                 {tag}
                             </span>
                         ))}
-                        {item.tags.length > 3 && (
+                        {(item.remainingCount !== undefined && item.remainingCount > 0) && (
                             <span className="px-1.5 py-0.5 font-nunito text-[11px] leading-4 text-[#109EB1]">
-                                +{item.tags.length - 3}
+                                +{item.remainingCount}
                             </span>
                         )}
                     </div>

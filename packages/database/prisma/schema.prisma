@@ -173,6 +173,9 @@ model User {
   resourceDescriptionImages ResourceDescriptionImage[]      @relation("ResourceDescriptionImages")
   versionChangelogImages    ResourceVersionChangelogImage[] @relation("VersionChangelogImages")
 
+  // Server - Description Images
+  serverDescriptionImages ServerDescriptionImage[] @relation("ServerDescriptionImages")
+
   // Social Links
   socialLinks UserSocialLink[] @relation("UserSocialLinks")
 
@@ -416,10 +419,11 @@ model Server {
   ownerTeam   Team?   @relation(fields: [ownerTeamId], references: [id], onDelete: SetNull)
 
   // Relations
-  tags          ServerTagRelation[]
-  categories    ServerCategoryRelation[]
-  statusHistory ServerStatusHistory[]
-  socialLinks   ServerSocialLink[]   @relation("ServerSocialLinks")
+  tags              ServerTagRelation[]
+  categories        ServerCategoryRelation[]
+  statusHistory     ServerStatusHistory[]
+  socialLinks       ServerSocialLink[]           @relation("ServerSocialLinks")
+  descriptionImages ServerDescriptionImage[] // Inline images in description
 
   @@index([slug])
   @@index([status])
@@ -554,6 +558,32 @@ model ServerSocialLink {
   @@unique([serverId, type])
   @@index([serverId])
   @@map("server_social_links")
+}
+
+// Inline images in server description
+model ServerDescriptionImage {
+  id         String      @id @default(cuid())
+  serverId   String? // NULL if temporary/draft
+  url        String
+  storageKey String // R2 key (temp/ or servers/)
+  size       Int // Bytes
+  hash       String // SHA256 hash for duplicate detection
+  alt        String?
+  status     ImageStatus @default(TEMPORARY)
+  uploadedBy String
+  uploadedAt DateTime    @default(now())
+  expiresAt  DateTime? // For TEMPORARY images (24h)
+  movedAt    DateTime? // When moved to PERMANENT
+
+  server   Server? @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  uploader User    @relation("ServerDescriptionImages", fields: [uploadedBy], references: [id], onDelete: Cascade)
+
+  @@index([serverId])
+  @@index([status, expiresAt]) // For cleanup cron
+  @@index([uploadedBy])
+  @@index([status])
+  @@index([uploadedBy, hash]) // For duplicate detection
+  @@map("server_description_images")
 }
 
 

@@ -45,6 +45,11 @@ export default function MarketplacePage({ params }: { params: Promise<{ type: st
     // Debounce search query
     const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
+    // Reset to page 1 when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [selectedTags, selectedCategories, selectedVersions, debouncedSearchQuery, sortBy]);
+
     // Validate resource type
     if (!isValidResourceType(type)) {
         notFound();
@@ -75,6 +80,9 @@ export default function MarketplacePage({ params }: { params: Promise<{ type: st
                     sortBy,
                     page: currentPage,
                     limit: 12,
+                    tags: selectedTags.length > 0 ? selectedTags : undefined,
+                    categories: selectedCategories.length > 0 ? selectedCategories : undefined,
+                    versions: selectedVersions.length > 0 ? selectedVersions : undefined,
                 });
 
                 setResources(response.data);
@@ -90,20 +98,39 @@ export default function MarketplacePage({ params }: { params: Promise<{ type: st
         };
 
         loadResources();
-    }, [backendType, debouncedSearchQuery, sortBy, currentPage]);
+    }, [backendType, debouncedSearchQuery, sortBy, currentPage, selectedTags, selectedCategories, selectedVersions]);
 
     // Map backend resource to MarketplaceItem
     const mapToMarketplaceItem = (resource: Resource): MarketplaceItem => {
         const author = resource.ownerTeam?.name || resource.ownerUser?.username || 'Unknown';
         const authorDisplay = resource.ownerTeam?.displayName || resource.ownerUser?.displayName || author;
 
-        // Get tags (no limit, we'll show all)
+        // Get categories first (priority)
+        const categoryNames = resource.categories
+            ?.map(c => c.category.name) || [];
+
+        // Get tags
         const tagNames = resource.tags
             ?.map(t => t.tag.name) || [];
 
-        // Get categories
-        const categoryNames = resource.categories
-            ?.map(c => c.category.name) || [];
+        // Limit to 3 items total, prioritize categories
+        let displayTags: string[] = [];
+        let displayCategories: string[] = [];
+        let remainingCount = 0;
+
+        if (categoryNames.length >= 3) {
+            // If we have 3+ categories, show only categories (max 3)
+            displayCategories = categoryNames.slice(0, 3);
+            // Calculate remaining: extra categories + all tags
+            remainingCount = (categoryNames.length - 3) + tagNames.length;
+        } else {
+            // Show all categories and fill remaining slots with tags
+            displayCategories = categoryNames;
+            const remainingSlots = 3 - categoryNames.length;
+            displayTags = tagNames.slice(0, remainingSlots);
+            // Calculate remaining tags
+            remainingCount = Math.max(0, tagNames.length - remainingSlots);
+        }
 
         return {
             id: resource.id,
@@ -118,8 +145,9 @@ export default function MarketplacePage({ params }: { params: Promise<{ type: st
             downloads: formatNumber(resource.downloadCount),
             date: formatDate(resource.publishedAt || resource.createdAt),
             updatedAt: formatRelativeTime(resource.updatedAt || resource.createdAt),
-            tags: tagNames,
-            categories: categoryNames,
+            tags: displayTags,
+            categories: displayCategories,
+            remainingCount: remainingCount > 0 ? remainingCount : undefined,
             type: typeConfig.labelSingular,
         };
     };

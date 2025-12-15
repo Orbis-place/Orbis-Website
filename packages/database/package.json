@@ -15,6 +15,7 @@
     "db:migrate": "prisma migrate dev --name auto",
     "db:deploy": "prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts",
+    "resync-usage": "tsx scripts/resync-usage-counts.ts",
     "build": "prisma generate && tsup ./index.ts --format cjs,esm",
 "dev": "tsup ./index.ts --format cjs,esm --watch"
   },

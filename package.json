@@ -11,7 +11,8 @@
     "test": "turbo run test",
     "test:e2e": "turbo run test:e2e",
     "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "resync-usage": "pnpm --filter @repo/db resync-usage"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",

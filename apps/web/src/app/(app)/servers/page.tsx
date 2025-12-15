@@ -134,14 +134,16 @@ export default function ServersPage() {
     // Map backend server to ServerItem
     const mapToServerItem = (server: Server, index: number): ServerItem => {
         // If server has a team, use team info; otherwise use owner info
-        const owner = server.ownerTeam?.name || server.ownerUser.username;
-        const ownerDisplay = server.ownerTeam?.displayName || server.ownerUser.displayName;
+        const owner = server.ownerTeam?.name || server.ownerUser?.username;
+        const ownerDisplay = server.ownerTeam?.displayName || server.ownerUser?.displayName;
         const isOwnedByTeam = !!server.ownerTeam;
 
         // Get tags
         const tagNames = server.tags?.map(t => t.tag.name) || [];
 
-        // Get categories
+        // Get categories - separate primary from secondary
+        const primaryCat = server.categories?.find(c => c.isPrimary);
+        const primaryCategory = primaryCat?.category.name;
         const categoryNames = server.categories?.map(c => c.category.name) || [];
 
         return {
@@ -150,16 +152,18 @@ export default function ServersPage() {
             name: server.name,
             owner,
             ownerDisplay,
+            shortDesc: server.shortDesc,
             isOwnedByTeam,
             logoUrl: server.logoUrl,
             bannerUrl: server.bannerUrl,
-            serverIp: server.serverIp,
+            serverIp: server.serverAddress,
             onlineStatus: server.onlineStatus,
             currentPlayers: server.currentPlayers,
             maxPlayers: server.maxPlayers,
             voteCount: server.voteCount,
             tags: tagNames,
             categories: categoryNames,
+            primaryCategory,
             verified: server.verified,
             featured: server.featured,
             description: server.description,

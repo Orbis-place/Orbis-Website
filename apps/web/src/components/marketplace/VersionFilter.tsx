@@ -59,7 +59,7 @@ export function VersionFilter({ selectedVersions, onVersionsChange }: VersionFil
                             : 'bg-transparent text-[#C7F4FA] hover:bg-[#032125]/50'
                             }`}
                     >
-                        <span className="font-abeezee text-[15.16px] leading-[18px]">Hytale {version}</span>
+                        <span className="font-abeezee text-[15.16px] leading-[18px]">{version}</span>
                     </button>
                 ))
             )}

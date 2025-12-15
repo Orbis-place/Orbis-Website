@@ -400,12 +400,26 @@ export class ResourceService {
 
             // Handle Categories - Remove
             if (updateDto.removeCategories && updateDto.removeCategories.length > 0) {
+                // Get the categories to remove for usage count updates
+                const categoriesToRemove = await tx.resourceToCategory.findMany({
+                    where: {
+                        resourceId: resourceId,
+                        categoryId: { in: updateDto.removeCategories },
+                    },
+                });
+
+                // Delete relations
                 await tx.resourceToCategory.deleteMany({
                     where: {
                         resourceId: resourceId,
                         categoryId: { in: updateDto.removeCategories },
                     },
                 });
+
+                // Decrement usage counters
+                for (const rel of categoriesToRemove) {
+                    await this.updateCategoryUsageCount(rel.categoryId, updated.type, false, tx);
+                }
             }
 
             // Handle Categories - Add
@@ -447,21 +461,32 @@ export class ResourceService {
                     );
                 }
 
-                // Create category relations
+                // Create category relations and update counters
                 for (const categoryId of updateDto.addCategories) {
-                    await tx.resourceToCategory.upsert({
+                    // Check if relation already exists
+                    const existingRelation = await tx.resourceToCategory.findUnique({
                         where: {
                             resourceId_categoryId: {
                                 resourceId: resourceId,
                                 categoryId: categoryId,
                             },
                         },
-                        create: {
-                            resourceId: resourceId,
-                            categoryId: categoryId,
-                        },
-                        update: {},
                     });
+
+                    const isNewRelation = !existingRelation;
+
+                    // Create relation if it doesn't exist
+                    if (isNewRelation) {
+                        await tx.resourceToCategory.create({
+                            data: {
+                                resourceId: resourceId,
+                                categoryId: categoryId,
+                            },
+                        });
+
+                        // Increment usage counter for new relations
+                        await this.updateCategoryUsageCount(categoryId, updated.type, true, tx);
+                    }
                 }
             }
 
@@ -664,7 +689,7 @@ export class ResourceService {
 
         const iconUrl = await this.storage.uploadFile(
             file,
-            `resources / ${resourceId}/icon`,
+            `resources/${resourceId}/icon`,
         );
 
         const updated = await prisma.resource.update({
@@ -1057,10 +1082,65 @@ export class ResourceService {
     }
 
     /**
+     * Update category usage counters (global and per-type)
+     */
+    private async updateCategoryUsageCount(
+        categoryId: string,
+        resourceType: ResourceType,
+        increment: boolean,
+        tx: any
+    ) {
+        // Update global count
+        await tx.resourceCategory.update({
+            where: { id: categoryId },
+            data: {
+                usageCount: {
+                    [increment ? 'increment' : 'decrement']: 1
+                }
+            },
+        });
+
+        // Update per-type count
+        if (increment) {
+            await tx.resourceCategoryUsageByType.upsert({
+                where: {
+                    categoryId_resourceType: { categoryId, resourceType }
+                },
+                create: {
+                    categoryId,
+                    resourceType,
+                    usageCount: 1
+                },
+                update: {
+                    usageCount: { increment: 1 }
+                },
+            });
+        } else {
+            // Decrement, but don't go below 0
+            const usage = await tx.resourceCategoryUsageByType.findUnique({
+                where: {
+                    categoryId_resourceType: { categoryId, resourceType }
+                },
+            });
+
+            if (usage && usage.usageCount > 0) {
+                await tx.resourceCategoryUsageByType.update({
+                    where: {
+                        categoryId_resourceType: { categoryId, resourceType }
+                    },
+                    data: {
+                        usageCount: { decrement: 1 }
+                    },
+                });
+            }
+        }
+    }
+
+    /**
      * Get all approved resources for marketplace with filters
      */
     async getAllResources(filterDto: FilterResourcesDto) {
-        const { type, search, sortBy = ResourceSortOption.DATE, page = 1, limit = 20 } = filterDto;
+        const { type, search, sortBy = ResourceSortOption.DATE, page = 1, limit = 20, tags, categories, versions } = filterDto;
         const skip = (page - 1) * limit;
 
         // Build where clause
@@ -1079,6 +1159,55 @@ export class ResourceService {
                 { name: { contains: search, mode: 'insensitive' } },
                 { description: { contains: search, mode: 'insensitive' } },
             ];
+        }
+
+        // Filter by tags (OR logic - resource must have at least one of the selected tags)
+        if (tags && tags.length > 0) {
+            where.tags = {
+                some: {
+                    tag: {
+                        OR: tags.map(tag => ({
+                            OR: [
+                                { slug: tag },
+                                { id: tag },
+                            ]
+                        }))
+                    }
+                }
+            };
+        }
+
+        // Filter by categories (OR logic - resource must have at least one of the selected categories)
+        if (categories && categories.length > 0) {
+            where.categories = {
+                some: {
+                    category: {
+                        OR: categories.map(category => ({
+                            OR: [
+                                { slug: category },
+                                { id: category },
+                            ]
+                        }))
+                    }
+                }
+            };
+        }
+
+        // Filter by Hytale versions (OR logic - resource must support at least one of the selected versions)
+        if (versions && versions.length > 0) {
+            where.versions = {
+                some: {
+                    hytaleVersions: {
+                        some: {
+                            hytaleVersion: {
+                                hytaleVersion: {
+                                    in: versions
+                                }
+                            }
+                        }
+                    }
+                }
+            };
         }
 
         // Determine sort order
@@ -1142,7 +1271,11 @@ export class ResourceService {
                     include: {
                         tag: true,
                     },
-                    take: 3,
+                },
+                categories: {
+                    include: {
+                        category: true,
+                    },
                 },
                 _count: {
                     select: {

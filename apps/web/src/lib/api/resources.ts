@@ -32,6 +32,9 @@ export interface FetchResourcesParams {
     sortBy?: ResourceSortOption;
     page?: number;
     limit?: number;
+    tags?: string[];
+    categories?: string[];
+    versions?: string[];
 }
 
 // API response types
@@ -161,6 +164,15 @@ export async function fetchResources(
     }
     if (params.limit) {
         queryParams.append('limit', params.limit.toString());
+    }
+    if (params.tags && params.tags.length > 0) {
+        params.tags.forEach(tag => queryParams.append('tags', tag));
+    }
+    if (params.categories && params.categories.length > 0) {
+        params.categories.forEach(category => queryParams.append('categories', category));
+    }
+    if (params.versions && params.versions.length > 0) {
+        params.versions.forEach(version => queryParams.append('versions', version));
     }
 
     const url = `${API_URL}/resources?${queryParams.toString()}`;
@@ -519,11 +531,19 @@ export async function fetchCategories(type?: ResourceType): Promise<Category[]> 
  * Hytale Versions API
  */
 
+export interface HytaleVersion {
+    id: string;
+    hytaleVersion: string;
+    name: string;
+    releaseDate: string;
+    createdAt: string;
+}
+
 /**
  * Fetch all available Hytale versions
  */
 export async function fetchHytaleVersions(): Promise<string[]> {
-    const url = `${API_URL}/resources/hytale-versions`;
+    const url = `${API_URL}/hytale-versions`;
 
     const response = await fetch(url, {
         method: 'GET',
@@ -540,7 +560,9 @@ export async function fetchHytaleVersions(): Promise<string[]> {
         throw new Error(error.message || `Request failed with status ${response.status}`);
     }
 
-    return response.json();
+    const versions: HytaleVersion[] = await response.json();
+    // Return only the version strings for compatibility with VersionFilter
+    return versions.map(v => v.hytaleVersion);
 }
 
 /**

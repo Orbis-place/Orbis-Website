@@ -63,6 +63,32 @@ export default function ServerManageLayout({ children }: ManageLayoutProps) {
                     exact: true
                 }
             ]
+        },
+        {
+            title: 'Content',
+            items: [
+                {
+                    id: 'description',
+                    label: 'Description',
+                    icon: 'mdi:text-box',
+                    href: `${basePath}/description`,
+                    exact: false
+                },
+                {
+                    id: 'categories',
+                    label: 'Categories & Tags',
+                    icon: 'mdi:tag-multiple',
+                    href: `${basePath}/categories`,
+                    exact: false
+                },
+                {
+                    id: 'links',
+                    label: 'Social Links',
+                    icon: 'mdi:link',
+                    href: `${basePath}/links`,
+                    exact: false
+                }
+            ]
         }
     ];
 

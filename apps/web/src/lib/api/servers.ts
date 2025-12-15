@@ -71,6 +71,13 @@ export interface Server {
     createdAt: string;
     updatedAt: string;
     owner: ServerOwner;
+    ownerUser?: ServerOwner | null;
+    ownerTeam?: {
+        id: string;
+        name: string;
+        displayName?: string;
+        logo?: string;
+    } | null;
     team?: {
         id: string;
         name: string;
@@ -82,6 +89,7 @@ export interface Server {
     }>;
     categories?: Array<{
         category: ServerCategory;
+        isPrimary: boolean;
     }>;
 }
 

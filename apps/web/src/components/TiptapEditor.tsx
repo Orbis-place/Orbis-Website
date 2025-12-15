@@ -10,7 +10,7 @@ import Underline from '@tiptap/extension-underline'
 import { Icon } from '@iconify/react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
-import { uploadResourceDescriptionImage, fileToBase64 } from '@/lib/api/image-upload'
+import { uploadResourceDescriptionImage, uploadServerDescriptionImage, fileToBase64 } from '@/lib/api/image-upload'
 
 interface TiptapEditorProps {
   content: string
@@ -19,6 +19,7 @@ interface TiptapEditorProps {
   className?: string
   minHeight?: string
   resourceId?: string
+  serverId?: string
 }
 
 export function TiptapEditor({
@@ -27,7 +28,8 @@ export function TiptapEditor({
   placeholder = 'Write your description here...',
   className = '',
   minHeight = '300px',
-  resourceId
+  resourceId,
+  serverId
 }: TiptapEditorProps) {
   const [showImageInput, setShowImageInput] = useState(false)
   const [imageUrl, setImageUrl] = useState('')
@@ -133,11 +135,28 @@ export function TiptapEditor({
 
           toast.info('Image added locally. Server upload will be available when backend is ready.')
         }
+      } else if (serverId) {
+        try {
+          toast.loading('Uploading image...', { id: 'image-upload' })
+
+          const result = await uploadServerDescriptionImage(serverId, file)
+          editor.chain().focus().setImage({ src: result.url }).run()
+
+          toast.success('Image uploaded successfully!', { id: 'image-upload' })
+        } catch (uploadError) {
+          console.warn('Upload failed, falling back to base64:', uploadError)
+          toast.dismiss('image-upload')
+
+          const base64 = await fileToBase64(file)
+          editor.chain().focus().setImage({ src: base64 }).run()
+
+          toast.info('Image added locally. Server upload will be available when backend is ready.')
+        }
       } else {
         const base64 = await fileToBase64(file)
         editor.chain().focus().setImage({ src: base64 }).run()
 
-        toast.info('Image added locally. Save the resource first to enable server uploads.')
+        toast.info('Image added locally. Save first to enable server uploads.')
       }
     } catch (error) {
       console.error('Failed to process image:', error)

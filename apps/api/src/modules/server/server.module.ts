@@ -6,6 +6,8 @@ import { ServerCategoryController } from "./server-category.controller";
 import { ServerCategoryService } from "./server-category.service";
 import { ServerTagService } from "./server-tag.service";
 import { ServerTagController } from "./server-tag.controller";
+import { ServerDescriptionImageController } from './server-description-image.controller';
+import { ServerDescriptionImageService } from './server-description-image.service';
 
 @Module({
     imports: [StorageModule],
@@ -13,8 +15,9 @@ import { ServerTagController } from "./server-tag.controller";
         ServerController,
         ServerCategoryController,
         ServerTagController,
+        ServerDescriptionImageController,
     ],
-    providers: [ServerService, ServerCategoryService, ServerTagService],
+    providers: [ServerService, ServerCategoryService, ServerTagService, ServerDescriptionImageService],
     exports: [ServerService],
 })
 export class ServerModule {

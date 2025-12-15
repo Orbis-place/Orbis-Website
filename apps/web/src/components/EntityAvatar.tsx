@@ -15,7 +15,7 @@ interface EntityAvatarProps {
     /** className for the AvatarFallback */
     fallbackClassName?: string;
     /** Fallback variant style */
-    variant?: 'user' | 'team' | 'resource' | 'default';
+    variant?: 'user' | 'team' | 'resource' | 'server' | 'default';
 }
 
 /**
@@ -35,6 +35,7 @@ const variantStyles = {
     user: 'bg-gradient-to-br from-primary to-primary/70 text-white',
     team: 'bg-gradient-to-br from-primary/20 to-secondary/20 text-foreground',
     resource: 'bg-gradient-to-br from-[#06363D] via-[#084B54] to-[#109EB1] text-[#C7F4FA]',
+    server: 'bg-gradient-to-br from-[#06363D] via-[#084B54] to-[#109EB1] text-[#C7F4FA]',
     default: 'bg-gradient-to-br from-primary to-primary/70 text-white',
 };
 

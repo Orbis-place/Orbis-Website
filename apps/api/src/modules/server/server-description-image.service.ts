@@ -8,38 +8,37 @@ const MAX_TEMPORARY_IMAGES = 20;
 const TEMPORARY_IMAGE_EXPIRATION_HOURS = 24;
 
 @Injectable()
-export class ResourceDescriptionImageService {
+export class ServerDescriptionImageService {
     constructor(
-
         private readonly storageService: StorageService,
     ) { }
 
     /**
      * Upload a description image (temporary by default)
      * Detects duplicates by file hash to avoid re-uploading the same image
-     * Uploads directly to the resource-specific folder
+     * Uploads directly to the server-specific folder
      */
-    async uploadImage(userId: string, resourceId: string, file: Express.Multer.File) {
-        // Check temporary image limit for this user and resource
-        const temporaryCount = await prisma.resourceDescriptionImage.count({
+    async uploadImage(userId: string, serverId: string, file: Express.Multer.File) {
+        // Check temporary image limit for this user and server
+        const temporaryCount = await prisma.serverDescriptionImage.count({
             where: {
                 uploadedBy: userId,
-                resourceId,
+                serverId,
                 status: 'TEMPORARY',
             },
         });
 
         if (temporaryCount >= MAX_TEMPORARY_IMAGES) {
             throw new BadRequestException(
-                `You have reached the maximum of ${MAX_TEMPORARY_IMAGES} temporary images for this resource. Please validate or delete unused images.`,
+                `You have reached the maximum of ${MAX_TEMPORARY_IMAGES} temporary images for this server. Please validate or delete unused images.`,
             );
         }
 
         // Calculate file hash to detect duplicates
         const fileHash = crypto.createHash('sha256').update(file.buffer).digest('hex');
 
-        // Check if this exact image already exists for this user and resource (by hash comparison)
-        const existingImage = await this.findImageByHash(userId, resourceId, fileHash);
+        // Check if this exact image already exists for this user and server (by hash comparison)
+        const existingImage = await this.findImageByHash(userId, serverId, fileHash);
 
         if (existingImage) {
             // Return existing image URL instead of re-uploading
@@ -57,8 +56,8 @@ export class ResourceDescriptionImageService {
             };
         }
 
-        // Upload image directly to resource-specific folder
-        const url = await this.storageService.uploadFile(file, `resources/${resourceId}/descriptions`);
+        // Upload image directly to server-specific folder
+        const url = await this.storageService.uploadFile(file, `servers/${serverId}/descriptions`);
 
         // Extract storage key from URL
         const storageKey = url.split('media.orbis.place/')[1];
@@ -67,8 +66,8 @@ export class ResourceDescriptionImageService {
         const expiresAt = new Date();
         expiresAt.setHours(expiresAt.getHours() + TEMPORARY_IMAGE_EXPIRATION_HOURS);
 
-        // Save to database with hash and resourceId
-        const image = await prisma.resourceDescriptionImage.create({
+        // Save to database with hash and serverId
+        const image = await prisma.serverDescriptionImage.create({
             data: {
                 url,
                 storageKey,
@@ -76,7 +75,7 @@ export class ResourceDescriptionImageService {
                 hash: fileHash,
                 status: 'TEMPORARY',
                 uploadedBy: userId,
-                resourceId,
+                serverId,
                 expiresAt,
             },
         });
@@ -97,14 +96,14 @@ export class ResourceDescriptionImageService {
 
     /**
      * Find an image by comparing file hashes
-     * Checks if an image with the same hash already exists for this user and resource
+     * Checks if an image with the same hash already exists for this user and server
      */
-    private async findImageByHash(userId: string, resourceId: string, fileHash: string): Promise<any> {
-        // Find image with matching hash for this user and resource (both temporary and permanent)
-        const existingImage = await prisma.resourceDescriptionImage.findFirst({
+    private async findImageByHash(userId: string, serverId: string, fileHash: string): Promise<any> {
+        // Find image with matching hash for this user and server (both temporary and permanent)
+        const existingImage = await prisma.serverDescriptionImage.findFirst({
             where: {
                 uploadedBy: userId,
-                resourceId,
+                serverId,
                 hash: fileHash,
                 status: { in: ['TEMPORARY', 'PERMANENT'] },
             },
@@ -114,11 +113,11 @@ export class ResourceDescriptionImageService {
     }
 
     /**
-     * Validate images when resource description is updated
+     * Validate images when server description is updated
      * Marks images as PERMANENT if they are used in the description
      */
     async validateImagesInDescription(
-        resourceId: string,
+        serverId: string,
         userId: string,
         description: string,
     ) {
@@ -130,7 +129,7 @@ export class ResourceDescriptionImageService {
         if (imageUrls.length === 0) return;
 
         // Find images that belong to this user and are in the description
-        const images = await prisma.resourceDescriptionImage.findMany({
+        const images = await prisma.serverDescriptionImage.findMany({
             where: {
                 uploadedBy: userId,
                 url: { in: imageUrls },
@@ -140,14 +139,14 @@ export class ResourceDescriptionImageService {
 
         if (images.length === 0) return;
 
-        // Mark images as PERMANENT and link them to the resource
+        // Mark images as PERMANENT and link them to the server
         await prisma.$transaction(
             images.map((image) =>
-                prisma.resourceDescriptionImage.update({
+                prisma.serverDescriptionImage.update({
                     where: { id: image.id },
                     data: {
                         status: 'PERMANENT',
-                        resourceId,
+                        serverId,
                         movedAt: new Date(),
                         expiresAt: null, // Remove expiration
                     },
@@ -185,13 +184,13 @@ export class ResourceDescriptionImageService {
     }
 
     /**
-     * Get all temporary images for a specific resource
+     * Get all temporary images for a specific server
      */
-    async getTemporaryImages(userId: string, resourceId: string) {
-        const images = await prisma.resourceDescriptionImage.findMany({
+    async getTemporaryImages(userId: string, serverId: string) {
+        const images = await prisma.serverDescriptionImage.findMany({
             where: {
                 uploadedBy: userId,
-                resourceId,
+                serverId,
                 status: 'TEMPORARY',
             },
             orderBy: {
@@ -217,12 +216,12 @@ export class ResourceDescriptionImageService {
     /**
      * Delete a temporary image
      */
-    async deleteTemporaryImage(userId: string, resourceId: string, imageId: string) {
-        const image = await prisma.resourceDescriptionImage.findFirst({
+    async deleteTemporaryImage(userId: string, serverId: string, imageId: string) {
+        const image = await prisma.serverDescriptionImage.findFirst({
             where: {
                 id: imageId,
                 uploadedBy: userId,
-                resourceId,
+                serverId,
                 status: 'TEMPORARY',
             },
         });
@@ -235,7 +234,7 @@ export class ResourceDescriptionImageService {
         await this.storageService.deleteFile(image.url);
 
         // Delete from database
-        await prisma.resourceDescriptionImage.delete({
+        await prisma.serverDescriptionImage.delete({
             where: { id: imageId },
         });
 
@@ -248,7 +247,7 @@ export class ResourceDescriptionImageService {
      * Cleanup expired temporary images (to be called by a cron job)
      */
     async cleanupExpiredImages() {
-        const expiredImages = await prisma.resourceDescriptionImage.findMany({
+        const expiredImages = await prisma.serverDescriptionImage.findMany({
             where: {
                 status: 'TEMPORARY',
                 expiresAt: {
@@ -260,7 +259,7 @@ export class ResourceDescriptionImageService {
         for (const image of expiredImages) {
             try {
                 await this.storageService.deleteFile(image.url);
-                await prisma.resourceDescriptionImage.delete({
+                await prisma.serverDescriptionImage.delete({
                     where: { id: image.id },
                 });
             } catch (error) {

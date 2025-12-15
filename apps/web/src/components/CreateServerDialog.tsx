@@ -23,6 +23,7 @@ interface ServerCategory {
     id: string;
     name: string;
     slug: string;
+    icon?: string;
 }
 
 interface HytaleVersion {
@@ -54,6 +55,7 @@ export function CreateServerDialog({ open, onOpenChange, trigger, onSuccess, def
         serverAddress: '',  // Changed from serverIp + port
         gameVersionId: '',
         primaryCategoryId: '',
+        categoryIds: [] as string[],
         teamId: defaultTeamId,
     });
 
@@ -170,6 +172,7 @@ export function CreateServerDialog({ open, onOpenChange, trigger, onSuccess, def
                 serverAddress: '',
                 gameVersionId: hytaleVersions[0]?.id || '',
                 primaryCategoryId: '',
+                categoryIds: [],
                 teamId: defaultTeamId,
             });
             setTagNames([]);
@@ -259,7 +262,13 @@ export function CreateServerDialog({ open, onOpenChange, trigger, onSuccess, def
                         </Label>
                         <Select
                             value={formData.primaryCategoryId}
-                            onValueChange={(value) => setFormData({ ...formData, primaryCategoryId: value })}
+                            onValueChange={(value) => {
+                                setFormData({
+                                    ...formData,
+                                    primaryCategoryId: value,
+                                    categoryIds: formData.categoryIds.filter(id => id !== value)
+                                });
+                            }}
                             required
                         >
                             <SelectTrigger id="primaryCategoryId" className="w-full">
@@ -268,7 +277,10 @@ export function CreateServerDialog({ open, onOpenChange, trigger, onSuccess, def
                             <SelectContent>
                                 {categories.map((category) => (
                                     <SelectItem key={category.id} value={category.id}>
-                                        {category.name}
+                                        <div className="flex items-center gap-2">
+                                            {category.icon && <Icon icon={category.icon} />}
+                                            <span>{category.name}</span>
+                                        </div>
                                     </SelectItem>
                                 ))}
                             </SelectContent>

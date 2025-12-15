@@ -11,12 +11,13 @@ import { CreateServerDto } from './dtos/create-server.dto';
 import { UpdateServerDto } from './dtos/update-server.dto';
 import { FilterServersDto, ServerSortOption } from './dtos/filter-servers.dto';
 import { prisma, ServerStatus } from '@repo/db';
+import { ServerDescriptionImageService } from './server-description-image.service';
 
 @Injectable()
 export class ServerService {
     constructor(
-
         private readonly storage: StorageService,
+        private readonly descriptionImageService: ServerDescriptionImageService,
     ) {
     }
 
@@ -350,11 +351,12 @@ export class ServerService {
                         },
                     },
                     categories: {
-                        where: { isPrimary: true },
                         include: {
                             category: true,
                         },
-                        take: 1,
+                        orderBy: {
+                            isPrimary: 'desc',
+                        },
                     },
                     tags: {
                         include: {
@@ -366,7 +368,6 @@ export class ServerService {
                                 },
                             },
                         },
-                        take: 3,
                     },
                 },
             }),
@@ -451,7 +452,16 @@ export class ServerService {
             throw new NotFoundException('Server not found');
         }
 
-        return server;
+        // Check if user is owner (can edit the server)
+        let isOwner = false;
+        if (userId) {
+            isOwner = await this.checkEditPermission(userId, server);
+        }
+
+        return {
+            ...server,
+            isOwner,
+        };
     }
 
     /**
@@ -622,6 +632,82 @@ export class ServerService {
             if (updateDto.country !== undefined)
                 updateData.country = updateDto.country;
 
+            // Handle Categories
+            if (updateDto.categoryIds && updateDto.primaryCategoryId) {
+                // Verify primary category exists
+                const primaryCategory = await prisma.serverCategory.findUnique({
+                    where: { id: updateDto.primaryCategoryId },
+                });
+
+                if (!primaryCategory) {
+                    throw new BadRequestException('Primary category not found');
+                }
+
+                // Verify all category IDs exist
+                const categories = await prisma.serverCategory.findMany({
+                    where: { id: { in: updateDto.categoryIds } },
+                });
+
+                if (categories.length !== updateDto.categoryIds.length) {
+                    throw new BadRequestException('One or more categories not found');
+                }
+
+                // Check max 3 categories total
+                const totalCategories = new Set([
+                    updateDto.primaryCategoryId,
+                    ...updateDto.categoryIds,
+                ]);
+                if (totalCategories.size > 3) {
+                    throw new BadRequestException('Maximum 3 categories allowed');
+                }
+
+                // Delete existing relations
+                await tx.serverCategoryRelation.deleteMany({
+                    where: { serverId: serverId },
+                });
+
+                // Decrement usage counts for old categories
+                // Note: Ideally we should track which ones were removed, but for simplicity we can just recalculate all
+                // Or better: fetch old categories before delete, compare, and update counts.
+                // For now, let's just re-implement the count update logic properly later or assume the count is global.
+                // Actually, let's do it right:
+                // 1. Get old categories
+                const oldRelations = await prisma.serverCategoryRelation.findMany({
+                    where: { serverId: serverId },
+                    select: { categoryId: true },
+                });
+                for (const rel of oldRelations) {
+                    await this.updateCategoryUsageCount(rel.categoryId, false, tx);
+                }
+
+                // Create new relations
+                await tx.serverCategoryRelation.createMany({
+                    data: [
+                        // Primary category
+                        {
+                            serverId: serverId,
+                            categoryId: updateDto.primaryCategoryId,
+                            isPrimary: true,
+                        },
+                        // Additional categories
+                        ...(updateDto.categoryIds
+                            .filter((id) => id !== updateDto.primaryCategoryId)
+                            .map((id) => ({
+                                serverId: serverId,
+                                categoryId: id,
+                                isPrimary: false,
+                            }))),
+                    ],
+                });
+
+                // Increment usage counts for new categories
+                for (const categoryId of totalCategories) {
+                    await this.updateCategoryUsageCount(categoryId, true, tx);
+                }
+            } else if (updateDto.categoryIds || updateDto.primaryCategoryId) {
+                throw new BadRequestException('Both categoryIds and primaryCategoryId must be provided together');
+            }
+
             // TODO: Handle supportedVersionIds via separate endpoint for managing version relations
 
             return tx.server.update({
@@ -640,6 +726,15 @@ export class ServerService {
                 },
             });
         });
+
+        // Validate description images if description changed
+        if (updateDto.description) {
+            await this.descriptionImageService.validateImagesInDescription(
+                serverId,
+                userId,
+                updateDto.description
+            );
+        }
 
         return updated;
     }

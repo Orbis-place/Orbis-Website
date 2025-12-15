@@ -100,9 +100,9 @@ export function TagFilter({ selectedTags, onTagsChange, resourceType }: TagFilte
                                 )}
                                 <span className="font-abeezee text-[15.16px] leading-[18px]">{tag.name}</span>
                             </div>
-                            {(tag.usageCountForType || tag.usageCount) && (
+                            {(tag.usageCountForType !== undefined || tag.usageCount !== undefined) && (
                                 <span className="ml-auto text-xs text-[#C7F4FA]/40 font-abeezee">
-                                    {tag.usageCountForType || tag.usageCount}
+                                    {tag.usageCountForType ?? tag.usageCount}
                                 </span>
                             )}
                         </button>

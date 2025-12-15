@@ -44,6 +44,7 @@ interface Server {
     verified: boolean;
     createdAt: string;
     updatedAt: string;
+    isOwner?: boolean;
     owner?: {
         id: string;
         username: string;
@@ -91,19 +92,8 @@ export function ServerProvider({ children }: { children: ReactNode }) {
                     const data = await response.json();
                     setServer(data);
 
-                    // Check ownership
-                    try {
-                        const userResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/users/me`, {
-                            credentials: 'include',
-                        });
-
-                        if (userResponse.ok) {
-                            const userData = await userResponse.json();
-                            setIsOwner(data.owner?.id === userData.id);
-                        }
-                    } catch (userError) {
-                        console.error('Failed to fetch user:', userError);
-                    }
+                    // Set isOwner from the API response
+                    setIsOwner(data.isOwner || false);
                 } else {
                     // Server not found or access denied - show 404 page
                     notFound();

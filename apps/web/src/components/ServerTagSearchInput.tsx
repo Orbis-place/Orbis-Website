@@ -15,9 +15,10 @@ interface ServerTag {
 interface ServerTagSearchInputProps {
     selectedTags: string[];
     onTagsChange: (tags: string[]) => void;
+    maxTags?: number;
 }
 
-export function ServerTagSearchInput({ selectedTags, onTagsChange }: ServerTagSearchInputProps) {
+export function ServerTagSearchInput({ selectedTags, onTagsChange, maxTags = 10 }: ServerTagSearchInputProps) {
     const [searchQuery, setSearchQuery] = useState('');
     const [suggestions, setSuggestions] = useState<ServerTag[]>([]);
     const [loading, setLoading] = useState(false);
@@ -93,7 +94,7 @@ export function ServerTagSearchInput({ selectedTags, onTagsChange }: ServerTagSe
     };
 
     const handleTagSelect = (tagName: string) => {
-        if (!selectedTags.includes(tagName)) {
+        if (!selectedTags.includes(tagName) && selectedTags.length < maxTags) {
             onTagsChange([...selectedTags, tagName]);
         }
         setSearchQuery('');
@@ -115,7 +116,8 @@ export function ServerTagSearchInput({ selectedTags, onTagsChange }: ServerTagSe
     const exactMatch = suggestions.find(
         s => s.name.toLowerCase() === searchQuery.toLowerCase()
     );
-    const showCreateOption = searchQuery.trim().length > 0 && !exactMatch;
+    const showCreateOption = searchQuery.trim().length > 0 && !exactMatch && selectedTags.length < maxTags;
+    const isAtLimit = selectedTags.length >= maxTags;
 
     return (
         <div className="relative" ref={dropdownRef}>
@@ -169,16 +171,17 @@ export function ServerTagSearchInput({ selectedTags, onTagsChange }: ServerTagSe
                     {suggestions.map((tag) => {
                         const isSelected = selectedTags.includes(tag.name);
                         const isPopular = tag.usageCount > 10;
+                        const isDisabled = isSelected || isAtLimit;
 
                         return (
                             <button
                                 key={tag.id}
                                 type="button"
-                                onClick={() => !isSelected && handleTagSelect(tag.name)}
-                                disabled={isSelected}
+                                onClick={() => !isDisabled && handleTagSelect(tag.name)}
+                                disabled={isDisabled}
                                 className={cn(
                                     "w-full px-4 py-3 text-left transition-colors flex items-center justify-between",
-                                    isSelected
+                                    isDisabled
                                         ? "bg-[#109EB1]/10 cursor-not-allowed opacity-50"
                                         : "hover:bg-[#06363D] cursor-pointer"
                                 )}
@@ -210,6 +213,14 @@ export function ServerTagSearchInput({ selectedTags, onTagsChange }: ServerTagSe
                     {suggestions.length === 0 && !showCreateOption && (
                         <div className="px-4 py-6 text-center text-[#C7F4FA]/50 font-nunito text-sm">
                             No tags found
+                        </div>
+                    )}
+
+                    {isAtLimit && searchQuery.length > 0 && (
+                        <div className="px-4 py-3 bg-[#109EB1]/10 border-t border-[#084B54] text-center">
+                            <div className="text-xs text-[#C7F4FA]/70 font-nunito">
+                                Maximum {maxTags} tags reached
+                            </div>
                         </div>
                     )}
                 </div>

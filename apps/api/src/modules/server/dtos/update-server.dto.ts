@@ -20,4 +20,21 @@ export class UpdateServerDto extends PartialType(CreateServerDto) {
     @IsString({ each: true })
     @IsOptional()
     removeTags?: string[];
+
+    @ApiPropertyOptional({
+        example: 'clq...',
+        description: 'Primary category ID',
+    })
+    @IsString()
+    @IsOptional()
+    primaryCategoryId?: string;
+
+    @ApiPropertyOptional({
+        example: ['clq...', 'clr...'],
+        description: 'All category IDs (including primary)',
+    })
+    @IsArray()
+    @IsString({ each: true })
+    @IsOptional()
+    categoryIds?: string[];
 }

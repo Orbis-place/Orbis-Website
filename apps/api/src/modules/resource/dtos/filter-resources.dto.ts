@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsInt, Min, Max, IsString, IsEnum } from 'class-validator';
+import { IsOptional, IsInt, Min, Max, IsString, IsEnum, IsArray } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
 import { ResourceType } from './create-resource.dto';
 
@@ -38,6 +38,48 @@ export class FilterResourcesDto {
     @IsEnum(ResourceSortOption)
     @IsOptional()
     sortBy?: ResourceSortOption = ResourceSortOption.DATE;
+
+    @ApiPropertyOptional({
+        description: 'Filter by tag slugs or IDs (OR logic)',
+        type: [String],
+        example: ['economy', 'admin-tools'],
+    })
+    @IsArray()
+    @IsString({ each: true })
+    @IsOptional()
+    @Transform(({ value }) => {
+        if (typeof value === 'string') return [value];
+        return value;
+    })
+    tags?: string[];
+
+    @ApiPropertyOptional({
+        description: 'Filter by category slugs or IDs (OR logic)',
+        type: [String],
+        example: ['gameplay', 'utilities'],
+    })
+    @IsArray()
+    @IsString({ each: true })
+    @IsOptional()
+    @Transform(({ value }) => {
+        if (typeof value === 'string') return [value];
+        return value;
+    })
+    categories?: string[];
+
+    @ApiPropertyOptional({
+        description: 'Filter by Hytale version strings (OR logic)',
+        type: [String],
+        example: ['1.0.0', '1.1.0'],
+    })
+    @IsArray()
+    @IsString({ each: true })
+    @IsOptional()
+    @Transform(({ value }) => {
+        if (typeof value === 'string') return [value];
+        return value;
+    })
+    versions?: string[];
 
     @ApiPropertyOptional({
         description: 'Page number (1-based)',

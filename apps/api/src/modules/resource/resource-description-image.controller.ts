@@ -18,13 +18,13 @@ import { UploadDescriptionImageDto } from './dtos/description-image.dto';
 @ApiBearerAuth()
 @Controller('resources/description-images')
 export class ResourceDescriptionImageController {
-    constructor(private readonly descriptionImageService: ResourceDescriptionImageService) {}
+    constructor(private readonly descriptionImageService: ResourceDescriptionImageService) { }
 
     /**
      * Upload a description image (temporary)
      * If the same image was already uploaded, returns the existing URL instead
      */
-    @Post('upload')
+    @Post(':resourceId/upload')
     @ApiOperation({
         summary: 'Upload a description image',
         description:
@@ -34,35 +34,40 @@ export class ResourceDescriptionImageController {
     @UseInterceptors(FileInterceptor('file'))
     async uploadImage(
         @Session() session: UserSession,
+        @Param('resourceId') resourceId: string,
         @UploadedFile() file: Express.Multer.File,
     ) {
-        return this.descriptionImageService.uploadImage(session.user.id, file);
+        return this.descriptionImageService.uploadImage(session.user.id, resourceId, file);
     }
 
     /**
-     * Get all temporary images for the current user
+     * Get all temporary images for a resource
      */
-    @Get('temporary')
+    @Get(':resourceId/temporary')
     @ApiOperation({
-        summary: 'Get all temporary images',
-        description: 'Retrieves all temporary images uploaded by the current user.',
+        summary: 'Get all temporary images for a resource',
+        description: 'Retrieves all temporary images uploaded for a specific resource by the current user.',
     })
-    async getTemporaryImages(@Session() session: UserSession) {
-        return this.descriptionImageService.getTemporaryImages(session.user.id);
+    async getTemporaryImages(
+        @Session() session: UserSession,
+        @Param('resourceId') resourceId: string,
+    ) {
+        return this.descriptionImageService.getTemporaryImages(session.user.id, resourceId);
     }
 
     /**
      * Delete a temporary image
      */
-    @Delete(':imageId')
+    @Delete(':resourceId/:imageId')
     @ApiOperation({
         summary: 'Delete a temporary image',
         description: 'Deletes a temporary image that has not yet been used in a resource.',
     })
     async deleteTemporaryImage(
         @Session() session: UserSession,
+        @Param('resourceId') resourceId: string,
         @Param('imageId') imageId: string,
     ) {
-        return this.descriptionImageService.deleteTemporaryImage(session.user.id, imageId);
+        return this.descriptionImageService.deleteTemporaryImage(session.user.id, resourceId, imageId);
     }
 }
