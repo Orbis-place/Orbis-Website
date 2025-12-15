@@ -54,7 +54,7 @@ export default function Home() {
                     {/* CTA Buttons */}
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 md:gap-5 w-full sm:w-auto">
                         <Link
-                            href="/marketplace"
+                            href="/login"
                             prefetch={false}
                             className="flex items-center justify-center px-[18px] py-[14px] md:py-[16px] gap-2.5 bg-[#109EB1] rounded-full w-full sm:w-auto sm:min-w-[158px] h-[48px] md:h-[52px] hover:bg-[#0d8a9b] transition-all cursor-pointer"
                         >
@@ -63,12 +63,15 @@ export default function Home() {
                             </span>
                         </Link>
 
-                        <button
-                            className="flex items-center justify-center px-[18px] py-[14px] md:py-[16px] gap-2.5 bg-[rgba(152,234,245,0.25)] border-2 border-[rgba(152,234,245,0.25)] rounded-full w-full sm:w-auto sm:min-w-[198px] h-[48px] md:h-[52px] hover:bg-[rgba(152,234,245,0.35)] transition-all cursor-pointer">
+                        <Link
+                            href="/plugins"
+                            prefetch={false}
+                            className="flex items-center justify-center px-[18px] py-[14px] md:py-[16px] gap-2.5 bg-[rgba(152,234,245,0.25)] border-2 border-[rgba(152,234,245,0.25)] rounded-full w-full sm:w-auto sm:min-w-[198px] h-[48px] md:h-[52px] hover:bg-[rgba(152,234,245,0.35)] transition-all cursor-pointer"
+                        >
                             <span className="font-hebden font-semibold text-base md:text-[17px] leading-[20px] text-[#C7F4FA]">
                                 Browse Content
                             </span>
-                        </button>
+                        </Link>
                     </div>
 
                     {/* Search Bar */}
