@@ -99,6 +99,7 @@ model User {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   banned        Boolean  @default(false)
+  apikeys       Apikey[]
 
   // Better Auth relations
   sessions Session[]
@@ -1309,4 +1310,33 @@ model ResourceStatusHistory {
   @@index([resourceId])
   @@index([changedAt])
   @@map("resource_status_history")
+}
+
+model Apikey {
+  id                  String    @id
+  name                String?
+  start               String?
+  prefix              String?
+  key                 String
+  userId              String
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refillInterval      Int?
+  refillAmount        Int?
+  lastRefillAt        DateTime?
+  enabled             Boolean?  @default(true)
+  rateLimitEnabled    Boolean?  @default(true)
+  rateLimitTimeWindow Int?      @default(86400000)
+  rateLimitMax        Int?      @default(10)
+  requestCount        Int?      @default(0)
+  remaining           Int?
+  lastRequest         DateTime?
+  expiresAt           DateTime?
+  createdAt           DateTime
+  updatedAt           DateTime
+  permissions         String?
+  metadata            String?
+
+  @@index([key])
+  @@index([userId])
+  @@map("apikey")
 }

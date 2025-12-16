@@ -8,6 +8,7 @@ import { EntityAvatar } from '@/components/EntityAvatar';
 
 export interface MarketplaceItem {
     id: number | string;
+    slug: string;
     title: string;
     author: string;
     authorDisplay: string;

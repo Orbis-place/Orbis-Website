@@ -8,14 +8,17 @@ import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { authClient } from '@repo/auth/client';
 import { toast } from 'sonner';
+import { OrbisConfirmDialog } from '@/components/OrbisDialog';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const MAX_API_KEYS = 5;
 
 const settingsSections = [
   { id: 'account', name: 'Account', icon: 'mdi:account' },
   // { id: 'notifications', name: 'Notifications', icon: 'mdi:bell' },
   // { id: 'privacy', name: 'Privacy', icon: 'mdi:shield-account' },
   { id: 'security', name: 'Security', icon: 'mdi:lock' },
+  { id: 'developer', name: 'Developer', icon: 'mdi:code-braces' },
 ];
 
 interface User {
@@ -23,6 +26,14 @@ interface User {
   username: string;
   email: string;
   displayName?: string;
+}
+
+interface ApiKey {
+  id: string;
+  name: string;
+  start: string;
+  createdAt: string;
+  enabled: boolean;
 }
 
 export default function SettingsPage() {
@@ -40,10 +51,27 @@ export default function SettingsPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isChangingPassword, setIsChangingPassword] = useState(false);
 
+  // API Keys state
+  const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
+  const [isLoadingKeys, setIsLoadingKeys] = useState(false);
+  const [newKeyName, setNewKeyName] = useState('');
+  const [isCreatingKey, setIsCreatingKey] = useState(false);
+  const [generatedKey, setGeneratedKey] = useState<string | null>(null);
+  const [deletingKeyId, setDeletingKeyId] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [keyToDelete, setKeyToDelete] = useState<string | null>(null);
+
   // Fetch user data on mount
   useEffect(() => {
     fetchUserData();
   }, []);
+
+  // Fetch API keys when Developer section is active
+  useEffect(() => {
+    if (activeSection === 'developer') {
+      fetchApiKeys();
+    }
+  }, [activeSection]);
 
   const fetchUserData = async () => {
     try {
@@ -63,6 +91,26 @@ export default function SettingsPage() {
       toast.error('Failed to load user data');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchApiKeys = async () => {
+    setIsLoadingKeys(true);
+    try {
+      const { data, error } = await authClient.apiKey.list({});
+
+      if (error) {
+        toast.error('Failed to load API keys');
+        console.error('Error fetching API keys:', error);
+        return;
+      }
+
+      setApiKeys(data || []);
+    } catch (error) {
+      console.error('Error fetching API keys:', error);
+      toast.error('Failed to load API keys');
+    } finally {
+      setIsLoadingKeys(false);
     }
   };
 
@@ -184,6 +232,94 @@ export default function SettingsPage() {
       console.error('Password change error:', error);
     } finally {
       setIsChangingPassword(false);
+    }
+  };
+
+  const handleCreateApiKey = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!newKeyName.trim()) {
+      toast.error('Please enter a name for your API key');
+      return;
+    }
+
+    // Check if user has reached the limit
+    if (apiKeys.length >= MAX_API_KEYS) {
+      toast.error(`You can only create up to ${MAX_API_KEYS} API keys`);
+      return;
+    }
+
+    setIsCreatingKey(true);
+
+    try {
+      const { data, error } = await authClient.apiKey.create({
+        name: newKeyName.trim(),
+      });
+
+      if (error) {
+        toast.error(error.message || 'Failed to create API key');
+        return;
+      }
+
+      if (data) {
+        // Store the full key to display it once
+        setGeneratedKey(data.key);
+        setNewKeyName('');
+        toast.success('API key created successfully!');
+        // Refresh the list
+        await fetchApiKeys();
+      }
+    } catch (error) {
+      console.error('Error creating API key:', error);
+      toast.error('An unexpected error occurred');
+    } finally {
+      setIsCreatingKey(false);
+    }
+  };
+
+  const openDeleteDialog = (keyId: string) => {
+    setKeyToDelete(keyId);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteApiKey = async () => {
+    if (!keyToDelete) return;
+
+    setDeletingKeyId(keyToDelete);
+
+    try {
+      // @ts-expect-error - apiKey plugin is dynamically added
+      const { data, error } = await authClient.apiKey.delete({
+        keyId: keyToDelete,
+      });
+
+      if (error) {
+        toast.error(error.message || 'Failed to delete API key');
+        return;
+      }
+
+      if (data?.success) {
+        toast.success('API key deleted successfully');
+        // Refresh the list
+        await fetchApiKeys();
+      }
+    } catch (error) {
+      console.error('Error deleting API key:', error);
+      toast.error('An unexpected error occurred');
+    } finally {
+      setDeletingKeyId(null);
+      setDeleteDialogOpen(false);
+      setKeyToDelete(null);
+    }
+  };
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success('Copied to clipboard!');
+    } catch (error) {
+      console.error('Failed to copy:', error);
+      toast.error('Failed to copy to clipboard');
     }
   };
 
@@ -356,6 +492,274 @@ export default function SettingsPage() {
                   </Button>
                 </form>
               </div>
+            </div>
+          )}
+
+          {activeSection === 'developer' && (
+            <div className="space-y-6">
+              {/* Create API Key */}
+              <div className="bg-secondary/30 rounded-lg p-6">
+                <h2 className="font-hebden text-xl font-semibold mb-2 text-foreground">
+                  Create API Key
+                </h2>
+                <p className="text-sm text-muted-foreground font-nunito mb-4">
+                  Generate an API key to authenticate your applications.
+                </p>
+
+                <form onSubmit={handleCreateApiKey} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="keyName">API Key Name</Label>
+                    <Input
+                      id="keyName"
+                      type="text"
+                      value={newKeyName}
+                      onChange={(e) => setNewKeyName(e.target.value)}
+                      disabled={isCreatingKey}
+                      placeholder="My Application API Key"
+                      required
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      A descriptive name to identify this key
+                    </p>
+                  </div>
+
+                  <Button
+                    type="submit"
+                    disabled={isCreatingKey || apiKeys.length >= MAX_API_KEYS}
+                    className="font-hebden"
+                  >
+                    {isCreatingKey ? (
+                      <>
+                        <Icon icon="mdi:loading" className="animate-spin mr-2" width="16" height="16" />
+                        Creating...
+                      </>
+                    ) : (
+                      <>
+                        <Icon icon="mdi:key-plus" className="mr-2" width="16" height="16" />
+                        Create API Key
+                      </>
+                    )}
+                  </Button>
+                </form>
+              </div>
+
+              {/* Generated Key Display */}
+              {generatedKey && (
+                <div className="bg-gradient-to-br from-primary/5 via-primary/10 to-primary/5 border-2 border-primary rounded-lg p-6 shadow-lg">
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-primary/20 rounded-lg">
+                        <Icon icon="mdi:key-variant" className="text-primary" width="24" height="24" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-hebden text-xl font-bold text-foreground mb-1">
+                          Your API Key is Ready!
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          Copy and save this key now - it will only be shown once and cannot be recovered later.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="bg-background border border-border rounded-lg p-4 shadow-sm">
+                      <div className="flex items-center justify-between mb-2">
+                        <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                          API Key
+                        </Label>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => copyToClipboard(generatedKey)}
+                          className="h-7 gap-1.5 font-hebden"
+                        >
+                          <Icon icon="mdi:content-copy" width="14" height="14" />
+                          Copy
+                        </Button>
+                      </div>
+                      <div className="bg-secondary/50 rounded p-3 font-mono text-sm break-all select-all text-foreground">
+                        {generatedKey}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                      <Icon icon="mdi:alert-circle" className="text-yellow-500 flex-shrink-0" width="18" height="18" />
+                      <p className="text-xs text-muted-foreground">
+                        <strong className="text-yellow-500 font-semibold">Important:</strong> Store this key in a secure location.
+                        Once you close this message, you won't be able to see the full key again.
+                      </p>
+                    </div>
+
+                    <div className="flex gap-2 pt-2">
+                      <Button
+                        onClick={() => copyToClipboard(generatedKey)}
+                        className="font-hebden flex-1"
+                      >
+                        <Icon icon="mdi:content-copy" className="mr-2" width="16" height="16" />
+                        Copy to Clipboard
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => setGeneratedKey(null)}
+                        className="font-hebden"
+                      >
+                        <Icon icon="mdi:check" className="mr-2" width="16" height="16" />
+                        Done
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+
+
+              {/* API Keys List */}
+              <div className="bg-secondary/30 rounded-lg p-6">
+                <h2 className="font-hebden text-xl font-semibold mb-4 text-foreground">
+                  Your API Keys ({apiKeys.length}/{MAX_API_KEYS})
+                </h2>
+
+                {isLoadingKeys ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Icon icon="mdi:loading" className="animate-spin text-primary" width="24" height="24" />
+                  </div>
+                ) : apiKeys.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Icon icon="mdi:key-outline" className="mx-auto text-muted-foreground mb-2" width="48" height="48" />
+                    <p className="text-muted-foreground font-nunito">
+                      No API keys yet. Create one to get started.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {apiKeys.map((key) => (
+                      <div
+                        key={key.id}
+                        className="flex items-center justify-between p-4 bg-background/50 rounded-lg border border-border"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-hebden font-medium text-foreground truncate">
+                              {key.name}
+                            </h3>
+                            {!key.enabled && (
+                              <span className="px-2 py-0.5 text-xs bg-destructive/20 text-destructive rounded">
+                                Disabled
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground font-nunito">
+                            <span className="font-mono">{key.start}...</span>
+                            <span>•</span>
+                            <span>Created {new Date(key.createdAt).toLocaleDateString()}</span>
+                            <span>•</span>
+                            <span className="text-xs">100 req/hour</span>
+                          </div>
+                        </div>
+
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => openDeleteDialog(key.id)}
+                          disabled={deletingKeyId === key.id}
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10 ml-4"
+                        >
+                          {deletingKeyId === key.id ? (
+                            <Icon icon="mdi:loading" className="animate-spin" width="16" height="16" />
+                          ) : (
+                            <Icon icon="mdi:delete" width="16" height="16" />
+                          )}
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* API Usage Documentation */}
+              <div className="bg-secondary/30 rounded-lg p-6">
+                <h2 className="font-hebden text-xl font-semibold mb-2 text-foreground">
+                  How to Use Your API Key
+                </h2>
+                <p className="text-sm text-muted-foreground font-nunito mb-4">
+                  Include your API key in the request header to authenticate your requests.
+                </p>
+
+                <div className="space-y-4">
+                  {/* Endpoint Info */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold flex items-center gap-2">
+                      <Icon icon="mdi:api" width="16" height="16" />
+                      API Base URL
+                    </Label>
+                    <div className="bg-background border border-border rounded-lg p-3">
+                      <code className="text-sm font-mono text-primary">
+                        https://api.orbis.place
+                      </code>
+                    </div>
+                  </div>
+
+                  {/* Example Request */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold flex items-center gap-2">
+                      <Icon icon="mdi:code-braces" width="16" height="16" />
+                      Example Request
+                    </Label>
+                    <div className="bg-background border border-border rounded-lg overflow-hidden">
+                      <div className="flex items-center justify-between px-3 py-2 bg-secondary/50 border-b border-border">
+                        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                          cURL
+                        </span>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => copyToClipboard(
+                            `curl -X GET https://api.orbis.place/resources/me \\\n  -H "x-api-key: YOUR_API_KEY"`
+                          )}
+                          className="h-6 gap-1.5 text-xs"
+                        >
+                          <Icon icon="mdi:content-copy" width="12" height="12" />
+                          Copy
+                        </Button>
+                      </div>
+                      <div className="p-4 overflow-x-auto">
+                        <pre className="text-xs font-mono text-foreground">
+                          <code>{`curl -X GET https://api.orbis.place/resources/me \\
+  -H "x-api-key: YOUR_API_KEY"`}</code>
+                        </pre>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Rate Limiting Info */}
+                  <div className="flex items-start gap-3 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                    <Icon icon="mdi:information" className="text-blue-500 flex-shrink-0 mt-0.5" width="18" height="18" />
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-blue-500 mb-1">Rate Limiting</p>
+                      <p className="text-xs text-muted-foreground">
+                        Each API key is limited to <strong>100 requests per hour</strong>.
+                        If you exceed this limit, you'll receive a 429 (Too Many Requests) response.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Delete Confirmation Dialog */}
+              <OrbisConfirmDialog
+                open={deleteDialogOpen}
+                onOpenChange={setDeleteDialogOpen}
+                title="Delete API Key"
+                description="Are you sure you want to delete this API key? This action cannot be undone."
+                onConfirm={handleDeleteApiKey}
+                onCancel={() => {
+                  setDeleteDialogOpen(false);
+                  setKeyToDelete(null);
+                }}
+                confirmText="Delete"
+                cancelText="Cancel"
+                variant="destructive"
+                confirmLoading={deletingKeyId !== null}
+              />
             </div>
           )}
         </div>

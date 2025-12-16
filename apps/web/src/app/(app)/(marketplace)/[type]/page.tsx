@@ -134,6 +134,7 @@ export default function MarketplacePage({ params }: { params: Promise<{ type: st
 
         return {
             id: resource.id,
+            slug: resource.slug,
             title: resource.name,
             author,
             authorDisplay,
@@ -352,7 +353,7 @@ export default function MarketplacePage({ params }: { params: Promise<{ type: st
                             {items.map((item) => (
                                 <Link
                                     key={item.id}
-                                    href={`/${typeConfig.singular}/${item.title.toLowerCase().replace(/ /g, '-')}`}
+                                    href={`/${typeConfig.singular}/${item.slug}`}
                                     className="cursor-pointer"
                                 >
                                     <MarketplaceCard item={item} viewMode={viewMode} />

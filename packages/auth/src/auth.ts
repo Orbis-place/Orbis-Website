@@ -1,8 +1,9 @@
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { betterAuth } from "better-auth";
+import { createAuthMiddleware, APIError } from "better-auth/api";
 import { prisma } from "@repo/db";
 import { sendResetPasswordEmail, sendVerificationEmail } from "./email";
-import { admin } from "better-auth/plugins";
+import { admin, apiKey } from "better-auth/plugins";
 import { createAccessControl } from "better-auth/plugins/access";
 import { defaultStatements, adminAc } from "better-auth/plugins/admin/access";
 
@@ -43,10 +44,10 @@ export const getAuth = () => {
             secret: process.env.BETTER_AUTH_SECRET!,
             basePath: '/auth',
             account: {
-                skipStateCookieCheck: process.env.NODE_ENV === 'development' // For testing purposes only
+                skipStateCookieCheck: process.env.NODE_ENV === 'development'
             },
             advanced: {
-                disableCSRFCheck: process.env.NODE_ENV === 'development', // For testing purposes only
+                disableCSRFCheck: process.env.NODE_ENV === 'development',
                 cookies: {
                     session_token: {
                         name: "orbis_session_token",
@@ -152,6 +153,17 @@ export const getAuth = () => {
                 },
             },
             plugins: [
+                apiKey({
+                    defaultPrefix: "orb_",
+                    enableSessionForAPIKeys: true,
+                    rateLimit: {
+                        enabled: true,
+                        timeWindow: 1000 * 60 * 60,
+                        maxRequests: 100,
+                    },
+                    defaultKeyLength: 64,
+                    requireName: true,
+                }),
                 admin({
                     ac,
                     roles: {
