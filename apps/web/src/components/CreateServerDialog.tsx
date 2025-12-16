@@ -51,7 +51,7 @@ export function CreateServerDialog({ open, onOpenChange, trigger, onSuccess, def
     const [formData, setFormData] = useState({
         name: '',
         slug: '',
-        description: '',
+        shortDesc: '',
         serverAddress: '',  // Changed from serverIp + port
         gameVersionId: '',
         primaryCategoryId: '',
@@ -116,9 +116,12 @@ export function CreateServerDialog({ open, onOpenChange, trigger, onSuccess, def
             if (response.ok) {
                 const data = await response.json();
                 setHytaleVersions(data);
-                // Set the first version as default if available
-                if (data.length > 0 && !formData.gameVersionId) {
-                    setFormData(prev => ({ ...prev, gameVersionId: data[0]?.id || '' }));
+                // Set the first version as default if available and no version is currently selected
+                if (data.length > 0) {
+                    setFormData(prev => ({
+                        ...prev,
+                        gameVersionId: prev.gameVersionId || data[0]?.id || ''
+                    }));
                 }
             }
         } catch (error) {
@@ -140,15 +143,18 @@ export function CreateServerDialog({ open, onOpenChange, trigger, onSuccess, def
             const serverData = {
                 name: formData.name,
                 slug: formData.slug,
-                description: formData.description,
+                shortDesc: formData.shortDesc,
                 serverAddress: formData.serverAddress,
-                gameVersionId: formData.gameVersionId,
-                supportedVersionIds: [formData.gameVersionId],
+                ...(formData.gameVersionId && {
+                    gameVersionId: formData.gameVersionId,
+                    supportedVersionIds: [formData.gameVersionId],
+                }),
                 primaryCategoryId: formData.primaryCategoryId,
                 teamId: formData.teamId,
                 tagNames: tagNames.length > 0 ? tagNames : undefined,
                 country: country || undefined,
             };
+
 
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/servers`, {
                 method: 'POST',
@@ -168,7 +174,7 @@ export function CreateServerDialog({ open, onOpenChange, trigger, onSuccess, def
             setFormData({
                 name: '',
                 slug: '',
-                description: '',
+                shortDesc: '',
                 serverAddress: '',
                 gameVersionId: hytaleVersions[0]?.id || '',
                 primaryCategoryId: '',
@@ -363,13 +369,13 @@ export function CreateServerDialog({ open, onOpenChange, trigger, onSuccess, def
 
                 {/* Short Description - Full width */}
                 <div className="space-y-2">
-                    <Label htmlFor="description">
+                    <Label htmlFor="shortDesc">
                         Short description *
                     </Label>
                     <Textarea
-                        id="description"
-                        name="description"
-                        value={formData.description}
+                        id="shortDesc"
+                        name="shortDesc"
+                        value={formData.shortDesc}
                         onChange={handleInputChange}
                         placeholder="A brief description of your server..."
                         rows={3}
@@ -377,7 +383,7 @@ export function CreateServerDialog({ open, onOpenChange, trigger, onSuccess, def
                         required
                     />
                     <p className="text-xs text-muted-foreground/60 font-nunito">
-                        {formData.description.length}/200 characters (minimum 10)
+                        {formData.shortDesc.length}/200 characters (minimum 10)
                     </p>
                 </div>
 

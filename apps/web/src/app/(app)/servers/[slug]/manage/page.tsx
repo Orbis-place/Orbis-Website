@@ -54,27 +54,17 @@ export default function ServerManagePage() {
     if (contextServer) {
       setServer(contextServer);
 
-      // Try to find the version ID if we have the versions loaded
-      let versionId = '';
-      if (hytaleVersions.length > 0) {
-        const foundVersion = hytaleVersions.find(v => v.hytaleVersion === contextServer.gameVersion);
-        if (foundVersion) {
-          versionId = foundVersion.id;
-        }
-      }
-
       setFormData(prev => ({
         ...prev,
         name: contextServer.name,
         shortDesc: contextServer.shortDesc || '',
         serverAddress: contextServer.serverAddress,
-        // If we found the ID, use it. If not, keep existing or empty. 
-        gameVersionId: versionId || prev.gameVersionId,
+        gameVersionId: (contextServer as any).gameVersionId || '',
         websiteUrl: (contextServer as any).websiteUrl || '',
         country: (contextServer as any).country || '',
       }));
     }
-  }, [contextServer, hytaleVersions]);
+  }, [contextServer]);
 
   useEffect(() => {
     setLoading(contextLoading);
@@ -113,13 +103,24 @@ export default function ServerManagePage() {
 
     try {
       setIsSaving(true);
+
+      // Only include non-empty optional fields
+      const updateData = {
+        name: formData.name,
+        shortDesc: formData.shortDesc,
+        serverAddress: formData.serverAddress,
+        gameVersionId: formData.gameVersionId,
+        ...(formData.websiteUrl && { websiteUrl: formData.websiteUrl }),
+        ...(formData.country && { country: formData.country }),
+      };
+
       const response = await fetch(`${API_URL}/servers/${server.id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify(formData),
+        body: JSON.stringify(updateData),
       });
 
       if (!response.ok) {
@@ -338,13 +339,14 @@ export default function ServerManagePage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="shortDesc">Short Description</Label>
+                <Label htmlFor="shortDesc">Short Description *</Label>
                 <Input
                   id="shortDesc"
                   value={formData.shortDesc}
                   onChange={(e) => setFormData({ ...formData, shortDesc: e.target.value })}
                   placeholder="A brief tagline for your server"
                   maxLength={200}
+                  required
                 />
               </div>
               <div className="space-y-2">
@@ -363,6 +365,7 @@ export default function ServerManagePage() {
               <div className="space-y-2">
                 <Label htmlFor="gameVersionId">Game Version *</Label>
                 <Select
+                  key={`${formData.gameVersionId}-${hytaleVersions.length}`}
                   value={formData.gameVersionId}
                   onValueChange={(value) => setFormData({ ...formData, gameVersionId: value })}
                   required
