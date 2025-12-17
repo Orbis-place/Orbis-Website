@@ -1,6 +1,6 @@
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { betterAuth } from "better-auth";
-import { createAuthMiddleware, APIError } from "better-auth/api";
+import { createAuthMiddleware, APIError, getSessionFromCtx } from "better-auth/api";
 import { prisma } from "@repo/db";
 import { sendResetPasswordEmail, sendVerificationEmail } from "./email";
 import { admin, apiKey } from "better-auth/plugins";
@@ -45,6 +45,29 @@ export const getAuth = () => {
             basePath: '/auth',
             account: {
                 skipStateCookieCheck: process.env.NODE_ENV === 'development'
+            },
+            hooks: {
+                before: createAuthMiddleware(async (ctx) => {
+                    if (ctx.path === '/api-key/create') {
+                        const session = await getSessionFromCtx(ctx);
+
+                        if (!session?.user?.id) {
+                            throw new Error('Unauthorized: No valid session found');
+                        }
+
+                        const existingKeys = await prisma.apikey.count({
+                            where: {
+                                userId: session.user.id,
+                            },
+                        });
+
+                        if (existingKeys >= 5) {
+                            throw new Error('You can only create up to 5 API keys');
+                        }
+                    }
+
+                    return ctx;
+                }),
             },
             advanced: {
                 disableCSRFCheck: process.env.NODE_ENV === 'development',
