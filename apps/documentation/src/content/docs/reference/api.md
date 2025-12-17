@@ -1,0 +1,231 @@
+---
+title: Overview
+description: Introduction to the Orbis API
+---
+
+# API Reference
+
+The Orbis API provides programmatic access to servers, marketplace resources, teams, users, and more.
+
+## Authentication
+
+All API requests require authentication using an API key:
+
+```bash
+curl -H "Authorization: Bearer YOUR_API_KEY" \
+  https://api.orbis.place/resources
+```
+
+### Getting an API Key
+
+1. Log in to your Orbis account
+2. Navigate to Settings → Developer
+3. Click "Create API Key"
+4. Copy and securely store your key
+
+## Base URL
+
+```
+https://api.orbis.place
+```
+
+## Rate Limiting
+
+- **Default**: 100 requests per hour per API key
+- Rate limit headers are included in all responses
+
+## Response Format
+
+All responses are in JSON format:
+
+```json
+{
+  "data": [...],
+  "meta": {
+    "total": 100,
+    "limit": 20,
+    "offset": 0
+  }
+}
+```
+
+## Error Handling
+
+Errors return appropriate HTTP status codes:
+
+- `400` - Bad Request (invalid parameters)
+- `401` - Unauthorized (invalid or missing API key)
+- `403` - Forbidden (insufficient permissions)
+- `404` - Not Found
+- `429` - Rate Limit Exceeded
+- `500` - Internal Server Error
+
+Error responses include details:
+
+```json
+{
+  "error": {
+    "code": "INVALID_REQUEST",
+    "message": "Invalid resource ID format",
+    "details": {}
+  }
+}
+```
+
+---
+
+## API Sections
+
+### Resources
+
+Manage marketplace resources including mods, plugins, tools, and scripts.
+
+- **[Resources API](/reference/api/resources)** - Core resource management
+- **[Resource Likes](/reference/api/resource-likes)** - Like/unlike resources
+- **[Resource Favorites](/reference/api/resource-favorites)** - Favorite resources
+- **[Resource Contributors](/reference/api/resource-contributors)** - Manage contributors
+- **[Resource Versions](/reference/api/resource-versions)** - Version and file management
+- **[Resource Gallery Images](/reference/api/resource-gallery-images)** - Gallery images
+- **[Resource Description Images](/reference/api/resource-description-images)** - Description images
+- **[Resource Tags](/reference/api/resource-tags)** - Browse and search tags
+
+### Servers
+
+Manage Hytale game server listings.
+
+- **[Servers API](/reference/api/servers)** - Server management and moderation
+- **[Server Tags](/reference/api/server-tags)** - Server tags
+- **[Server Categories](/reference/api/server-categories)** - Server categories
+- **[Server Description Images](/reference/api/server-description-images)** - Description images
+
+### Teams
+
+Manage teams and team-owned content.
+
+- **[Teams API](/reference/api/teams)** - Team management, members, and invitations
+
+### Users
+
+Manage user profiles and social features.
+
+- **[Users API](/reference/api/users)** - User profiles, follows, and social links
+
+### Community & Moderation
+
+- **[Badges API](/reference/api/badges)** - User badges and achievements
+- **[Reports API](/reference/api/reports)** - Report users and content
+
+### Game Data
+
+- **[Hytale Versions API](/reference/api/hytale-versions)** - Hytale game versions
+
+---
+
+## Common Patterns
+
+### Pagination
+
+Many endpoints support pagination using `limit` and `offset`:
+
+```http
+GET /resources?limit=20&offset=40
+```
+
+Alternative page-based pagination:
+
+```http
+GET /resources?page=3&limit=20
+```
+
+### Filtering
+
+Filter results using query parameters:
+
+```http
+GET /resources?type=MOD&tags=magic,combat
+```
+
+Array parameters can be passed multiple times or comma-separated.
+
+### Sorting
+
+Sort results using the `sort` parameter:
+
+```http
+GET /resources?sort=newest
+GET /servers?sort=rank
+```
+
+Common sort options:
+- `newest` - Most recently created
+- `popular` - Most popular/liked
+- `downloads` - Most downloaded (resources)
+- `rank` - Server rank (servers)
+
+### File Uploads
+
+File upload endpoints use `multipart/form-data`:
+
+```bash
+curl -X POST \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "icon=@/path/to/image.png" \
+  https://api.orbis.place/resources/RESOURCE_ID/icon
+```
+
+### Slugs vs IDs
+
+Most resources can be accessed by either ID or slug:
+
+- `/resources/:id` - Access by ID (guaranteed unique)
+- `/resources/slug/:slug` - Access by slug (user-friendly URLs)
+
+---
+
+## Best Practices
+
+### Security
+
+- Never expose your API key in client-side code
+- Rotate API keys regularly
+- Use environment variables to store API keys
+- Implement proper error handling for 401/403 responses
+
+### Performance
+
+- Use pagination to limit response sizes
+- Cache responses when appropriate
+- Use conditional requests with ETags (when available)
+- Filter results to fetch only what you need
+
+### Error Handling
+
+```javascript
+try {
+  const response = await fetch('https://api.orbis.place/resources', {
+    headers: {
+      'Authorization': `Bearer ${API_KEY}`
+    }
+  });
+  
+  if (!response.ok) {
+    const error = await response.json();
+    console.error('API Error:', error.error.message);
+    return;
+  }
+  
+  const data = await response.json();
+  // Process data
+} catch (error) {
+  console.error('Network Error:', error);
+}
+```
+
+---
+
+## Support
+
+For API support, please:
+- Open an issue on [GitHub](https://github.com/orbisplace/orbis)
+- Join our [Discord](https://discord.gg/orbis)
+- Check the documentation for updates

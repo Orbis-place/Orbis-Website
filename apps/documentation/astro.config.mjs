@@ -6,19 +6,55 @@ import starlight from '@astrojs/starlight';
 export default defineConfig({
 	integrations: [
 		starlight({
-			title: 'My Docs',
-			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/withastro/starlight' }],
+			title: 'Documentation',
+			description: 'Official documentation for Orbis',
+			logo: {
+				src: './src/assets/logo.png',
+			},
+			customCss: [
+				'./src/styles/custom.css',
+			],
+			social: [
+				{ 
+					icon: 'github', 
+					label: 'GitHub', 
+					href: 'https://github.com/orbisplace/orbis' 
+				},
+				{ 
+					icon: 'discord', 
+					label: 'Discord', 
+					href: 'https://discord.gg/orbis' 
+				},
+				{ 
+					icon: 'x.com', 
+					label: 'X (Twitter)', 
+					href: 'https://x.com/orbisplace' 
+				},
+			],
+			components: {
+				ThemeSelect: './src/components/ThemeSelect.astro',
+			},
 			sidebar: [
 				{
-					label: 'Guides',
+					label: 'Getting Started',
 					items: [
-						// Each item here is one entry in the navigation menu.
-						{ label: 'Example Guide', slug: 'guides/example' },
+						{ label: 'Welcome', slug: 'index' },
+						{ label: 'Quick Start', slug: 'guides/quick-start' },
 					],
 				},
 				{
-					label: 'Reference',
+					label: 'Guides',
+					autogenerate: { directory: 'guides' },
+				},
+				{
+					label: 'API Reference',
 					autogenerate: { directory: 'reference' },
+				},
+			],
+			head: [
+				{
+					tag: 'meta',
+					attrs: { property: 'og:image', content: '/og-image.png' },
 				},
 			],
 		}),

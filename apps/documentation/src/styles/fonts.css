@@ -1,0 +1,11 @@
+/* Google Font - Nunito */
+@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
+
+/* Custom Font - Hebden */
+@font-face {
+  font-family: 'Hebden';
+  src: url('/fonts/Hebden.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
