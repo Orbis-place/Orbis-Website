@@ -126,7 +126,7 @@ export default function Footer() {
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/documentation" className="text-[#C7F4FA]/70 hover:text-[#109EB1] transition-colors">
+                                <Link href="https://docs.orbis.place" className="text-[#C7F4FA]/70 hover:text-[#109EB1] transition-colors">
                                     Documentation
                                 </Link>
                             </li>
