@@ -18,7 +18,7 @@ export default defineConfig({
 				{ 
 					icon: 'github', 
 					label: 'GitHub', 
-					href: 'https://github.com/orbisplace/orbis' 
+					href: 'https://github.com/Orbis-place' 
 				},
 				{ 
 					icon: 'discord', 
@@ -39,15 +39,14 @@ export default defineConfig({
 					label: 'Getting Started',
 					items: [
 						{ label: 'Welcome', slug: 'index' },
-						{ label: 'Quick Start', slug: 'guides/quick-start' },
 					],
 				},
 				{
-					label: 'Guides',
-					autogenerate: { directory: 'guides' },
+					label: 'Tutorials',
+					autogenerate: { directory: 'tutorials' },
 				},
 				{
-					label: 'API Endpoints',
+					label: 'API',
 					autogenerate: { directory: 'reference' },
 				},
 			],

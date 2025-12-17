@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { UpdateProfileDto } from "./dtos/update-profile.dto";
 import { StorageService } from "../storage/storage.service";
 import { SearchUsersDto } from "./dtos/search-users.dto";
@@ -282,7 +282,12 @@ export class UserService {
         });
     }
 
-    async getFollowers(userId: string) {
+    async getFollowers(userId: string, currentUserId: string) {
+        // Privacy check: only allow viewing own followers list
+        if (userId !== currentUserId) {
+            throw new ForbiddenException('You can only view your own followers list');
+        }
+
         const followers = await prisma.follow.findMany({
             where: { followingId: userId },
             include: {
@@ -313,7 +318,12 @@ export class UserService {
         }));
     }
 
-    async getFollowing(userId: string) {
+    async getFollowing(userId: string, currentUserId: string) {
+        // Privacy check: only allow viewing own following list
+        if (userId !== currentUserId) {
+            throw new ForbiddenException('You can only view your own following list');
+        }
+
         const following = await prisma.follow.findMany({
             where: { followerId: userId },
             include: {

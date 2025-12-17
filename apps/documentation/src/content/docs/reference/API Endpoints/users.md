@@ -286,24 +286,47 @@ GET /users/:userId/followers
 
 Get a list of users following this user.
 
-**Authentication:** Not required
+> [!IMPORTANT]
+> **Privacy Restriction**: You can only view your own followers list. This endpoint requires authentication and will return a 403 Forbidden error if you try to access another user's followers.
+
+**Authentication:** Required
 
 **URL Parameters:**
-- `userId` (string) - User ID
+- `userId` (string) - User ID (must match authenticated user's ID)
 
 **Response:**
 ```json
-{
-  "followers": [
-    {
-      "id": "follower-id",
-      "username": "follower",
-      "displayName": "Follower Name",
-      "image": "https://...",
-      "followedAt": "2024-01-01T00:00:00Z"
+[
+  {
+    "id": "follower-id",
+    "username": "follower",
+    "displayName": "Follower Name",
+    "image": "https://...",
+    "bio": "Follower bio",
+    "followedAt": "2024-01-01T00:00:00Z",
+    "_count": {
+      "followers": 10,
+      "following": 15
     }
-  ],
-  "total": 50
+  }
+]
+```
+
+**Error Responses:**
+
+401 Unauthorized (not authenticated):
+```json
+{
+  "statusCode": 401,
+  "message": "Unauthorized"
+}
+```
+
+403 Forbidden (trying to view another user's followers):
+```json
+{
+  "statusCode": 403,
+  "message": "You can only view your own followers list"
 }
 ```
 
@@ -317,24 +340,47 @@ GET /users/:userId/following
 
 Get a list of users that this user is following.
 
-**Authentication:** Not required
+> [!IMPORTANT]
+> **Privacy Restriction**: You can only view your own following list. This endpoint requires authentication and will return a 403 Forbidden error if you try to access another user's following list.
+
+**Authentication:** Required
 
 **URL Parameters:**
-- `userId` (string) - User ID
+- `userId` (string) - User ID (must match authenticated user's ID)
 
 **Response:**
 ```json
-{
-  "following": [
-    {
-      "id": "user-id",
-      "username": "username",
-      "displayName": "Display Name",
-      "image": "https://...",
-      "followedAt": "2024-01-01T00:00:00Z"
+[
+  {
+    "id": "user-id",
+    "username": "username",
+    "displayName": "Display Name",
+    "image": "https://...",
+    "bio": "User bio",
+    "followedAt": "2024-01-01T00:00:00Z",
+    "_count": {
+      "followers": 20,
+      "following": 30
     }
-  ],
-  "total": 30
+  }
+]
+```
+
+**Error Responses:**
+
+401 Unauthorized (not authenticated):
+```json
+{
+  "statusCode": 401,
+  "message": "Unauthorized"
+}
+```
+
+403 Forbidden (trying to view another user's following):
+```json
+{
+  "statusCode": 403,
+  "message": "You can only view your own following list"
 }
 ```
 

@@ -101,15 +101,23 @@ export class UserController {
     }
 
     @Get(':userId/followers')
+    @ApiBearerAuth()
     @ApiOperation({ summary: 'Get user followers' })
-    async getFollowers(@Param('userId') userId: string) {
-        return this.userService.getFollowers(userId);
+    async getFollowers(
+        @Param('userId') userId: string,
+        @Session() session: UserSession,
+    ) {
+        return this.userService.getFollowers(userId, session.user.id);
     }
 
     @Get(':userId/following')
+    @ApiBearerAuth()
     @ApiOperation({ summary: 'Get users that this user is following' })
-    async getFollowing(@Param('userId') userId: string) {
-        return this.userService.getFollowing(userId);
+    async getFollowing(
+        @Param('userId') userId: string,
+        @Session() session: UserSession,
+    ) {
+        return this.userService.getFollowing(userId, session.user.id);
     }
 
     @Get('search')

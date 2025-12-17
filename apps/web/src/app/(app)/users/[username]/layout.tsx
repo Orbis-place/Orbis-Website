@@ -16,6 +16,7 @@ import {
 import { ReportUserDialog } from '@/components/ReportUserDialog';
 import UserProfileTabs from '@/components/user/UserProfileTabs';
 import { UserProvider, useUser } from '@/contexts/UserContext';
+import FollowListDialog from '@/components/user/FollowListDialog';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
@@ -24,6 +25,8 @@ function UserProfileLayoutContent({ children }: { children: ReactNode }) {
     const [followLoading, setFollowLoading] = useState(false);
     const [copySuccess, setCopySuccess] = useState(false);
     const [reportDialogOpen, setReportDialogOpen] = useState(false);
+    const [followListDialogOpen, setFollowListDialogOpen] = useState(false);
+    const [followListInitialTab, setFollowListInitialTab] = useState<'followers' | 'following'>('followers');
 
     const handleCopyId = () => {
         if (user) {
@@ -266,23 +269,35 @@ function UserProfileLayoutContent({ children }: { children: ReactNode }) {
                 <div className="flex flex-wrap items-center gap-6 pb-6">
                     {/* Stats */}
                     <div className="flex gap-6">
-                        <div className="flex flex-col">
+                        <button
+                            onClick={() => {
+                                setFollowListInitialTab('followers');
+                                setFollowListDialogOpen(true);
+                            }}
+                            className="flex flex-col hover:opacity-80 transition-opacity cursor-pointer text-left"
+                        >
                             <span className="font-hebden font-extrabold text-2xl text-[#C7F4FA]">
                                 {user._count.followers.toLocaleString()}
                             </span>
                             <span className="font-nunito text-sm text-[#C7F4FA]/50">
                                 Followers
                             </span>
-                        </div>
+                        </button>
 
-                        <div className="flex flex-col">
+                        <button
+                            onClick={() => {
+                                setFollowListInitialTab('following');
+                                setFollowListDialogOpen(true);
+                            }}
+                            className="flex flex-col hover:opacity-80 transition-opacity cursor-pointer text-left"
+                        >
                             <span className="font-hebden font-extrabold text-2xl text-[#C7F4FA]">
                                 {user._count.following.toLocaleString()}
                             </span>
                             <span className="font-nunito text-sm text-[#C7F4FA]/50">
                                 Following
                             </span>
-                        </div>
+                        </button>
                     </div>
 
                     {/* Badges */}
@@ -475,6 +490,15 @@ function UserProfileLayoutContent({ children }: { children: ReactNode }) {
                     )}
                 </div>
             </div>
+
+            {/* Follow List Dialog */}
+            <FollowListDialog
+                open={followListDialogOpen}
+                onOpenChange={setFollowListDialogOpen}
+                initialTab={followListInitialTab}
+                userId={user.id}
+                username={user.username}
+            />
 
             {/* Report Dialog */}
             <ReportUserDialog
