@@ -2,6 +2,7 @@
 
 import { Icon } from '@iconify/react';
 import { useUser } from '@/contexts/UserContext';
+import Link from 'next/link';
 
 export default function UserResourcesPage() {
     const { user } = useUser();
@@ -13,9 +14,9 @@ export default function UserResourcesPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {user.ownedResources.length > 0 ? (
                     user.ownedResources.map((resource) => (
-                        <a
+                        <Link
                             key={resource.id}
-                            href={`/${resource.type}/${resource.slug}`}
+                            href={`/${resource.type.toLowerCase()}/${resource.slug}`}
                             className="bg-[#06363D]/50 border border-[#084B54] rounded-[15px] p-4 hover:border-[#109EB1]/50 hover:bg-[#084B54]/30 transition-all"
                         >
                             <div className="flex items-start gap-3 mb-3">
@@ -44,7 +45,7 @@ export default function UserResourcesPage() {
                                     {resource.likeCount}
                                 </span>
                             </div>
-                        </a>
+                        </Link>
                     ))
                 ) : (
                     <div className="col-span-full text-center py-16 border border-dashed border-[#084B54] rounded-[20px]">
