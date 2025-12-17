@@ -11,6 +11,7 @@ export default defineConfig({
 			logo: {
 				src: './src/assets/logo.png',
 			},
+			favicon: '/favicon.ico',
 			customCss: [
 				'./src/styles/custom.css',
 			],
