@@ -47,10 +47,17 @@ export default defineConfig({
 					autogenerate: { directory: 'guides' },
 				},
 				{
-					label: 'API Reference',
+					label: 'API Endpoints',
 					autogenerate: { directory: 'reference' },
 				},
 			],
+			expressiveCode: {
+				themes: ['github-dark'],
+				styleOverrides: {
+					borderRadius: '0.5rem',
+					borderWidth: '1px',
+				},
+			},
 			head: [
 				{
 					tag: 'meta',

@@ -75,9 +75,25 @@
     background-color: var(--sl-color-gray-6);
   }
 
-  /* Code block background */
+  /* Code block background and syntax highlighting colors */
+  .expressive-code {
+    /* Ensure code block colors are consistent across builds */
+    --ec-codeBg: var(--sl-color-gray-6);
+  }
+  
   .expressive-code pre {
     --code-background: var(--sl-color-gray-6);
+  }
+  
+  /* Define syntax highlighting colors for code blocks */
+  .expressive-code .code {
+    /* Dark mode colors (--0) */
+    color: var(--sl-color-white);
+  }
+  
+  /* Ensure inline styles work correctly in production */
+  .expressive-code .code span[style*="--0"] {
+    color: var(--0, var(--sl-color-white));
   }
 
   /* Additional Orbis-specific refinements */
