@@ -1,7 +1,8 @@
 import { ImageResponse } from 'next/og';
 import { getResourceType, getResourceTypeBySingular } from '@/config/resource-types';
-
-export const runtime = 'edge';
+import fs from 'fs';
+import path from 'path';
+import { fetchImageAsBase64Png } from '@/lib/og-image-utils';
 
 export const alt = 'Orbis Resource Preview';
 export const size = {
@@ -48,6 +49,9 @@ export default async function Image({ params }: { params: { slug: string; type: 
     const resourceType = getResourceType(type) || getResourceTypeBySingular(type);
     const typeLabel = resourceType?.labelSingular || 'Resource';
 
+    // Convert icon to PNG for Satori compatibility
+    const iconSrc = resource.iconUrl ? await fetchImageAsBase64Png(resource.iconUrl) : null;
+
     return new ImageResponse(
         (
             <div
@@ -86,6 +90,7 @@ export default async function Image({ params }: { params: { slug: string; type: 
                 >
                     <div
                         style={{
+                            display: 'flex',
                             background: 'rgba(16, 158, 177, 0.2)',
                             border: '1px solid rgba(16, 158, 177, 0.3)',
                             borderRadius: 12,
@@ -97,24 +102,23 @@ export default async function Image({ params }: { params: { slug: string; type: 
                     >
                         {typeLabel}
                     </div>
-                    <div style={{ color: 'rgba(199, 244, 250, 0.5)', fontSize: 24 }}>
-                        by {resource.author?.username || 'Unknown'}
+                    <div style={{ display: 'flex', color: 'rgba(199, 244, 250, 0.5)', fontSize: 24 }}>
+                        by {resource.ownerUser?.username || resource.ownerTeam?.name || 'Unknown'}
                     </div>
                 </div>
 
                 {/* Main Content */}
                 <div style={{ display: 'flex', gap: 40, alignItems: 'flex-start', flex: 1 }}>
                     {/* Icon */}
-                    {resource.iconUrl && (
+                    {iconSrc && (
                         <img
-                            src={resource.iconUrl}
+                            src={iconSrc}
                             alt=""
-                            width="200"
-                            height="200"
+                            width={200}
+                            height={200}
                             style={{
                                 borderRadius: 32,
                                 border: '4px solid rgba(16, 158, 177, 0.3)',
-                                boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
                             }}
                         />
                     )}
@@ -154,38 +158,57 @@ export default async function Image({ params }: { params: { slug: string; type: 
                     }}
                 >
                     <div style={{ display: 'flex', gap: 40 }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                            <div style={{ fontSize: 20, color: 'rgba(199, 244, 250, 0.5)' }}>Downloads</div>
-                            <div style={{ fontSize: 36, fontWeight: 700, color: '#15C8E0' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                            {/* Download Icon */}
+                            <svg
+                                width="28"
+                                height="28"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="#15C8E0"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            >
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                <polyline points="7 10 12 15 17 10" />
+                                <line x1="12" y1="15" x2="12" y2="3" />
+                            </svg>
+                            <div style={{ display: 'flex', fontSize: 36, fontWeight: 700, color: '#15C8E0' }}>
                                 {new Intl.NumberFormat('en-US', { notation: "compact" }).format(resource.downloadCount || 0)}
                             </div>
                         </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                            <div style={{ fontSize: 20, color: 'rgba(199, 244, 250, 0.5)' }}>Likes</div>
-                            <div style={{ fontSize: 36, fontWeight: 700, color: '#FF5D5D' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                            {/* Heart Icon */}
+                            <svg
+                                width="28"
+                                height="28"
+                                viewBox="0 0 24 24"
+                                fill="#FF5D5D"
+                                stroke="#FF5D5D"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            >
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                            </svg>
+                            <div style={{ display: 'flex', fontSize: 36, fontWeight: 700, color: '#FF5D5D' }}>
                                 {new Intl.NumberFormat('en-US', { notation: "compact" }).format(resource.likeCount || 0)}
                             </div>
                         </div>
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                        <div
+                        <img
+                            src={`data:image/png;base64,${fs.readFileSync(path.join(process.cwd(), 'public/icon.png')).toString('base64')}`}
+                            alt=""
+                            width={48}
+                            height={48}
                             style={{
-                                width: 48,
-                                height: 48,
-                                background: '#15C8E0',
                                 borderRadius: 12,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                fontSize: 28,
-                                fontWeight: 900,
-                                color: '#032125',
                             }}
-                        >
-                            O
-                        </div>
-                        <div style={{ fontSize: 32, fontWeight: 700, color: '#C7F4FA' }}>Orbis.place</div>
+                        />
+                        <div style={{ display: 'flex', fontSize: 32, fontWeight: 700, color: '#C7F4FA' }}>Orbis.place</div>
                     </div>
                 </div>
             </div>
