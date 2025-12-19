@@ -85,6 +85,13 @@ enum SocialLinkType {
   CUSTOM
 }
 
+enum DiscoveryResourceCollectionType {
+  SELECTION_OF_WEEK // Featured resource of the week
+  HIDDEN_GEMS // Lesser-known quality resources
+  STARTER_PACK // Essential resources for beginners
+  THEME_OF_MONTH // Monthly themed collection
+}
+
 // ============================================
 // USER MODEL
 // ============================================
@@ -732,6 +739,9 @@ model Resource {
   statusHistory ResourceStatusHistory[]
   usedBy        ResourceVersionDependency[] @relation("ResourceDependencies")
 
+  // Discovery - Resource Collections
+  discoveryResourceCollections DiscoveryResourceCollectionItem[]
+
   // Moderation
   moderationNotes String? // Internal staff notes
   rejectionReason String? // If status = REJECTED
@@ -1340,3 +1350,42 @@ model Apikey {
   @@index([userId])
   @@map("apikey")
 }
+
+// ============================================
+// DISCOVERY RESOURCE COLLECTIONS
+// ============================================
+
+model DiscoveryResourceCollection {
+  id          String                         @id @default(cuid())
+  type        DiscoveryResourceCollectionType @unique
+  title       String                         // e.g., "Selection of the Week", "Medieval Era"
+  description String?                        @db.Text
+  metadata    Json?                          // For theme info, dates, background image URL, etc.
+  isActive    Boolean                        @default(true)
+  createdAt   DateTime                       @default(now())
+  updatedAt   DateTime                       @updatedAt
+
+  items DiscoveryResourceCollectionItem[]
+
+  @@map("discovery_resource_collections")
+}
+
+model DiscoveryResourceCollectionItem {
+  id           String                      @id @default(cuid())
+  collectionId String
+  resourceId   String
+  order        Int                         @default(0)
+  startDate    DateTime                    @default(now())  // When it becomes active
+  endDate      DateTime?                   // When it ends (null = current)
+  addedAt      DateTime                    @default(now())
+
+  collection DiscoveryResourceCollection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  resource   Resource                    @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  @@unique([collectionId, resourceId])
+  @@index([collectionId, order])
+  @@index([collectionId, endDate])  // Critical for performance when querying current items
+  @@map("discovery_resource_collection_items")
+}
+
+

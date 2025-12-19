@@ -4,7 +4,7 @@ import { cva } from "class-variance-authority"
 import { ChevronDownIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
-import {EvaArrowDownFill} from "@/components/icons/EvaArrowDownFill";
+import { EvaArrowDownFill } from "@/components/icons/EvaArrowDownFill";
 
 function NavigationMenu({
   className,
@@ -60,7 +60,7 @@ function NavigationMenuItem({
 }
 
 const navigationMenuTriggerStyle = cva(
-    "group inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium hover:bg-white/5 dark:hover:bg-white/5 hover:text-accent-foreground focus:bg-white/5 dark:focus:bg-white/5 focus:text-accent-foreground disabled:pointer-events-none disabled:opacity-50 data-[state=open]:hover:bg-white/5 dark:data-[state=open]:hover:bg-white/5 data-[state=open]:text-accent-foreground data-[state=open]:focus:bg-accent data-[state=open]:bg-white/5 focus-visible:ring-ring/50 outline-none transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1"
+  "group inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium hover:bg-white/5 dark:hover:bg-white/5 hover:text-accent-foreground focus:bg-white/5 dark:focus:bg-white/5 focus:text-accent-foreground disabled:pointer-events-none disabled:opacity-50 data-[state=open]:hover:bg-white/5 dark:data-[state=open]:hover:bg-white/5 data-[state=open]:text-accent-foreground data-[state=open]:focus:bg-accent data-[state=open]:bg-white/5 focus-visible:ring-ring/50 outline-none transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1"
 )
 
 function NavigationMenuTrigger({

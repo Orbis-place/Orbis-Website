@@ -7,7 +7,6 @@ import { prisma } from '@repo/db';
 @Injectable()
 export class UserService {
     constructor(
-
         private readonly storage: StorageService,
     ) {
     }

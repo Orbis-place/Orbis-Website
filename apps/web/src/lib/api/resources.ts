@@ -982,3 +982,133 @@ export async function reorderExternalLinks(
 
     return response.json();
 }
+
+// ============================================
+// DISCOVERY COLLECTIONS API
+// ============================================
+
+export interface DiscoveryCollectionResponse {
+    collection: {
+        id: string;
+        type: string;
+        title: string;
+        description?: string;
+        metadata?: any;
+    };
+    resources: Resource[];
+}
+
+/**
+ * Fetch Selection of the Week
+ */
+export async function fetchSelectionOfWeek(): Promise<Resource | null> {
+    try {
+        const response = await fetch(`${API_URL}/discovery/resources/selection-of-week`, {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) return null;
+
+        const data: DiscoveryCollectionResponse = await response.json();
+        return data.resources[0] || null;
+    } catch (error) {
+        console.error('Failed to fetch selection of the week:', error);
+        return null;
+    }
+}
+
+/**
+ * Fetch Hidden Gems collection
+ */
+export async function fetchHiddenGems(): Promise<Resource[]> {
+    try {
+        const response = await fetch(`${API_URL}/discovery/resources/hidden-gems`, {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) return [];
+
+        const data: DiscoveryCollectionResponse = await response.json();
+        return data.resources;
+    } catch (error) {
+        console.error('Failed to fetch hidden gems:', error);
+        return [];
+    }
+}
+
+/**
+ * Fetch Starter Pack collection
+ */
+export async function fetchStarterPack(): Promise<Resource[]> {
+    try {
+        const response = await fetch(`${API_URL}/discovery/resources/starter-pack`, {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) return [];
+
+        const data: DiscoveryCollectionResponse = await response.json();
+        return data.resources;
+    } catch (error) {
+        console.error('Failed to fetch starter pack:', error);
+        return [];
+    }
+}
+
+/**
+ * Fetch Theme of the Month collection
+ */
+export async function fetchThemeOfMonth(): Promise<DiscoveryCollectionResponse | null> {
+    try {
+        const response = await fetch(`${API_URL}/discovery/resources/theme-of-month`, {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) return null;
+
+        return response.json();
+    } catch (error) {
+        console.error('Failed to fetch theme of the month:', error);
+        return null;
+    }
+}
+
+/**
+ * Fetch Most Downloaded resources
+ */
+export async function fetchMostDownloaded(limit = 4): Promise<Resource[]> {
+    try {
+        const response = await fetch(`${API_URL}/discovery/resources/most-downloaded?limit=${limit}`, {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) return [];
+
+        const data: { resources: Resource[] } = await response.json();
+        return data.resources;
+    } catch (error) {
+        console.error('Failed to fetch most downloaded:', error);
+        return [];
+    }
+}
+

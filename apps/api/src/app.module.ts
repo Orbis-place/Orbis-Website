@@ -14,6 +14,7 @@ import { ReportModule } from "./modules/report/report.module";
 import { BadgeModule } from "./modules/badge/badge.module";
 import { ResourceModule } from "./modules/resource/resource.module";
 import { HytaleVersionModule } from "./modules/hytale-version/hytale-version.module";
+import { DiscoveryModule } from "./modules/discovery/discovery.module";
 
 @Module({
     imports: [
@@ -32,7 +33,7 @@ import { HytaleVersionModule } from "./modules/hytale-version/hytale-version.mod
                 next();
             },
         }),
-        UserModule, OrbisAuthModule, ServerModule, TeamModule, ReportModule, BadgeModule, ResourceModule, HytaleVersionModule],
+        UserModule, OrbisAuthModule, ServerModule, TeamModule, ReportModule, BadgeModule, ResourceModule, HytaleVersionModule, DiscoveryModule],
     controllers: [AppController],
     providers: [AppService],
 })

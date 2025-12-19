@@ -77,7 +77,7 @@ export default function MarketplaceCard({ item, viewMode }: MarketplaceCardProps
 
                 {/* Categories and Tags */}
                 <div className="flex flex-wrap gap-2" style={{ gridArea: 'tags' }}>
-                    {item.categories.map((category, i) => (
+                    {(item.categories || []).map((category, i) => (
                         <span
                             key={`cat-${i}`}
                             className="px-2.5 py-1 rounded-[6px] font-nunito text-xs leading-4 bg-[#109EB1]/30 text-[#C7F4FA] border border-[#109EB1]"
@@ -85,7 +85,7 @@ export default function MarketplaceCard({ item, viewMode }: MarketplaceCardProps
                             {category}
                         </span>
                     ))}
-                    {item.tags.slice(0, 3).map((tag, i) => (
+                    {(item.tags || []).slice(0, 3).map((tag, i) => (
                         <span
                             key={`tag-${i}`}
                             className="px-2.5 py-1 rounded-[6px] font-nunito text-xs leading-4 bg-[#C7F4FA]/25 text-[#C7F4FA]"
@@ -197,7 +197,7 @@ export default function MarketplaceCard({ item, viewMode }: MarketplaceCardProps
 
     // Grid View - Default (2 columns)
     return (
-        <div className="bg-[#06363D] border border-[#084B54] rounded-[25px] overflow-hidden flex flex-col h-48">
+        <div className="bg-[#06363D] border border-[#084B54] rounded-[25px] overflow-hidden flex flex-col min-h-48">
             {/* Compact horizontal layout */}
             <div className="flex gap-3 p-3">
                 {/* Logo - 96x96 */}
@@ -237,7 +237,7 @@ export default function MarketplaceCard({ item, viewMode }: MarketplaceCardProps
                     {/* Categories and Tags */}
                     <div className="flex flex-wrap gap-1 mb-2">
                         {/* Categories */}
-                        {item.categories.map((category, i) => (
+                        {(item.categories || []).map((category, i) => (
                             <span
                                 key={`cat-${i}`}
                                 className="px-1.5 py-0.5 rounded-[5px] font-nunito text-[11px] leading-4 bg-[#109EB1]/30 text-[#C7F4FA] border border-[#109EB1]"
@@ -246,7 +246,7 @@ export default function MarketplaceCard({ item, viewMode }: MarketplaceCardProps
                             </span>
                         ))}
                         {/* Tags */}
-                        {item.tags.slice(0, 3).map((tag, i) => (
+                        {(item.tags || []).slice(0, 3).map((tag, i) => (
                             <span
                                 key={`tag-${i}`}
                                 className="px-1.5 py-0.5 rounded-[5px] font-nunito text-[11px] leading-4 bg-[#C7F4FA]/25 text-[#C7F4FA]"

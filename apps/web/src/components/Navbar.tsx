@@ -28,14 +28,14 @@ import { Session } from '@repo/auth';
 import * as React from "react";
 
 const marketplaceCategories = [
-    { name: 'Mods', href: '/mods', icon: 'mdi:puzzle' },
-    { name: 'Modpacks', href: '/modpacks', icon: 'mdi:package-variant' },
-    { name: 'Worlds', href: '/worlds', icon: 'mdi:earth' },
-    { name: 'Plugins', href: '/plugins', icon: 'mdi:power-plug' },
-    { name: 'Asset Packs', href: '/asset-packs', icon: 'mdi:image-multiple' },
-    { name: 'Prefabs', href: '/prefabs', icon: 'mdi:cube-outline' },
-    { name: 'Data packs', href: '/data-packs', icon: 'mdi:database' },
-    { name: 'Tools & Scripts', href: '/tools-scripts', icon: 'mdi:tools' },
+    { name: 'Mods', href: '/mods', icon: 'mdi:puzzle', description: 'New gameplay mechanics & items' },
+    { name: 'Modpacks', href: '/modpacks', icon: 'mdi:package-variant', description: 'Complete curated game experiences' },
+    { name: 'Worlds', href: '/worlds', icon: 'mdi:earth', description: 'Custom maps, lobbies & spawns' },
+    { name: 'Plugins', href: '/plugins', icon: 'mdi:power-plug', description: 'Server management & features' },
+    { name: 'Asset Packs', href: '/asset-packs', icon: 'mdi:image-multiple', description: '3D models, textures & sounds' },
+    { name: 'Prefabs', href: '/prefabs', icon: 'mdi:cube-outline', description: 'Ready-to-use structures & builds' },
+    { name: 'Data packs', href: '/data-packs', icon: 'mdi:database', description: 'Vanilla game modifications' },
+    { name: 'Tools & Scripts', href: '/tools-scripts', icon: 'mdi:tools', description: 'External utilities & automation' },
 ];
 
 interface NavbarProps {
@@ -101,33 +101,105 @@ export default function Navbar({ session }: NavbarProps) {
                     </Link>
 
                     <div className="flex items-center gap-8 font-hebden text-base text-foreground">
+                        {/* Discover Navigation Menu */}
                         <NavigationMenu delayDuration={50}>
                             <NavigationMenuList>
                                 <NavigationMenuItem>
                                     <NavigationMenuTrigger
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                        }}
+                                        className="font-hebden font-semibold text-base leading-none bg-transparent text-foreground hover:text-foreground">
+                                        Discover
+                                    </NavigationMenuTrigger>
+                                    <NavigationMenuContent className="bg-accent border border-border rounded-[25px] p-3">
+                                        <ul className="grid w-[320px] gap-2">
+                                            <li>
+                                                <NavigationMenuLink
+                                                    href="/resources"
+                                                    className="flex flex-row items-center gap-2 select-none rounded-lg p-2 leading-none no-underline outline-none transition-colors hover:bg-white/5 hover:text-foreground focus:bg-white/5 focus:text-foreground"
+                                                >
+                                                    <div className="p-1.5 rounded-lg bg-[#109EB1]/10 text-[#109EB1]">
+                                                        <Icon icon="mdi:compass" width="18" height="18" />
+                                                    </div>
+                                                    <div className="flex flex-col gap-0.5">
+                                                        <span className="font-hebden font-semibold text-foreground text-sm">Resources</span>
+                                                        <span className="font-nunito text-xs text-foreground/60">Browse mods, plugins, and more</span>
+                                                    </div>
+                                                </NavigationMenuLink>
+                                            </li>
+                                            <li>
+                                                <NavigationMenuLink
+                                                    href="/servers"
+                                                    className="flex flex-row items-center gap-2 select-none rounded-lg p-2 leading-none no-underline outline-none transition-colors hover:bg-white/5 hover:text-foreground focus:bg-white/5 focus:text-foreground"
+                                                >
+                                                    <div className="p-1.5 rounded-lg bg-[#109EB1]/10 text-[#109EB1]">
+                                                        <Icon icon="mdi:server" width="16" height="16" />
+                                                    </div>
+                                                    <div className="flex flex-col gap-0.5">
+                                                        <span className="font-hebden font-semibold text-foreground text-sm">Find Servers</span>
+                                                        <span className="font-nunito text-xs text-foreground/60">Join active multiplayer communities</span>
+                                                    </div>
+                                                </NavigationMenuLink>
+                                            </li>
+                                            {/* <li>
+                                                <NavigationMenuLink
+                                                    href="/creators"
+                                                    className="flex flex-row items-center gap-2 select-none rounded-lg p-2 leading-none no-underline outline-none transition-colors hover:bg-white/5 hover:text-foreground focus:bg-white/5 focus:text-foreground"
+                                                >
+                                                    <div className="p-1.5 rounded-lg bg-[#109EB1]/10 text-[#109EB1]">
+                                                        <Icon icon="mdi:account-group" width="16" height="16" />
+                                                    </div>
+                                                    <div className="flex flex-col gap-0.5">
+                                                        <span className="font-hebden font-semibold text-foreground text-sm">Creators</span>
+                                                        <span className="font-nunito text-xs text-foreground/60">Support & follow top developers</span>
+                                                    </div>
+                                                </NavigationMenuLink>
+                                            </li> */}
+                                        </ul>
+                                    </NavigationMenuContent>
+                                </NavigationMenuItem>
+                            </NavigationMenuList>
+                        </NavigationMenu>
+
+                        {/* Marketplace Navigation Menu */}
+                        <NavigationMenu delayDuration={50}>
+                            <NavigationMenuList>
+                                <NavigationMenuItem>
+                                    <NavigationMenuTrigger
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                        }}
                                         className="font-hebden font-semibold text-base leading-none bg-transparent text-foreground hover:text-foreground">
                                         Marketplace
                                     </NavigationMenuTrigger>
-                                    <NavigationMenuContent
-                                        className="grid grid-cols-2 gap-2 bg-accent border border-border rounded-[25px] p-4 min-w-[420px]">
-                                        {marketplaceCategories.map((category) => (
-                                            <NavigationMenuLink
-                                                key={category.href}
-                                                href={category.href}
-                                                className="flex flex-row items-center gap-2 select-none rounded-lg p-2 leading-none no-underline outline-none transition-colors hover:bg-white/5 hover:text-foreground focus:bg-white/5 focus:text-foreground font-hebden font-semibold text-foreground text-sm"
-                                            >
-                                                <Icon icon={category.icon} width="16" height="16" />
-                                                {category.name}
-                                            </NavigationMenuLink>
-                                        ))}
+                                    <NavigationMenuContent className="bg-accent border border-border rounded-[25px] p-3">
+                                        <ul className="grid w-[480px] grid-cols-2 gap-2">
+                                            {marketplaceCategories.map((category) => (
+                                                <li key={category.href}>
+                                                    <NavigationMenuLink
+                                                        href={category.href}
+                                                        className="flex flex-row items-start gap-2 select-none rounded-lg p-2 leading-none no-underline outline-none transition-colors hover:bg-white/5 hover:text-foreground focus:bg-white/5 focus:text-foreground"
+                                                    >
+                                                        <div className="p-1.5 rounded-lg bg-[#109EB1]/10 text-[#109EB1]">
+                                                            <Icon icon={category.icon} width="18" height="18" />
+                                                        </div>
+                                                        <div className="flex flex-col gap-0.5">
+                                                            <span className="font-hebden font-semibold text-foreground text-sm">{category.name}</span>
+                                                            <span className="font-nunito text-xs text-foreground/60">{category.description}</span>
+                                                        </div>
+                                                    </NavigationMenuLink>
+                                                </li>
+                                            ))}
+                                        </ul>
                                     </NavigationMenuContent>
                                 </NavigationMenuItem>
                             </NavigationMenuList>
                         </NavigationMenu>
 
                         <Button variant="ghost">
-                            <Link href="/servers" className="font-hebden font-semibold text-base leading-none">
-                                Server Discovery
+                            <Link href="https://www.g-portal.com/en/gameserver/hytale-server-hosting?ref=orbisplace" className="font-hebden font-semibold text-base leading-none">
+                                Server Hosting
                             </Link>
                         </Button>
                     </div>
@@ -307,33 +379,49 @@ export default function Navbar({ session }: NavbarProps) {
                 >
                     <div className="flex flex-col h-full">
                         <div className="flex-1 px-6 py-6 space-y-6 overflow-y-auto">
-                            {/* Navigation principale */}
+                            {/* Discover Section */}
                             <div className="space-y-1">
                                 <h3 className="font-hebden font-semibold text-sm text-foreground/60 uppercase tracking-wider mb-3">
-                                    Navigation
+                                    Discover
                                 </h3>
 
-                                {/* Marketplace */}
+                                {/* Resources */}
                                 <Link
-                                    href="/mods"
+                                    href="/resources"
                                     onClick={closeMobileNav}
-                                    className="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-accent transition-colors group"
+                                    className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent transition-colors group"
                                 >
-                                    <span className="font-hebden font-semibold text-base text-foreground">
-                                        Marketplace
-                                    </span>
+                                    <div className="p-1.5 rounded-lg bg-[#109EB1]/10 text-[#109EB1]">
+                                        <Icon icon="mdi:compass" width="18" height="18" />
+                                    </div>
+                                    <div className="flex flex-col flex-1">
+                                        <span className="font-hebden font-semibold text-sm text-foreground">
+                                            Resources
+                                        </span>
+                                        <span className="font-nunito text-xs text-foreground/60">
+                                            Browse mods, plugins, and more
+                                        </span>
+                                    </div>
                                     <Icon icon="mdi:chevron-right" width="20" height="20" className="text-foreground/40 group-hover:text-foreground/60" />
                                 </Link>
 
-                                {/* Server Discovery */}
+                                {/* Find Servers */}
                                 <Link
                                     href="/servers"
                                     onClick={closeMobileNav}
-                                    className="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-accent transition-colors group"
+                                    className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent transition-colors group"
                                 >
-                                    <span className="font-hebden font-semibold text-base text-foreground">
-                                        Server Discovery
-                                    </span>
+                                    <div className="p-1.5 rounded-lg bg-[#109EB1]/10 text-[#109EB1]">
+                                        <Icon icon="mdi:server" width="18" height="18" />
+                                    </div>
+                                    <div className="flex flex-col flex-1">
+                                        <span className="font-hebden font-semibold text-sm text-foreground">
+                                            Find Servers
+                                        </span>
+                                        <span className="font-nunito text-xs text-foreground/60">
+                                            Join active multiplayer communities
+                                        </span>
+                                    </div>
                                     <Icon icon="mdi:chevron-right" width="20" height="20" className="text-foreground/40 group-hover:text-foreground/60" />
                                 </Link>
                             </div>
@@ -358,6 +446,28 @@ export default function Navbar({ session }: NavbarProps) {
                                         </Link>
                                     ))}
                                 </div>
+                            </div>
+
+                            {/* Server Hosting */}
+                            <div className="space-y-1">
+                                <h3 className="font-hebden font-semibold text-sm text-foreground/60 uppercase tracking-wider mb-3">
+                                    Hosting
+                                </h3>
+                                <Link
+                                    href="https://g-portal.com/?ref=orbisplace"
+                                    onClick={closeMobileNav}
+                                    className="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-accent transition-colors group"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
+                                            <Icon icon="mdi:server-network" width="18" height="18" />
+                                        </div>
+                                        <span className="font-hebden font-semibold text-sm text-foreground">
+                                            Server Hosting
+                                        </span>
+                                    </div>
+                                    <Icon icon="mdi:open-in-new" width="18" height="18" className="text-foreground/40 group-hover:text-foreground/60" />
+                                </Link>
                             </div>
                         </div>
                     </div>
