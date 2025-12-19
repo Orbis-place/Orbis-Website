@@ -158,6 +158,13 @@ export default function ManageGeneralPage() {
     const handleIconChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
+            // Validate file size (5MB limit)
+            const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+            if (file.size > maxSize) {
+                toast.error('File size must be less than 5MB');
+                return;
+            }
+
             setIconFile(file);
             const reader = new FileReader();
             reader.onloadend = () => {
@@ -170,6 +177,13 @@ export default function ManageGeneralPage() {
     const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
+            // Validate file size (5MB limit)
+            const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+            if (file.size > maxSize) {
+                toast.error('File size must be less than 5MB');
+                return;
+            }
+
             setBannerFile(file);
             const reader = new FileReader();
             reader.onloadend = () => {
@@ -744,6 +758,7 @@ export default function ManageGeneralPage() {
                         if (response.ok) {
                             setBannerPreview(null);
                             setBannerFile(null);
+                            setShowDeleteBannerDialog(false);
                             toast.success('Banner deleted successfully!');
                         } else {
                             toast.error('Failed to delete banner');
@@ -773,6 +788,7 @@ export default function ManageGeneralPage() {
                         if (response.ok) {
                             setIconPreview(null);
                             setIconFile(null);
+                            setShowDeleteIconDialog(false);
                             toast.success('Icon deleted successfully!');
                         } else {
                             toast.error('Failed to delete icon');

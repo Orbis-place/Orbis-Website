@@ -179,6 +179,13 @@ export default function TeamManageGeneralPage() {
     const handleFileUpload = async (file: File, type: 'logo' | 'banner') => {
         if (!team?.id) return;
 
+        // Validate file size (5MB limit)
+        const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+        if (file.size > maxSize) {
+            toast.error(`File size must be less than 5MB`);
+            return;
+        }
+
         try {
             const formData = new FormData();
             formData.append(type, file);

@@ -1,5 +1,11 @@
+import type { Metadata } from 'next';
 import BlogCard, { BlogPost } from '@/components/blog/BlogCard';
 import { FileText } from 'lucide-react';
+
+export const metadata: Metadata = {
+    title: 'Blog',
+    description: 'Stay updated with the latest news, guides, and insights from the Hytale community on Orbis.',
+};
 
 // Mock data for blog posts
 const MOCK_POSTS: BlogPost[] = [

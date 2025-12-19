@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { Icon } from '@iconify/react';
 import MarketplaceCard from '@/components/marketplace/MarketplaceCard';
 import ScrollableSection from '@/components/resources/ScrollableSection';
@@ -12,6 +13,11 @@ import {
 } from '@/lib/api/discovery';
 import { convertResourceToMarketplaceItem } from '@/lib/utils/resourceConverters';
 import { MarketplaceItem } from '@/components/marketplace/MarketplaceCard';
+
+export const metadata: Metadata = {
+    title: 'Discover Resources',
+    description: 'Discover mods, plugins, worlds and more created by the Hytale community on Orbis.',
+};
 
 export default async function ResourcesPage() {
     // Fetch all collections from the API with error handling

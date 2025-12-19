@@ -86,7 +86,7 @@ export default function ResourceHeader({
                             src={bannerImage}
                             alt={`${title} banner`}
                             fill
-                            className="object-contain"
+                            className="object-cover"
                         />
                     )}
 

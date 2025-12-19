@@ -133,6 +133,26 @@ export class ResourceController {
         return this.resourceService.uploadBanner(id, session.user.id, file);
     }
 
+    @Delete(':id/icon')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Delete resource icon' })
+    async deleteIcon(
+        @Session() session: UserSession,
+        @Param('id') id: string,
+    ) {
+        return this.resourceService.deleteIcon(id, session.user.id);
+    }
+
+    @Delete(':id/banner')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Delete resource banner' })
+    async deleteBanner(
+        @Session() session: UserSession,
+        @Param('id') id: string,
+    ) {
+        return this.resourceService.deleteBanner(id, session.user.id);
+    }
+
     // ============================================
     // USER RESOURCES
     // ============================================

@@ -784,6 +784,62 @@ export class ResourceService {
     }
 
     /**
+     * Delete resource icon
+     */
+    async deleteIcon(resourceId: string, userId: string) {
+        const resource = await prisma.resource.findUnique({
+            where: { id: resourceId },
+            select: { iconUrl: true, ownerUserId: true, ownerTeamId: true },
+        });
+
+        if (!resource) {
+            throw new NotFoundException('Resource not found');
+        }
+
+        const canEdit = await this.checkEditPermission(userId, resource);
+        if (!canEdit) {
+            throw new ForbiddenException('You do not have permission to edit this resource');
+        }
+
+        if (resource.iconUrl) {
+            await this.storage.deleteFile(resource.iconUrl);
+        }
+
+        return prisma.resource.update({
+            where: { id: resourceId },
+            data: { iconUrl: null },
+        });
+    }
+
+    /**
+     * Delete resource banner
+     */
+    async deleteBanner(resourceId: string, userId: string) {
+        const resource = await prisma.resource.findUnique({
+            where: { id: resourceId },
+            select: { bannerUrl: true, ownerUserId: true, ownerTeamId: true },
+        });
+
+        if (!resource) {
+            throw new NotFoundException('Resource not found');
+        }
+
+        const canEdit = await this.checkEditPermission(userId, resource);
+        if (!canEdit) {
+            throw new ForbiddenException('You do not have permission to edit this resource');
+        }
+
+        if (resource.bannerUrl) {
+            await this.storage.deleteFile(resource.bannerUrl);
+        }
+
+        return prisma.resource.update({
+            where: { id: resourceId },
+            data: { bannerUrl: null },
+        });
+    }
+
+    /**
      * Validate license fields
      */
     private validateLicense(updateDto: UpdateResourceDto) {
