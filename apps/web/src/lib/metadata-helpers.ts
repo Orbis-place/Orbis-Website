@@ -21,11 +21,17 @@ export async function generateResourceMetadata(
 
         const resource = await response.json();
         const description = resource.tagline || resource.description || `Download ${resource.name}, a ${resourceTypeName.toLowerCase()} for Hytale.`;
-        const stats = `${resource.downloadCount || 0} downloads • ${resource.likeCount || 0} likes`;
+
+        // Format stats for rich preview
+        const downloadCount = new Intl.NumberFormat('en-US', { notation: "compact", compactDisplay: "short" }).format(resource.downloadCount || 0);
+        const likeCount = new Intl.NumberFormat('en-US', { notation: "compact", compactDisplay: "short" }).format(resource.likeCount || 0);
+        const stats = `Downloads: ${downloadCount} • Likes: ${likeCount}`;
+
+        const fullDescription = `${description}\n\n${stats}`;
 
         return {
             title: resource.name,
-            description: `${description} ${stats}`,
+            description: fullDescription,
             keywords: [
                 'Hytale',
                 resourceTypeName,
@@ -39,26 +45,62 @@ export async function generateResourceMetadata(
                 description: description,
                 type: 'website',
                 url: `/${resourceType}/${slug}`,
-                images: resource.iconUrl ? [
-                    {
-                        url: resource.iconUrl,
-                        width: 512,
-                        height: 512,
-                        alt: `${resource.name} icon`,
-                    }
-                ] : [],
+                siteName: 'Orbis',
             },
             twitter: {
-                card: 'summary',
+                card: 'summary_large_image',
                 title: `${resource.name} - ${resourceTypeName}`,
-                description: description,
-                images: resource.iconUrl ? [resource.iconUrl] : [],
+                description: fullDescription,
             },
         };
     } catch (error) {
         return {
             title: slug,
             description: `Download ${slug}, a ${resourceTypeName.toLowerCase()} for Hytale on Orbis marketplace.`,
+        };
+    }
+}
+
+export async function generateTeamMetadata(teamName: string): Promise<Metadata> {
+    try {
+        const response = await fetch(`${API_URL}/teams/${teamName}`, {
+            cache: 'no-store'
+        });
+
+        if (!response.ok) {
+            return {
+                title: 'Team Not Found',
+                description: 'The requested team could not be found on Orbis.',
+            };
+        }
+
+        const team = await response.json();
+        const description = team.description || `Check out ${team.name}'s profile on Orbis.`;
+
+        const memberCount = team._count?.members || team.members?.length || 0;
+        const resourceCount = team._count?.resources || 0;
+        const stats = `${memberCount} Members • ${resourceCount} Resources`;
+
+        return {
+            title: team.name,
+            description: `${description}\n\n${stats}`,
+            openGraph: {
+                title: `${team.name} - Orbis Team`,
+                description: description,
+                type: 'profile',
+                url: `/team/${teamName}`,
+                siteName: 'Orbis',
+            },
+            twitter: {
+                card: 'summary_large_image',
+                title: `${team.name} - Orbis Team`,
+                description: `${description}\n\n${stats}`,
+            },
+        };
+    } catch (error) {
+        return {
+            title: teamName,
+            description: `Check out ${teamName}'s profile on Orbis.`,
         };
     }
 }

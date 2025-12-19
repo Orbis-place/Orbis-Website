@@ -21,7 +21,7 @@ const nunito = Nunito({
 export const metadata: Metadata = {
     title: {
         default: 'Orbis - Hytale Community Hub',
-        template: '%s | Orbis'
+        template: '%s | Orbis.place'
     },
     description: 'The ultimate Hytale community hub. Discover servers, browse marketplace for plugins & mods. Open-source platform for players and creators.',
     keywords: ['Hytale', 'mods', 'plugins', 'servers', 'marketplace', 'community', 'modding', 'gaming', 'open-source'],
