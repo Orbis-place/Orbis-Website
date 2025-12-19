@@ -71,7 +71,7 @@ export default async function Image({ params }: { params: { slug: string; type: 
                         width: 600,
                         height: 600,
                         background: 'radial-gradient(circle, rgba(16, 158, 177, 0.2) 0%, transparent 70%)',
-                        filter: 'blur(40px)',
+                        opacity: 0.5,
                     }}
                 />
 
