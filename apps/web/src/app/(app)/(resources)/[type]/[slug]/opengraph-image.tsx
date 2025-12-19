@@ -1,5 +1,5 @@
 import { ImageResponse } from 'next/og';
-import { getResourceType } from '@/config/resource-types';
+import { getResourceType, getResourceTypeBySingular } from '@/config/resource-types';
 
 export const runtime = 'edge';
 
@@ -17,9 +17,10 @@ export default async function Image({ params }: { params: { slug: string; type: 
     const { slug, type } = await params;
 
     // Fetch resource data
-    const resource = await fetch(`${API_URL}/resources/slug/${slug}`).then((res) =>
+    const data = await fetch(`${API_URL}/resources/slug/${slug}`).then((res) =>
         res.ok ? res.json() : null
     );
+    const resource = data?.resource;
 
     if (!resource) {
         return new ImageResponse(
@@ -44,7 +45,7 @@ export default async function Image({ params }: { params: { slug: string; type: 
         );
     }
 
-    const resourceType = getResourceType(type);
+    const resourceType = getResourceType(type) || getResourceTypeBySingular(type);
     const typeLabel = resourceType?.labelSingular || 'Resource';
 
     return new ImageResponse(

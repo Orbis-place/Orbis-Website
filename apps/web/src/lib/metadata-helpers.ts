@@ -19,7 +19,8 @@ export async function generateResourceMetadata(
             };
         }
 
-        const resource = await response.json();
+        const data = await response.json();
+        const resource = data.resource;
         const description = resource.tagline || resource.description || `Download ${resource.name}, a ${resourceTypeName.toLowerCase()} for Hytale.`;
 
         // Format stats for rich preview
@@ -101,6 +102,51 @@ export async function generateTeamMetadata(teamName: string): Promise<Metadata> 
         return {
             title: teamName,
             description: `Check out ${teamName}'s profile on Orbis.`,
+        };
+    }
+}
+
+export async function generateUserMetadata(username: string): Promise<Metadata> {
+    try {
+        const response = await fetch(`${API_URL}/users/username/${username}`, {
+            cache: 'no-store'
+        });
+
+        if (!response.ok) {
+            return {
+                title: 'User Not Found',
+                description: 'The requested user could not be found on Orbis.',
+            };
+        }
+
+        const user = await response.json();
+        const displayName = user.displayName || user.username;
+        const description = user.bio || `Check out ${displayName}'s profile on Orbis.`;
+
+        const followerCount = user._count?.followers || 0;
+        const resourceCount = user._count?.ownedResources || 0;
+        const stats = `${followerCount} Followers • ${resourceCount} Resources`;
+
+        return {
+            title: displayName,
+            description: `${description}\n\n${stats}`,
+            openGraph: {
+                title: `${displayName} (@${user.username}) - Orbis User`,
+                description: description,
+                type: 'profile',
+                url: `/users/${username}`,
+                siteName: 'Orbis',
+            },
+            twitter: {
+                card: 'summary_large_image',
+                title: `${displayName} (@${user.username}) - Orbis User`,
+                description: `${description}\n\n${stats}`,
+            },
+        };
+    } catch (error) {
+        return {
+            title: username,
+            description: `Check out ${username}'s profile on Orbis.`,
         };
     }
 }
