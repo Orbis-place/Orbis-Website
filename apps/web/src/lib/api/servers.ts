@@ -196,7 +196,7 @@ export async function fetchServerBySlug(slug: string): Promise<{ server: Server 
  * Fetch server categories
  */
 export async function fetchServerCategories(): Promise<ServerCategory[]> {
-    const response = await fetch(`${API_URL}/servers/categories`, {
+    const response = await fetch(`${API_URL}/server-categories`, {
         method: 'GET',
         credentials: 'include',
         headers: {

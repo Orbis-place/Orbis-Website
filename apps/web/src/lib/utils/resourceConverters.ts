@@ -4,7 +4,7 @@ import type { MarketplaceItem } from '@/components/marketplace/MarketplaceCard';
 /**
  * Format a date to relative time (e.g., "2 days ago")
  */
-function formatRelativeTime(dateString: string): string {
+export function formatRelativeTime(dateString: string): string {
     const date = new Date(dateString);
     const now = new Date();
     const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
@@ -33,7 +33,7 @@ function formatRelativeTime(dateString: string): string {
 /**
  * Format a date to absolute format (e.g., "Dec 17, 2025")
  */
-function formatAbsoluteDate(dateString: string): string {
+export function formatAbsoluteDate(dateString: string): string {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
         month: 'short',
@@ -45,7 +45,7 @@ function formatAbsoluteDate(dateString: string): string {
 /**
  * Format count numbers to human-readable format (e.g., "1.2k", "3.5M")
  */
-function formatCount(count: number): string {
+export function formatCount(count: number): string {
     if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
     if (count >= 1000) return `${(count / 1000).toFixed(1)}k`;
     return count.toString();
@@ -63,7 +63,6 @@ export function convertResourceToMarketplaceItem(resource: Resource): Marketplac
         authorDisplay: resource.ownerUser?.displayName || resource.ownerTeam?.name || 'Unknown',
         description: resource.tagline,
         image: resource.iconUrl || '',
-        banner: resource.bannerUrl,
         rating: 0, // Not yet implemented in backend
         likes: formatCount(resource.likeCount),
         downloads: formatCount(resource.downloadCount),
