@@ -424,6 +424,26 @@ export default function Navbar({ session }: NavbarProps) {
                                     </div>
                                     <Icon icon="mdi:chevron-right" width="20" height="20" className="text-foreground/40 group-hover:text-foreground/60" />
                                 </Link>
+
+                                {/* Creators */}
+                                <Link
+                                    href="/creators"
+                                    onClick={closeMobileNav}
+                                    className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent transition-colors group"
+                                >
+                                    <div className="p-1.5 rounded-lg bg-[#109EB1]/10 text-[#109EB1]">
+                                        <Icon icon="mdi:account-group" width="18" height="18" />
+                                    </div>
+                                    <div className="flex flex-col flex-1">
+                                        <span className="font-hebden font-semibold text-sm text-foreground">
+                                            Creators
+                                        </span>
+                                        <span className="font-nunito text-xs text-foreground/60">
+                                            Support & follow top developers
+                                        </span>
+                                    </div>
+                                    <Icon icon="mdi:chevron-right" width="20" height="20" className="text-foreground/40 group-hover:text-foreground/60" />
+                                </Link>
                             </div>
 
                             {/* Marketplace Categories */}
