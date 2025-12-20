@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { ArrowRight, Star, Download, Heart } from 'lucide-react';
-import { Creator } from '../creators/mockData';
+import { Creator } from '../creators/types';
 import { MarketplaceItem } from '../marketplace/MarketplaceCard';
 
 interface ResourcesHeroProps {
@@ -52,9 +52,6 @@ export default function ResourcesHero({ title, description, featuredResource, fe
                                     <div className="w-full h-full bg-[#084B54] flex items-center justify-center text-[#C7F4FA] font-hebden text-sm">
                                         {featuredCreator.displayName[0]}
                                     </div>
-                                )}
-                                {featuredCreator.isOnline && (
-                                    <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-[#032125]" />
                                 )}
                             </div>
                             <div>

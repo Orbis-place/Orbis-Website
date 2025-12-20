@@ -197,7 +197,7 @@ export default function ServerCard({ item, viewMode }: ServerCardProps) {
                                         {primaryCategory}
                                     </span>
                                 )}
-                                {secondaryCategories.slice(0, 2).map((category, i) => (
+                                {secondaryCategories.slice(0, 1).map((category, i) => (
                                     <span
                                         key={`cat-${i}`}
                                         className="px-2 py-0.5 rounded-md font-nunito text-xs bg-[#109EB1]/20 text-[#C7F4FA]/90 border border-[#109EB1]/40"
@@ -205,6 +205,11 @@ export default function ServerCard({ item, viewMode }: ServerCardProps) {
                                         {category}
                                     </span>
                                 ))}
+                                {secondaryCategories.length > 1 && (
+                                    <span className="flex items-center justify-center px-2 py-0.5 rounded-md font-nunito text-[10px] bg-[#109EB1]/30 text-[#15C8E0] font-bold border border-[#109EB1]/50">
+                                        +{secondaryCategories.length - 1}
+                                    </span>
+                                )}
                             </div>
                         </div>
 
@@ -369,8 +374,8 @@ export default function ServerCard({ item, viewMode }: ServerCardProps) {
                                         {primaryCategory}
                                     </span>
                                 )}
-                                {/* Secondary Categories - show up to 2 */}
-                                {secondaryCategories.slice(0, 2).map((category, i) => (
+                                {/* Secondary Categories - show only 1 */}
+                                {secondaryCategories.slice(0, 1).map((category, i) => (
                                     <span
                                         key={`cat-${i}`}
                                         className="px-2.5 py-1 rounded-md font-nunito text-xs bg-[#109EB1]/20 text-[#C7F4FA]/90 border border-[#109EB1]/40"
@@ -378,6 +383,12 @@ export default function ServerCard({ item, viewMode }: ServerCardProps) {
                                         {category}
                                     </span>
                                 ))}
+                                {/* +X Badge for remaining categories */}
+                                {secondaryCategories.length > 1 && (
+                                    <span className="flex items-center justify-center px-2 py-0.5 rounded-md font-nunito text-[10px] bg-[#109EB1]/30 text-[#15C8E0] font-bold border border-[#109EB1]/50">
+                                        +{secondaryCategories.length - 1}
+                                    </span>
+                                )}
                             </div>
                         </div>
 

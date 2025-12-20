@@ -293,7 +293,17 @@ button {
   color: #c7f4fa;
   padding-left: 1.5em;
   margin: 1em 0;
+  list-style-position: outside;
 }
+
+.tiptap ul {
+  list-style-type: disc;
+}
+
+.tiptap ol {
+  list-style-type: decimal;
+}
+
 
 .tiptap li {
   color: #c7f4fa;

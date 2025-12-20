@@ -142,7 +142,7 @@ export default function Navbar({ session }: NavbarProps) {
                                                     </div>
                                                 </NavigationMenuLink>
                                             </li>
-                                            {/* <li>
+                                            <li>
                                                 <NavigationMenuLink
                                                     href="/creators"
                                                     className="flex flex-row items-center gap-2 select-none rounded-lg p-2 leading-none no-underline outline-none transition-colors hover:bg-white/5 hover:text-foreground focus:bg-white/5 focus:text-foreground"
@@ -155,7 +155,7 @@ export default function Navbar({ session }: NavbarProps) {
                                                         <span className="font-nunito text-xs text-foreground/60">Support & follow top developers</span>
                                                     </div>
                                                 </NavigationMenuLink>
-                                            </li> */}
+                                            </li>
                                         </ul>
                                     </NavigationMenuContent>
                                 </NavigationMenuItem>

@@ -136,3 +136,110 @@ export async function fetchMostDownloaded(limit = 10): Promise<{ resources: Reso
 
     return response.json();
 }
+
+// ============================================
+// CREATOR DISCOVERY API
+// ============================================
+
+export interface CreatorStats {
+    resources: number;
+    downloads: number;
+    followers: number;
+}
+
+export interface Creator {
+    id: string;
+    username: string;
+    displayName: string | null;
+    image: string | null;
+    bio: string | null;
+    stats: CreatorStats;
+    specialties?: string[];
+}
+
+export interface LeaderboardEntry {
+    rank: number;
+    previousRank: number;
+    creator: Creator;
+    weeklyDownloads: number;
+    weeklyChange: number;
+}
+
+export interface WeeklyLeaderboardResponse {
+    leaderboard: LeaderboardEntry[];
+}
+
+export interface TopByCategoryResponse {
+    topByCategory: Record<string, Creator>;
+}
+
+export interface ShuffleCreatorsResponse {
+    creators: Creator[];
+}
+
+/**
+ * Fetch weekly leaderboard of top creators
+ */
+export async function fetchWeeklyLeaderboard(limit = 10): Promise<WeeklyLeaderboardResponse> {
+    const response = await fetch(`${API_URL}/discovery/creators/weekly-leaderboard?limit=${limit}`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({
+            message: 'Failed to fetch weekly leaderboard',
+        }));
+        throw new Error(error.message || `Request failed with status ${response.status}`);
+    }
+
+    return response.json();
+}
+
+/**
+ * Fetch top creator for each resource category
+ */
+export async function fetchTopCreatorsByCategory(): Promise<TopByCategoryResponse> {
+    const response = await fetch(`${API_URL}/discovery/creators/top-by-category`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({
+            message: 'Failed to fetch top creators by category',
+        }));
+        throw new Error(error.message || `Request failed with status ${response.status}`);
+    }
+
+    return response.json();
+}
+
+/**
+ * Fetch random creators for shuffle discovery
+ */
+export async function fetchShuffleCreators(limit = 6): Promise<ShuffleCreatorsResponse> {
+    const response = await fetch(`${API_URL}/discovery/creators/shuffle?limit=${limit}`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({
+            message: 'Failed to fetch shuffle creators',
+        }));
+        throw new Error(error.message || `Request failed with status ${response.status}`);
+    }
+
+    return response.json();
+}
+

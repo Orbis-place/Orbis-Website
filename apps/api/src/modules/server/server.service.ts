@@ -439,6 +439,12 @@ export class ServerService {
                         },
                     },
                 },
+                socialLinks: {
+                    orderBy: {
+                        order: 'asc',
+                    },
+                },
+                gameVersion: true,
             },
         });
 
@@ -458,9 +464,36 @@ export class ServerService {
             isOwner = await this.checkEditPermission(userId, server);
         }
 
+        return this.transformServerResponse(server, isOwner);
+    }
+
+    /**
+     * Transform server response to match frontend expectations
+     */
+    private transformServerResponse(server: any, isOwner: boolean) {
+        // Parse serverAddress into serverIp and port
+        const [serverIp, port] = server.serverAddress?.includes(':')
+            ? server.serverAddress.split(':')
+            : [server.serverAddress, '5520']; // Default Hytale port
+
+        // Flatten socialLinks array into direct properties
+        const discordUrl = server.socialLinks?.find((l: any) => l.type === 'DISCORD')?.url;
+        const youtubeUrl = server.socialLinks?.find((l: any) => l.type === 'YOUTUBE')?.url;
+        const twitterUrl = server.socialLinks?.find((l: any) => l.type === 'TWITTER')?.url;
+        const tiktokUrl = server.socialLinks?.find((l: any) => l.type === 'TIKTOK')?.url;
+
         return {
             ...server,
+            serverIp,
+            port: parseInt(port) || 5520,
+            discordUrl,
+            youtubeUrl,
+            twitterUrl,
+            tiktokUrl,
             isOwner,
+            // Map database field names to frontend expectations
+            onlineStatus: server.isOnline,
+            gameVersion: server.gameVersion?.version || 'Unknown',
         };
     }
 

@@ -201,8 +201,14 @@ export default function ServerDetailPage() {
                                     <tr className="border-b border-[#084B54]">
                                         <th className="text-left py-3 font-hebden font-medium text-[#C7F4FA]/60">Website</th>
                                         <td className="text-right py-3 font-nunito">
-                                            <a href={server.websiteUrl} target="_blank" rel="noopener noreferrer" className="text-[#109EB1] hover:text-[#109EB1]/80 transition-colors">
+                                            <a
+                                                href={server.websiteUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#109EB1] text-white rounded-lg hover:bg-[#0d8a9c] transition-all duration-200 font-medium text-sm"
+                                            >
                                                 Visit
+                                                <Icon icon="mdi:open-in-new" width="16" height="16" />
                                             </a>
                                         </td>
                                     </tr>

@@ -43,4 +43,29 @@ export class DiscoveryController {
         const parsedLimit = limit ? parseInt(limit, 10) : 10;
         return this.discoveryService.getMostDownloadedResources(parsedLimit);
     }
+
+    // ============================================
+    // CREATOR DISCOVERY ENDPOINTS
+    // ============================================
+
+    @Get('creators/weekly-leaderboard')
+    @ApiOperation({ summary: 'Get weekly leaderboard of top creators by downloads' })
+    async getWeeklyLeaderboard(@Query('limit') limit?: string): Promise<any> {
+        const parsedLimit = limit ? parseInt(limit, 10) : 10;
+        return this.discoveryService.getWeeklyLeaderboard(parsedLimit);
+    }
+
+    @Get('creators/top-by-category')
+    @ApiOperation({ summary: 'Get top creator for each resource category' })
+    async getTopCreatorsByCategory(): Promise<any> {
+        return this.discoveryService.getTopCreatorsByCategory();
+    }
+
+    @Get('creators/shuffle')
+    @ApiOperation({ summary: 'Get random creators for discovery' })
+    async getRandomCreators(@Query('limit') limit?: string): Promise<any> {
+        const parsedLimit = limit ? parseInt(limit, 10) : 6;
+        return this.discoveryService.getRandomCreators(parsedLimit);
+    }
 }
+
