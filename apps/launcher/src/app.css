@@ -1,0 +1,220 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --background: #032125;
+  --foreground: #c7f4fa;
+  --primary: #109eb1;
+  --primary-foreground: #e8ffff;
+  --secondary: #06363d;
+  --secondary-foreground: #c7f4fa;
+  --muted: #032125;
+  --muted-foreground: #c7f4fa;
+
+  --card: #032125;
+  --card-foreground: #c7f4fa;
+  --popover: #032125;
+  --popover-foreground: #c7f4fa;
+  --accent: #06363d;
+  --accent-foreground: #c7f4fa;
+  --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: #ffffff;
+  --border: #084b54;
+  --input: #084b54;
+  --ring: #109eb1;
+
+  --status-approved: #10b981;
+  --status-pending: #f59e0b;
+  --status-rejected: var(--destructive);
+  --status-suspended: #f97316;
+  --status-archived: #6b7280;
+
+  /* Fonts */
+  --font-sans: Nunito, ui-sans-serif, sans-serif, system-ui;
+  --font-serif: ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
+    'Courier New', monospace;
+
+  /* Radius */
+  --radius: 0.95rem;
+
+  /* Layout dimensions */
+  --left-bar-width: 64px;
+  --top-bar-height: 56px;
+}
+
+.dark {
+  --background: #032125;
+  --foreground: #c7f4fa;
+  --primary: #109eb1;
+  --primary-foreground: #032125;
+  --secondary: #06363d;
+  --secondary-foreground: #c7f4fa;
+  --muted: #032125;
+  --muted-foreground: #c7f4fa;
+  --card: #032125;
+  --card-foreground: #c7f4fa;
+  --popover: #032125;
+  --popover-foreground: #c7f4fa;
+  --accent: #06363d;
+  --accent-foreground: #c7f4fa;
+  --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: #ffffff;
+  --border: #084b54;
+  --input: #084b54;
+  --ring: #109eb1;
+}
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-status-approved: var(--status-approved);
+  --color-status-pending: var(--status-pending);
+  --color-status-rejected: var(--status-rejected);
+  --color-status-suspended: var(--status-suspended);
+  --color-status-archived: var(--status-archived);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+  }
+}
+
+
+/* Fix pour Tauri - permettre le drag sur tout le header */
+[data-tauri-drag-region] {
+  -webkit-app-region: drag;
+}
+
+/* Permettre le drag sur tous les enfants du header sauf les exclusions */
+[data-tauri-drag-region] * {
+  -webkit-app-region: drag;
+}
+
+/* Désactiver le drag uniquement sur les éléments exclus */
+[data-tauri-drag-region-exclude],
+[data-tauri-drag-region-exclude] * {
+  -webkit-app-region: no-drag;
+}
+
+/* Layout Grid */
+.app-grid-layout {
+  display: grid;
+  grid-template-areas: 
+    "navbar statusbar"
+    "navbar content";
+  grid-template-columns: var(--left-bar-width) 1fr;
+  grid-template-rows: var(--top-bar-height) 1fr;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background: var(--color-background);
+}
+
+.app-grid-navbar {
+  grid-area: navbar;
+  background: var(--color-secondary);
+  border-right: 1px solid var(--color-border);
+}
+
+.app-grid-statusbar {
+  grid-area: statusbar;
+  background: var(--color-secondary);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.app-grid-content {
+  grid-area: content;
+  overflow-y: auto;
+  background: var(--color-background);
+}
+
+/* Navigation Buttons */
+.nav-button {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 150ms ease;
+  background: transparent;
+  color: var(--color-foreground);
+  border: none;
+  cursor: pointer;
+}
+
+.nav-button:hover {
+  background: var(--color-accent);
+  filter: brightness(1.1);
+}
+
+.nav-button.active {
+  background: var(--color-primary);
+  color: var(--color-primary-foreground);
+}
+
+/* Titlebar buttons */
+.titlebar-button {
+  padding: 0;
+  margin: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--color-muted-foreground);
+  cursor: pointer;
+  transition: all 150ms ease;
+  border-radius: 0.5rem;
+}
+
+.titlebar-button:hover {
+  background: var(--color-secondary);
+  color: var(--color-foreground);
+}
+
+.titlebar-button.close:hover {
+  background: var(--color-destructive);
+  color: white;
+}
+/* Permettre le drag à travers les SVG et spans non-interactifs */
+[data-tauri-drag-region] svg:not([data-tauri-drag-region-exclude] svg),
+[data-tauri-drag-region] svg:not([data-tauri-drag-region-exclude] svg) *,
+[data-tauri-drag-region] span:not([data-tauri-drag-region-exclude] span) {
+  pointer-events: none;
+}

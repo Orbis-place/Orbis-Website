@@ -1,0 +1,360 @@
+{
+	"info": {
+		"_postman_id": "server-refactored-2024",
+		"name": "Orbis - Server API (Refactored)",
+		"description": "Updated server endpoints with HytaleVersion relations, logoUrl/bannerUrl, and new filtering",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Hytale Versions",
+			"item": [
+				{
+					"name": "Get All Hytale Versions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/hytale-versions",
+							"host": ["{{base_url}}"],
+							"path": ["hytale-versions"]
+						},
+						"description": "Get list of all available Hytale game versions"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Servers",
+			"item": [
+				{
+					"name": "Create Server",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"My Awesome Server\",\n  \"slug\": \"my-awesome-server\",\n  \"description\": \"A detailed description of my server with all the features\",\n  \"shortDesc\": \"Best Hytale server ever!\",\n  \"serverAddress\": \"play.myserver.com:5520\",\n  \"gameVersionId\": \"{{hytale_version_id}}\",\n  \"supportedVersionIds\": [\"{{hytale_version_id}}\"],\n  \"websiteUrl\": \"https://myserver.com\",\n  \"country\": \"France\",\n  \"primaryCategoryId\": \"{{category_id}}\",\n  \"categoryIds\": [],\n  \"tagIds\": [\"{{tag_id_1}}\", \"{{tag_id_2}}\"],\n  \"teamId\": \"{{team_id}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/servers",
+							"host": ["{{base_url}}"],
+							"path": ["servers"]
+						},
+						"description": "Create a new server with HytaleVersion relations"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Servers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/servers?page=1&limit=20&sortBy=NEWEST",
+							"host": ["{{base_url}}"],
+							"path": ["servers"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "20"
+								},
+								{
+									"key": "search",
+									"value": "minecraft",
+									"disabled": true
+								},
+								{
+									"key": "category",
+									"value": "pvp",
+									"disabled": true
+								},
+								{
+									"key": "tags",
+									"value": "custom-items,economy",
+									"disabled": true
+								},
+								{
+									"key": "country",
+									"value": "France",
+									"disabled": true,
+									"description": "NEW: Filter by country"
+								},
+								{
+									"key": "online",
+									"value": "true",
+									"disabled": true
+								},
+								{
+									"key": "featured",
+									"value": "true",
+									"disabled": true
+								},
+								{
+									"key": "sortBy",
+									"value": "NEWEST",
+									"description": "NEWEST, POPULAR, MOST_VOTED, MOST_PLAYERS"
+								}
+							]
+						},
+						"description": "Get paginated list of servers with optional filters"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Server by Slug",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/servers/{{server_slug}}",
+							"host": ["{{base_url}}"],
+							"path": ["servers", "{{server_slug}}"]
+						},
+						"description": "Get detailed server information including HytaleVersion relations"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Server",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Updated Server Name\",\n  \"description\": \"Updated description\",\n  \"shortDesc\": \"Updated tagline\",\n  \"serverAddress\": \"updated.server.com:5520\",\n  \"gameVersionId\": \"{{hytale_version_id}}\",\n  \"websiteUrl\": \"https://updated.com\",\n  \"country\": \"Germany\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/servers/{{server_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["servers", "{{server_id}}"]
+						},
+						"description": "Update server information"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Server",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/servers/{{server_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["servers", "{{server_id}}"]
+						},
+						"description": "Delete or archive a server"
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Server Logo",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/servers/{{server_id}}/logo",
+							"host": ["{{base_url}}"],
+							"path": ["servers", "{{server_id}}", "logo"]
+						},
+						"description": "Upload server logo (saved to logoUrl field)"
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Server Banner",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/servers/{{server_id}}/banner",
+							"host": ["{{base_url}}"],
+							"path": ["servers", "{{server_id}}", "banner"]
+						},
+						"description": "Upload server banner (saved to bannerUrl field)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Server Logo",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/servers/{{server_id}}/logo",
+							"host": ["{{base_url}}"],
+							"path": ["servers", "{{server_id}}", "logo"]
+						},
+						"description": "Delete server logo (clears logoUrl field)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Server Banner",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/servers/{{server_id}}/banner",
+							"host": ["{{base_url}}"],
+							"path": ["servers", "{{server_id}}", "banner"]
+						},
+						"description": "Delete server banner (clears bannerUrl field)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User's Servers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/servers/user/my-servers",
+							"host": ["{{base_url}}"],
+							"path": ["servers", "user", "my-servers"]
+						},
+						"description": "Get all servers owned by the authenticated user"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Server Categories",
+			"item": [
+				{
+					"name": "Get All Categories",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/server-categories",
+							"host": ["{{base_url}}"],
+							"path": ["server-categories"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Server Tags",
+			"item": [
+				{
+					"name": "Get All Tags",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/server-tags",
+							"host": ["{{base_url}}"],
+							"path": ["server-tags"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Search Tags",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/server-tags/search?q=pvp&limit=10",
+							"host": ["{{base_url}}"],
+							"path": ["server-tags", "search"],
+							"query": [
+								{
+									"key": "q",
+									"value": "pvp"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3001",
+			"type": "string"
+		},
+		{
+			"key": "server_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "server_slug",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "hytale_version_id",
+			"value": "",
+			"type": "string",
+			"description": "ID from GET /hytale-versions"
+		},
+		{
+			"key": "category_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "tag_id_1",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "tag_id_2",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "team_id",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
