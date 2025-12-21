@@ -2,6 +2,7 @@
 
 import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
+import { Icon } from '@iconify/react';
 import { notFound } from 'next/navigation';
 import type { FilterOption, ViewMode, MarketplaceItem } from '@/components/marketplace';
 import {
@@ -214,10 +215,13 @@ export default function MarketplacePage({ params }: { params: Promise<{ type: st
                     <div className="space-y-4 sticky top-4">
                         {/* Browse / Quick Filters */}
                         <div className="bg-[#06363D] border border-[#084B54] rounded-[25px] p-5 flex flex-col gap-2.5">
-                            <h3 className="font-hebden font-semibold text-xs leading-[14px] text-[#C7F4FA]/50 uppercase">
-                                Browse
-                            </h3>
-                            <div className="flex flex-col gap-2.5">
+                            <div className="flex items-center gap-2.5">
+                                <Icon icon="solar:compass-bold-duotone" className="w-4 h-4 text-[#109EB1]" />
+                                <h3 className="font-hebden font-semibold text-xs leading-[14px] text-[#C7F4FA]/50 uppercase">
+                                    Browse
+                                </h3>
+                            </div>
+                            <div className="flex flex-col gap-2.5 pt-2">
                                 {filterOptions.map((filter) => (
                                     <button
                                         key={filter.id}
@@ -237,6 +241,7 @@ export default function MarketplacePage({ params }: { params: Promise<{ type: st
                                 ))}
                             </div>
                         </div>
+
 
                         {/* Filter Cards */}
                         <FilterCard title="Tags" defaultExpanded={true}>

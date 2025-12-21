@@ -2183,4 +2183,24 @@ export class ResourceService {
             message: 'External links reordered successfully',
         };
     }
+
+    /**
+     * Get published resources for sitemap (top 1000 by downloads)
+     */
+    async getSitemapResources() {
+        return prisma.resource.findMany({
+            where: {
+                status: ResourceStatus.APPROVED,
+            },
+            select: {
+                slug: true,
+                type: true,
+                updatedAt: true,
+            },
+            orderBy: {
+                downloadCount: 'desc',
+            },
+            take: 1000,
+        });
+    }
 }

@@ -4,6 +4,7 @@ import { Nunito } from 'next/font/google';
 import './globals.css';
 import { headers } from "next/headers";
 import { SessionProvider } from "@/components/providers/SessionProvider";
+import { ExternalLinkProvider } from "@/components/providers/ExternalLinkProvider";
 import { Toaster } from '@/components/ui/sonner';
 
 const hebden = localFont({
@@ -100,7 +101,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <html lang="en">
             <body className={`${hebden.variable} ${nunito.variable}`}>
                 <SessionProvider initialSession={session}>
-                    {children}
+                    <ExternalLinkProvider>
+                        {children}
+                    </ExternalLinkProvider>
                 </SessionProvider>
                 <Toaster />
             </body>

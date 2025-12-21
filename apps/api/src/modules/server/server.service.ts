@@ -1673,4 +1673,23 @@ export class ServerService {
             },
         });
     }
+
+    /**
+     * Get approved servers for sitemap (top 1000 by votes)
+     */
+    async getSitemapServers() {
+        return prisma.server.findMany({
+            where: {
+                status: ServerStatus.APPROVED,
+            },
+            select: {
+                slug: true,
+                updatedAt: true,
+            },
+            orderBy: {
+                voteCount: 'desc',
+            },
+            take: 1000,
+        });
+    }
 }

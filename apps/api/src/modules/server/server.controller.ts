@@ -44,6 +44,13 @@ export class ServerController {
         return this.serverService.findAll(filterDto);
     }
 
+    @Get('sitemap')
+    @AllowAnonymous()
+    @ApiOperation({ summary: 'Get servers for sitemap' })
+    async getSitemapServers() {
+        return this.serverService.getSitemapServers();
+    }
+
     // ============================================
     // AUTHENTICATED ENDPOINTS
     // ============================================

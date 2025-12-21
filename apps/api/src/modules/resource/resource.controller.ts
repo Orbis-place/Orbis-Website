@@ -30,6 +30,13 @@ export class ResourceController {
         return this.resourceService.getAllResources(filterDto);
     }
 
+    @Get('sitemap')
+    @AllowAnonymous()
+    @ApiOperation({ summary: 'Get resources for sitemap' })
+    async getSitemapResources() {
+        return this.resourceService.getSitemapResources();
+    }
+
     @Get('categories')
     @AllowAnonymous()
     @ApiOperation({ summary: 'Get categories filtered by resource type' })

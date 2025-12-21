@@ -750,4 +750,23 @@ export class UserService {
 
         return this.getSocialLinks(userId);
     }
+
+    /**
+     * Get users for sitemap (top 1000 by reputation)
+     */
+    async getSitemapUsers() {
+        return prisma.user.findMany({
+            where: {
+                status: 'ACTIVE',
+            },
+            select: {
+                username: true,
+                updatedAt: true,
+            },
+            orderBy: {
+                reputation: 'desc',
+            },
+            take: 1000,
+        });
+    }
 }

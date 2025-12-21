@@ -25,6 +25,13 @@ export class UserController {
         return this.userService.findById(session.user.id);
     }
 
+    @Get('sitemap')
+    @AllowAnonymous()
+    @ApiOperation({ summary: 'Get users for sitemap' })
+    async getSitemapUsers() {
+        return this.userService.getSitemapUsers();
+    }
+
     @Patch('me')
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Update current user profile' })

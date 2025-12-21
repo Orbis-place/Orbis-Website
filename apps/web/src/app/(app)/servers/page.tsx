@@ -21,6 +21,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { CheckIcon, ArrowDown, ArrowUp } from 'lucide-react';
+import { Icon } from '@iconify/react';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -181,10 +182,13 @@ export default function ServersPage() {
                     <div className="space-y-4 sticky top-4">
                         {/* Browse / Quick Filters */}
                         <div className="bg-[#06363D] border border-[#084B54] rounded-[25px] p-5 flex flex-col gap-2.5">
-                            <h3 className="font-hebden font-semibold text-xs leading-[14px] text-[#C7F4FA]/50 uppercase">
-                                Browse
-                            </h3>
-                            <div className="flex flex-col gap-2.5">
+                            <div className="flex items-center gap-2.5">
+                                <Icon icon="solar:compass-bold-duotone" className="w-4 h-4 text-[#109EB1]" />
+                                <h3 className="font-hebden font-semibold text-xs leading-[14px] text-[#C7F4FA]/50 uppercase">
+                                    Browse
+                                </h3>
+                            </div>
+                            <div className="flex flex-col gap-2.5 pt-2">
                                 {filterOptions.map((filter) => (
                                     <button
                                         key={filter.id}
@@ -207,10 +211,13 @@ export default function ServersPage() {
 
                         {/* Status Filters */}
                         <div className="bg-[#06363D] border border-[#084B54] rounded-[25px] p-5 flex flex-col gap-2.5">
-                            <h3 className="font-hebden font-semibold text-xs leading-[14px] text-[#C7F4FA]/50 uppercase mb-1">
-                                Status
-                            </h3>
-                            <div className="flex flex-col gap-1">
+                            <div className="flex items-center gap-2.5">
+                                <Icon icon="solar:settings-minimalistic-bold-duotone" className="w-4 h-4 text-[#109EB1]" />
+                                <h3 className="font-hebden font-semibold text-xs leading-[14px] text-[#C7F4FA]/50 uppercase">
+                                    Status
+                                </h3>
+                            </div>
+                            <div className="flex flex-col gap-1 pt-2">
                                 <button
                                     onClick={() => setOnlineOnly(!onlineOnly)}
                                     className={`
