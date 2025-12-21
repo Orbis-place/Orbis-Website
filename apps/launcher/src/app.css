@@ -5,6 +5,11 @@
 
 @custom-variant dark (&:is(.dark *));
 
+html,
+body {
+  height: 100%;
+}
+
 :root {
   --background: #032125;
   --foreground: #c7f4fa;
@@ -41,7 +46,7 @@
     'Courier New', monospace;
 
   /* Radius */
-  --radius: 0.95rem;
+  --radius: 1.25rem;
 
   /* Layout dimensions */
   --left-bar-width: 64px;
@@ -71,10 +76,10 @@
 }
 
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 6px);
+  --radius-md: calc(var(--radius) - 3px);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-xl: calc(var(--radius) + 6px);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -102,119 +107,14 @@
   --color-status-archived: var(--status-archived);
 }
 
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-    font-family: var(--font-sans);
-  }
+/* Global flat rounded styles */
+button,
+input,
+select,
+textarea {
+  border-radius: 0.75rem;
 }
 
-
-/* Fix pour Tauri - permettre le drag sur tout le header */
-[data-tauri-drag-region] {
-  -webkit-app-region: drag;
-}
-
-/* Permettre le drag sur tous les enfants du header sauf les exclusions */
-[data-tauri-drag-region] * {
-  -webkit-app-region: drag;
-}
-
-/* Désactiver le drag uniquement sur les éléments exclus */
-[data-tauri-drag-region-exclude],
-[data-tauri-drag-region-exclude] * {
-  -webkit-app-region: no-drag;
-}
-
-/* Layout Grid */
-.app-grid-layout {
-  display: grid;
-  grid-template-areas: 
-    "navbar statusbar"
-    "navbar content";
-  grid-template-columns: var(--left-bar-width) 1fr;
-  grid-template-rows: var(--top-bar-height) 1fr;
-  height: 100vh;
-  width: 100vw;
-  overflow: hidden;
-  background: var(--color-background);
-}
-
-.app-grid-navbar {
-  grid-area: navbar;
-  background: var(--color-secondary);
-  border-right: 1px solid var(--color-border);
-}
-
-.app-grid-statusbar {
-  grid-area: statusbar;
-  background: var(--color-secondary);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.app-grid-content {
-  grid-area: content;
-  overflow-y: auto;
-  background: var(--color-background);
-}
-
-/* Navigation Buttons */
-.nav-button {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 150ms ease;
-  background: transparent;
-  color: var(--color-foreground);
-  border: none;
-  cursor: pointer;
-}
-
-.nav-button:hover {
-  background: var(--color-accent);
-  filter: brightness(1.1);
-}
-
-.nav-button.active {
-  background: var(--color-primary);
-  color: var(--color-primary-foreground);
-}
-
-/* Titlebar buttons */
-.titlebar-button {
-  padding: 0;
-  margin: 0;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: none;
-  color: var(--color-muted-foreground);
-  cursor: pointer;
-  transition: all 150ms ease;
-  border-radius: 0.5rem;
-}
-
-.titlebar-button:hover {
-  background: var(--color-secondary);
-  color: var(--color-foreground);
-}
-
-.titlebar-button.close:hover {
-  background: var(--color-destructive);
-  color: white;
-}
-/* Permettre le drag à travers les SVG et spans non-interactifs */
-[data-tauri-drag-region] svg:not([data-tauri-drag-region-exclude] svg),
-[data-tauri-drag-region] svg:not([data-tauri-drag-region-exclude] svg) *,
-[data-tauri-drag-region] span:not([data-tauri-drag-region-exclude] span) {
-  pointer-events: none;
+button {
+  transition: all 0.2s ease-in-out;
 }
