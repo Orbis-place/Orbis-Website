@@ -89,7 +89,7 @@ export default function Navbar({ session }: NavbarProps) {
         <>
             {/* Desktop Navbar */}
             <nav className="hidden lg:flex w-full z-50 h-25 relative justify-center px-8">
-                <div className="flex max-w-6xl justify-between w-full items-center gap-2">
+                <div className="flex max-w-7xl justify-between w-full items-center gap-2">
                     <Link href="/">
                         <Image
                             src="/navbar_header.png"
@@ -200,6 +200,11 @@ export default function Navbar({ session }: NavbarProps) {
                         <Button variant="ghost">
                             <Link href="https://www.g-portal.com/en/gameserver/hytale-server-hosting?ref=orbisplace" className="font-hebden font-semibold text-base leading-none">
                                 Server Hosting
+                            </Link>
+                        </Button>
+                        <Button variant="ghost">
+                            <Link href="/our-launcher" className="font-hebden font-semibold text-base leading-none">
+                                Orbis Launcher
                             </Link>
                         </Button>
                     </div>

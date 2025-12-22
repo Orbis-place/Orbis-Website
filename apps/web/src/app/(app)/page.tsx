@@ -145,95 +145,97 @@ export default async function Home() {
     return (
         <div className={styles.page}>
             {/* Hero Section */}
-            <section className="min-h-[calc(100vh-100px)] md:min-h-[calc(100vh-100px)] sm:min-h-[calc(100vh-80px)] pb-12 md:pb-28 flex flex-col md:flex-row items-center justify-between px-4 sm:px-6 md:px-8 relative gap-8 md:gap-0">
-                <div className="flex flex-col items-start gap-6 md:gap-[30px] w-full max-w-full md:max-w-[590px] md:ml-[151px] ml-0 mt-8 md:mt-0">
-                    {/* Text Content */}
-                    <div className="flex flex-col items-start gap-4 md:gap-[18px] w-full">
-                        {/* Title Group */}
-                        <div className="w-full">
-                            <h1 className="font-hebden font-semibold text-2xl sm:text-3xl md:text-[40px] leading-tight md:leading-[48px] text-[#C7F4FA]">
-                                Welcome to Orbis: Hytale&apos;s #1
-                            </h1>
-                            <Rotater
-                                cellClassName="font-hebden font-semibold text-2xl sm:text-3xl md:text-[40px] leading-tight md:leading-[48px] text-[#15C8E0]"
-                                className="text-3xl h-8 sm:h-[32px] md:h-12"
-                                names={[
-                                    'Server Listing',
-                                    'Marketplace',
-                                    'Community Hub',
-                                ]}
-                            />
+            <section className="min-h-[calc(100vh-100px)] md:min-h-[calc(100vh-100px)] sm:min-h-[calc(100vh-80px)] pb-12 md:pb-28 px-4 sm:px-6 md:px-8 relative flex items-center">
+                <div className="max-w-7xl mx-auto w-full h-full flex flex-col md:flex-row items-center justify-between gap-8 md:gap-0">
+                    <div className="flex flex-col items-start gap-6 md:gap-[30px] w-full max-w-full md:max-w-[590px] mt-8 md:mt-0">
+                        {/* Text Content */}
+                        <div className="flex flex-col items-start gap-4 md:gap-[18px] w-full">
+                            {/* Title Group */}
+                            <div className="w-full">
+                                <h1 className="font-hebden font-semibold text-2xl sm:text-3xl md:text-[40px] leading-tight md:leading-[48px] text-[#C7F4FA]">
+                                    Welcome to Orbis: Hytale&apos;s #1
+                                </h1>
+                                <Rotater
+                                    cellClassName="font-hebden font-semibold text-2xl sm:text-3xl md:text-[40px] leading-tight md:leading-[48px] text-[#15C8E0]"
+                                    className="text-3xl h-8 sm:h-[32px] md:h-12"
+                                    names={[
+                                        'Server Listing',
+                                        'Marketplace',
+                                        'Community Hub',
+                                    ]}
+                                />
+                            </div>
+
+                            {/* Subtitle */}
+                            <p className="font-nunito text-base sm:text-lg leading-[24px] md:leading-[26px] text-[#C7F4FA] max-w-full md:max-w-[420px]">
+                                Discover, Create and Connect with best mods, worlds, and servers.
+                            </p>
                         </div>
 
-                        {/* Subtitle */}
-                        <p className="font-nunito text-base sm:text-lg leading-[24px] md:leading-[26px] text-[#C7F4FA] max-w-full md:max-w-[420px]">
-                            Discover, Create and Connect with best mods, worlds, and servers.
-                        </p>
+                        {/* CTA Buttons */}
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 md:gap-5 w-full sm:w-auto">
+                            <Link
+                                href="/login"
+                                prefetch={false}
+                                className="flex items-center justify-center px-[18px] py-[14px] md:py-[16px] gap-2.5 bg-[#109EB1] rounded-full w-full sm:w-auto sm:min-w-[158px] h-[48px] md:h-[52px] hover:bg-[#0d8a9b] transition-all cursor-pointer"
+                            >
+                                <span className="font-hebden font-semibold text-base md:text-[17px] leading-[20px] text-[#C7F4FA]">
+                                    Get Started
+                                </span>
+                            </Link>
+
+                            <Link
+                                href="/plugins"
+                                prefetch={false}
+                                className="flex items-center justify-center px-[18px] py-[14px] md:py-[16px] gap-2.5 bg-[rgba(152,234,245,0.25)] border-2 border-[rgba(152,234,245,0.25)] rounded-full w-full sm:w-auto sm:min-w-[198px] h-[48px] md:h-[52px] hover:bg-[rgba(152,234,245,0.35)] transition-all cursor-pointer"
+                            >
+                                <span className="font-hebden font-semibold text-base md:text-[17px] leading-[20px] text-[#C7F4FA]">
+                                    Browse Content
+                                </span>
+                            </Link>
+                        </div>
+
+                        {/* Platform Stats */}
+                        <div className="flex flex-wrap justify-center items-center gap-6 md:gap-8 pt-2">
+                            <div className="flex items-center gap-2">
+                                <svg className="w-5 h-5 text-[#109EB1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                </svg>
+                                <span className="font-hebden font-semibold text-lg text-[#C7F4FA]">250+</span>
+                                <span className="font-nunito text-sm text-[#C7F4FA]/60">Resources</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <svg className="w-5 h-5 text-[#109EB1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                                <span className="font-hebden font-semibold text-lg text-[#C7F4FA]">85+</span>
+                                <span className="font-nunito text-sm text-[#C7F4FA]/60">Creators</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <svg className="w-5 h-5 text-[#109EB1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                </svg>
+                                <span className="font-hebden font-semibold text-lg text-[#C7F4FA]">12K+</span>
+                                <span className="font-nunito text-sm text-[#C7F4FA]/60">Downloads</span>
+                            </div>
+                        </div>
                     </div>
 
-                    {/* CTA Buttons */}
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 md:gap-5 w-full sm:w-auto">
-                        <Link
-                            href="/login"
-                            prefetch={false}
-                            className="flex items-center justify-center px-[18px] py-[14px] md:py-[16px] gap-2.5 bg-[#109EB1] rounded-full w-full sm:w-auto sm:min-w-[158px] h-[48px] md:h-[52px] hover:bg-[#0d8a9b] transition-all cursor-pointer"
-                        >
-                            <span className="font-hebden font-semibold text-base md:text-[17px] leading-[20px] text-[#C7F4FA]">
-                                Get Started
-                            </span>
-                        </Link>
-
-                        <Link
-                            href="/plugins"
-                            prefetch={false}
-                            className="flex items-center justify-center px-[18px] py-[14px] md:py-[16px] gap-2.5 bg-[rgba(152,234,245,0.25)] border-2 border-[rgba(152,234,245,0.25)] rounded-full w-full sm:w-auto sm:min-w-[198px] h-[48px] md:h-[52px] hover:bg-[rgba(152,234,245,0.35)] transition-all cursor-pointer"
-                        >
-                            <span className="font-hebden font-semibold text-base md:text-[17px] leading-[20px] text-[#C7F4FA]">
-                                Browse Content
-                            </span>
-                        </Link>
+                    {/* Floating Kweebec Image */}
+                    <div className="relative animate-float w-full md:w-auto flex justify-center md:block">
+                        <Image
+                            src="/kweebec.webp"
+                            alt="Kweebec character"
+                            width={300}
+                            height={300}
+                            style={{
+                                transform: 'scaleX(-1)',
+                                filter: 'drop-shadow(0 0 15px rgba(199, 244, 250, 0.3)) drop-shadow(0 0 30px rgba(21, 200, 224, 0.2))',
+                            }}
+                            className="object-contain drop-shadow-2xl md:w-[400px] md:h-[400px] w-[250px] h-[250px]"
+                            priority
+                        />
                     </div>
-
-                    {/* Platform Stats */}
-                    <div className="flex flex-wrap justify-center items-center gap-6 md:gap-8 pt-2">
-                        <div className="flex items-center gap-2">
-                            <svg className="w-5 h-5 text-[#109EB1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                            </svg>
-                            <span className="font-hebden font-semibold text-lg text-[#C7F4FA]">250+</span>
-                            <span className="font-nunito text-sm text-[#C7F4FA]/60">Resources</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <svg className="w-5 h-5 text-[#109EB1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                            </svg>
-                            <span className="font-hebden font-semibold text-lg text-[#C7F4FA]">85+</span>
-                            <span className="font-nunito text-sm text-[#C7F4FA]/60">Creators</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <svg className="w-5 h-5 text-[#109EB1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                            </svg>
-                            <span className="font-hebden font-semibold text-lg text-[#C7F4FA]">12K+</span>
-                            <span className="font-nunito text-sm text-[#C7F4FA]/60">Downloads</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Floating Kweebec Image */}
-                <div className="relative md:mr-[151px] mr-0 animate-float w-full md:w-auto flex justify-center md:block">
-                    <Image
-                        src="/kweebec.webp"
-                        alt="Kweebec character"
-                        width={300}
-                        height={300}
-                        style={{
-                            transform: 'scaleX(-1)',
-                            filter: 'drop-shadow(0 0 15px rgba(199, 244, 250, 0.3)) drop-shadow(0 0 30px rgba(21, 200, 224, 0.2))',
-                        }}
-                        className="object-contain drop-shadow-2xl md:w-[400px] md:h-[400px] w-[250px] h-[250px]"
-                        priority
-                    />
                 </div>
             </section>
 
