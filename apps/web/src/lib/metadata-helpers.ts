@@ -150,3 +150,73 @@ export async function generateUserMetadata(username: string): Promise<Metadata> 
         };
     }
 }
+
+const SHOWCASE_CATEGORY_LABELS: Record<string, string> = {
+    'THREE_D_MODEL': '3D Model',
+    'SCREENSHOT': 'Screenshot',
+    'VIDEO': 'Video',
+    'ARTWORK': 'Artwork',
+    'ANIMATION': 'Animation',
+    'CONCEPT_ART': 'Concept Art',
+    'FAN_ART': 'Fan Art',
+    'TUTORIAL': 'Tutorial',
+    'DEVLOG': 'Dev Log',
+    'OTHER': 'Other',
+};
+
+export async function generateShowcaseMetadata(postId: string): Promise<Metadata> {
+    try {
+        const response = await fetch(`${API_URL}/showcase/${postId}`, {
+            cache: 'no-store'
+        });
+
+        if (!response.ok) {
+            return {
+                title: 'Showcase Not Found',
+                description: 'The requested showcase post could not be found on Orbis.',
+            };
+        }
+
+        const post = await response.json();
+        const categoryLabel = SHOWCASE_CATEGORY_LABELS[post.category] || post.category;
+        const ownerName = post.ownerTeam?.name || post.author?.displayName || post.author?.username || 'Unknown';
+
+        // Strip HTML from description
+        const cleanDescription = post.description?.replace(/<[^>]*>/g, '') || '';
+        const description = cleanDescription.slice(0, 160) || `${post.title} - A ${categoryLabel.toLowerCase()} by ${ownerName} on Orbis.`;
+
+        // Format stats
+        const viewCount = new Intl.NumberFormat('en-US', { notation: "compact" }).format(post.viewCount || 0);
+        const likeCount = new Intl.NumberFormat('en-US', { notation: "compact" }).format(post._count?.likes || 0);
+        const stats = `Views: ${viewCount} • Likes: ${likeCount}`;
+
+        return {
+            title: post.title,
+            description: `${description}\n\n${stats}`,
+            keywords: [
+                'Hytale',
+                'Showcase',
+                categoryLabel,
+                post.title,
+                ownerName,
+            ],
+            openGraph: {
+                title: `${post.title} - ${categoryLabel}`,
+                description: description,
+                type: 'article',
+                url: `/showcase/${postId}`,
+                siteName: 'Orbis',
+            },
+            twitter: {
+                card: 'summary_large_image',
+                title: `${post.title} - ${categoryLabel}`,
+                description: `${description}\n\n${stats}`,
+            },
+        };
+    } catch (error) {
+        return {
+            title: 'Showcase',
+            description: 'View this showcase post on Orbis.',
+        };
+    }
+}

@@ -80,6 +80,13 @@ export default function TeamManageLayout({ children }: ManageLayoutProps) {
                     icon: 'mdi:server',
                     href: `${basePath}/servers`,
                     exact: false
+                },
+                {
+                    id: 'showcase',
+                    label: 'Showcase',
+                    icon: 'mdi:image-multiple',
+                    href: `${basePath}/showcase`,
+                    exact: false
                 }
             ]
         },

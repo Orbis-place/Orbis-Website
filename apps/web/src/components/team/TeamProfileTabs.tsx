@@ -15,16 +15,18 @@ export interface TeamProfileTabsProps {
     teamSlug: string;
     resourceCount?: number;
     serverCount?: number;
+    showcaseCount?: number;
     memberCount: number;
 }
 
-export default function TeamProfileTabs({ teamName, teamSlug, resourceCount = 0, serverCount = 0, memberCount }: TeamProfileTabsProps) {
+export default function TeamProfileTabs({ teamName, teamSlug, resourceCount = 0, serverCount = 0, showcaseCount = 0, memberCount }: TeamProfileTabsProps) {
     const pathname = usePathname();
 
     const tabs: Tab[] = [
         { id: 'overview', label: 'Overview', href: `/team/${teamSlug}` },
         { id: 'resources', label: 'Resources', href: `/team/${teamSlug}/resources`, count: resourceCount },
         { id: 'servers', label: 'Servers', href: `/team/${teamSlug}/servers`, count: serverCount },
+        { id: 'showcase', label: 'Showcase', href: `/team/${teamSlug}/showcase`, count: showcaseCount },
         { id: 'members', label: 'Members', href: `/team/${teamSlug}/members`, count: memberCount },
     ];
 

@@ -14,14 +14,16 @@ export interface UserProfileTabsProps {
     username: string;
     resourceCount: number;
     serverCount: number;
+    showcaseCount?: number;
 }
 
-export default function UserProfileTabs({ username, resourceCount, serverCount }: UserProfileTabsProps) {
+export default function UserProfileTabs({ username, resourceCount, serverCount, showcaseCount }: UserProfileTabsProps) {
     const pathname = usePathname();
 
     const tabs: Tab[] = [
         { id: 'resources', label: 'Resources', href: `/users/${username}/resources`, count: resourceCount },
         { id: 'servers', label: 'Servers', href: `/users/${username}/servers`, count: serverCount },
+        { id: 'showcase', label: 'Showcase', href: `/users/${username}/showcase`, count: showcaseCount },
         { id: 'activity', label: 'Activity', href: `/users/${username}/activity` },
     ];
 

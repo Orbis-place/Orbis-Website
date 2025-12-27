@@ -1055,6 +1055,57 @@ export class TeamService {
     }
 
     /**
+     * Get team showcase posts
+     */
+    async getTeamShowcase(teamId: string) {
+        const team = await prisma.team.findUnique({
+            where: { id: teamId },
+        });
+
+        if (!team) {
+            throw new NotFoundException('Team not found');
+        }
+
+        const showcasePosts = await prisma.showcasePost.findMany({
+            where: {
+                ownerTeamId: teamId,
+                status: 'PUBLISHED',
+            },
+            include: {
+                author: {
+                    select: {
+                        id: true,
+                        username: true,
+                        displayName: true,
+                        image: true,
+                    },
+                },
+                ownerTeam: {
+                    select: {
+                        id: true,
+                        slug: true,
+                        name: true,
+                        logo: true,
+                    },
+                },
+                media: {
+                    take: 1,
+                    orderBy: { order: 'asc' },
+                },
+                _count: {
+                    select: {
+                        likes: true,
+                        comments: true,
+                    },
+                },
+            },
+            orderBy: { createdAt: 'desc' },
+        });
+
+        return showcasePosts;
+    }
+
+    /**
      * Check if user has edit permission
      */
     private async checkEditPermission(userId: string, teamId: string): Promise<boolean> {

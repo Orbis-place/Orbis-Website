@@ -264,6 +264,14 @@ export class TeamController {
         return this.teamService.getTeamServers(teamId);
     }
 
+    @Get(':id/showcase')
+    @AllowAnonymous()
+    @ApiOperation({ summary: 'Get team showcase posts' })
+    @ApiParam({ name: 'id', description: 'Team ID' })
+    async getTeamShowcase(@Param('id') teamId: string) {
+        return this.teamService.getTeamShowcase(teamId);
+    }
+
     @Get('user/my-teams')
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Get current user teams' })

@@ -65,10 +65,6 @@ export default function CreatorsPage() {
                 {/* Content */}
                 <div className="relative w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between pt-[140px] pb-16">
                     <div className="max-w-2xl space-y-4">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#109EB1]/10 border border-[#109EB1]/20 text-[#109EB1] text-xs font-hebden tracking-wider">
-                            <Icon icon="mdi:account-group" className="text-sm" />
-                            COMMUNITY
-                        </div>
                         <h1 className="font-hebden text-4xl md:text-5xl text-[#C7F4FA] leading-tight">
                             Discover Creators
                         </h1>

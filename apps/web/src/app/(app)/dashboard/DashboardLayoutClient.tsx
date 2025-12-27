@@ -49,6 +49,11 @@ const dashboardNav = [
         href: '/dashboard/servers',
         icon: 'mdi:server',
       },
+      {
+        name: 'My Showcase',
+        href: '/dashboard/showcase',
+        icon: 'mdi:image-multiple',
+      },
     ],
   },
   {

@@ -93,6 +93,32 @@ enum DiscoveryResourceCollectionType {
 }
 
 // ============================================
+// SHOWCASE ENUMS
+// ============================================
+
+enum ShowcaseCategory {
+  THREE_D_MODEL    // 3D Models, characters, props
+  TEXTURE          // Textures, materials
+  MAP              // Maps, worlds, terrain
+  PLUGIN           // Plugin previews
+  CONCEPT_ART      // Concept art, sketches
+  ANIMATION        // Animations, VFX
+  MUSIC_SOUND      // Music, sound effects
+  OTHER            // Other creations
+}
+
+enum ShowcasePostStatus {
+  DRAFT     // Not visible
+  PUBLISHED // Visible to everyone
+  ARCHIVED  // Hidden by user
+}
+
+enum ShowcaseMediaType {
+  IMAGE
+  VIDEO
+}
+
+// ============================================
 // USER MODEL
 // ============================================
 
@@ -186,6 +212,12 @@ model User {
 
   // Social Links
   socialLinks UserSocialLink[] @relation("UserSocialLinks")
+
+  // Showcase
+  showcasePosts        ShowcasePost[]        @relation("ShowcasePosts")
+  ownedShowcasePosts   ShowcasePost[]        @relation("OwnedShowcasePosts")
+  showcaseLikes        ShowcasePostLike[]    @relation("ShowcaseLikes")
+  showcaseComments     ShowcasePostComment[] @relation("ShowcaseComments")
 
   @@index([email])
   @@index([username])
@@ -300,11 +332,12 @@ model Team {
   owner   User   @relation("TeamOwner", fields: [ownerId], references: [id], onDelete: Cascade)
 
   // Relations
-  members     TeamMember[]
-  invitations TeamInvitation[]
-  servers     Server[]
-  resources   Resource[]
-  socialLinks TeamSocialLink[] @relation("TeamSocialLinks")
+  members       TeamMember[]
+  invitations   TeamInvitation[]
+  servers       Server[]
+  resources     Resource[]
+  socialLinks   TeamSocialLink[]  @relation("TeamSocialLinks")
+  showcasePosts ShowcasePost[]    @relation("TeamShowcasePosts")
 
   @@index([ownerId])
   @@map("teams")
@@ -741,6 +774,9 @@ model Resource {
 
   // Discovery - Resource Collections
   discoveryResourceCollections DiscoveryResourceCollectionItem[]
+
+  // Showcase - Linked posts
+  linkedShowcases ShowcasePost[] @relation("LinkedShowcase")
 
   // Moderation
   moderationNotes String? // Internal staff notes
@@ -1388,4 +1424,108 @@ model DiscoveryResourceCollectionItem {
   @@map("discovery_resource_collection_items")
 }
 
+// ============================================
+// SHOWCASE SYSTEM
+// ============================================
 
+model ShowcasePost {
+  id          String   @id @default(cuid())
+  title       String   @db.VarChar(200)
+  description String?  @db.Text
+  category    ShowcaseCategory
+  status      ShowcasePostStatus @default(DRAFT)
+  
+  // Media
+  media        ShowcasePostMedia[]
+  thumbnailUrl String? // Primary thumbnail
+  
+  // Stats
+  likeCount    Int @default(0)
+  commentCount Int @default(0)
+  viewCount    Int @default(0)
+  
+  // Featured
+  featured Boolean @default(false)
+  
+  // Ownership
+  authorId     String  // User who created the post
+  author       User    @relation("ShowcasePosts", fields: [authorId], references: [id], onDelete: Cascade)
+  ownerUserId  String? // Owner if user (exclusive with ownerTeamId)
+  ownerUser    User?   @relation("OwnedShowcasePosts", fields: [ownerUserId], references: [id], onDelete: Cascade)
+  ownerTeamId  String? // Owner if team (exclusive with ownerUserId)
+  ownerTeam    Team?   @relation("TeamShowcasePosts", fields: [ownerTeamId], references: [id], onDelete: SetNull)
+  
+  // Relations
+  likes    ShowcasePostLike[]
+  comments ShowcasePostComment[]
+  
+  // Optional link to published resource
+  linkedResourceId String?
+  linkedResource   Resource? @relation("LinkedShowcase", fields: [linkedResourceId], references: [id], onDelete: SetNull)
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([authorId])
+  @@index([ownerUserId])
+  @@index([ownerTeamId])
+  @@index([category])
+  @@index([status])
+  @@index([featured])
+  @@index([createdAt])
+  @@map("showcase_posts")
+}
+
+model ShowcasePostMedia {
+  id         String            @id @default(cuid())
+  postId     String
+  url        String
+  storageKey String
+  type       ShowcaseMediaType @default(IMAGE)
+  order      Int               @default(0)
+  caption    String?
+  size       Int?              // Bytes
+  
+  createdAt DateTime @default(now())
+  
+  post ShowcasePost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  
+  @@index([postId, order])
+  @@map("showcase_post_media")
+}
+
+model ShowcasePostLike {
+  id        String   @id @default(cuid())
+  userId    String
+  postId    String
+  createdAt DateTime @default(now())
+  
+  user User         @relation("ShowcaseLikes", fields: [userId], references: [id], onDelete: Cascade)
+  post ShowcasePost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, postId])
+  @@index([userId])
+  @@index([postId])
+  @@map("showcase_post_likes")
+}
+
+model ShowcasePostComment {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  userId    String
+  postId    String
+  parentId  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  user    User                  @relation("ShowcaseComments", fields: [userId], references: [id], onDelete: Cascade)
+  post    ShowcasePost          @relation(fields: [postId], references: [id], onDelete: Cascade)
+  parent  ShowcasePostComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies ShowcasePostComment[] @relation("CommentReplies")
+  
+  @@index([postId, createdAt])
+  @@index([userId])
+  @@index([parentId])
+  @@map("showcase_post_comments")
+}

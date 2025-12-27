@@ -156,6 +156,20 @@ export default function Navbar({ session }: NavbarProps) {
                                                     </div>
                                                 </NavigationMenuLink>
                                             </li>
+                                            <li>
+                                                <NavigationMenuLink
+                                                    href="/showcase"
+                                                    className="flex flex-row items-center gap-2 select-none rounded-lg p-2 leading-none no-underline outline-none transition-colors hover:bg-white/5 hover:text-foreground focus:bg-white/5 focus:text-foreground"
+                                                >
+                                                    <div className="p-1.5 rounded-lg bg-[#109EB1]/10 text-[#109EB1]">
+                                                        <Icon icon="mdi:image-multiple" width="16" height="16" />
+                                                    </div>
+                                                    <div className="flex flex-col gap-0.5">
+                                                        <span className="font-hebden font-semibold text-foreground text-sm">Showcase</span>
+                                                        <span className="font-nunito text-xs text-foreground/60">Community gallery & WIP projects</span>
+                                                    </div>
+                                                </NavigationMenuLink>
+                                            </li>
                                         </ul>
                                     </NavigationMenuContent>
                                 </NavigationMenuItem>
@@ -280,6 +294,13 @@ export default function Navbar({ session }: NavbarProps) {
                                         className="flex items-center gap-2 w-full px-2 py-2">
                                         <Icon icon="mdi:server" width="16" height="16" className="text-current" />
                                         My Servers
+                                    </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild className="text-foreground cursor-pointer">
+                                    <Link href="/dashboard/showcase"
+                                        className="flex items-center gap-2 w-full px-2 py-2">
+                                        <Icon icon="mdi:image-multiple" width="16" height="16" className="text-current" />
+                                        My Showcase
                                     </Link>
                                 </DropdownMenuItem>
 
@@ -444,6 +465,26 @@ export default function Navbar({ session }: NavbarProps) {
                                     </div>
                                     <Icon icon="mdi:chevron-right" width="20" height="20" className="text-foreground/40 group-hover:text-foreground/60" />
                                 </Link>
+
+                                {/* Showcase */}
+                                <Link
+                                    href="/showcase"
+                                    onClick={closeMobileNav}
+                                    className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent transition-colors group"
+                                >
+                                    <div className="p-1.5 rounded-lg bg-[#E9735B]/10 text-[#E9735B]">
+                                        <Icon icon="mdi:image-multiple" width="18" height="18" />
+                                    </div>
+                                    <div className="flex flex-col flex-1">
+                                        <span className="font-hebden font-semibold text-sm text-foreground">
+                                            Showcase
+                                        </span>
+                                        <span className="font-nunito text-xs text-foreground/60">
+                                            Community gallery & WIP projects
+                                        </span>
+                                    </div>
+                                    <Icon icon="mdi:chevron-right" width="20" height="20" className="text-foreground/40 group-hover:text-foreground/60" />
+                                </Link>
                             </div>
 
                             {/* Marketplace Categories */}
@@ -575,6 +616,12 @@ export default function Navbar({ session }: NavbarProps) {
                                     className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent transition-colors">
                                     <Icon icon="mdi:server" width="20" height="20" className="text-primary" />
                                     <span className="font-hebden font-medium text-foreground">My Servers</span>
+                                </Link>
+
+                                <Link href="/dashboard/showcase" onClick={closeMobileProfile}
+                                    className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent transition-colors">
+                                    <Icon icon="mdi:image-multiple" width="20" height="20" className="text-primary" />
+                                    <span className="font-hebden font-medium text-foreground">My Showcase</span>
                                 </Link>
                             </div>
 

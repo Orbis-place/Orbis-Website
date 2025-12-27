@@ -30,6 +30,11 @@ interface SitemapUser {
     updatedAt: string
 }
 
+interface SitemapShowcase {
+    id: string
+    updatedAt: string
+}
+
 async function fetchResources(): Promise<SitemapResource[]> {
     try {
         const response = await fetch(`${API_URL}/resources/sitemap`, {
@@ -66,15 +71,28 @@ async function fetchCreators(): Promise<SitemapUser[]> {
     }
 }
 
+async function fetchShowcase(): Promise<SitemapShowcase[]> {
+    try {
+        const response = await fetch(`${API_URL}/showcase/sitemap`, {
+            next: { revalidate: 3600 },
+        })
+        if (!response.ok) return []
+        return response.json()
+    } catch {
+        return []
+    }
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://orbis.place'
     const currentDate = new Date()
 
     // Fetch all dynamic data in parallel (limited to MAX_ITEMS each)
-    const [resources, servers, creators] = await Promise.all([
+    const [resources, servers, creators, showcase] = await Promise.all([
         fetchResources(),
         fetchServers(),
         fetchCreators(),
+        fetchShowcase(),
     ])
 
     // Static routes
@@ -96,6 +114,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             lastModified: currentDate,
             changeFrequency: 'hourly',
             priority: 0.9,
+        },
+        {
+            url: `${baseUrl}/showcase`,
+            lastModified: currentDate,
+            changeFrequency: 'daily',
+            priority: 0.8,
         },
         {
             url: `${baseUrl}/creators`,
@@ -175,11 +199,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.6,
     }))
 
+    // Individual showcase posts (max 1000)
+    const showcaseRoutes: MetadataRoute.Sitemap = showcase.map((post) => ({
+        url: `${baseUrl}/showcase/${post.id}`,
+        lastModified: new Date(post.updatedAt),
+        changeFrequency: 'weekly' as const,
+        priority: 0.6,
+    }))
+
     return [
         ...staticRoutes,
         ...resourceTypeRoutes,
         ...resourceRoutes,
         ...serverRoutes,
         ...creatorRoutes,
+        ...showcaseRoutes,
     ]
 }
+
