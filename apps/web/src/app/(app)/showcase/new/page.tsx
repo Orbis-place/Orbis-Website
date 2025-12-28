@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Icon } from '@iconify/react';
@@ -20,7 +20,7 @@ interface TeamOption {
     logo: string | null;
 }
 
-export default function NewShowcasePage() {
+function NewShowcasePageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const defaultTeamId = searchParams.get('teamId');
@@ -427,5 +427,17 @@ export default function NewShowcasePage() {
                 </form>
             )}
         </div>
+    );
+}
+
+export default function NewShowcasePage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#109EB1]"></div>
+            </div>
+        }>
+            <NewShowcasePageContent />
+        </Suspense>
     );
 }
