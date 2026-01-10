@@ -10,7 +10,7 @@ import Underline from '@tiptap/extension-underline'
 import { Icon } from '@iconify/react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
-import { uploadResourceDescriptionImage, uploadServerDescriptionImage, fileToBase64 } from '@/lib/api/image-upload'
+import { uploadResourceDescriptionImage, uploadServerDescriptionImage, uploadVersionChangelogImage, fileToBase64 } from '@/lib/api/image-upload'
 
 interface TiptapEditorProps {
   content: string
@@ -20,6 +20,7 @@ interface TiptapEditorProps {
   minHeight?: string
   resourceId?: string
   serverId?: string
+  versionId?: string
 }
 
 export function TiptapEditor({
@@ -29,7 +30,8 @@ export function TiptapEditor({
   className = '',
   minHeight = '300px',
   resourceId,
-  serverId
+  serverId,
+  versionId
 }: TiptapEditorProps) {
   const [showImageInput, setShowImageInput] = useState(false)
   const [imageUrl, setImageUrl] = useState('')
@@ -147,6 +149,23 @@ export function TiptapEditor({
           toast.loading('Uploading image...', { id: 'image-upload' })
 
           const result = await uploadServerDescriptionImage(serverId, file)
+          editor.chain().focus().setImage({ src: result.url }).run()
+
+          toast.success('Image uploaded successfully!', { id: 'image-upload' })
+        } catch (uploadError) {
+          console.warn('Upload failed, falling back to base64:', uploadError)
+          toast.dismiss('image-upload')
+
+          const base64 = await fileToBase64(file)
+          editor.chain().focus().setImage({ src: base64 }).run()
+
+          toast.info('Image added locally. Server upload will be available when backend is ready.')
+        }
+      } else if (versionId) {
+        try {
+          toast.loading('Uploading image...', { id: 'image-upload' })
+
+          const result = await uploadVersionChangelogImage(versionId, file)
           editor.chain().focus().setImage({ src: result.url }).run()
 
           toast.success('Image uploaded successfully!', { id: 'image-upload' })

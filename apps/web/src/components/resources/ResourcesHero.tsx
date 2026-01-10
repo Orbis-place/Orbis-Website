@@ -40,7 +40,7 @@ export default function ResourcesHero({ title, description, featuredResource, fe
                     <div className="bg-[#032125]/50 backdrop-blur-sm border border-[#084B54] rounded-[16px] p-3 max-w-sm">
                         <div className="flex items-center justify-between mb-2">
                             <span className="text-[10px] font-hebden text-[#109EB1] tracking-wider">FEATURED CREATOR</span>
-                            <Link href={`/users/${featuredCreator.username}`} className="text-[10px] text-[#C7F4FA]/50 hover:text-[#C7F4FA] transition-colors flex items-center gap-1">
+                            <Link href={`/user/${featuredCreator.username}`} className="text-[10px] text-[#C7F4FA]/50 hover:text-[#C7F4FA] transition-colors flex items-center gap-1">
                                 View Profile <ArrowRight className="w-2.5 h-2.5" />
                             </Link>
                         </div>

@@ -1,81 +1,163 @@
 "use client";
 
-import { useState } from 'react';
-import { Download, Calendar, FileText, ChevronDown } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Download, Calendar, FileText, ChevronDown, FileIcon, Loader2 } from 'lucide-react';
 import { useResource } from '@/contexts/ResourceContext';
+import { Badge } from '@/components/ui/badge';
+import { TiptapViewer } from '@/components/TiptapViewer';
+import { Icon } from '@iconify/react';
 
-// Channel badge component
-const ChannelBadge = ({ channel }: { channel: 'release' | 'beta' | 'alpha' }) => {
-    const colors = {
-        release: { bg: 'bg-[#0D7A3D]', text: 'text-[#5EE59C]' },
-        beta: { bg: 'bg-[#7A4D0D]', text: 'text-[#FFA94D]' },
-        alpha: { bg: 'bg-[#7A0D0D]', text: 'text-[#FF7979]' }
-    };
+// ============================================
+// TYPES
+// ============================================
 
-    const color = colors[channel];
-    const label = channel.charAt(0).toUpperCase();
+interface VersionFile {
+    id: string;
+    filename: string;
+    displayName?: string;
+    fileType: string;
+    size: number;
+}
 
+interface HytaleVersion {
+    id: string;
+    hytaleVersion: string;
+    name?: string;
+}
+
+interface ResourceVersion {
+    id: string;
+    versionNumber: string;
+    name?: string;
+    channel: 'RELEASE' | 'BETA' | 'ALPHA' | 'SNAPSHOT';
+    status: 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'ARCHIVED';
+    changelog?: string;
+    downloadCount: number;
+    createdAt: string;
+    publishedAt?: string;
+    primaryFileId?: string;
+    primaryFile?: VersionFile;
+    files: VersionFile[];
+    compatibleVersions: Array<{
+        hytaleVersion: HytaleVersion;
+    }>;
+}
+
+// ============================================
+// HELPER FUNCTIONS
+// ============================================
+
+const getChannelColor = (channel: ResourceVersion['channel']) => {
+    switch (channel) {
+        case 'RELEASE': return 'bg-[#0D7A3D] text-[#5EE59C]';
+        case 'BETA': return 'bg-[#7A4D0D] text-[#FFA94D]';
+        case 'ALPHA': return 'bg-[#7A0D0D] text-[#FF7979]';
+        case 'SNAPSHOT': return 'bg-purple-600 text-purple-200';
+        default: return 'bg-gray-600 text-gray-200';
+    }
+};
+
+const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
+
+const formatDate = (dateString: string): string => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+    });
+};
+
+// ============================================
+// CHANNEL BADGE COMPONENT
+// ============================================
+
+const ChannelBadge = ({ channel }: { channel: ResourceVersion['channel'] }) => {
     return (
-        <div className={`w-9 h-9 ${color.bg} rounded-full flex items-center justify-center flex-shrink-0`}>
-            <span className={`font-hebden font-bold text-sm ${color.text}`}>{label}</span>
+        <div className={`w-9 h-9 ${getChannelColor(channel)} rounded-full flex items-center justify-center flex-shrink-0`}>
+            <span className="font-hebden font-bold text-sm">{channel.charAt(0)}</span>
         </div>
     );
 };
 
-// Version type with changelog
-interface Version {
-    version: string;
-    date: string;
-    downloads: number;
-    gameVersions: string[];
-    fileSize: string;
-    fileName: string;
-    channel: 'release' | 'beta' | 'alpha';
-    changelog: string[];
+// ============================================
+// VERSION ITEM COMPONENT
+// ============================================
+
+interface VersionItemProps {
+    version: ResourceVersion;
+    resourceId: string;
 }
 
-// Individual version item with accordion
-const VersionItem = ({ version }: { version: Version }) => {
+const VersionItem = ({ version, resourceId }: VersionItemProps) => {
     const [isOpen, setIsOpen] = useState(false);
+
+    const handleDownload = (e: React.MouseEvent, fileId?: string) => {
+        e.stopPropagation();
+        const targetFileId = fileId || version.primaryFileId;
+        if (!targetFileId) return;
+
+        const downloadUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/resources/${resourceId}/versions/${version.id}/download/${targetFileId}`;
+        window.open(downloadUrl, '_blank');
+    };
 
     return (
         <div className="bg-[#06363D] border border-[#084B54] rounded-[25px] overflow-hidden hover:border-[#109EB1] transition-colors">
-            {/* Version Header - Clickable to toggle accordion */}
+            {/* Version Header */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className="w-full p-6 text-left"
             >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-3 mb-2">
+                        <div className="flex items-center gap-3 mb-2 flex-wrap">
                             <ChannelBadge channel={version.channel} />
                             <h3 className="font-hebden font-bold text-xl text-[#C7F4FA]">
-                                {version.version}
+                                v{version.versionNumber}
                             </h3>
+                            {version.name && (
+                                <span className="font-nunito text-base text-[#C7F4FA]/70">
+                                    {version.name}
+                                </span>
+                            )}
                             <span className="flex items-center gap-1.5 font-nunito text-sm text-[#C7F4FA]/60">
                                 <Calendar className="w-4 h-4" />
-                                {version.date}
+                                {version.publishedAt ? formatDate(version.publishedAt) : formatDate(version.createdAt)}
                             </span>
                         </div>
 
                         <div className="flex flex-wrap gap-3 text-sm mb-3">
                             <span className="flex items-center gap-1.5 font-nunito text-[#C7F4FA]/70">
                                 <Download className="w-4 h-4" />
-                                {version.downloads.toLocaleString()} downloads
+                                {version.downloadCount.toLocaleString()} downloads
                             </span>
-                            <span className="flex items-center gap-1.5 font-nunito text-[#C7F4FA]/70">
-                                <FileText className="w-4 h-4" />
-                                {version.fileSize}
-                            </span>
+                            {version.primaryFile && (
+                                <span className="flex items-center gap-1.5 font-nunito text-[#C7F4FA]/70">
+                                    <FileText className="w-4 h-4" />
+                                    {formatFileSize(version.primaryFile.size)}
+                                </span>
+                            )}
+                            {version.files.length > 1 && (
+                                <span className="flex items-center gap-1.5 font-nunito text-[#C7F4FA]/70">
+                                    <FileIcon className="w-4 h-4" />
+                                    {version.files.length} files
+                                </span>
+                            )}
                         </div>
 
+                        {/* Compatible Hytale Versions */}
                         <div className="flex flex-wrap gap-2">
-                            {version.gameVersions.map((gameVer, j) => (
+                            {version.compatibleVersions.map((cv) => (
                                 <span
-                                    key={j}
+                                    key={cv.hytaleVersion.id}
                                     className="px-3 py-1 bg-[#032125] rounded-full text-xs font-hebden font-semibold text-[#C7F4FA]/70"
                                 >
-                                    {gameVer}
+                                    Hytale {cv.hytaleVersion.hytaleVersion}
                                 </span>
                             ))}
                         </div>
@@ -83,72 +165,128 @@ const VersionItem = ({ version }: { version: Version }) => {
 
                     <div className="flex items-center gap-3">
                         <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                // Download logic here
-                            }}
-                            className="flex items-center gap-2 px-6 py-3 bg-[#109EB1] hover:bg-[#0D8A9A] rounded-full font-hebden font-bold text-base text-[#C7F4FA] transition-all shadow-lg whitespace-nowrap"
+                            onClick={(e) => handleDownload(e)}
+                            disabled={!version.primaryFileId}
+                            className="flex items-center gap-2 px-6 py-3 bg-[#109EB1] hover:bg-[#0D8A9A] disabled:opacity-50 disabled:cursor-not-allowed rounded-full font-hebden font-bold text-base text-[#C7F4FA] transition-all shadow-lg whitespace-nowrap"
                         >
                             <Download className="w-5 h-5" />
                             Download
                         </button>
                         <ChevronDown
-                            className={`w-6 h-6 text-[#C7F4FA]/60 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''
-                                }`}
+                            className={`w-6 h-6 text-[#C7F4FA]/60 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
                         />
                     </div>
                 </div>
             </button>
 
-            {/* Changelog - Accordion Content */}
+            {/* Expanded Content */}
             <div
-                className={`
-                    overflow-hidden transition-all duration-300 ease-in-out
-                    ${isOpen ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'}
-                `}
+                className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'}`}
             >
-                <div className="px-6 pb-6 pt-2 border-t border-[#084B54]">
-                    <h4 className="font-hebden font-bold text-lg text-[#109EB1] mb-3">
-                        Changelog
-                    </h4>
-                    <ul className="space-y-2">
-                        {version.changelog.map((change, i) => (
-                            <li key={i} className="flex items-start gap-3 font-nunito text-base text-[#C7F4FA]">
-                                <span className="text-[#109EB1] mt-1">•</span>
-                                <span>{change}</span>
-                            </li>
-                        ))}
-                    </ul>
+                <div className="px-6 pb-6 pt-2 border-t border-[#084B54] space-y-4">
+                    {/* Changelog */}
+                    {version.changelog && (
+                        <div>
+                            <h4 className="font-hebden font-bold text-lg text-[#109EB1] mb-3">
+                                Changelog
+                            </h4>
+                            <div className="bg-[#032125] rounded-lg p-4">
+                                <TiptapViewer content={version.changelog} />
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Files List */}
+                    {version.files.length > 1 && (
+                        <div>
+                            <h4 className="font-hebden font-bold text-lg text-[#109EB1] mb-3">
+                                Files
+                            </h4>
+                            <div className="space-y-2">
+                                {version.files.map((file) => (
+                                    <div
+                                        key={file.id}
+                                        className={`flex items-center justify-between p-3 rounded-lg ${file.id === version.primaryFileId
+                                                ? 'bg-[#109EB1]/10 border border-[#109EB1]/30'
+                                                : 'bg-[#032125]'
+                                            }`}
+                                    >
+                                        <div className="flex items-center gap-3 min-w-0">
+                                            <FileIcon className="w-5 h-5 text-[#C7F4FA]/50 flex-shrink-0" />
+                                            <div className="min-w-0">
+                                                <p className="font-nunito text-sm text-[#C7F4FA] truncate">
+                                                    {file.displayName || file.filename}
+                                                </p>
+                                                <p className="text-xs text-[#C7F4FA]/50">
+                                                    {formatFileSize(file.size)}
+                                                    {file.id === version.primaryFileId && (
+                                                        <span className="ml-2 text-[#109EB1]">Primary</span>
+                                                    )}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={(e) => handleDownload(e, file.id)}
+                                            className="p-2 hover:bg-[#109EB1]/20 rounded-lg transition-colors"
+                                        >
+                                            <Download className="w-4 h-4 text-[#C7F4FA]" />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
     );
 };
 
+// ============================================
+// MAIN COMPONENT
+// ============================================
+
 export default function VersionsPage() {
     const { resource } = useResource();
-    const [selectedChannels, setSelectedChannels] = useState<string[]>(['release', 'beta', 'alpha']);
-    const [selectedGameVersions, setSelectedGameVersions] = useState<string[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [versions, setVersions] = useState<ResourceVersion[]>([]);
+    const [selectedChannels, setSelectedChannels] = useState<string[]>(['RELEASE', 'BETA', 'ALPHA', 'SNAPSHOT']);
+
+    const fetchVersions = useCallback(async () => {
+        if (!resource?.id) return;
+
+        setLoading(true);
+        try {
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/resources/${resource.id}/versions`,
+                { credentials: 'include' }
+            );
+            if (response.ok) {
+                const data = await response.json();
+                // Only show approved versions on the public page
+                const approvedVersions = (data.versions || []).filter(
+                    (v: ResourceVersion) => v.status === 'APPROVED'
+                );
+                setVersions(approvedVersions);
+            }
+        } catch (error) {
+            console.error('Failed to fetch versions:', error);
+        } finally {
+            setLoading(false);
+        }
+    }, [resource?.id]);
+
+    useEffect(() => {
+        fetchVersions();
+    }, [fetchVersions]);
 
     if (!resource) return null;
 
-    // Mock versions data with changelog - will be replaced with real data from backend
-    const allVersions: Version[] = [
+    // Get unique channels from versions
+    const availableChannels = [...new Set(versions.map(v => v.channel))];
 
-    ];
-
-    // Get unique game versions for filter
-    const allGameVersions = Array.from(
-        new Set(allVersions.flatMap(v => v.gameVersions))
-    );
-
-    // Filter versions based on selected filters
-    const filteredVersions = allVersions.filter(version => {
-        const channelMatch = selectedChannels.length === 0 || selectedChannels.includes(version.channel);
-        const gameVersionMatch = selectedGameVersions.length === 0 ||
-            version.gameVersions.some(gv => selectedGameVersions.includes(gv));
-        return channelMatch && gameVersionMatch;
-    });
+    // Filter versions by selected channels
+    const filteredVersions = versions.filter(v => selectedChannels.includes(v.channel));
 
     // Toggle channel filter
     const toggleChannel = (channel: string) => {
@@ -159,73 +297,52 @@ export default function VersionsPage() {
         );
     };
 
-    // Toggle game version filter
-    const toggleGameVersion = (gameVersion: string) => {
-        setSelectedGameVersions(prev =>
-            prev.includes(gameVersion)
-                ? prev.filter(gv => gv !== gameVersion)
-                : [...prev, gameVersion]
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-[#109EB1]" />
+            </div>
         );
-    };
+    }
 
     return (
         <div className="flex flex-col gap-6">
             {/* Filters */}
-            <div className="flex flex-wrap gap-3">
-                {/* Channel Filters */}
-                <div className="flex gap-2">
-                    <button
-                        onClick={() => toggleChannel('release')}
-                        className={`px-4 py-2 rounded-full font-hebden font-semibold text-sm transition-all ${selectedChannels.includes('release')
-                            ? 'bg-[#0D7A3D] text-[#5EE59C]'
-                            : 'bg-[#06363D] text-[#C7F4FA]/60 hover:text-[#C7F4FA]'
-                            } border border-[#084B54]`}
-                    >
-                        Release
-                    </button>
-                    <button
-                        onClick={() => toggleChannel('beta')}
-                        className={`px-4 py-2 rounded-full font-hebden font-semibold text-sm transition-all ${selectedChannels.includes('beta')
-                            ? 'bg-[#7A4D0D] text-[#FFA94D]'
-                            : 'bg-[#06363D] text-[#C7F4FA]/60 hover:text-[#C7F4FA]'
-                            } border border-[#084B54]`}
-                    >
-                        Beta
-                    </button>
-                    <button
-                        onClick={() => toggleChannel('alpha')}
-                        className={`px-4 py-2 rounded-full font-hebden font-semibold text-sm transition-all ${selectedChannels.includes('alpha')
-                            ? 'bg-[#7A0D0D] text-[#FF7979]'
-                            : 'bg-[#06363D] text-[#C7F4FA]/60 hover:text-[#C7F4FA]'
-                            } border border-[#084B54]`}
-                    >
-                        Alpha
-                    </button>
+            {versions.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                    {(['RELEASE', 'BETA', 'ALPHA', 'SNAPSHOT'] as const)
+                        .filter(ch => availableChannels.includes(ch))
+                        .map(channel => (
+                            <button
+                                key={channel}
+                                onClick={() => toggleChannel(channel)}
+                                className={`px-4 py-2 rounded-full font-hebden font-semibold text-sm transition-all border border-[#084B54] ${selectedChannels.includes(channel)
+                                        ? getChannelColor(channel)
+                                        : 'bg-[#06363D] text-[#C7F4FA]/60 hover:text-[#C7F4FA]'
+                                    }`}
+                            >
+                                {channel.charAt(0) + channel.slice(1).toLowerCase()}
+                                <span className="ml-1.5 opacity-70">
+                                    ({versions.filter(v => v.channel === channel).length})
+                                </span>
+                            </button>
+                        ))}
                 </div>
-
-                {/* Game Version Filters */}
-                <div className="flex gap-2">
-                    {allGameVersions.map(gameVersion => (
-                        <button
-                            key={gameVersion}
-                            onClick={() => toggleGameVersion(gameVersion)}
-                            className={`px-4 py-2 rounded-full font-hebden font-semibold text-sm transition-all ${selectedGameVersions.includes(gameVersion)
-                                ? 'bg-[#109EB1] text-[#C7F4FA]'
-                                : 'bg-[#06363D] text-[#C7F4FA]/60 hover:text-[#C7F4FA]'
-                                } border border-[#084B54]`}
-                        >
-                            {gameVersion}
-                        </button>
-                    ))}
-                </div>
-            </div>
+            )}
 
             {/* Versions List */}
             <div className="flex flex-col gap-4">
                 {filteredVersions.length > 0 ? (
-                    filteredVersions.map((version, i) => (
-                        <VersionItem key={i} version={version} />
+                    filteredVersions.map((version) => (
+                        <VersionItem key={version.id} version={version} resourceId={resource.id} />
                     ))
+                ) : versions.length === 0 ? (
+                    <div className="bg-[#06363D] border border-[#084B54] rounded-[25px] p-12 text-center">
+                        <Icon icon="mdi:package-variant" width="48" height="48" className="mx-auto mb-4 text-[#C7F4FA]/30" />
+                        <p className="font-nunito text-lg text-[#C7F4FA]/60">
+                            No versions available yet.
+                        </p>
+                    </div>
                 ) : (
                     <div className="bg-[#06363D] border border-[#084B54] rounded-[25px] p-12 text-center">
                         <p className="font-nunito text-lg text-[#C7F4FA]/60">

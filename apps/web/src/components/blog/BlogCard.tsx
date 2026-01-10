@@ -58,7 +58,7 @@ export default function BlogCard({ post, featured = false }: BlogCardProps) {
                                 <span className="font-nunito text-sm text-[#C7F4FA]/70">{post.readTime}</span>
                             </div>
                             <Link
-                                href={`/users/${post.author}`}
+                                href={`/user/${post.author}`}
                                 className="flex items-center gap-1.5 hover:text-[#109EB1] transition-colors ml-auto"
                                 onClick={(e) => e.stopPropagation()}
                             >
@@ -132,7 +132,7 @@ export default function BlogCard({ post, featured = false }: BlogCardProps) {
                     {/* Author */}
                     <div className="pt-3 border-t border-[#084B54] mt-auto">
                         <Link
-                            href={`/users/${post.author}`}
+                            href={`/user/${post.author}`}
                             className="flex items-center gap-1.5 hover:text-[#109EB1] transition-colors"
                             onClick={(e) => e.stopPropagation()}
                         >

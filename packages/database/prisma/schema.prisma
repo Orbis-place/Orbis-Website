@@ -219,6 +219,9 @@ model User {
   showcaseLikes        ShowcasePostLike[]    @relation("ShowcaseLikes")
   showcaseComments     ShowcasePostComment[] @relation("ShowcaseComments")
 
+  // Resource Collections
+  resourceCollections  UserResourceCollection[] @relation("UserCollections")
+
   @@index([email])
   @@index([username])
   @@index([status])
@@ -778,6 +781,9 @@ model Resource {
   // Showcase - Linked posts
   linkedShowcases ShowcasePost[] @relation("LinkedShowcase")
 
+  // User Collections
+  collectionItems UserResourceCollectionItem[]
+
   // Moderation
   moderationNotes String? // Internal staff notes
   rejectionReason String? // If status = REJECTED
@@ -1086,6 +1092,7 @@ model ResourceVersion {
 
   // Status
   status VersionStatus @default(DRAFT)
+  rejectionReason String? @db.Text // Reason for rejection by moderator
 
   // Images in changelog
   changelogImages ResourceVersionChangelogImage[]
@@ -1313,6 +1320,45 @@ model ResourceFavorite {
   @@index([userId])
   @@index([resourceId])
   @@map("resource_favorites")
+}
+
+// ============================================================================
+// USER RESOURCE COLLECTIONS
+// ============================================================================
+
+model UserResourceCollection {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String   @db.VarChar(100)
+  description String?  @db.VarChar(300)
+  isDefault   Boolean  @default(false) // Only one default per user
+  isPublic    Boolean  @default(false) // Public collections visible on profile
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user  User                          @relation("UserCollections", fields: [userId], references: [id], onDelete: Cascade)
+  items UserResourceCollectionItem[]
+
+  @@unique([userId, name]) // Each user can have unique collection names
+  @@index([userId])
+  @@index([userId, isDefault])
+  @@index([userId, isPublic])
+  @@map("user_resource_collections")
+}
+
+model UserResourceCollectionItem {
+  id           String   @id @default(cuid())
+  collectionId String
+  resourceId   String
+  addedAt      DateTime @default(now())
+
+  collection UserResourceCollection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  resource   Resource               @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  @@unique([collectionId, resourceId]) // Prevent duplicates
+  @@index([collectionId])
+  @@index([resourceId])
+  @@map("user_resource_collection_items")
 }
 
 // ============================================================================

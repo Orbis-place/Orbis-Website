@@ -136,10 +136,10 @@ export class FavoriteService {
     }
 
     /**
-     * Get user's favorites
+     * Get user's favorites (liked resources)
      */
     async getUserFavorites(userId: string) {
-        const favorites = await prisma.resourceFavorite.findMany({
+        const likes = await prisma.resourceLike.findMany({
             where: { userId },
             include: {
                 resource: {
@@ -175,6 +175,13 @@ export class FavoriteService {
                 createdAt: 'desc',
             },
         });
+
+        // Map likes to favorites structure to maintain compatibility
+        const favorites = likes.map(like => ({
+            ...like,
+            // Add any missing fields if ResourceFavorite had more than ResourceLike
+            // They are structurally very similar (userId, resourceId, createdAt)
+        }));
 
         return {
             favorites,

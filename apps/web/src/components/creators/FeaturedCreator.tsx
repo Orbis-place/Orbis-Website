@@ -89,7 +89,7 @@ export default function FeaturedCreator({ creator }: FeaturedCreatorProps) {
                 <div className="border-t border-[#084B54] pt-4">
                     <div className="flex items-center justify-between mb-3">
                         <h3 className="font-hebden text-sm text-[#C7F4FA]/80">Top Resources</h3>
-                        <Link href={`/users/${creator.username}`} className="text-[10px] text-[#109EB1] hover:text-[#C7F4FA] transition-colors flex items-center gap-1">
+                        <Link href={`/user/${creator.username}`} className="text-[10px] text-[#109EB1] hover:text-[#C7F4FA] transition-colors flex items-center gap-1">
                             VIEW ALL <Icon icon="ph:arrow-right-bold" />
                         </Link>
                     </div>

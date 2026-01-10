@@ -59,7 +59,7 @@ export default function CreatorPodium({ creators }: CreatorPodiumProps) {
                 return (
                     <Link
                         key={creator.id}
-                        href={`/users/${creator.username}`}
+                        href={`/user/${creator.username}`}
                         className={`
                             relative flex items-center gap-4 p-3 rounded-[16px] border transition-all duration-300 group
                             ${style.border} ${style.bg} ${style.shadow}

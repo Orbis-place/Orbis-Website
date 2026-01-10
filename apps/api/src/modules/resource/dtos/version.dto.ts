@@ -8,7 +8,11 @@ import {
     MaxLength,
     ArrayMinSize
 } from 'class-validator';
-import { ReleaseChannel, VersionStatus } from '@repo/db';
+import { ReleaseChannel } from '@repo/db';
+
+// ============================================
+// VERSION CREATION & UPDATE
+// ============================================
 
 export class CreateVersionDto {
     @ApiProperty({
@@ -38,22 +42,14 @@ export class CreateVersionDto {
     channel: ReleaseChannel;
 
     @ApiProperty({
-        description: 'Compatible Hytale versions',
-        example: ['1.0', '1.1'],
+        description: 'Compatible Hytale version IDs',
+        example: ['clxx123...', 'clxx456...'],
         type: [String],
     })
     @IsArray()
     @ArrayMinSize(1)
     @IsString({ each: true })
-    compatibleVersions: string[];
-
-    @ApiProperty({
-        description: 'Changelog in Markdown format',
-        example: '# Version 1.0.0\n\n- Added new features\n- Fixed bugs',
-    })
-    @IsString()
-    @IsNotEmpty()
-    changelog: string;
+    compatibleHytaleVersionIds: string[];
 }
 
 export class UpdateVersionDto {
@@ -76,32 +72,57 @@ export class UpdateVersionDto {
     channel?: ReleaseChannel;
 
     @ApiPropertyOptional({
-        description: 'Compatible Hytale versions',
-        example: ['1.0', '1.1'],
+        description: 'Compatible Hytale version IDs (only editable in DRAFT or REJECTED status)',
+        example: ['clxx123...', 'clxx456...'],
         type: [String],
     })
     @IsArray()
     @IsOptional()
     @IsString({ each: true })
-    compatibleVersions?: string[];
+    compatibleHytaleVersionIds?: string[];
+}
 
-    @ApiPropertyOptional({
+// ============================================
+// CHANGELOG
+// ============================================
+
+export class UpdateChangelogDto {
+    @ApiProperty({
         description: 'Changelog in Markdown format',
         example: '# Version 1.0.0\n\n- Added new features\n- Fixed bugs',
     })
     @IsString()
-    @IsOptional()
-    changelog?: string;
-
-    @ApiPropertyOptional({
-        description: 'Version status',
-        enum: VersionStatus,
-        example: VersionStatus.APPROVED,
-    })
-    @IsEnum(VersionStatus)
-    @IsOptional()
-    status?: VersionStatus;
+    @IsNotEmpty()
+    changelog: string;
 }
+
+// ============================================
+// VERSION WORKFLOW
+// ============================================
+
+export class SubmitVersionDto {
+    @ApiPropertyOptional({
+        description: 'Optional message for reviewers',
+    })
+    @IsString()
+    @IsOptional()
+    @MaxLength(500)
+    submissionNote?: string;
+}
+
+export class RejectVersionDto {
+    @ApiProperty({
+        description: 'Reason for rejection',
+    })
+    @IsString()
+    @IsNotEmpty()
+    @MaxLength(1000)
+    reason: string;
+}
+
+// ============================================
+// FILE MANAGEMENT
+// ============================================
 
 export class UploadVersionFileDto {
     @ApiPropertyOptional({

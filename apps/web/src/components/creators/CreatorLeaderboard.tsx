@@ -76,7 +76,7 @@ function LeaderboardRow({ entry, index }: { entry: LeaderboardEntry; index: numb
 
     return (
         <Link
-            href={`/users/${creator.username}`}
+            href={`/user/${creator.username}`}
             className={`group flex items-center gap-4 p-3 rounded-xl transition-all duration-300 hover:-translate-x-1 ${isTopThree
                 ? 'bg-gradient-to-r from-[#109EB1]/10 to-transparent border border-[#109EB1]/20'
                 : 'hover:bg-[#06363D]/50'

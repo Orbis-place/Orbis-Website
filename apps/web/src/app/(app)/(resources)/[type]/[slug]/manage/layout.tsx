@@ -111,9 +111,7 @@ export default function ManageLayout({ children }: ManageLayoutProps) {
                     label: 'Versions',
                     icon: 'mdi:history',
                     href: `${basePath}/versions`,
-                    exact: false,
-                    disabled: true,
-                    badge: 'At release'
+                    exact: false
                 }
             ]
         }

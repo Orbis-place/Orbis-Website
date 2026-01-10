@@ -95,7 +95,7 @@ export default function ResourceSidebar({
                     {creators.map((creator, i) => (
                         <Link
                             key={i}
-                            href={creator.isTeam ? `/team/${creator.username.toLowerCase()}` : `/users/${creator.username.toLowerCase()}`}
+                            href={creator.isTeam ? `/team/${creator.username.toLowerCase()}` : `/user/${creator.username.toLowerCase()}`}
                             className="flex items-center gap-3 group hover:bg-[#032125] p-2 -m-2 rounded-xl transition-colors"
                         >
                             <EntityAvatar

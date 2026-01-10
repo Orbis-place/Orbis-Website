@@ -17,7 +17,7 @@ export default function CreatorCard({ creator, variant = 'default' }: CreatorCar
         .slice(0, 2);
 
     return (
-        <Link href={`/users/${creator.username}`} className="block h-full group">
+        <Link href={`/user/${creator.username}`} className="block h-full group">
             <div className="bg-[#06363D] border border-[#084B54] rounded-[20px] p-4 hover:border-[#109EB1] transition-all h-full flex flex-col group-hover:-translate-y-1 duration-300">
                 {/* Header: Avatar + Name */}
                 <div className="flex items-start gap-3 mb-3">

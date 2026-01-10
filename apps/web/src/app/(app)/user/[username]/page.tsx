@@ -6,5 +6,5 @@ export default function UserRootPage() {
     const params = useParams();
     const username = params.username as string;
 
-    redirect(`/users/${username}/resources`);
+    redirect(`/user/${username}/resources`);
 }

@@ -8,8 +8,10 @@ import ResourceTabs from '@/components/marketplace/ResourceTabs';
 import { Icon } from '@iconify/react';
 import { getResourceTypeBySingular } from '@/config/resource-types';
 import { useResource } from '@/contexts/ResourceContext';
-import { likeResource, unlikeResource, favoriteResource, unfavoriteResource } from '@/lib/api/resources';
+import { likeResource, unlikeResource } from '@/lib/api/resources';
 import { useSession } from '@repo/auth/client';
+import { toast } from 'sonner';
+import { formatRelativeTime } from '@/lib/utils/resourceConverters';
 
 export default function ResourceLayoutContent({ children }: { children: ReactNode }) {
     const params = useParams<{ type: string; slug: string }>();
@@ -29,7 +31,6 @@ export default function ResourceLayoutContent({ children }: { children: ReactNod
 
     const { data: session } = useSession();
     const [isLiking, setIsLiking] = useState(false);
-    const [isFavoriting, setIsFavoriting] = useState(false);
 
     // Format numbers
     const formatNumber = (num: number): string => {
@@ -40,27 +41,6 @@ export default function ResourceLayoutContent({ children }: { children: ReactNod
             return `${(num / 1000).toFixed(1)}k`;
         }
         return num.toString();
-    };
-
-    // Format date
-    const formatDate = (dateString: string): string => {
-        const date = new Date(dateString);
-        const now = new Date();
-        const diffTime = Math.abs(now.getTime() - date.getTime());
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-        if (diffDays < 7) {
-            return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
-        } else if (diffDays < 30) {
-            const weeks = Math.floor(diffDays / 7);
-            return `${weeks} week${weeks !== 1 ? 's' : ''} ago`;
-        } else if (diffDays < 365) {
-            const months = Math.floor(diffDays / 30);
-            return `${months} month${months !== 1 ? 's' : ''} ago`;
-        } else {
-            const years = Math.floor(diffDays / 365);
-            return `${years} year${years !== 1 ? 's' : ''} ago`;
-        }
     };
 
     // Toggle like
@@ -97,32 +77,7 @@ export default function ResourceLayoutContent({ children }: { children: ReactNod
         }
     };
 
-    // Toggle favorite
-    const handleToggleFavorite = async () => {
-        if (!session?.user) {
-            alert('Please log in to favorite this resource');
-            return;
-        }
-
-        if (!resource || isFavoriting) return;
-
-        const previousFavorited = isFavorited;
-        setIsFavorited(!isFavorited);
-        setIsFavoriting(true);
-
-        try {
-            if (isFavorited) {
-                await unfavoriteResource(resource.id);
-            } else {
-                await favoriteResource(resource.id);
-            }
-        } catch (err) {
-            console.error('Failed to toggle favorite:', err);
-            setIsFavorited(previousFavorited);
-        } finally {
-            setIsFavoriting(false);
-        }
-    };
+    // Handle login required
 
     // Loading state
     if (isLoading || !resource) {
@@ -223,15 +178,14 @@ export default function ResourceLayoutContent({ children }: { children: ReactNod
                 author={author}
                 team={resource.ownerTeam}
                 owner={resource.ownerUser || undefined}
-                updatedAt={formatDate(resource.updatedAt)}
+                updatedAt={resource.latestVersion?.publishedAt ? formatRelativeTime(resource.latestVersion.publishedAt) : formatRelativeTime(resource.updatedAt)}
                 isOwner={isOwner}
                 isLiked={isLiked}
-                isFavorited={isFavorited}
                 onToggleLike={handleToggleLike}
-                onToggleFavorite={handleToggleFavorite}
                 isLiking={isLiking}
-                isFavoriting={isFavoriting}
                 resourceId={resource.id}
+                isLoggedIn={!!session?.user}
+                onLoginRequired={() => toast.error('Please log in to save resources')}
             />
 
             {/* Main Content + Sidebar */}
@@ -248,8 +202,8 @@ export default function ResourceLayoutContent({ children }: { children: ReactNod
                     links={links}
                     creators={creators}
                     license={license}
-                    publishedAt={formatDate(resource.publishedAt || resource.createdAt)}
-                    updatedAt={formatDate(resource.updatedAt)}
+                    publishedAt={formatRelativeTime(resource.publishedAt || resource.createdAt)}
+                    updatedAt={resource.latestVersion?.publishedAt ? formatRelativeTime(resource.latestVersion.publishedAt) : formatRelativeTime(resource.updatedAt)}
                 />
             </div>
         </div>

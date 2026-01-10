@@ -64,7 +64,7 @@ function SpecialtyCard({ categoryId, categoryLabel, creator }: SpecialtyCardProp
 
     return (
         <Link
-            href={`/users/${creator.username}`}
+            href={`/user/${creator.username}`}
             className="group relative bg-[#06363D] border border-[#084B54] rounded-[20px] p-5 hover:border-[#109EB1] transition-all duration-300 hover:-translate-y-1"
         >
             {/* Category Icon & Label */}

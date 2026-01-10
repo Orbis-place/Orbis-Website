@@ -17,6 +17,7 @@ import { HytaleVersionModule } from "./modules/hytale-version/hytale-version.mod
 import { DiscoveryModule } from "./modules/discovery/discovery.module";
 import { ShowcaseModule } from "./modules/showcase/showcase.module";
 import { RedisModule } from "./common/redis.module";
+import { AdminModule } from "./modules/admin/admin.module";
 
 @Module({
     imports: [
@@ -36,7 +37,7 @@ import { RedisModule } from "./common/redis.module";
             },
         }),
         RedisModule,
-        UserModule, OrbisAuthModule, ServerModule, TeamModule, ReportModule, BadgeModule, ResourceModule, HytaleVersionModule, DiscoveryModule, ShowcaseModule],
+        UserModule, OrbisAuthModule, ServerModule, TeamModule, ReportModule, BadgeModule, ResourceModule, HytaleVersionModule, DiscoveryModule, ShowcaseModule, AdminModule],
     controllers: [AppController],
     providers: [AppService],
 })

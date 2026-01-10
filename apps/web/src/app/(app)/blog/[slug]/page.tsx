@@ -69,7 +69,7 @@ export async function generateMetadata({
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://orbis.place';
     const postUrl = `${siteUrl}/blog/${post.slug}`;
-    const authorUrl = `${siteUrl}/users/${post.author}`;
+    const authorUrl = `${siteUrl}/user/${post.author}`;
 
     return {
         title: `${post.title} | Orbis Blog`,
@@ -139,7 +139,7 @@ export default async function BlogPostPage({
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://orbis.place';
     const postUrl = `${siteUrl}/blog/${post.slug}`;
-    const authorUrl = `${siteUrl}/users/${post.author}`;
+    const authorUrl = `${siteUrl}/user/${post.author}`;
 
     // JSON-LD structured data for SEO
     const jsonLd = {
@@ -264,7 +264,7 @@ export default async function BlogPostPage({
                             {/* Meta Info */}
                             <div className="flex flex-wrap items-center gap-4 pb-6 border-b border-[#084B54]">
                                 <Link
-                                    href={`/users/${post.author}`}
+                                    href={`/user/${post.author}`}
                                     className="flex items-center gap-2 hover:text-[#109EB1] transition-colors"
                                 >
                                     <User className="w-5 h-5 text-[#C7F4FA]/50" />

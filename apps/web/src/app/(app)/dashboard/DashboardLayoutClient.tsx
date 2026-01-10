@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Icon } from '@iconify/react';
 import { cn } from '@/lib/utils';
+import { useUser } from '@/hooks/useUser';
 
 const dashboardNav = [
   {
@@ -24,11 +25,11 @@ const dashboardNav = [
         href: '/dashboard/notifications',
         icon: 'mdi:bell',
       },
-      /* {
-         name: 'Collections',
-         href: '/dashboard/collections',
-         icon: 'mdi:view-list',
-       },*/
+      {
+        name: 'Collections',
+        href: '/dashboard/collections',
+        icon: 'mdi:bookmark-multiple',
+      },
     ],
   },
   {
@@ -70,6 +71,31 @@ const dashboardNav = [
 
 export default function DashboardLayoutClient({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { user, hasRole } = useUser();
+
+  // Filter sections and items based on user role
+  const filteredNav = dashboardNav.map(section => {
+    // Check if section has role requirements
+    const sectionRequiredRoles = (section as any).requiredRoles;
+    if (sectionRequiredRoles && (!user || !hasRole(sectionRequiredRoles))) {
+      return null;
+    }
+
+    // Filter items based on role requirements
+    const filteredItems = section.items.filter(item => {
+      const itemRequiredRoles = (item as any).requiredRoles;
+      if (!itemRequiredRoles) return true;
+      return user && hasRole(itemRequiredRoles);
+    });
+
+    // Only return section if it has visible items
+    if (filteredItems.length === 0) return null;
+
+    return {
+      ...section,
+      items: filteredItems,
+    };
+  }).filter(Boolean);
 
   return (
     <div className="min-h-screen bg-background">
@@ -81,13 +107,13 @@ export default function DashboardLayoutClient({ children }: { children: React.Re
               <h2 className="font-hebden text-xl font-semibold text-foreground">
                 Dashboard
               </h2>
-              {dashboardNav.map((section, idx) => (
+              {filteredNav.map((section, idx) => (
                 <div key={idx}>
                   <h3 className="font-hebden text-sm font-semibold text-foreground/60 mb-2 px-3">
-                    {section.section}
+                    {section!.section}
                   </h3>
                   <ul className="space-y-1">
-                    {section.items.map((item) => {
+                    {section!.items.map((item) => {
                       const isActive = pathname.startsWith(item.href);
                       return (
                         <li key={item.href}>
@@ -121,3 +147,4 @@ export default function DashboardLayoutClient({ children }: { children: React.Re
     </div>
   );
 }
+

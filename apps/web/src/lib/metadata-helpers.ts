@@ -134,7 +134,7 @@ export async function generateUserMetadata(username: string): Promise<Metadata> 
                 title: `${displayName} (@${user.username}) - Orbis User`,
                 description: description,
                 type: 'profile',
-                url: `/users/${username}`,
+                url: `/user/${username}`,
                 siteName: 'Orbis',
             },
             twitter: {

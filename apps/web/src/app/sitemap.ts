@@ -193,7 +193,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     // Creator profile pages (max 1000)
     const creatorRoutes: MetadataRoute.Sitemap = creators.map((creator) => ({
-        url: `${baseUrl}/users/${creator.username}`,
+        url: `${baseUrl}/user/${creator.username}`,
         lastModified: new Date(creator.updatedAt),
         changeFrequency: 'weekly' as const,
         priority: 0.6,

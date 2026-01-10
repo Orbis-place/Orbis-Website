@@ -20,7 +20,7 @@ import { formatRelativeTime } from '@/lib/utils/resourceConverters';
 
 export const metadata: Metadata = {
     title: 'Home',
-    description: 'Discover, create and connect with the best Hytale mods, worlds, plugins and servers. Join the ultimate Hytale community hub for players and creators.',
+    description: 'Discover, create and connect with the best Hytale mods, worlds, plugins and servers. Join the Hytale community hub for players and creators.',
     openGraph: {
         title: 'Orbis - Your Hytale Modding & Server Hub',
         description: 'Discover, create and connect with the best Hytale mods, worlds, plugins and servers.',

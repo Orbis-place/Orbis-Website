@@ -37,7 +37,7 @@ export default function MarketplaceCard({ item, viewMode }: MarketplaceCardProps
     // Row View - Full width list
     if (viewMode === 'row') {
         return (
-            <div className="w-full bg-[#06363D] border border-[#084B54] rounded-[25px] overflow-hidden p-4 grid gap-x-4 gap-y-2"
+            <div className="w-full bg-[#06363D] border border-[#084B54] hover:border-[#109EB1] rounded-[25px] overflow-hidden p-4 grid gap-x-4 gap-y-2 transition-colors duration-200"
                 style={{
                     gridTemplate: '"icon title stats" "icon description stats" "icon tags stats"',
                     gridTemplateColumns: 'min-content 1fr auto',
@@ -62,7 +62,7 @@ export default function MarketplaceCard({ item, viewMode }: MarketplaceCardProps
                         {item.title}
                     </h2>
                     <Link
-                        href={item.isOwnedByTeam ? `/team/${item.author}` : `/users/${item.author}`}
+                        href={item.isOwnedByTeam ? `/team/${item.author}` : `/user/${item.author}`}
                         className="font-hebden font-semibold text-sm leading-4 text-[#C7F4FA]/50 hover:text-[#109EB1] transition-colors"
                         onClick={(e) => e.stopPropagation()}
                     >
@@ -132,7 +132,7 @@ export default function MarketplaceCard({ item, viewMode }: MarketplaceCardProps
     // Gallery View - Compact grid
     if (viewMode === 'gallery') {
         return (
-            <div className="bg-[#06363D] border border-[#084B54] rounded-[25px] overflow-hidden">
+            <div className="bg-[#06363D] border border-[#084B54] hover:border-[#109EB1] rounded-[25px] overflow-hidden transition-colors duration-200">
                 {/* Image */}
                 <div className="w-full aspect-video relative overflow-hidden bg-gradient-to-br from-[#06363D] via-[#084B54] to-[#109EB1]">
                     {item.image ? (
@@ -167,7 +167,7 @@ export default function MarketplaceCard({ item, viewMode }: MarketplaceCardProps
                         {item.title}
                     </h3>
                     <Link
-                        href={item.isOwnedByTeam ? `/team/${item.author}` : `/users/${item.author}`}
+                        href={item.isOwnedByTeam ? `/team/${item.author}` : `/user/${item.author}`}
                         className="font-hebden font-semibold text-xs leading-[14px] text-[#C7F4FA]/50 hover:text-[#109EB1] transition-colors"
                         onClick={(e) => e.stopPropagation()}
                     >
@@ -197,7 +197,7 @@ export default function MarketplaceCard({ item, viewMode }: MarketplaceCardProps
 
     // Grid View - Default (2 columns)
     return (
-        <div className="bg-[#06363D] border border-[#084B54] rounded-[25px] overflow-hidden flex flex-col min-h-48">
+        <div className="bg-[#06363D] border border-[#084B54] hover:border-[#109EB1] rounded-[25px] overflow-hidden flex flex-col min-h-48 transition-colors duration-200">
             {/* Compact horizontal layout */}
             <div className="flex gap-3 p-3">
                 {/* Logo - 96x96 */}
@@ -220,7 +220,7 @@ export default function MarketplaceCard({ item, viewMode }: MarketplaceCardProps
                                 {item.title}
                             </h3>
                             <Link
-                                href={item.isOwnedByTeam ? `/team/${item.author}` : `/users/${item.author}`}
+                                href={item.isOwnedByTeam ? `/team/${item.author}` : `/user/${item.author}`}
                                 className="font-hebden font-semibold text-xs leading-4 text-[#C7F4FA]/50 hover:text-[#109EB1] transition-colors"
                                 onClick={(e) => e.stopPropagation()}
                             >

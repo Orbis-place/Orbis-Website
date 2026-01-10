@@ -244,7 +244,7 @@ export default function Navbar({ session }: NavbarProps) {
                             >
                                 {/* General Section */}
                                 <DropdownMenuItem asChild className="text-foreground cursor-pointer">
-                                    <Link href={`/users/${session.user.name}`}
+                                    <Link href={`/user/${session.user.name}`}
                                         className="flex items-center gap-2 w-full px-2 py-2">
                                         <Icon icon="mdi:account" width="16" height="16" className="text-current" />
                                         Profile
@@ -264,13 +264,13 @@ export default function Navbar({ session }: NavbarProps) {
                                         Notifications
                                     </Link>
                                 </DropdownMenuItem>
-                                {/* <DropdownMenuItem asChild className="text-foreground cursor-pointer">
+                                <DropdownMenuItem asChild className="text-foreground cursor-pointer">
                                     <Link href="/dashboard/collections"
-                                          className="flex items-center gap-2 w-full px-2 py-2">
-                                        <Icon icon="mdi:view-list" width="16" height="16"/>
+                                        className="flex items-center gap-2 w-full px-2 py-2">
+                                        <Icon icon="mdi:folder-multiple" width="16" height="16" className="text-current" />
                                         Collections
                                     </Link>
-                                </DropdownMenuItem>*/}
+                                </DropdownMenuItem>
 
                                 <DropdownMenuSeparator className="bg-[#084B54]" />
 
@@ -305,6 +305,20 @@ export default function Navbar({ session }: NavbarProps) {
                                 </DropdownMenuItem>
 
                                 <DropdownMenuSeparator className="bg-[#084B54]" />
+
+                                {/* Admin Panel - Only for Moderator+ */}
+                                {(session.user as any).role && ['MODERATOR', 'ADMIN', 'SUPER_ADMIN'].includes((session.user as any).role) && (
+                                    <>
+                                        <DropdownMenuItem asChild className="text-foreground cursor-pointer bg-primary/10 hover:bg-primary/20">
+                                            <Link href="/admin"
+                                                className="flex items-center gap-2 w-full px-2 py-2">
+                                                <Icon icon="mdi:shield-crown" width="16" height="16" className="text-primary" />
+                                                <span className="font-semibold">Admin Panel</span>
+                                            </Link>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuSeparator className="bg-[#084B54]" />
+                                    </>
+                                )}
 
                                 {/* Settings Section */}
                                 <DropdownMenuItem asChild className="text-foreground cursor-pointer">
@@ -569,7 +583,7 @@ export default function Navbar({ session }: NavbarProps) {
                                     General
                                 </h3>
 
-                                <Link href={`/users/${session.user.name}`} onClick={closeMobileProfile}
+                                <Link href={`/user/${session.user.name}`} onClick={closeMobileProfile}
                                     className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent transition-colors">
                                     <Icon icon="mdi:account" width="20" height="20" className="text-primary" />
                                     <span className="font-hebden font-medium text-foreground">Profile</span>
@@ -587,11 +601,11 @@ export default function Navbar({ session }: NavbarProps) {
                                     <span className="font-hebden font-medium text-foreground">Notifications</span>
                                 </Link>
 
-                                {/*<Link href="/dashboard/collections" onClick={closeMobileProfile}
-                                      className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent transition-colors">
-                                    <Icon icon="mdi:view-list" width="20" height="20" className="text-primary"/>
+                                <Link href="/dashboard/collections" onClick={closeMobileProfile}
+                                    className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent transition-colors">
+                                    <Icon icon="mdi:folder-multiple" width="20" height="20" className="text-primary" />
                                     <span className="font-hebden font-medium text-foreground">Collections</span>
-                                </Link>*/}
+                                </Link>
                             </div>
 
                             {/* Dashboard Links */}
@@ -624,6 +638,21 @@ export default function Navbar({ session }: NavbarProps) {
                                     <span className="font-hebden font-medium text-foreground">My Showcase</span>
                                 </Link>
                             </div>
+
+                            {/* Admin Panel - Only for Moderator+ */}
+                            {(session.user as any).role && ['MODERATOR', 'ADMIN', 'SUPER_ADMIN'].includes((session.user as any).role) && (
+                                <div className="space-y-1">
+                                    <h3 className="font-hebden font-semibold text-sm text-foreground/60 uppercase tracking-wider mb-3">
+                                        Administration
+                                    </h3>
+
+                                    <Link href="/admin" onClick={closeMobileProfile}
+                                        className="flex items-center gap-3 px-4 py-3 rounded-xl bg-primary/10 hover:bg-primary/20 transition-colors">
+                                        <Icon icon="mdi:shield-crown" width="20" height="20" className="text-primary" />
+                                        <span className="font-hebden font-semibold text-foreground">Admin Panel</span>
+                                    </Link>
+                                </div>
+                            )}
 
                             {/* Settings */}
                             <div className="space-y-1">

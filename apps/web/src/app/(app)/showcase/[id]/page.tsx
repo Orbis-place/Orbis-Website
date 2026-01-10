@@ -273,7 +273,7 @@ export default function ShowcaseDetailPage() {
                                     <div key={comment.id} className="space-y-3">
                                         {/* Main Comment */}
                                         <div className="flex gap-3">
-                                            <Link href={`/users/${comment.user.username}`} className="flex-shrink-0">
+                                            <Link href={`/user/${comment.user.username}`} className="flex-shrink-0">
                                                 {comment.user.image ? (
                                                     <img
                                                         src={comment.user.image}
@@ -292,7 +292,7 @@ export default function ShowcaseDetailPage() {
                                                 <div className="bg-[#032125] rounded-lg p-3">
                                                     <div className="flex items-center gap-2 mb-1">
                                                         <Link
-                                                            href={`/users/${comment.user.username}`}
+                                                            href={`/user/${comment.user.username}`}
                                                             className="font-semibold text-[#C7F4FA] hover:text-[#109EB1] transition-colors font-nunito"
                                                         >
                                                             {comment.user.displayName || comment.user.username}
@@ -354,7 +354,7 @@ export default function ShowcaseDetailPage() {
                                             <div className="ml-12 space-y-3 border-l-2 border-[#109EB1]/10 pl-4">
                                                 {comment.replies.map((reply) => (
                                                     <div key={reply.id} className="flex gap-3">
-                                                        <Link href={`/users/${reply.user.username}`} className="flex-shrink-0">
+                                                        <Link href={`/user/${reply.user.username}`} className="flex-shrink-0">
                                                             {reply.user.image ? (
                                                                 <img
                                                                     src={reply.user.image}
@@ -372,7 +372,7 @@ export default function ShowcaseDetailPage() {
                                                         <div className="flex-1 bg-[#032125]/50 rounded-lg p-3">
                                                             <div className="flex items-center gap-2 mb-1">
                                                                 <Link
-                                                                    href={`/users/${reply.user.username}`}
+                                                                    href={`/user/${reply.user.username}`}
                                                                     className="font-semibold text-[#C7F4FA] hover:text-[#109EB1] transition-colors font-nunito text-sm"
                                                                 >
                                                                     {reply.user.displayName || reply.user.username}
@@ -438,7 +438,7 @@ export default function ShowcaseDetailPage() {
                             </Link>
                         ) : (
                             <Link
-                                href={`/users/${post.author.username}`}
+                                href={`/user/${post.author.username}`}
                                 className="flex items-center gap-3 p-3 bg-[#032125] rounded-lg hover:bg-[#032125]/80 transition-colors"
                             >
                                 {post.author.image ? (

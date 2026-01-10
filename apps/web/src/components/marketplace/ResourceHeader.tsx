@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Download, Heart, Bookmark, MoreVertical, Tag, Calendar, Flag, Copy } from 'lucide-react';
+import { Download, Heart, MoreVertical, Tag, Calendar, Flag, Copy } from 'lucide-react';
 import { Icon } from '@iconify/react';
 import { EntityAvatar } from '@/components/EntityAvatar';
 import {
@@ -13,6 +13,8 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useState } from 'react';
+import { DownloadVersionModal } from '@/components/marketplace/DownloadVersionModal';
+import { SaveToCollectionPopover } from '@/components/marketplace/SaveToCollectionPopover';
 
 export interface ResourceHeaderProps {
     title: string;
@@ -25,18 +27,18 @@ export interface ResourceHeaderProps {
     type: string;
     slug: string;
     author: string;
-    team?: { name: string; displayName?: string } | null;
+    team?: { name: string; displayName?: string; slug?: string } | null;
     owner?: { username: string; displayName?: string } | null;
     updatedAt: string;
     isOwner?: boolean;
     isLiked?: boolean;
-    isFavorited?: boolean;
     onToggleLike?: () => void;
-    onToggleFavorite?: () => void;
     isLiking?: boolean;
-    isFavoriting?: boolean;
     resourceId?: string;
+    isLoggedIn?: boolean;
+    onLoginRequired?: () => void;
 }
+
 
 export default function ResourceHeader({
     title,
@@ -54,14 +56,14 @@ export default function ResourceHeader({
     updatedAt,
     isOwner = false,
     isLiked = false,
-    isFavorited = false,
     onToggleLike,
-    onToggleFavorite,
     isLiking = false,
-    isFavoriting = false,
-    resourceId
+    resourceId,
+    isLoggedIn = false,
+    onLoginRequired,
 }: ResourceHeaderProps) {
     const [copySuccess, setCopySuccess] = useState(false);
+    const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
 
     const handleCopyId = () => {
         if (resourceId) {
@@ -116,8 +118,8 @@ export default function ResourceHeader({
                     {/* Primary buttons - Desktop only */}
                     <div className="hidden sm:flex gap-3">
                         <button
-                            disabled
-                            className="flex items-center justify-center gap-3 px-6 py-3 bg-[#109EB1] hover:bg-[#0D8A9A] rounded-full font-hebden font-extrabold text-base text-[#C7F4FA] transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#109EB1]">
+                            onClick={() => setIsDownloadModalOpen(true)}
+                            className="flex items-center justify-center gap-3 px-6 py-3 bg-[#109EB1] hover:bg-[#0D8A9A] rounded-full font-hebden font-extrabold text-base text-[#C7F4FA] transition-all shadow-lg">
                             <Download className="w-5 h-5" />
                             <span>Download</span>
                         </button>
@@ -150,21 +152,13 @@ export default function ResourceHeader({
                         />
                     </button>
 
-                    <button
-                        onClick={onToggleFavorite}
-                        disabled={isFavoriting}
-                        className={`group flex items-center justify-center w-12 h-12 border rounded-full transition-all duration-200 ${isFavorited
-                            ? 'bg-[#109EB1] border-[#109EB1]'
-                            : 'bg-[#06363D] hover:bg-[#084B54] border-[#084B54]'
-                            } ${isFavoriting ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 active:scale-95'}`}
-                    >
-                        <Bookmark
-                            className={`w-5 h-5 transition-all duration-200 ${isFavorited
-                                ? 'text-white fill-white scale-110'
-                                : 'text-[#C7F4FA] group-hover:scale-110'
-                                } ${isFavoriting ? 'animate-[pulse_1s_ease-in-out_infinite]' : ''}`}
+                    {resourceId && (
+                        <SaveToCollectionPopover
+                            resourceId={resourceId}
+                            isLoggedIn={isLoggedIn}
+                            onLoginRequired={onLoginRequired}
                         />
-                    </button>
+                    )}
 
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -201,7 +195,7 @@ export default function ResourceHeader({
 
                 {/* Metadata Row */}
                 <div className="flex flex-wrap items-center gap-4 text-sm text-[#C7F4FA]/60 font-nunito mb-4">
-                    <span>by <Link href={team ? `/team/${team.slug.toLowerCase()}` : owner ? `/users/${owner.username.toLowerCase()}` : '#'} className="text-[#109EB1] font-semibold hover:underline">{author}</Link></span>
+                    <span>by <Link href={team?.slug ? `/team/${team.slug.toLowerCase()}` : owner ? `/user/${owner.username.toLowerCase()}` : '#'} className="text-[#109EB1] font-semibold hover:underline">{author}</Link></span>
                     <span>•</span>
                     <span className="flex items-center gap-1.5">
                         <Calendar className="w-4 h-4" />
@@ -250,7 +244,9 @@ export default function ResourceHeader({
 
                 {/* Primary action buttons - Mobile only */}
                 <div className="flex flex-col gap-3 pb-6 sm:hidden">
-                    <button className="flex-1 flex items-center justify-center gap-3 px-6 py-3 bg-[#109EB1] hover:bg-[#0D8A9A] rounded-full font-hebden font-extrabold text-base text-[#C7F4FA] transition-all shadow-lg">
+                    <button
+                        onClick={() => setIsDownloadModalOpen(true)}
+                        className="flex-1 flex items-center justify-center gap-3 px-6 py-3 bg-[#109EB1] hover:bg-[#0D8A9A] rounded-full font-hebden font-extrabold text-base text-[#C7F4FA] transition-all shadow-lg">
                         <Download className="w-5 h-5" />
                         <span>Download</span>
                     </button>
@@ -266,6 +262,16 @@ export default function ResourceHeader({
                     )}
                 </div>
             </div>
+
+            {/* Download Version Modal */}
+            {resourceId && (
+                <DownloadVersionModal
+                    open={isDownloadModalOpen}
+                    onOpenChange={setIsDownloadModalOpen}
+                    resourceId={resourceId}
+                    resourceName={title}
+                />
+            )}
         </div>
     );
 }

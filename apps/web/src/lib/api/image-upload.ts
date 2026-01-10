@@ -139,6 +139,68 @@ export async function uploadServerDescriptionImage(
 }
 
 /**
+ * Upload an image for a version changelog
+ *
+ * @param versionId - The ID of the version
+ * @param file - The image file to upload
+ * @returns The uploaded image URL
+ *
+ * @example
+ * ```ts
+ * const file = new File(['...'], 'image.png', { type: 'image/png' })
+ * const result = await uploadVersionChangelogImage('version-123', file)
+ * console.log(result.url) // https://cdn.orbis.com/images/abc123.png
+ * ```
+ */
+export async function uploadVersionChangelogImage(
+  versionId: string,
+  file: File
+): Promise<UploadImageResponse> {
+  // Validation de la taille du fichier (max 5MB)
+  const MAX_SIZE = 5 * 1024 * 1024 // 5MB
+  if (file.size > MAX_SIZE) {
+    throw new Error(`Image size exceeds maximum allowed size of ${MAX_SIZE / 1024 / 1024}MB`)
+  }
+
+  // Validation du type de fichier
+  const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+  if (!ALLOWED_TYPES.includes(file.type)) {
+    throw new Error(`Invalid file type. Allowed types: ${ALLOWED_TYPES.join(', ')}`)
+  }
+
+  // Préparation de la requête
+  const formData = new FormData()
+  formData.append('file', file)
+
+  // Upload vers l'endpoint du backend avec versionId dans le path
+  const response = await fetch(`${API_URL}/resources/versions/${versionId}/changelog-images`, {
+    method: 'POST',
+    credentials: 'include',
+    body: formData
+  })
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: 'Failed to upload image' }))
+    throw new Error(error.message || `Upload failed with status ${response.status}`)
+  }
+
+  const data = await response.json()
+
+  // Le backend renvoie { image: { url, ... } }
+  const imageData = data.image
+  if (!imageData?.url) {
+    throw new Error('Invalid response from server: missing image URL')
+  }
+
+  return {
+    url: imageData.url,
+    filename: imageData.storageKey || file.name,
+    size: imageData.size || file.size,
+    mimeType: file.type
+  }
+}
+
+/**
  * Delete an image from a resource description
  *
  * @param resourceId - The ID of the resource

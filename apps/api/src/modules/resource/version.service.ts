@@ -6,22 +6,35 @@ import {
 } from '@nestjs/common';
 
 import { StorageService } from '../storage/storage.service';
-import { CreateVersionDto, UpdateVersionDto } from './dtos/version.dto';
+import { RedisService } from '../../common/redis.service';
+import { VersionChangelogImageService } from './version-changelog-image.service';
+import {
+    CreateVersionDto,
+    UpdateVersionDto,
+    UpdateChangelogDto,
+    RejectVersionDto,
+} from './dtos/version.dto';
 import { prisma, VersionStatus, FileType, UserRole } from '@repo/db';
 import * as crypto from 'crypto';
+import archiver from 'archiver';
+import { Response } from 'express';
 
 @Injectable()
 export class VersionService {
     constructor(
-
         private readonly storageService: StorageService,
+        private readonly redisService: RedisService,
+        private readonly changelogImageService: VersionChangelogImageService,
     ) { }
 
+    // ============================================
+    // HELPER METHODS
+    // ============================================
+
     /**
-     * Create a new version for a resource
+     * Check if user has permission to manage resource versions
      */
-    async create(resourceId: string, userId: string, createDto: CreateVersionDto) {
-        // Check if resource exists and user has permission
+    private async checkResourcePermission(resourceId: string, userId: string) {
         const resource = await prisma.resource.findUnique({
             where: { id: resourceId },
             include: {
@@ -37,7 +50,6 @@ export class VersionService {
             throw new NotFoundException('Resource not found');
         }
 
-        // Check permission
         const hasPermission =
             resource.ownerUserId === userId ||
             (resource.ownerTeam &&
@@ -46,8 +58,82 @@ export class VersionService {
                 ));
 
         if (!hasPermission) {
-            throw new ForbiddenException('You do not have permission to create versions for this resource');
+            throw new ForbiddenException('You do not have permission to manage this resource');
         }
+
+        return resource;
+    }
+
+    /**
+     * Check if user has moderation permission
+     */
+    private async checkModeratorPermission(userId: string) {
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { role: true },
+        });
+
+        if (!user || (user.role !== UserRole.MODERATOR && user.role !== UserRole.ADMIN && user.role !== UserRole.SUPER_ADMIN)) {
+            throw new ForbiddenException('You do not have permission to moderate versions');
+        }
+    }
+
+    /**
+     * Get version with permission check
+     */
+    private async getVersionWithPermission(resourceId: string, versionId: string, userId: string) {
+        const version = await prisma.resourceVersion.findFirst({
+            where: {
+                id: versionId,
+                resourceId,
+            },
+            include: {
+                resource: {
+                    include: {
+                        ownerTeam: {
+                            include: {
+                                members: true,
+                            },
+                        },
+                    },
+                },
+                files: true,
+                compatibleVersions: {
+                    include: {
+                        hytaleVersion: true,
+                    },
+                },
+            },
+        });
+
+        if (!version) {
+            throw new NotFoundException('Version not found');
+        }
+
+        const hasPermission =
+            version.resource.ownerUserId === userId ||
+            (version.resource.ownerTeam &&
+                version.resource.ownerTeam.members.some(
+                    (member) => member.userId === userId && member.role !== 'MEMBER',
+                ));
+
+        if (!hasPermission) {
+            throw new ForbiddenException('You do not have permission to manage this version');
+        }
+
+        return version;
+    }
+
+    // ============================================
+    // VERSION CRUD
+    // ============================================
+
+    /**
+     * Create a new version for a resource (DRAFT status)
+     */
+    async create(resourceId: string, userId: string, createDto: CreateVersionDto) {
+        // Check permission
+        await this.checkResourcePermission(resourceId, userId);
 
         // Check if version number already exists
         const existingVersion = await prisma.resourceVersion.findUnique({
@@ -65,6 +151,17 @@ export class VersionService {
             );
         }
 
+        // Validate that all Hytale versions exist
+        const hytaleVersions = await prisma.hytaleVersion.findMany({
+            where: {
+                id: { in: createDto.compatibleHytaleVersionIds },
+            },
+        });
+
+        if (hytaleVersions.length !== createDto.compatibleHytaleVersionIds.length) {
+            throw new BadRequestException('One or more Hytale version IDs are invalid');
+        }
+
         // Create version
         const version = await prisma.resourceVersion.create({
             data: {
@@ -72,29 +169,13 @@ export class VersionService {
                 versionNumber: createDto.versionNumber,
                 name: createDto.name,
                 channel: createDto.channel,
-                changelog: createDto.changelog,
                 status: VersionStatus.DRAFT,
                 compatibleVersions: {
-                    create: await Promise.all(
-                        createDto.compatibleVersions.map(async (hytaleVersionStr) => {
-                            // Find or create the HytaleVersion
-                            let hytaleVersion = await prisma.hytaleVersion.findUnique({
-                                where: { hytaleVersion: hytaleVersionStr },
-                            });
-
-                            if (!hytaleVersion) {
-                                hytaleVersion = await prisma.hytaleVersion.create({
-                                    data: { hytaleVersion: hytaleVersionStr },
-                                });
-                            }
-
-                            return {
-                                hytaleVersion: {
-                                    connect: { id: hytaleVersion.id },
-                                },
-                            };
-                        }),
-                    ),
+                    create: createDto.compatibleHytaleVersionIds.map((hytaleVersionId) => ({
+                        hytaleVersion: {
+                            connect: { id: hytaleVersionId },
+                        },
+                    })),
                 },
             },
             include: {
@@ -160,6 +241,7 @@ export class VersionService {
                 },
                 files: true,
                 primaryFile: true,
+                changelogImages: true,
                 resource: {
                     select: {
                         id: true,
@@ -179,7 +261,9 @@ export class VersionService {
     }
 
     /**
-     * Update a version
+     * Update a version (status-aware restrictions)
+     * - DRAFT & REJECTED: name, channel, compatible versions editable
+     * - PENDING & APPROVED: not editable via this method
      */
     async update(
         resourceId: string,
@@ -187,39 +271,17 @@ export class VersionService {
         userId: string,
         updateDto: UpdateVersionDto,
     ) {
-        // Get version with resource
-        const version = await prisma.resourceVersion.findFirst({
-            where: {
-                id: versionId,
-                resourceId,
-            },
-            include: {
-                resource: {
-                    include: {
-                        ownerTeam: {
-                            include: {
-                                members: true,
-                            },
-                        },
-                    },
-                },
-            },
-        });
+        const version = await this.getVersionWithPermission(resourceId, versionId, userId);
 
-        if (!version) {
-            throw new NotFoundException('Version not found');
+        // Check status restrictions
+        if (version.status === VersionStatus.PENDING || version.status === VersionStatus.APPROVED) {
+            throw new BadRequestException(
+                'Cannot modify version metadata while in PENDING or APPROVED status. Only changelog and files can be updated.',
+            );
         }
 
-        // Check permission
-        const hasPermission =
-            version.resource.ownerUserId === userId ||
-            (version.resource.ownerTeam &&
-                version.resource.ownerTeam.members.some(
-                    (member) => member.userId === userId && member.role !== 'MEMBER',
-                ));
-
-        if (!hasPermission) {
-            throw new ForbiddenException('You do not have permission to update this version');
+        if (version.status === VersionStatus.ARCHIVED) {
+            throw new BadRequestException('Cannot modify archived versions');
         }
 
         // Prepare update data
@@ -227,55 +289,43 @@ export class VersionService {
 
         if (updateDto.name !== undefined) updateData.name = updateDto.name;
         if (updateDto.channel !== undefined) updateData.channel = updateDto.channel;
-        if (updateDto.changelog !== undefined) updateData.changelog = updateDto.changelog;
-        if (updateDto.status !== undefined) updateData.status = updateDto.status;
 
         // Update version
-        const updatedVersion = await prisma.resourceVersion.update({
+        await prisma.resourceVersion.update({
             where: { id: versionId },
             data: updateData,
-            include: {
-                compatibleVersions: {
-                    include: {
-                        hytaleVersion: true,
-                    },
-                },
-                files: true,
-                primaryFile: true,
-            },
         });
 
         // Update compatible versions if provided
-        if (updateDto.compatibleVersions) {
+        if (updateDto.compatibleHytaleVersionIds) {
+            // Validate that all Hytale versions exist
+            const hytaleVersions = await prisma.hytaleVersion.findMany({
+                where: {
+                    id: { in: updateDto.compatibleHytaleVersionIds },
+                },
+            });
+
+            if (hytaleVersions.length !== updateDto.compatibleHytaleVersionIds.length) {
+                throw new BadRequestException('One or more Hytale version IDs are invalid');
+            }
+
             // Delete existing junction table entries
             await prisma.resourceVersionToHytaleVersion.deleteMany({
                 where: { resourceVersionId: versionId },
             });
 
             // Create new junction table entries
-            for (const hytaleVersionStr of updateDto.compatibleVersions) {
-                // Find or create the HytaleVersion
-                let hytaleVersion = await prisma.hytaleVersion.findUnique({
-                    where: { hytaleVersion: hytaleVersionStr },
-                });
-
-                if (!hytaleVersion) {
-                    hytaleVersion = await prisma.hytaleVersion.create({
-                        data: { hytaleVersion: hytaleVersionStr },
-                    });
-                }
-
-                // Create junction entry
+            for (const hytaleVersionId of updateDto.compatibleHytaleVersionIds) {
                 await prisma.resourceVersionToHytaleVersion.create({
                     data: {
                         resourceVersionId: versionId,
-                        hytaleVersionId: hytaleVersion.id,
+                        hytaleVersionId,
                     },
                 });
             }
         }
 
-        // Fetch updated version with new compatible versions
+        // Fetch updated version
         const finalVersion = await prisma.resourceVersion.findUnique({
             where: { id: versionId },
             include: {
@@ -296,44 +346,54 @@ export class VersionService {
     }
 
     /**
-     * Delete a version
+     * Update version changelog (allowed in all statuses except ARCHIVED)
      */
-    async delete(resourceId: string, versionId: string, userId: string) {
-        // Get version with resource and files
-        const version = await prisma.resourceVersion.findFirst({
-            where: {
-                id: versionId,
-                resourceId,
-            },
+    async updateChangelog(
+        resourceId: string,
+        versionId: string,
+        userId: string,
+        updateDto: UpdateChangelogDto,
+    ) {
+        const version = await this.getVersionWithPermission(resourceId, versionId, userId);
+
+        if (version.status === VersionStatus.ARCHIVED) {
+            throw new BadRequestException('Cannot modify archived versions');
+        }
+
+        const updatedVersion = await prisma.resourceVersion.update({
+            where: { id: versionId },
+            data: { changelog: updateDto.changelog },
             include: {
-                resource: {
+                compatibleVersions: {
                     include: {
-                        ownerTeam: {
-                            include: {
-                                members: true,
-                            },
-                        },
+                        hytaleVersion: true,
                     },
                 },
                 files: true,
+                primaryFile: true,
             },
         });
 
-        if (!version) {
-            throw new NotFoundException('Version not found');
+        // Validate and mark changelog images as permanent
+        if (updateDto.changelog) {
+            await this.changelogImageService.validateImagesInChangelog(
+                versionId,
+                userId,
+                updateDto.changelog,
+            );
         }
 
-        // Check permission
-        const hasPermission =
-            version.resource.ownerUserId === userId ||
-            (version.resource.ownerTeam &&
-                version.resource.ownerTeam.members.some(
-                    (member) => member.userId === userId && member.role !== 'MEMBER',
-                ));
+        return {
+            message: 'Changelog updated successfully',
+            version: updatedVersion,
+        };
+    }
 
-        if (!hasPermission) {
-            throw new ForbiddenException('You do not have permission to delete this version');
-        }
+    /**
+     * Delete a version
+     */
+    async delete(resourceId: string, versionId: string, userId: string) {
+        const version = await this.getVersionWithPermission(resourceId, versionId, userId);
 
         // Check if this is the latest version
         if (version.resource.latestVersionId === versionId) {
@@ -361,8 +421,199 @@ export class VersionService {
         };
     }
 
+    // ============================================
+    // VERSION WORKFLOW
+    // ============================================
+
     /**
-     * Upload a file for a version
+     * Submit a version for review (DRAFT -> PENDING)
+     */
+    async submit(resourceId: string, versionId: string, userId: string) {
+        const version = await this.getVersionWithPermission(resourceId, versionId, userId);
+
+        if (version.status !== VersionStatus.DRAFT) {
+            throw new BadRequestException('Only DRAFT versions can be submitted for review');
+        }
+
+        // Validate that at least one file is uploaded
+        if (version.files.length === 0) {
+            throw new BadRequestException('At least one file must be uploaded before submitting');
+        }
+
+        // Validate that a primary file is set
+        if (!version.primaryFileId) {
+            throw new BadRequestException('A primary file must be set before submitting');
+        }
+
+        const updatedVersion = await prisma.resourceVersion.update({
+            where: { id: versionId },
+            data: { status: VersionStatus.PENDING },
+            include: {
+                compatibleVersions: {
+                    include: {
+                        hytaleVersion: true,
+                    },
+                },
+                files: true,
+                primaryFile: true,
+            },
+        });
+
+        return {
+            message: 'Version submitted for review',
+            version: updatedVersion,
+        };
+    }
+
+    /**
+     * Resubmit a rejected version for review (REJECTED -> PENDING)
+     */
+    async resubmit(resourceId: string, versionId: string, userId: string) {
+        const version = await this.getVersionWithPermission(resourceId, versionId, userId);
+
+        if (version.status !== VersionStatus.REJECTED) {
+            throw new BadRequestException('Only REJECTED versions can be resubmitted');
+        }
+
+        // Validate that at least one file is uploaded
+        if (version.files.length === 0) {
+            throw new BadRequestException('At least one file must be uploaded before resubmitting');
+        }
+
+        // Validate that a primary file is set
+        if (!version.primaryFileId) {
+            throw new BadRequestException('A primary file must be set before resubmitting');
+        }
+
+        const updatedVersion = await prisma.resourceVersion.update({
+            where: { id: versionId },
+            data: {
+                status: VersionStatus.PENDING,
+                rejectionReason: null, // Clear rejection reason
+            },
+            include: {
+                compatibleVersions: {
+                    include: {
+                        hytaleVersion: true,
+                    },
+                },
+                files: true,
+                primaryFile: true,
+            },
+        });
+
+        return {
+            message: 'Version resubmitted for review',
+            version: updatedVersion,
+        };
+    }
+
+    /**
+     * Approve a pending version (PENDING -> APPROVED) - Moderators only
+     */
+    async approve(resourceId: string, versionId: string, userId: string) {
+        await this.checkModeratorPermission(userId);
+
+        const version = await prisma.resourceVersion.findFirst({
+            where: {
+                id: versionId,
+                resourceId,
+            },
+        });
+
+        if (!version) {
+            throw new NotFoundException('Version not found');
+        }
+
+        if (version.status !== VersionStatus.PENDING) {
+            throw new BadRequestException('Only PENDING versions can be approved');
+        }
+
+        const updateData: any = {
+            status: VersionStatus.APPROVED,
+        };
+
+        // Set publishedAt if first approval
+        if (!version.publishedAt) {
+            updateData.publishedAt = new Date();
+        }
+
+        const updatedVersion = await prisma.resourceVersion.update({
+            where: { id: versionId },
+            data: updateData,
+            include: {
+                compatibleVersions: {
+                    include: {
+                        hytaleVersion: true,
+                    },
+                },
+                files: true,
+                primaryFile: true,
+            },
+        });
+
+        // Update resource lastActivityAt
+        await prisma.resource.update({
+            where: { id: resourceId },
+            data: { lastActivityAt: new Date() },
+        });
+
+        return {
+            message: 'Version approved',
+            version: updatedVersion,
+        };
+    }
+
+    /**
+     * Reject a pending version (PENDING -> REJECTED) - Moderators only
+     */
+    async reject(resourceId: string, versionId: string, userId: string, rejectDto: RejectVersionDto) {
+        await this.checkModeratorPermission(userId);
+
+        const version = await prisma.resourceVersion.findFirst({
+            where: {
+                id: versionId,
+                resourceId,
+            },
+        });
+
+        if (!version) {
+            throw new NotFoundException('Version not found');
+        }
+
+        if (version.status !== VersionStatus.PENDING) {
+            throw new BadRequestException('Only PENDING versions can be rejected');
+        }
+
+        const updatedVersion = await prisma.resourceVersion.update({
+            where: { id: versionId },
+            data: {
+                status: VersionStatus.REJECTED,
+                rejectionReason: rejectDto.reason,
+            },
+            include: {
+                compatibleVersions: {
+                    include: {
+                        hytaleVersion: true,
+                    },
+                },
+                files: true,
+                primaryFile: true,
+            },
+        });
+
+        return {
+            message: 'Version rejected',
+            version: updatedVersion,
+        };
+    }
+
+    // ============================================
+    // FILE MANAGEMENT
+    // ============================================
+
+    /**
+     * Upload a file for a version (allowed in all statuses except ARCHIVED)
      */
     async uploadFile(
         resourceId: string,
@@ -371,39 +622,13 @@ export class VersionService {
         file: Express.Multer.File,
         displayName?: string,
     ) {
-        // Get version with resource
-        const version = await prisma.resourceVersion.findFirst({
-            where: {
-                id: versionId,
-                resourceId,
-            },
-            include: {
-                resource: {
-                    include: {
-                        ownerTeam: {
-                            include: {
-                                members: true,
-                            },
-                        },
-                    },
-                },
-            },
-        });
+        const version = await this.getVersionWithPermission(resourceId, versionId, userId);
 
-        if (!version) {
-            throw new NotFoundException('Version not found');
-        }
-
-        // Check permission
-        const hasPermission =
-            version.resource.ownerUserId === userId ||
-            (version.resource.ownerTeam &&
-                version.resource.ownerTeam.members.some(
-                    (member) => member.userId === userId && member.role !== 'MEMBER',
-                ));
-
-        if (!hasPermission) {
-            throw new ForbiddenException('You do not have permission to upload files for this version');
+        // Cannot modify files on pending, approved or archived versions
+        if (version.status === VersionStatus.PENDING || version.status === VersionStatus.APPROVED || version.status === VersionStatus.ARCHIVED) {
+            throw new BadRequestException(
+                'Cannot upload files to pending, approved or archived versions. Only DRAFT and REJECTED versions can be modified.',
+            );
         }
 
         // Determine file type based on extension
@@ -463,7 +688,7 @@ export class VersionService {
     }
 
     /**
-     * Delete a version file
+     * Delete a version file (allowed in all statuses except ARCHIVED)
      */
     async deleteFile(
         resourceId: string,
@@ -471,45 +696,18 @@ export class VersionService {
         fileId: string,
         userId: string,
     ) {
-        // Get version with resource and file
-        const version = await prisma.resourceVersion.findFirst({
-            where: {
-                id: versionId,
-                resourceId,
-            },
-            include: {
-                resource: {
-                    include: {
-                        ownerTeam: {
-                            include: {
-                                members: true,
-                            },
-                        },
-                    },
-                },
-                files: true,
-            },
-        });
+        const version = await this.getVersionWithPermission(resourceId, versionId, userId);
 
-        if (!version) {
-            throw new NotFoundException('Version not found');
+        // Cannot modify files on pending, approved or archived versions
+        if (version.status === VersionStatus.PENDING || version.status === VersionStatus.APPROVED || version.status === VersionStatus.ARCHIVED) {
+            throw new BadRequestException(
+                'Cannot delete files from pending, approved or archived versions. Only DRAFT and REJECTED versions can be modified.',
+            );
         }
 
         const file = version.files.find((f) => f.id === fileId);
         if (!file) {
             throw new NotFoundException('File not found');
-        }
-
-        // Check permission
-        const hasPermission =
-            version.resource.ownerUserId === userId ||
-            (version.resource.ownerTeam &&
-                version.resource.ownerTeam.members.some(
-                    (member) => member.userId === userId && member.role !== 'MEMBER',
-                ));
-
-        if (!hasPermission) {
-            throw new ForbiddenException('You do not have permission to delete this file');
         }
 
         // Cannot delete the primary file if there are other files
@@ -545,7 +743,7 @@ export class VersionService {
     }
 
     /**
-     * Set primary file for a version
+     * Set primary file for a version (allowed in all statuses except ARCHIVED)
      */
     async setPrimaryFile(
         resourceId: string,
@@ -553,46 +751,19 @@ export class VersionService {
         fileId: string,
         userId: string,
     ) {
-        // Get version with resource
-        const version = await prisma.resourceVersion.findFirst({
-            where: {
-                id: versionId,
-                resourceId,
-            },
-            include: {
-                resource: {
-                    include: {
-                        ownerTeam: {
-                            include: {
-                                members: true,
-                            },
-                        },
-                    },
-                },
-                files: true,
-            },
-        });
+        const version = await this.getVersionWithPermission(resourceId, versionId, userId);
 
-        if (!version) {
-            throw new NotFoundException('Version not found');
+        // Cannot modify on pending, approved or archived versions
+        if (version.status === VersionStatus.PENDING || version.status === VersionStatus.APPROVED || version.status === VersionStatus.ARCHIVED) {
+            throw new BadRequestException(
+                'Cannot modify primary file on pending, approved or archived versions.',
+            );
         }
 
         // Check if file exists
         const file = version.files.find((f) => f.id === fileId);
         if (!file) {
             throw new NotFoundException('File not found');
-        }
-
-        // Check permission
-        const hasPermission =
-            version.resource.ownerUserId === userId ||
-            (version.resource.ownerTeam &&
-                version.resource.ownerTeam.members.some(
-                    (member) => member.userId === userId && member.role !== 'MEMBER',
-                ));
-
-        if (!hasPermission) {
-            throw new ForbiddenException('You do not have permission to modify this version');
         }
 
         // Update primary file
@@ -606,8 +777,13 @@ export class VersionService {
         };
     }
 
+    // ============================================
+    // DOWNLOAD
+    // ============================================
+
     /**
      * Download a version file (tracks download statistics)
+     * Downloads are deduplicated by IP - only one count per IP per version per day
      */
     async downloadFile(
         resourceId: string,
@@ -638,28 +814,35 @@ export class VersionService {
             throw new NotFoundException('File not found');
         }
 
-        // Track download
-        await prisma.resourceDownload.create({
-            data: {
-                resourceId,
-                versionId,
-                userId,
-                ipAddress,
-                userAgent,
-            },
-        });
+        // Check if this download should be counted (deduplicated by IP per day)
+        const shouldCount = ipAddress
+            ? await this.redisService.shouldCountDownload(versionId, ipAddress)
+            : true;
 
-        // Increment download counters
-        await prisma.$transaction([
-            prisma.resource.update({
-                where: { id: resourceId },
-                data: { downloadCount: { increment: 1 } },
-            }),
-            prisma.resourceVersion.update({
-                where: { id: versionId },
-                data: { downloadCount: { increment: 1 } },
-            }),
-        ]);
+        if (shouldCount) {
+            // Track download
+            await prisma.resourceDownload.create({
+                data: {
+                    resourceId,
+                    versionId,
+                    userId,
+                    ipAddress,
+                    userAgent,
+                },
+            });
+
+            // Increment download counters
+            await prisma.$transaction([
+                prisma.resource.update({
+                    where: { id: resourceId },
+                    data: { downloadCount: { increment: 1 } },
+                }),
+                prisma.resourceVersion.update({
+                    where: { id: versionId },
+                    data: { downloadCount: { increment: 1 } },
+                }),
+            ]);
+        }
 
         return {
             downloadUrl: file.url,
@@ -668,28 +851,28 @@ export class VersionService {
         };
     }
 
-
-
     /**
-     * Set a version as the latest version for a resource
+     * Download a version (smart download - single file or ZIP)
+     * - If version has 1 file: direct download
+     * - If version has multiple files: create ZIP archive
      */
-    async setAsLatest(resourceId: string, versionId: string, userId: string) {
-        // Get version with resource
+    async downloadVersion(
+        resourceId: string,
+        versionId: string,
+        userId?: string,
+        ipAddress?: string,
+        userAgent?: string,
+        res?: Response,
+    ) {
+        // Get version with files and resource info
         const version = await prisma.resourceVersion.findFirst({
             where: {
                 id: versionId,
                 resourceId,
             },
             include: {
-                resource: {
-                    include: {
-                        ownerTeam: {
-                            include: {
-                                members: true,
-                            },
-                        },
-                    },
-                },
+                files: true,
+                resource: true,
             },
         });
 
@@ -697,16 +880,125 @@ export class VersionService {
             throw new NotFoundException('Version not found');
         }
 
-        // Check permission
-        const hasPermission =
-            version.resource.ownerUserId === userId ||
-            (version.resource.ownerTeam &&
-                version.resource.ownerTeam.members.some(
-                    (member) => member.userId === userId && member.role !== 'MEMBER',
-                ));
+        if (version.files.length === 0) {
+            throw new BadRequestException('No files available for download');
+        }
 
-        if (!hasPermission) {
-            throw new ForbiddenException('You do not have permission to modify this resource');
+        // Debug logging
+        console.log(`[Download Debug] Version ${versionId}: ${version.files.length} file(s)`);
+        version.files.forEach((f, i) => {
+            console.log(`  File ${i + 1}: ${f.filename} (${f.id})`);
+        });
+
+        // Check if this download should be counted
+        const shouldCount = ipAddress
+            ? await this.redisService.shouldCountDownload(versionId, ipAddress)
+            : true;
+
+        if (shouldCount) {
+            // Track download
+            await prisma.resourceDownload.create({
+                data: {
+                    resourceId,
+                    versionId,
+                    userId,
+                    ipAddress,
+                    userAgent,
+                },
+            });
+
+            // Increment download counters
+            await prisma.$transaction([
+                prisma.resource.update({
+                    where: { id: resourceId },
+                    data: { downloadCount: { increment: 1 } },
+                }),
+                prisma.resourceVersion.update({
+                    where: { id: versionId },
+                    data: { downloadCount: { increment: 1 } },
+                }),
+            ]);
+        }
+
+        // If only one file, return direct download
+        if (version.files.length === 1) {
+            console.log('[Download Debug] Single file - redirecting to:', version.files[0].url);
+            const file = version.files[0];
+            return {
+                type: 'single' as const,
+                downloadUrl: file.url,
+                filename: file.filename,
+            };
+        }
+
+        console.log('[Download Debug] Multiple files - creating ZIP');
+
+        // Multiple files - create ZIP
+        if (!res) {
+            throw new BadRequestException('Response object required for ZIP download');
+        }
+
+        // Generate ZIP filename: ResourceName-vX.X.X.zip
+        const zipFilename = `${version.resource.slug}-v${version.versionNumber}.zip`;
+
+        // Set response headers
+        res.setHeader('Content-Type', 'application/zip');
+        res.setHeader('Content-Disposition', `attachment; filename="${zipFilename}"`);
+
+        // Create archiver instance
+        const archive = archiver('zip', {
+            zlib: { level: 9 }, // Maximum compression
+        });
+
+        // Pipe archive to response
+        archive.pipe(res);
+
+        // Handle errors
+        archive.on('error', (err) => {
+            throw new BadRequestException(`Error creating ZIP: ${err.message}`);
+        });
+
+        // Add all files to the ZIP
+        for (const file of version.files) {
+            try {
+                // Fetch file from S3 URL
+                const response = await fetch(file.url);
+
+                if (!response.ok) {
+                    console.error(`Failed to fetch file ${file.filename}: ${response.statusText}`);
+                    continue;
+                }
+
+                // Get readable stream from response
+                const fileBuffer = await response.arrayBuffer();
+
+                // Add to archive with display name or filename
+                archive.append(Buffer.from(fileBuffer), { name: file.displayName || file.filename });
+            } catch (error) {
+                console.error(`Error adding file ${file.filename} to ZIP:`, error);
+                // Continue with other files
+            }
+        }
+
+        // Finalize the archive
+        await archive.finalize();
+
+        // Don't return anything - response is already handled via streaming
+    }
+
+    // ============================================
+    // VERSION MANAGEMENT
+    // ============================================
+
+    /**
+     * Set a version as the latest version for a resource
+     */
+    async setAsLatest(resourceId: string, versionId: string, userId: string) {
+        const version = await this.getVersionWithPermission(resourceId, versionId, userId);
+
+        // Only approved versions can be set as latest
+        if (version.status !== VersionStatus.APPROVED) {
+            throw new BadRequestException('Only APPROVED versions can be set as the latest version');
         }
 
         // Update resource latest version

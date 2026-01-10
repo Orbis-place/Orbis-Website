@@ -60,7 +60,7 @@ export default function UserListCard({ user, currentUserId, isFollowing: initial
     return (
         <div className="flex items-center gap-3 p-4 bg-[#06363D] border border-[#084B54] rounded-xl hover:bg-[#084B54]/30 transition-colors">
             {/* Avatar */}
-            <Link href={`/users/${user.username}`} className="flex-shrink-0">
+            <Link href={`/user/${user.username}`} className="flex-shrink-0">
                 <Avatar className="h-12 w-12 rounded-lg border-2 border-[#084B54]">
                     <AvatarImage src={user.image || undefined} alt={user.displayName || user.username} />
                     <AvatarFallback className="bg-gradient-to-br from-primary to-primary/70 text-white font-hebden text-sm rounded-lg">
@@ -71,7 +71,7 @@ export default function UserListCard({ user, currentUserId, isFollowing: initial
 
             {/* User Info */}
             <div className="flex-1 min-w-0">
-                <Link href={`/users/${user.username}`}>
+                <Link href={`/user/${user.username}`}>
                     <h3 className="font-hebden font-bold text-[#C7F4FA] text-sm truncate hover:text-[#109EB1] transition-colors">
                         {user.displayName || user.username}
                     </h3>

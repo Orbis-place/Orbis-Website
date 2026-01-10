@@ -146,7 +146,7 @@ export default function MarketplacePage({ params }: { params: Promise<{ type: st
             likes: formatNumber(resource.likeCount),
             downloads: formatNumber(resource.downloadCount),
             date: formatDate(resource.publishedAt || resource.createdAt),
-            updatedAt: formatRelativeTime(resource.updatedAt || resource.createdAt),
+            updatedAt: formatRelativeTime(resource.latestVersion?.publishedAt || resource.updatedAt || resource.createdAt),
             tags: displayTags,
             categories: displayCategories,
             remainingCount: remainingCount > 0 ? remainingCount : undefined,

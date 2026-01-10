@@ -16,10 +16,15 @@ import { FavoriteService } from './favorite.service';
 import { UserFavoritesController } from './user-favorites.controller';
 import { VersionController } from './version.controller';
 import { VersionService } from './version.service';
+import { VersionChangelogImageController } from './version-changelog-image.controller';
+import { VersionChangelogImageService } from './version-changelog-image.service';
+import { CollectionController } from './collection.controller';
+import { CollectionService } from './collection.service';
 import { StorageModule } from '../storage/storage.module';
+import { RedisModule } from '../../common/redis.module';
 
 @Module({
-    imports: [StorageModule],
+    imports: [StorageModule, RedisModule],
     controllers: [
         ResourceController,
         ResourceTagController,
@@ -30,6 +35,8 @@ import { StorageModule } from '../storage/storage.module';
         FavoriteController,
         UserFavoritesController,
         VersionController,
+        VersionChangelogImageController,
+        CollectionController,
     ],
     providers: [
         ResourceService,
@@ -40,6 +47,8 @@ import { StorageModule } from '../storage/storage.module';
         LikeService,
         FavoriteService,
         VersionService,
+        VersionChangelogImageService,
+        CollectionService,
     ],
     exports: [
         ResourceService,
@@ -50,6 +59,8 @@ import { StorageModule } from '../storage/storage.module';
         LikeService,
         FavoriteService,
         VersionService,
+        VersionChangelogImageService,
+        CollectionService,
     ],
 })
 export class ResourceModule { }

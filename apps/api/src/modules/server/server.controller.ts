@@ -189,9 +189,7 @@ export class ServerController {
 
     @Post(':id/approve')
     @ApiBearerAuth()
-    @Roles([
-        UserRole.ADMIN, UserRole.SUPER_ADMIN
-    ])
+    @Roles([UserRole.MODERATOR, UserRole.ADMIN, UserRole.SUPER_ADMIN])
     @ApiOperation({ summary: 'Approve server (Admin only)' })
     @ApiParam({ name: 'id', description: 'Server ID' })
     async approve(
@@ -208,7 +206,7 @@ export class ServerController {
 
     @Post(':id/reject')
     @ApiBearerAuth()
-    @Roles([UserRole.ADMIN, UserRole.SUPER_ADMIN])
+    @Roles([UserRole.MODERATOR, UserRole.ADMIN, UserRole.SUPER_ADMIN])
     @ApiOperation({ summary: 'Reject server (Admin only)' })
     @ApiParam({ name: 'id', description: 'Server ID' })
     async reject(
@@ -225,7 +223,7 @@ export class ServerController {
 
     @Post(':id/suspend')
     @ApiBearerAuth()
-    @Roles([UserRole.ADMIN, UserRole.SUPER_ADMIN])
+    @Roles([UserRole.MODERATOR, UserRole.ADMIN, UserRole.SUPER_ADMIN])
     @ApiOperation({ summary: 'Suspend server (Admin only)' })
     @ApiParam({ name: 'id', description: 'Server ID' })
     async suspend(

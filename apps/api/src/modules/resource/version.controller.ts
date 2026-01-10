@@ -18,6 +18,9 @@ import { VersionService } from './version.service';
 import {
     CreateVersionDto,
     UpdateVersionDto,
+    UpdateChangelogDto,
+    SubmitVersionDto,
+    RejectVersionDto,
     UploadVersionFileDto,
     SetPrimaryFileDto,
 } from './dtos/version.dto';
@@ -26,7 +29,7 @@ import { Request, Response } from 'express';
 @ApiTags('resources/versions')
 @Controller('resources/:resourceId/versions')
 export class VersionController {
-    constructor(private readonly versionService: VersionService) {}
+    constructor(private readonly versionService: VersionService) { }
 
     // ============================================
     // VERSION CRUD
@@ -34,7 +37,7 @@ export class VersionController {
 
     @Post()
     @ApiBearerAuth()
-    @ApiOperation({ summary: 'Create a new version for a resource' })
+    @ApiOperation({ summary: 'Create a new version for a resource (starts as DRAFT)' })
     async create(
         @Param('resourceId') resourceId: string,
         @Session() session: UserSession,
@@ -62,7 +65,7 @@ export class VersionController {
 
     @Patch(':versionId')
     @ApiBearerAuth()
-    @ApiOperation({ summary: 'Update a version' })
+    @ApiOperation({ summary: 'Update a version (only in DRAFT or REJECTED status)' })
     async update(
         @Param('resourceId') resourceId: string,
         @Param('versionId') versionId: string,
@@ -81,6 +84,72 @@ export class VersionController {
         @Session() session: UserSession,
     ) {
         return this.versionService.delete(resourceId, versionId, session.user.id);
+    }
+
+    // ============================================
+    // CHANGELOG
+    // ============================================
+
+    @Patch(':versionId/changelog')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Update version changelog (allowed in all statuses except ARCHIVED)' })
+    async updateChangelog(
+        @Param('resourceId') resourceId: string,
+        @Param('versionId') versionId: string,
+        @Session() session: UserSession,
+        @Body() updateDto: UpdateChangelogDto,
+    ) {
+        return this.versionService.updateChangelog(resourceId, versionId, session.user.id, updateDto);
+    }
+
+    // ============================================
+    // VERSION WORKFLOW
+    // ============================================
+
+    @Post(':versionId/submit')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Submit a DRAFT version for review' })
+    async submit(
+        @Param('resourceId') resourceId: string,
+        @Param('versionId') versionId: string,
+        @Session() session: UserSession,
+        @Body() submitDto: SubmitVersionDto,
+    ) {
+        return this.versionService.submit(resourceId, versionId, session.user.id);
+    }
+
+    @Post(':versionId/resubmit')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Resubmit a REJECTED version for review' })
+    async resubmit(
+        @Param('resourceId') resourceId: string,
+        @Param('versionId') versionId: string,
+        @Session() session: UserSession,
+    ) {
+        return this.versionService.resubmit(resourceId, versionId, session.user.id);
+    }
+
+    @Post(':versionId/approve')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Approve a PENDING version (Moderators only)' })
+    async approve(
+        @Param('resourceId') resourceId: string,
+        @Param('versionId') versionId: string,
+        @Session() session: UserSession,
+    ) {
+        return this.versionService.approve(resourceId, versionId, session.user.id);
+    }
+
+    @Post(':versionId/reject')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Reject a PENDING version (Moderators only)' })
+    async reject(
+        @Param('resourceId') resourceId: string,
+        @Param('versionId') versionId: string,
+        @Session() session: UserSession,
+        @Body() rejectDto: RejectVersionDto,
+    ) {
+        return this.versionService.reject(resourceId, versionId, session.user.id, rejectDto);
     }
 
     // ============================================
@@ -187,34 +256,30 @@ export class VersionController {
 
     @Get(':versionId/download')
     @AllowAnonymous()
-    @ApiOperation({ summary: 'Download the primary file of a version' })
+    @ApiOperation({ summary: 'Download version (single file or ZIP)' })
     async downloadPrimaryFile(
         @Param('resourceId') resourceId: string,
         @Param('versionId') versionId: string,
         @Req() req: Request,
         @Res() res: Response,
     ) {
-        // Get version to find primary file
-        const { version } = await this.versionService.findOne(resourceId, versionId);
-
-        if (!version.primaryFileId) {
-            throw new Error('No primary file set for this version');
-        }
-
         // Get userId from session if authenticated
         const userId = (req as any).user?.id;
 
-        const result = await this.versionService.downloadFile(
+        const result = await this.versionService.downloadVersion(
             resourceId,
             versionId,
-            version.primaryFileId,
             userId,
             req.ip,
             req.get('user-agent'),
+            res,
         );
 
-        // Redirect to the actual download URL
-        return res.redirect(result.downloadUrl);
+        // If single file, redirect to download URL
+        // If ZIP, response is already handled and sent
+        if (result && result.type === 'single') {
+            return res.redirect(result.downloadUrl);
+        }
     }
 
     // ============================================
@@ -223,7 +288,7 @@ export class VersionController {
 
     @Patch(':versionId/set-latest')
     @ApiBearerAuth()
-    @ApiOperation({ summary: 'Set this version as the latest version for the resource' })
+    @ApiOperation({ summary: 'Set this version as the latest version for the resource (only APPROVED versions)' })
     async setAsLatest(
         @Param('resourceId') resourceId: string,
         @Param('versionId') versionId: string,

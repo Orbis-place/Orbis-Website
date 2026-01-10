@@ -21,10 +21,11 @@ export default function UserProfileTabs({ username, resourceCount, serverCount, 
     const pathname = usePathname();
 
     const tabs: Tab[] = [
-        { id: 'resources', label: 'Resources', href: `/users/${username}/resources`, count: resourceCount },
-        { id: 'servers', label: 'Servers', href: `/users/${username}/servers`, count: serverCount },
-        { id: 'showcase', label: 'Showcase', href: `/users/${username}/showcase`, count: showcaseCount },
-        { id: 'activity', label: 'Activity', href: `/users/${username}/activity` },
+        { id: 'resources', label: 'Resources', href: `/user/${username}/resources`, count: resourceCount },
+        { id: 'servers', label: 'Servers', href: `/user/${username}/servers`, count: serverCount },
+        { id: 'collections', label: 'Collections', href: `/user/${username}/collections` },
+        { id: 'showcase', label: 'Showcase', href: `/user/${username}/showcase`, count: showcaseCount },
+        { id: 'activity', label: 'Activity', href: `/user/${username}/activity` },
     ];
 
     const isActive = (tab: Tab) => {

@@ -26,7 +26,7 @@ export default function TeamMembersPage() {
                     {team.members.map((member) => (
                         <Link
                             key={member.user.id}
-                            href={`/users/${member.user.username}`}
+                            href={`/user/${member.user.username}`}
                             className="bg-[#06363D]/50 border border-[#084B54] rounded-[15px] p-4 hover:border-[#109EB1]/50 hover:bg-[#084B54]/30 transition-all"
                         >
                             <div className="flex items-start gap-3">

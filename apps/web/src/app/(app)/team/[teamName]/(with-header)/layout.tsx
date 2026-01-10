@@ -177,7 +177,7 @@ function TeamProfileLayoutContent({ children }: { children: ReactNode }) {
                     <div className="bg-[#06363D] border border-[#084B54] rounded-[25px] p-5 flex flex-col gap-4">
                         <h3 className="font-hebden text-lg font-semibold text-[#C7F4FA] m-0">Team Owner</h3>
                         <Link
-                            href={`/users/${team.owner.username}`}
+                            href={`/user/${team.owner.username}`}
                             className="flex items-center gap-3 p-3 rounded-lg hover:bg-[#032125]/50 transition-colors"
                         >
                             <Avatar className="h-12 w-12">

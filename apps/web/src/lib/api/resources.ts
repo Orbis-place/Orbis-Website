@@ -1112,3 +1112,307 @@ export async function fetchMostDownloaded(limit = 4): Promise<Resource[]> {
     }
 }
 
+// ============================================================================
+// Collection API
+// ============================================================================
+
+export interface UserCollection {
+    id: string;
+    name: string;
+    description?: string;
+    isDefault: boolean;
+    isPublic: boolean;
+    itemCount: number;
+    createdAt: string;
+    updatedAt?: string;
+}
+
+export interface CollectionWithItems {
+    collection: UserCollection & { isPublic: boolean };
+    items: Array<{
+        addedAt: string;
+        resource: Resource;
+    }>;
+    count: number;
+}
+
+/**
+ * Quick save resource to default collection
+ */
+export async function saveResourceToDefault(resourceId: string): Promise<{ message: string; added: boolean; collectionId: string }> {
+    const response = await fetch(`${API_URL}/resources/${resourceId}/save`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({
+            message: 'Failed to save resource',
+        }));
+        throw new Error(error.message || `Request failed with status ${response.status}`);
+    }
+
+    return response.json();
+}
+
+/**
+ * Get collections containing a specific resource (for current user)
+ */
+export async function getResourceCollections(resourceId: string): Promise<{ collections: UserCollection[]; count: number }> {
+    const response = await fetch(`${API_URL}/resources/${resourceId}/collections`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({
+            message: 'Failed to fetch resource collections',
+        }));
+        throw new Error(error.message || `Request failed with status ${response.status}`);
+    }
+
+    return response.json();
+}
+
+/**
+ * Get all user collections
+ */
+export async function getUserCollections(): Promise<{ collections: UserCollection[]; count: number }> {
+    const response = await fetch(`${API_URL}/users/me/collections`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({
+            message: 'Failed to fetch collections',
+        }));
+        throw new Error(error.message || `Request failed with status ${response.status}`);
+    }
+
+    return response.json();
+}
+
+/**
+ * Search collections by name
+ */
+export async function searchCollections(query: string): Promise<{ collections: UserCollection[]; count: number }> {
+    const response = await fetch(`${API_URL}/users/me/collections/search?q=${encodeURIComponent(query)}`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({
+            message: 'Failed to search collections',
+        }));
+        throw new Error(error.message || `Request failed with status ${response.status}`);
+    }
+
+    return response.json();
+}
+
+/**
+ * Create a new collection
+ */
+export async function createCollection(name: string, description?: string): Promise<UserCollection> {
+    const response = await fetch(`${API_URL}/users/me/collections`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name, description }),
+    });
+
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({
+            message: 'Failed to create collection',
+        }));
+        throw new Error(error.message || `Request failed with status ${response.status}`);
+    }
+
+    return response.json();
+}
+
+/**
+ * Add resource to a specific collection
+ */
+export async function addResourceToCollection(collectionId: string, resourceId: string): Promise<{ message: string; added: boolean }> {
+    const response = await fetch(`${API_URL}/users/me/collections/${collectionId}/resources/${resourceId}`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({
+            message: 'Failed to add resource to collection',
+        }));
+        throw new Error(error.message || `Request failed with status ${response.status}`);
+    }
+
+    return response.json();
+}
+
+/**
+ * Remove resource from a collection
+ */
+export async function removeResourceFromCollection(collectionId: string, resourceId: string): Promise<{ message: string; removed: boolean }> {
+    const response = await fetch(`${API_URL}/users/me/collections/${collectionId}/resources/${resourceId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({
+            message: 'Failed to remove resource from collection',
+        }));
+        throw new Error(error.message || `Request failed with status ${response.status}`);
+    }
+
+    return response.json();
+}
+
+/**
+ * Update a collection
+ */
+export async function updateCollection(collectionId: string, data: { name?: string; description?: string; isPublic?: boolean }): Promise<UserCollection> {
+    const response = await fetch(`${API_URL}/users/me/collections/${collectionId}`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({
+            message: 'Failed to update collection',
+        }));
+        throw new Error(error.message || `Request failed with status ${response.status}`);
+    }
+
+    return response.json();
+}
+
+/**
+ * Delete a collection
+ */
+export async function deleteCollection(collectionId: string): Promise<{ message: string }> {
+    const response = await fetch(`${API_URL}/users/me/collections/${collectionId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({
+            message: 'Failed to delete collection',
+        }));
+        throw new Error(error.message || `Request failed with status ${response.status}`);
+    }
+
+    return response.json();
+}
+
+/**
+ * Get collection with items
+ */
+export async function getCollectionWithItems(collectionId: string): Promise<CollectionWithItems & { count: number }> {
+    const response = await fetch(`${API_URL}/users/me/collections/${collectionId}`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({
+            message: 'Failed to fetch collection',
+        }));
+        throw new Error(error.message || `Request failed with status ${response.status}`);
+    }
+
+    return response.json();
+}
+
+/**
+ * Get user's favorite resources
+ */
+export async function getUserFavorites(): Promise<{ favorites: Array<{ resource: Resource; createdAt: string }>; count: number }> {
+    const response = await fetch(`${API_URL}/user/favorites`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({
+            message: 'Failed to fetch favorites',
+        }));
+        throw new Error(error.message || `Request failed with status ${response.status}`);
+    }
+
+    return response.json();
+}
+
+/**
+ * Get public collections for a user
+ */
+export async function getPublicCollections(userId: string): Promise<{ collections: UserCollection[]; count: number }> {
+    const response = await fetch(`${API_URL}/users/${userId}/collections/public`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+
+    if (!response.ok) {
+        return { collections: [], count: 0 };
+    }
+
+    return response.json();
+}
+
+/**
+ * Get a public collection with items
+ */
+export async function getPublicCollection(collectionId: string): Promise<CollectionWithItems> {
+    const response = await fetch(`${API_URL}/collections/${collectionId}/public`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to fetch collection');
+    }
+
+    return response.json();
+}
+
