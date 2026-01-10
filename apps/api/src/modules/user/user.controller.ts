@@ -9,6 +9,7 @@ import { CreateSocialLinkDto } from "./dtos/create-social-link.dto";
 import { UpdateSocialLinkDto } from "./dtos/update-social-link.dto";
 import { ReorderSocialLinksDto } from "./dtos/reorder-social-links.dto";
 import { SearchUsersDto } from "./dtos/search-users.dto";
+import { GetDownloadHistoryDto } from "./dtos/get-download-history.dto";
 
 @ApiTags('users')
 @Controller('users')
@@ -203,6 +204,24 @@ export class UserController {
         @Param('id') id: string,
     ) {
         return this.userService.deleteSocialLink(session.user.id, id);
+    }
+
+    // ============================================
+    // DOWNLOAD HISTORY
+    // ============================================
+
+    @Get('me/downloads')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Get download history for current user' })
+    async getMyDownloads(
+        @Session() session: UserSession,
+        @Query() queryDto: GetDownloadHistoryDto,
+    ) {
+        return this.userService.getDownloadHistory(
+            session.user.id,
+            queryDto.page,
+            queryDto.limit,
+        );
     }
 
 }

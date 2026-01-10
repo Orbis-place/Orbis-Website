@@ -31,9 +31,10 @@ DRAFT → PENDING → APPROVED
 
 ### Release Channels
 
-- **RELEASE**: Stable release
-- **BETA**: Beta version
-- **ALPHA**: Alpha/experimental version
+- **RELEASE**: Stable release (production-ready)
+- **BETA**: Beta version (feature complete, testing phase)
+- **ALPHA**: Alpha/experimental version (early access, unstable)
+- **SNAPSHOT**: Development builds (unstable, frequent updates)
 
 ---
 
@@ -63,7 +64,7 @@ Create a new version (starts as DRAFT).
 **Fields:**
 - `versionNumber` (string, required) - Version number (e.g., "1.0.0", "2.1.3-beta")
 - `name` (string, optional) - Optional version name
-- `channel` (string, required) - Release channel: `RELEASE`, `BETA`, or `ALPHA`
+- `channel` (string, required) - Release channel: `RELEASE`, `BETA`, `ALPHA`, or `SNAPSHOT`
 - `compatibleHytaleVersionIds` (string[], required) - Array of compatible Hytale version IDs (minimum 1)
 
 **Response:**

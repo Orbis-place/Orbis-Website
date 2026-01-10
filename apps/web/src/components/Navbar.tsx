@@ -240,7 +240,7 @@ export default function Navbar({ session }: NavbarProps) {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent
                                 align="end"
-                                className="w-56 bg-accent border border-border font-hebden"
+                                className="w-56 bg-accent border border-border font-hebden mt-2"
                             >
                                 {/* General Section */}
                                 <DropdownMenuItem asChild className="text-foreground cursor-pointer">

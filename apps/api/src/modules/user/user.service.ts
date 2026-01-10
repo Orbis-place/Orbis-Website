@@ -2,6 +2,7 @@ import { BadRequestException, ConflictException, ForbiddenException, Injectable,
 import { UpdateProfileDto } from "./dtos/update-profile.dto";
 import { StorageService } from "../storage/storage.service";
 import { SearchUsersDto } from "./dtos/search-users.dto";
+import { GetDownloadHistoryDto } from "./dtos/get-download-history.dto";
 import { prisma } from '@repo/db';
 
 @Injectable()
@@ -768,5 +769,105 @@ export class UserService {
             },
             take: 1000,
         });
+    }
+
+    /**
+     * Get download history for a user
+     * Returns only the most recent download per resource (grouped by resourceId)
+     */
+    async getDownloadHistory(userId: string, page: number = 1, limit: number = 20) {
+        const skip = (page - 1) * limit;
+
+        // First, get all unique resource IDs that the user has downloaded
+        // We group by resourceId to get only the most recent download per resource
+        const uniqueDownloads = await prisma.$queryRaw<Array<{ resourceId: string; maxDownloadedAt: Date }>>`
+            SELECT "resourceId", MAX("downloadedAt") as "maxDownloadedAt"
+            FROM "resource_downloads"
+            WHERE "userId" = ${userId}
+            GROUP BY "resourceId"
+            ORDER BY "maxDownloadedAt" DESC
+            LIMIT ${limit}
+            OFFSET ${skip}
+        `;
+
+        // Get total count of unique resources downloaded
+        const totalResult = await prisma.$queryRaw<Array<{ count: bigint }>>`
+            SELECT COUNT(DISTINCT "resourceId") as count
+            FROM "resource_downloads"
+            WHERE "userId" = ${userId}
+        `;
+        const total = Number(totalResult[0]?.count || 0);
+
+        // For each unique resource, get the most recent download with full details
+        const downloads = await Promise.all(
+            uniqueDownloads.map(async ({ resourceId, maxDownloadedAt }) => {
+                const download = await prisma.resourceDownload.findFirst({
+                    where: {
+                        userId,
+                        resourceId,
+                        downloadedAt: maxDownloadedAt,
+                    },
+                    include: {
+                        resource: {
+                            select: {
+                                id: true,
+                                name: true,
+                                slug: true,
+                                type: true,
+                                iconUrl: true,
+                                ownerUser: {
+                                    select: {
+                                        id: true,
+                                        username: true,
+                                        displayName: true,
+                                        image: true,
+                                    },
+                                },
+                                ownerTeam: {
+                                    select: {
+                                        id: true,
+                                        name: true,
+                                        logo: true,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                });
+
+                if (!download) return null;
+
+                // Get version info if versionId exists
+                let version = null;
+                if (download.versionId) {
+                    version = await prisma.resourceVersion.findUnique({
+                        where: { id: download.versionId },
+                        select: {
+                            id: true,
+                            versionNumber: true,
+                            channel: true,
+                        },
+                    });
+                }
+
+                return {
+                    ...download,
+                    version,
+                };
+            })
+        );
+
+        // Filter out any null results
+        const validDownloads = downloads.filter(d => d !== null);
+
+        return {
+            downloads: validDownloads,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit),
+            },
+        };
     }
 }

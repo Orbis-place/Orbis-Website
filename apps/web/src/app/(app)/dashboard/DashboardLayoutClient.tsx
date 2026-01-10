@@ -16,6 +16,11 @@ const dashboardNav = [
         icon: 'mdi:account',
       },
       {
+        name: 'Downloads',
+        href: '/dashboard/downloads',
+        icon: 'mdi:download',
+      },
+      {
         name: 'My Reports',
         href: '/dashboard/reports',
         icon: 'mdi:flag',
