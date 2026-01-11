@@ -119,7 +119,10 @@ export const getAuth = () => {
                 user: {
                     create: {
                         before: async (user: any) => {
-                            let formattedUsername = user.username.replace(/\s+/g, '').trim();
+                            // Get the base name for username - try name first, then username, then email prefix
+                            const baseName = user.name || user.username || user.email?.split('@')[0] || 'user';
+                            let formattedUsername = baseName.replace(/\s+/g, '').trim().toLowerCase();
+
                             const existingUser = await prisma.user.findFirst({
                                 where: {
                                     username: {
@@ -155,6 +158,7 @@ export const getAuth = () => {
                                 };
                             }
 
+                            console.log('formatted username', formattedUsername);
                             return {
                                 data: {
                                     ...user,
