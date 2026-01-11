@@ -3,12 +3,14 @@ import { UpdateProfileDto } from "./dtos/update-profile.dto";
 import { StorageService } from "../storage/storage.service";
 import { SearchUsersDto } from "./dtos/search-users.dto";
 import { GetDownloadHistoryDto } from "./dtos/get-download-history.dto";
-import { prisma } from '@repo/db';
+import { prisma, NotificationType } from '@repo/db';
+import { NotificationService } from '../notification/notification.service';
 
 @Injectable()
 export class UserService {
     constructor(
         private readonly storage: StorageService,
+        private readonly notificationService: NotificationService,
     ) {
     }
 
@@ -36,6 +38,9 @@ export class UserService {
                 showEmail: true,
                 showLocation: true,
                 showOnlineStatus: true,
+                showFollowers: true,
+                showFollowing: true,
+                allowTeamInvitations: true,
                 theme: true,
                 language: true,
                 lastLoginAt: true,
@@ -84,6 +89,9 @@ export class UserService {
         if (updateDto.showEmail !== undefined) safeData.showEmail = updateDto.showEmail;
         if (updateDto.showLocation !== undefined) safeData.showLocation = updateDto.showLocation;
         if (updateDto.showOnlineStatus !== undefined) safeData.showOnlineStatus = updateDto.showOnlineStatus;
+        if (updateDto.showFollowers !== undefined) safeData.showFollowers = updateDto.showFollowers;
+        if (updateDto.showFollowing !== undefined) safeData.showFollowing = updateDto.showFollowing;
+        if (updateDto.allowTeamInvitations !== undefined) safeData.allowTeamInvitations = updateDto.allowTeamInvitations;
         if (updateDto.theme !== undefined) safeData.theme = updateDto.theme;
         if (updateDto.language !== undefined) safeData.language = updateDto.language;
 
@@ -240,7 +248,7 @@ export class UserService {
             throw new ConflictException('You are already following this user');
         }
 
-        return prisma.follow.create({
+        const follow = await prisma.follow.create({
             data: {
                 followerId,
                 followingId,
@@ -254,8 +262,25 @@ export class UserService {
                         image: true,
                     },
                 },
+                follower: {
+                    select: {
+                        username: true,
+                        displayName: true,
+                    },
+                },
             },
         });
+
+        // Create notification for the followed user
+        await this.notificationService.createNotification({
+            userId: followingId,
+            type: NotificationType.NEW_FOLLOWER,
+            title: 'New Follower',
+            message: `${follow.follower.displayName || follow.follower.username} started following you`,
+            data: { followerId },
+        });
+
+        return follow;
     }
 
     async unfollowUser(followerId: string, followingId: string) {
@@ -283,9 +308,19 @@ export class UserService {
     }
 
     async getFollowers(userId: string, currentUserId: string) {
-        // Privacy check: only allow viewing own followers list
-        if (userId !== currentUserId) {
-            throw new ForbiddenException('You can only view your own followers list');
+        // Get user privacy settings
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { showFollowers: true },
+        });
+
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+
+        // Privacy check: allow if user has public followers list OR viewing own list
+        if (!user.showFollowers && userId !== currentUserId) {
+            throw new ForbiddenException('This followers list is private');
         }
 
         const followers = await prisma.follow.findMany({
@@ -319,9 +354,19 @@ export class UserService {
     }
 
     async getFollowing(userId: string, currentUserId: string) {
-        // Privacy check: only allow viewing own following list
-        if (userId !== currentUserId) {
-            throw new ForbiddenException('You can only view your own following list');
+        // Get user privacy settings
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { showFollowing: true },
+        });
+
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+
+        // Privacy check: allow if user has public following list OR viewing own list
+        if (!user.showFollowing && userId !== currentUserId) {
+            throw new ForbiddenException('This following list is private');
         }
 
         const following = await prisma.follow.findMany({

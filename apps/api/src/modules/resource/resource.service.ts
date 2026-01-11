@@ -15,6 +15,8 @@ import { FilterResourcesDto, ResourceSortOption } from './dtos/filter-resources.
 import { ModerateResourceDto } from './dtos/moderate-resource.dto';
 import { ResourceDescriptionImageService } from './resource-description-image.service';
 import { StorageService } from '../storage/storage.service';
+import { NotificationService } from '../notification/notification.service';
+import { NotificationType } from '@repo/db';
 
 @Injectable()
 export class ResourceService {
@@ -22,6 +24,7 @@ export class ResourceService {
 
         private readonly storage: StorageService,
         private descriptionImageService?: ResourceDescriptionImageService,
+        private readonly notificationService?: NotificationService,
     ) { }
 
     /**
@@ -599,6 +602,29 @@ export class ResourceService {
                 },
             });
         });
+
+        // Notify users who liked this resource if significant changes were made
+        const hasSignificantChanges = updateDto.name || updateDto.description || updateDto.addTags;
+        if (hasSignificantChanges && this.notificationService && resource.ownerUserId) {
+            const likes = await prisma.resourceLike.findMany({
+                where: { resourceId },
+                select: { userId: true },
+            });
+
+            const likeNotifications = likes
+                .filter(like => like.userId !== userId) // Don't notify the person making the update
+                .map(like =>
+                    this.notificationService!.createNotification({
+                        userId: like.userId,
+                        type: NotificationType.LIKED_PROJECT_UPDATE,
+                        title: 'Resource Updated',
+                        message: `${updatedResource?.name} has been updated`,
+                        data: { resourceId, updaterId: userId },
+                    })
+                );
+
+            await Promise.all(likeNotifications);
+        }
 
         return {
             message: 'Resource updated successfully',

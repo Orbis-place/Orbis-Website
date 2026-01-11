@@ -34,11 +34,12 @@ export function CategoryFilter({ selectedCategories, onCategoriesChange, resourc
         loadCategories();
     }, [resourceType]);
 
-    const toggleCategory = (categoryId: string) => {
-        if (selectedCategories.includes(categoryId)) {
-            onCategoriesChange(selectedCategories.filter((id) => id !== categoryId));
+    const toggleCategory = (categoryName: string) => {
+        const normalizedName = categoryName.toLowerCase();
+        if (selectedCategories.includes(normalizedName)) {
+            onCategoriesChange(selectedCategories.filter((name) => name !== normalizedName));
         } else {
-            onCategoriesChange([...selectedCategories, categoryId]);
+            onCategoriesChange([...selectedCategories, normalizedName]);
         }
     };
 
@@ -54,8 +55,8 @@ export function CategoryFilter({ selectedCategories, onCategoriesChange, resourc
                 categories.map((category) => (
                     <button
                         key={category.id}
-                        onClick={() => toggleCategory(category.id)}
-                        className={`flex items-center px-[15px] py-2.5 rounded-full transition-all ${selectedCategories.includes(category.id)
+                        onClick={() => toggleCategory(category.name)}
+                        className={`flex items-center px-[15px] py-2.5 rounded-full transition-all ${selectedCategories.includes(category.name.toLowerCase())
                             ? 'bg-[#032125] text-[#109EB1]'
                             : 'bg-transparent text-[#C7F4FA] hover:bg-[#032125]/50'
                             }`}

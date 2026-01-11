@@ -95,14 +95,15 @@ export default function ResourceLayoutContent({ children }: { children: ReactNod
     const authorDisplay = resource.ownerTeam?.displayName || resource.ownerUser?.displayName || author;
 
     const tags = resource.tags && resource.tags.length > 0
-        ? resource.tags.map(t => t.tag.name).slice(0, 5)
-        : resource.categories
-            ? resource.categories.map((c: any) => c.category.name).slice(0, 5)
-            : [];
+        ? resource.tags.map(t => t.tag.name)
+        : [];
+
+    const categories = resource.categories && resource.categories.length > 0
+        ? resource.categories.map((c: any) => c.category.name)
+        : [];
 
     console.log('Resource tags:', resource.tags);
     console.log('Resource categories:', resource.categories);
-    console.log('Mapped tags:', tags);
 
     // Map external links with appropriate icons based on type
     const getExternalLinkIcon = (type: string) => {
@@ -173,6 +174,7 @@ export default function ResourceLayoutContent({ children }: { children: ReactNod
                 downloads={formatNumber(resource.downloadCount)}
                 likes={likeCount}
                 tags={tags}
+                categories={categories}
                 type={type! as 'mod' | 'plugin' | 'world' | 'prefab' | 'asset-pack' | 'data-pack' | 'modpack' | 'tool'}
                 slug={resource.slug}
                 author={author}

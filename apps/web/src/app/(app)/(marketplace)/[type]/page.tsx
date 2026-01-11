@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect, use, useMemo } from 'react';
 import Link from 'next/link';
 import { Icon } from '@iconify/react';
-import { notFound } from 'next/navigation';
+import { notFound, useSearchParams, useRouter } from 'next/navigation';
 import type { FilterOption, ViewMode, MarketplaceItem } from '@/components/marketplace';
 import {
     FilterSidebar,
@@ -38,10 +38,72 @@ export default function MarketplacePage({ params }: { params: Promise<{ type: st
     const [error, setError] = useState<string | null>(null);
     const [sortBy, setSortBy] = useState<ResourceSortOption>(ResourceSortOption.DATE);
 
-    // New filter states
-    const [selectedTags, setSelectedTags] = useState<string[]>([]);
-    const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-    const [selectedVersions, setSelectedVersions] = useState<string[]>([]);
+    const searchParams = useSearchParams();
+    const router = useRouter();
+
+    // Derive filter values directly from URL (source of truth for fetching)
+    const urlTags = useMemo(() => {
+        const param = searchParams.get('tags');
+        return param ? param.split(',').filter(Boolean) : [];
+    }, [searchParams]);
+
+    const urlCategories = useMemo(() => {
+        const param = searchParams.get('categories');
+        return param ? param.split(',').filter(Boolean) : [];
+    }, [searchParams]);
+
+    const urlVersions = useMemo(() => {
+        const param = searchParams.get('versions');
+        return param ? param.split(',').filter(Boolean) : [];
+    }, [searchParams]);
+
+    // Local state for UI filter components (synced from URL)
+    const [selectedTags, setSelectedTags] = useState<string[]>(urlTags);
+    const [selectedCategories, setSelectedCategories] = useState<string[]>(urlCategories);
+    const [selectedVersions, setSelectedVersions] = useState<string[]>(urlVersions);
+
+    // Sync local state when URL changes (for Link navigation)
+    useEffect(() => {
+        setSelectedTags(urlTags);
+        setSelectedCategories(urlCategories);
+        setSelectedVersions(urlVersions);
+    }, [urlTags, urlCategories, urlVersions]);
+
+    // Update URL when user changes filters via UI
+    const updateUrlFromFilters = (tags: string[], categories: string[], versions: string[]) => {
+        const params = new URLSearchParams();
+
+        if (tags.length > 0) {
+            params.set('tags', tags.join(','));
+        }
+        if (categories.length > 0) {
+            params.set('categories', categories.join(','));
+        }
+        if (versions.length > 0) {
+            params.set('versions', versions.join(','));
+        }
+
+        const queryString = params.toString();
+        const newUrl = queryString ? `?${queryString}` : window.location.pathname;
+
+        router.replace(newUrl, { scroll: false });
+    };
+
+    // Wrapper functions for filter changes that also update URL
+    const handleTagsChange = (newTags: string[]) => {
+        setSelectedTags(newTags);
+        updateUrlFromFilters(newTags, selectedCategories, selectedVersions);
+    };
+
+    const handleCategoriesChange = (newCategories: string[]) => {
+        setSelectedCategories(newCategories);
+        updateUrlFromFilters(selectedTags, newCategories, selectedVersions);
+    };
+
+    const handleVersionsChange = (newVersions: string[]) => {
+        setSelectedVersions(newVersions);
+        updateUrlFromFilters(selectedTags, selectedCategories, newVersions);
+    };
 
     // Debounce search query
     const debouncedSearchQuery = useDebounce(searchQuery, 500);
@@ -49,7 +111,7 @@ export default function MarketplacePage({ params }: { params: Promise<{ type: st
     // Reset to page 1 when filters change
     useEffect(() => {
         setCurrentPage(1);
-    }, [selectedTags, selectedCategories, selectedVersions, debouncedSearchQuery, sortBy]);
+    }, [urlTags, urlCategories, urlVersions, debouncedSearchQuery, sortBy]);
 
     // Validate resource type
     if (!isValidResourceType(type)) {
@@ -68,7 +130,7 @@ export default function MarketplacePage({ params }: { params: Promise<{ type: st
         { id: 'last-updated', label: 'Last Updated' },
     ];
 
-    // Fetch resources from API
+    // Fetch resources from API - use URL values directly for consistent behavior
     useEffect(() => {
         const loadResources = async () => {
             setIsLoading(true);
@@ -81,9 +143,9 @@ export default function MarketplacePage({ params }: { params: Promise<{ type: st
                     sortBy,
                     page: currentPage,
                     limit: 12,
-                    tags: selectedTags.length > 0 ? selectedTags : undefined,
-                    categories: selectedCategories.length > 0 ? selectedCategories : undefined,
-                    versions: selectedVersions.length > 0 ? selectedVersions : undefined,
+                    tags: urlTags.length > 0 ? urlTags.map(t => t.toLowerCase()) : undefined,
+                    categories: urlCategories.length > 0 ? urlCategories.map(c => c.toLowerCase()) : undefined,
+                    versions: urlVersions.length > 0 ? urlVersions : undefined,
                 });
 
                 setResources(response.data);
@@ -99,7 +161,7 @@ export default function MarketplacePage({ params }: { params: Promise<{ type: st
         };
 
         loadResources();
-    }, [backendType, debouncedSearchQuery, sortBy, currentPage, selectedTags, selectedCategories, selectedVersions]);
+    }, [backendType, debouncedSearchQuery, sortBy, currentPage, urlTags, urlCategories, urlVersions]);
 
     // Map backend resource to MarketplaceItem
     const mapToMarketplaceItem = (resource: Resource): MarketplaceItem => {
@@ -247,7 +309,7 @@ export default function MarketplacePage({ params }: { params: Promise<{ type: st
                         <FilterCard title="Tags" defaultExpanded={true}>
                             <TagFilter
                                 selectedTags={selectedTags}
-                                onTagsChange={setSelectedTags}
+                                onTagsChange={handleTagsChange}
                                 resourceType={backendType}
                             />
                         </FilterCard>
@@ -255,7 +317,7 @@ export default function MarketplacePage({ params }: { params: Promise<{ type: st
                         <FilterCard title="Categories" defaultExpanded={true}>
                             <CategoryFilter
                                 selectedCategories={selectedCategories}
-                                onCategoriesChange={setSelectedCategories}
+                                onCategoriesChange={handleCategoriesChange}
                                 resourceType={backendType}
                             />
                         </FilterCard>
@@ -263,7 +325,7 @@ export default function MarketplacePage({ params }: { params: Promise<{ type: st
                         <FilterCard title="Hytale Version" defaultExpanded={true}>
                             <VersionFilter
                                 selectedVersions={selectedVersions}
-                                onVersionsChange={setSelectedVersions}
+                                onVersionsChange={handleVersionsChange}
                             />
                         </FilterCard>
                     </div>

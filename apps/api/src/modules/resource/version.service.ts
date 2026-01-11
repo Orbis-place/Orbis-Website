@@ -14,7 +14,8 @@ import {
     UpdateChangelogDto,
     RejectVersionDto,
 } from './dtos/version.dto';
-import { prisma, VersionStatus, FileType, UserRole } from '@repo/db';
+import { prisma, VersionStatus, FileType, UserRole, NotificationType } from '@repo/db';
+import { NotificationService } from '../notification/notification.service';
 import * as crypto from 'crypto';
 import archiver from 'archiver';
 import { Response } from 'express';
@@ -25,6 +26,7 @@ export class VersionService {
         private readonly storageService: StorageService,
         private readonly redisService: RedisService,
         private readonly changelogImageService: VersionChangelogImageService,
+        private readonly notificationService: NotificationService,
     ) { }
 
     // ============================================
@@ -512,6 +514,7 @@ export class VersionService {
      * Approve a pending version (PENDING -> APPROVED) - Moderators only
      */
     async approve(resourceId: string, versionId: string, userId: string) {
+        console.log('[VersionService] approve() called:', { resourceId, versionId, userId });
         await this.checkModeratorPermission(userId);
 
         const version = await prisma.resourceVersion.findFirst({
@@ -542,15 +545,83 @@ export class VersionService {
             where: { id: versionId },
             data: updateData,
             include: {
-                compatibleVersions: {
-                    include: {
-                        hytaleVersion: true,
-                    },
-                },
+                compatibleVersions: { include: { hytaleVersion: true } },
                 files: true,
                 primaryFile: true,
+                resource: {
+                    select: {
+                        id: true,
+                        name: true,
+                        ownerUserId: true,
+                        ownerTeamId: true,
+                        ownerTeam: {
+                            select: {
+                                id: true,
+                                name: true,
+                                ownerId: true,
+                            },
+                        },
+                    },
+                },
             },
         });
+
+        console.log('[VERSION APPROVAL] Version approved:', {
+            versionId,
+            resourceId,
+            ownerUserId: updatedVersion.resource.ownerUserId,
+            ownerTeamId: updatedVersion.resource.ownerTeamId,
+            teamOwnerId: updatedVersion.resource.ownerTeam?.ownerId,
+            resourceName: updatedVersion.resource.name,
+        });
+
+        // Determine notification recipient (team owner or resource owner)
+        const notificationRecipientId = updatedVersion.resource.ownerTeamId
+            ? updatedVersion.resource.ownerTeam?.ownerId
+            : updatedVersion.resource.ownerUserId;
+
+        // Create notification for resource/team owner
+        if (notificationRecipientId) {
+            console.log('[NOTIFICATION] Creating VERSION_APPROVED notification for user:', notificationRecipientId);
+            try {
+                await this.notificationService.createNotification({
+                    userId: notificationRecipientId,
+                    type: NotificationType.VERSION_APPROVED,
+                    title: 'Version Approved',
+                    message: `Your version ${updatedVersion.versionNumber} for ${updatedVersion.resource.name} has been approved`,
+                    data: { resourceId, versionId },
+                });
+                console.log('[NOTIFICATION] VERSION_APPROVED notification created successfully');
+            } catch (error) {
+                console.error('[NOTIFICATION] Failed to create VERSION_APPROVED notification:', error);
+            }
+
+            // Use creator ID for follower notifications
+            const creatorId = notificationRecipientId;
+
+            // Notify followers about new creator upload
+            const followers = await prisma.follow.findMany({
+                where: { followingId: creatorId },
+                select: { followerId: true },
+            });
+
+            console.log('[NOTIFICATION] Found', followers.length, 'followers to notify for creator:', creatorId);
+
+            const followerNotifications = followers.map(follower =>
+                this.notificationService!.createNotification({
+                    userId: follower.followerId,
+                    type: NotificationType.NEW_CREATOR_UPLOAD,
+                    title: 'New Upload',
+                    message: `${updatedVersion.resource.name} has a new version: ${updatedVersion.versionNumber}`,
+                    data: { resourceId, versionId, creatorId },
+                })
+            );
+
+            await Promise.all(followerNotifications);
+            console.log('[NOTIFICATION] Created', followerNotifications.length, 'follower notifications');
+        } else {
+            console.log('[NOTIFICATION] No ownerUserId or team owner found, skipping notifications');
+        }
 
         // Update resource lastActivityAt
         await prisma.resource.update({
@@ -592,15 +663,42 @@ export class VersionService {
                 rejectionReason: rejectDto.reason,
             },
             include: {
-                compatibleVersions: {
-                    include: {
-                        hytaleVersion: true,
-                    },
-                },
+                compatibleVersions: { include: { hytaleVersion: true } },
                 files: true,
                 primaryFile: true,
+                resource: {
+                    select: {
+                        id: true,
+                        name: true,
+                        ownerUserId: true,
+                        ownerTeamId: true,
+                        ownerTeam: {
+                            select: {
+                                id: true,
+                                name: true,
+                                ownerId: true,
+                            },
+                        },
+                    },
+                },
             },
         });
+
+        // Determine notification recipient (team owner or resource owner)
+        const notificationRecipientId = updatedVersion.resource.ownerTeamId
+            ? updatedVersion.resource.ownerTeam?.ownerId
+            : updatedVersion.resource.ownerUserId;
+
+        // Create notification for resource/team owner
+        if (notificationRecipientId) {
+            await this.notificationService.createNotification({
+                userId: notificationRecipientId,
+                type: NotificationType.VERSION_REJECTED,
+                title: 'Version Rejected',
+                message: `Your version ${updatedVersion.versionNumber} for ${updatedVersion.resource.name} was rejected: ${rejectDto.reason}`,
+                data: { resourceId, versionId, reason: rejectDto.reason },
+            });
+        }
 
         return {
             message: 'Version rejected',

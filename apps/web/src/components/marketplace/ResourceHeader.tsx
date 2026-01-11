@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Download, Heart, MoreVertical, Tag, Calendar, Flag, Copy } from 'lucide-react';
 import { Icon } from '@iconify/react';
 import { EntityAvatar } from '@/components/EntityAvatar';
+import { getResourceTypeBySingular } from '@/config/resource-types';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -24,6 +25,7 @@ export interface ResourceHeaderProps {
     downloads: string;
     likes: number;
     tags: string[];
+    categories: string[];
     type: string;
     slug: string;
     author: string;
@@ -48,6 +50,7 @@ export default function ResourceHeader({
     downloads,
     likes,
     tags,
+    categories,
     type,
     slug,
     author,
@@ -226,20 +229,42 @@ export default function ResourceHeader({
                         </div>
                     </div>
 
-                    {/* Tags */}
-                    <div className="flex items-center gap-2 flex-1">
-                        <Tag className="w-5 h-5 text-[#C7F4FA]/50" />
-                        <div className="flex flex-wrap gap-2">
-                            {tags.map((tag, i) => (
-                                <span
-                                    key={i}
-                                    className="px-3 py-1.5 bg-[#06363D] border border-[#084B54] rounded-full text-xs font-hebden font-semibold text-[#C7F4FA] hover:bg-[#084B54] transition-colors cursor-pointer"
-                                >
-                                    {tag}
-                                </span>
-                            ))}
+                    {/* Tags and Categories */}
+                    {(tags.length > 0 || categories.length > 0) && (
+                        <div className="flex items-center gap-2 flex-1">
+                            <Tag className="w-5 h-5 text-[#C7F4FA]/50" />
+                            <div className="flex flex-wrap gap-2">
+                                {/* Categories - displayed with cyan accent */}
+                                {categories.slice(0, 5).map((category, i) => {
+                                    const typeConfig = getResourceTypeBySingular(type);
+                                    const pluralPath = typeConfig?.plural || type;
+                                    return (
+                                        <Link
+                                            key={`category-${i}`}
+                                            href={`/${pluralPath}?categories=${encodeURIComponent(category.toLowerCase())}`}
+                                            className="px-3 py-1.5 bg-[#06363D] border border-[#084B54] rounded-full text-xs font-hebden font-semibold text-[#C7F4FA] hover:bg-[#084B54] transition-colors cursor-pointer"
+                                        >
+                                            {category}
+                                        </Link>
+                                    );
+                                })}
+                                {/* Tags - displayed with cyan accent */}
+                                {tags.slice(0, 5).map((tag, i) => {
+                                    const typeConfig = getResourceTypeBySingular(type);
+                                    const pluralPath = typeConfig?.plural || type;
+                                    return (
+                                        <Link
+                                            key={`tag-${i}`}
+                                            href={`/${pluralPath}?tags=${encodeURIComponent(tag.toLowerCase())}`}
+                                            className="px-3 py-1.5 bg-[#06363D] border border-[#084B54] rounded-full text-xs font-hebden font-semibold text-[#C7F4FA] hover:bg-[#084B54] transition-colors cursor-pointer"
+                                        >
+                                            {tag}
+                                        </Link>
+                                    );
+                                })}
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </div>
 
                 {/* Primary action buttons - Mobile only */}

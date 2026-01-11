@@ -1,11 +1,12 @@
 import { ForbiddenException, Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 
-import { prisma } from '@repo/db';
+import { prisma, NotificationType } from '@repo/db';
+import { NotificationService } from '../notification/notification.service';
 import { CreateShowcaseCommentDto } from './dtos/create-showcase-comment.dto';
 
 @Injectable()
 export class ShowcaseCommentService {
-    constructor() { }
+    constructor(private readonly notificationService: NotificationService) { }
 
     /**
      * Create a comment on a showcase post (or reply to another comment)
@@ -62,6 +63,17 @@ export class ShowcaseCommentService {
                 },
             }),
         ]);
+
+        // Create notification for post author (if not commenting on own post)
+        if (post.authorId !== userId) {
+            await this.notificationService.createNotification({
+                userId: post.authorId,
+                type: NotificationType.SHOWCASE_COMMENT,
+                title: 'New Comment',
+                message: `${comment.user.displayName || comment.user.username} commented on your showcase post`,
+                data: { postId, commentId: comment.id, commenterId: userId },
+            });
+        }
 
         return comment;
     }

@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Heart, Download, Star, Calendar } from 'lucide-react';
 import { ViewMode } from './ViewSwitcher';
 import { EntityAvatar } from '@/components/EntityAvatar';
@@ -32,7 +32,15 @@ interface MarketplaceCardProps {
 }
 
 export default function MarketplaceCard({ item, viewMode }: MarketplaceCardProps) {
+    const router = useRouter();
     const itemType = item.type || 'Item';
+
+    const handleAuthorClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const authorPath = item.isOwnedByTeam ? `/team/${item.author}` : `/user/${item.author}`;
+        router.push(authorPath);
+    };
 
     // Row View - Full width list
     if (viewMode === 'row') {
@@ -61,13 +69,12 @@ export default function MarketplaceCard({ item, viewMode }: MarketplaceCardProps
                     <h2 className="font-hebden font-semibold text-xl leading-6 text-[#C7F4FA] mb-1">
                         {item.title}
                     </h2>
-                    <Link
-                        href={item.isOwnedByTeam ? `/team/${item.author}` : `/user/${item.author}`}
-                        className="font-hebden font-semibold text-sm leading-4 text-[#C7F4FA]/50 hover:text-[#109EB1] transition-colors"
-                        onClick={(e) => e.stopPropagation()}
+                    <span
+                        className="font-hebden font-semibold text-sm leading-4 text-[#C7F4FA]/50 hover:text-[#109EB1] transition-colors cursor-pointer"
+                        onClick={handleAuthorClick}
                     >
                         by <span className="text-[#109EB1] hover:underline">{item?.author || item.authorDisplay}</span>
-                    </Link>
+                    </span>
                 </div>
 
                 {/* Description */}
@@ -166,13 +173,12 @@ export default function MarketplaceCard({ item, viewMode }: MarketplaceCardProps
                     <h3 className="font-hebden font-semibold text-sm sm:text-lg leading-5 sm:leading-6 text-[#C7F4FA] mb-1 break-words">
                         {item.title}
                     </h3>
-                    <Link
-                        href={item.isOwnedByTeam ? `/team/${item.author}` : `/user/${item.author}`}
-                        className="font-hebden font-semibold text-xs leading-[14px] text-[#C7F4FA]/50 hover:text-[#109EB1] transition-colors"
-                        onClick={(e) => e.stopPropagation()}
+                    <span
+                        className="font-hebden font-semibold text-xs leading-[14px] text-[#C7F4FA]/50 hover:text-[#109EB1] transition-colors cursor-pointer"
+                        onClick={handleAuthorClick}
                     >
                         by <span className="text-[#109EB1] hover:underline">{item?.author || item.authorDisplay}</span>
-                    </Link>
+                    </span>
 
                     {/* Stats */}
                     <div className="flex justify-between items-center mt-3 pt-3 border-t border-[#084B54]">
@@ -219,13 +225,12 @@ export default function MarketplaceCard({ item, viewMode }: MarketplaceCardProps
                             <h3 className="font-hebden font-semibold text-base leading-5 text-[#C7F4FA] truncate">
                                 {item.title}
                             </h3>
-                            <Link
-                                href={item.isOwnedByTeam ? `/team/${item.author}` : `/user/${item.author}`}
-                                className="font-hebden font-semibold text-xs leading-4 text-[#C7F4FA]/50 hover:text-[#109EB1] transition-colors"
-                                onClick={(e) => e.stopPropagation()}
+                            <span
+                                className="font-hebden font-semibold text-xs leading-4 text-[#C7F4FA]/50 hover:text-[#109EB1] transition-colors cursor-pointer"
+                                onClick={handleAuthorClick}
                             >
                                 by <span className="text-[#109EB1] hover:underline">{item?.author || item.authorDisplay}</span>
-                            </Link>
+                            </span>
                         </div>
                     </div>
 

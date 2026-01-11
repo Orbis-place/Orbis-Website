@@ -1,12 +1,14 @@
 import { Injectable, ForbiddenException, NotFoundException, BadRequestException } from '@nestjs/common';
-import { prisma, UserRole, AccountStatus, ResourceStatus, ServerStatus, ReportStatus } from '@repo/db';
+import { prisma, UserRole, AccountStatus, ResourceStatus, ServerStatus, ReportStatus, NotificationType } from '@repo/db';
 import { FilterUsersDto } from './dtos/filter-users.dto';
 import { UpdateUserRoleDto } from './dtos/update-user-role.dto';
 import { BanUserDto } from './dtos/ban-user.dto';
 import { UpdateUserStatusDto } from './dtos/update-user-status.dto';
+import { NotificationService } from '../notification/notification.service';
 
 @Injectable()
 export class AdminService {
+    constructor(private readonly notificationService: NotificationService) { }
     // ============================================
     // STATISTICS
     // ============================================
@@ -431,11 +433,21 @@ export class AdminService {
             throw new ForbiddenException('Access denied');
         }
 
-        // Get the version with resource info
+        // Get the version with resource info (including team owner if applicable)
         const version = await prisma.resourceVersion.findUnique({
             where: { id: versionId },
             include: {
-                resource: true,
+                resource: {
+                    include: {
+                        ownerTeam: {
+                            select: {
+                                id: true,
+                                name: true,
+                                ownerId: true,
+                            },
+                        },
+                    },
+                },
             },
         });
 
@@ -486,6 +498,60 @@ export class AdminService {
                 });
             }
 
+            // Determine who should receive the notification:
+            // - If resource is team-owned: notify team owner
+            // - If resource is user-owned: notify resource owner
+            const notificationRecipientId = version.resource.ownerTeamId
+                ? version.resource.ownerTeam?.ownerId
+                : version.resource.ownerUserId;
+
+            console.log('[AdminService] Notification recipient:', {
+                resourceId: version.resourceId,
+                ownerUserId: version.resource.ownerUserId,
+                ownerTeamId: version.resource.ownerTeamId,
+                teamOwnerId: version.resource.ownerTeam?.ownerId,
+                finalRecipient: notificationRecipientId,
+            });
+
+            // Create notification for resource/team owner
+            if (notificationRecipientId) {
+                console.log('[AdminService] Creating VERSION_APPROVED notification for user:', notificationRecipientId);
+                await this.notificationService.createNotification({
+                    userId: notificationRecipientId,
+                    type: NotificationType.VERSION_APPROVED,
+                    title: 'Version Approved',
+                    message: `Your version ${version.versionNumber} for ${version.resource.name} has been approved`,
+                    data: { resourceId: version.resourceId, versionId },
+                });
+
+                // For follower notifications, use the actual creator:
+                // - For team resources: followers of team owner
+                // - For user resources: followers of user owner
+                const creatorId = notificationRecipientId;
+
+                // Notify followers about new creator upload
+                const followers = await prisma.follow.findMany({
+                    where: { followingId: creatorId },
+                    select: { followerId: true },
+                });
+
+                console.log('[AdminService] Found', followers.length, 'followers to notify for creator:', creatorId);
+
+                const followerNotifications = followers.map(follower =>
+                    this.notificationService.createNotification({
+                        userId: follower.followerId,
+                        type: NotificationType.NEW_CREATOR_UPLOAD,
+                        title: 'New Upload',
+                        message: `${version.resource.name} has a new version: ${version.versionNumber}`,
+                        data: { resourceId: version.resourceId, versionId, creatorId },
+                    })
+                );
+
+                await Promise.all(followerNotifications);
+            } else {
+                console.log('[AdminService] No recipient found for notification (orphaned resource?)');
+            }
+
             return {
                 success: true,
                 message: isFirstVersion
@@ -498,13 +564,32 @@ export class AdminService {
             }
 
             // Update version status with rejection
-            // Note: rejection reason should be communicated to user separately
             await prisma.resourceVersion.update({
                 where: { id: versionId },
                 data: {
                     status: ResourceStatus.REJECTED,
+                    rejectionReason: reason,
                 },
             });
+
+            // Determine notification recipient (team owner or resource owner)
+            const notificationRecipientId = version.resource.ownerTeamId
+                ? version.resource.ownerTeam?.ownerId
+                : version.resource.ownerUserId;
+
+            // Create notification for resource/team owner
+            if (notificationRecipientId) {
+                console.log('[AdminService] Creating VERSION_REJECTED notification for user:', notificationRecipientId);
+                await this.notificationService.createNotification({
+                    userId: notificationRecipientId,
+                    type: NotificationType.VERSION_REJECTED,
+                    title: 'Version Rejected',
+                    message: `Your version ${version.versionNumber} for ${version.resource.name} was rejected: ${reason}`,
+                    data: { resourceId: version.resourceId, versionId, reason },
+                });
+            } else {
+                console.log('[AdminService] No recipient found for rejection notification (orphaned resource?)');
+            }
 
             // If this was the first version and resource is still PENDING, 
             // the resource stays PENDING (waiting for a new version)

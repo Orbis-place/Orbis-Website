@@ -502,13 +502,23 @@ export class TeamService {
             throw new ForbiddenException('You do not have permission to invite members');
         }
 
-        // Check if invitee exists
+        // Check if invitee exists and get their privacy settings
         const invitee = await prisma.user.findUnique({
             where: { id: createDto.inviteeId },
+            select: {
+                id: true,
+                username: true,
+                allowTeamInvitations: true,
+            },
         });
 
         if (!invitee) {
             throw new NotFoundException('User not found');
+        }
+
+        // Check if invitee allows team invitations
+        if (!invitee.allowTeamInvitations) {
+            throw new ForbiddenException('This user has disabled team invitations');
         }
 
         // Cannot invite yourself

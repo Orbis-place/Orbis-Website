@@ -5,12 +5,13 @@ import {
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
-import { prisma } from '@repo/db';
+import { prisma, NotificationType } from '@repo/db';
+import { NotificationService } from '../notification/notification.service';
 import { CreateCollectionDto, UpdateCollectionDto } from './dtos/collection.dto';
 
 @Injectable()
 export class CollectionService {
-    constructor() { }
+    constructor(private readonly notificationService: NotificationService) { }
 
     /**
      * Get or create the default collection for a user
@@ -356,6 +357,22 @@ export class CollectionService {
                 resourceId,
             },
         });
+
+        // Create notification for resource owner if collection is public
+        if (collection.isPublic && resource.ownerUserId && resource.ownerUserId !== userId) {
+            const collectionOwner = await prisma.user.findUnique({
+                where: { id: userId },
+                select: { username: true, displayName: true },
+            });
+
+            await this.notificationService.createNotification({
+                userId: resource.ownerUserId,
+                type: NotificationType.COLLECTION_ADDITION,
+                title: 'Resource Added to Collection',
+                message: `${collectionOwner?.displayName || collectionOwner?.username} added ${resource.name} to their collection "${collection.name}"`,
+                data: { resourceId, collectionId, collectorId: userId },
+            });
+        }
 
         return {
             message: 'Resource added to collection',

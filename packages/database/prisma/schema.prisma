@@ -118,6 +118,17 @@ enum ShowcaseMediaType {
   VIDEO
 }
 
+enum NotificationType {
+  LIKED_PROJECT_UPDATE    // Resource you liked got updated
+  NEW_CREATOR_UPLOAD      // Creator you follow uploaded new resource
+  NEW_FOLLOWER            // Someone followed you
+  VERSION_APPROVED        // Resource version approved
+  VERSION_REJECTED        // Resource version rejected
+  COLLECTION_ADDITION     // Resource added to collection
+  SHOWCASE_LIKE           // Someone liked your showcase post
+  SHOWCASE_COMMENT        // Someone commented on showcase post
+}
+
 // ============================================
 // USER MODEL
 // ============================================
@@ -160,9 +171,20 @@ model User {
   marketingEmails    Boolean @default(false)
   showEmail          Boolean @default(false)
   showLocation       Boolean @default(true)
-  showOnlineStatus   Boolean @default(true)
-  theme              String  @default("dark")
+  showOnlineStatus     Boolean @default(true)
+  showFollowers        Boolean @default(true)
+  showFollowing        Boolean @default(true)
+  allowTeamInvitations Boolean @default(true)
+  theme                String  @default("dark")
   language           String  @default("en")
+
+  // Notification preferences
+  notifLikedProjectUpdates  Boolean @default(true)
+  notifNewCreatorUploads    Boolean @default(true)
+  notifNewFollowers         Boolean @default(true)
+  notifVersionStatus        Boolean @default(true)
+  notifCollectionAdditions  Boolean @default(true)
+  notifShowcaseInteractions Boolean @default(true)
 
   // Activity tracking
   lastLoginAt  DateTime?
@@ -221,6 +243,9 @@ model User {
 
   // Resource Collections
   resourceCollections  UserResourceCollection[] @relation("UserCollections")
+
+  // Notifications
+  notifications Notification[] @relation("UserNotifications")
 
   @@index([email])
   @@index([username])
@@ -1359,6 +1384,28 @@ model UserResourceCollectionItem {
   @@index([collectionId])
   @@index([resourceId])
   @@map("user_resource_collection_items")
+}
+
+// ============================================
+// NOTIFICATIONS
+// ============================================
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  message   String           @db.Text
+  data      Json?            // Additional data (resource ID, user ID, etc.)
+  read      Boolean          @default(false)
+  createdAt DateTime         @default(now())
+  
+  user User @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+  @@index([userId, createdAt])
+  @@index([createdAt])
+  @@map("notifications")
 }
 
 // ============================================================================

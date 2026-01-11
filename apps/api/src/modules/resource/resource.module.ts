@@ -22,9 +22,10 @@ import { CollectionController } from './collection.controller';
 import { CollectionService } from './collection.service';
 import { StorageModule } from '../storage/storage.module';
 import { RedisModule } from '../../common/redis.module';
+import { NotificationModule } from '../notification/notification.module';
 
 @Module({
-    imports: [StorageModule, RedisModule],
+    imports: [StorageModule, RedisModule, NotificationModule],
     controllers: [
         ResourceController,
         ResourceTagController,

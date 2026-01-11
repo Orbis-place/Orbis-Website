@@ -51,11 +51,12 @@ export function TagFilter({ selectedTags, onTagsChange, resourceType }: TagFilte
         loadTags();
     }, [debouncedSearchQuery, resourceType]);
 
-    const toggleTag = (tagId: string) => {
-        if (selectedTags.includes(tagId)) {
-            onTagsChange(selectedTags.filter((id) => id !== tagId));
+    const toggleTag = (tagName: string) => {
+        const normalizedName = tagName.toLowerCase();
+        if (selectedTags.includes(normalizedName)) {
+            onTagsChange(selectedTags.filter((name) => name !== normalizedName));
         } else {
-            onTagsChange([...selectedTags, tagId]);
+            onTagsChange([...selectedTags, normalizedName]);
         }
     };
 
@@ -85,8 +86,8 @@ export function TagFilter({ selectedTags, onTagsChange, resourceType }: TagFilte
                     tags.map((tag) => (
                         <button
                             key={tag.id}
-                            onClick={() => toggleTag(tag.id)}
-                            className={`flex items-center px-[15px] py-2.5 rounded-full transition-all ${selectedTags.includes(tag.id)
+                            onClick={() => toggleTag(tag.name)}
+                            className={`flex items-center px-[15px] py-2.5 rounded-full transition-all ${selectedTags.includes(tag.name.toLowerCase())
                                 ? 'bg-[#032125] text-[#109EB1]'
                                 : 'bg-transparent text-[#C7F4FA] hover:bg-[#032125]/50'
                                 }`}

@@ -11,8 +11,10 @@ import { ShowcaseCommentService } from './showcase-comment.service';
 import { ShowcaseMediaService } from './showcase-media.service';
 
 import { StorageService } from '../storage/storage.service';
+import { NotificationModule } from '../notification/notification.module';
 
 @Module({
+    imports: [NotificationModule],
     controllers: [
         ShowcaseController,
         ShowcaseLikeController,

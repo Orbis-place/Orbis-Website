@@ -129,29 +129,6 @@ export class VersionController {
         return this.versionService.resubmit(resourceId, versionId, session.user.id);
     }
 
-    @Post(':versionId/approve')
-    @ApiBearerAuth()
-    @ApiOperation({ summary: 'Approve a PENDING version (Moderators only)' })
-    async approve(
-        @Param('resourceId') resourceId: string,
-        @Param('versionId') versionId: string,
-        @Session() session: UserSession,
-    ) {
-        return this.versionService.approve(resourceId, versionId, session.user.id);
-    }
-
-    @Post(':versionId/reject')
-    @ApiBearerAuth()
-    @ApiOperation({ summary: 'Reject a PENDING version (Moderators only)' })
-    async reject(
-        @Param('resourceId') resourceId: string,
-        @Param('versionId') versionId: string,
-        @Session() session: UserSession,
-        @Body() rejectDto: RejectVersionDto,
-    ) {
-        return this.versionService.reject(resourceId, versionId, session.user.id, rejectDto);
-    }
-
     // ============================================
     // VERSION FILES
     // ============================================

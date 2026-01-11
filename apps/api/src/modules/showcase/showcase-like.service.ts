@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-
-import { prisma } from '@repo/db';
+import { prisma, NotificationType } from '@repo/db';
+import { NotificationService } from '../notification/notification.service';
 
 @Injectable()
 export class ShowcaseLikeService {
-    constructor() { }
+    constructor(private readonly notificationService: NotificationService) { }
 
     /**
      * Like a showcase post
@@ -51,6 +51,22 @@ export class ShowcaseLikeService {
                 },
             }),
         ]);
+
+        // Create notification for post author (if not liking own post)
+        if (post.authorId !== userId) {
+            const liker = await prisma.user.findUnique({
+                where: { id: userId },
+                select: { username: true, displayName: true },
+            });
+
+            await this.notificationService.createNotification({
+                userId: post.authorId,
+                type: NotificationType.SHOWCASE_LIKE,
+                title: 'New Like',
+                message: `${liker?.displayName || liker?.username} liked your showcase post`,
+                data: { postId, likerId: userId },
+            });
+        }
 
         return {
             message: 'Post liked successfully',

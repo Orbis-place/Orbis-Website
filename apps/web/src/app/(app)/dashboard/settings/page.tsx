@@ -15,8 +15,8 @@ const MAX_API_KEYS = 5;
 
 const settingsSections = [
   { id: 'account', name: 'Account', icon: 'mdi:account' },
-  // { id: 'notifications', name: 'Notifications', icon: 'mdi:bell' },
-  // { id: 'privacy', name: 'Privacy', icon: 'mdi:shield-account' },
+  { id: 'privacy', name: 'Privacy', icon: 'mdi:shield-account' },
+  { id: 'notifications', name: 'Notifications', icon: 'mdi:bell' },
   { id: 'security', name: 'Security', icon: 'mdi:lock' },
   { id: 'developer', name: 'Developer', icon: 'mdi:code-braces' },
 ];
@@ -26,6 +26,16 @@ interface User {
   username: string;
   email: string;
   displayName?: string;
+  showFollowers: boolean;
+  showFollowing: boolean;
+  allowTeamInvitations: boolean;
+  // Notification preferences
+  notifLikedProjectUpdates: boolean;
+  notifNewCreatorUploads: boolean;
+  notifNewFollowers: boolean;
+  notifVersionStatus: boolean;
+  notifCollectionAdditions: boolean;
+  notifShowcaseInteractions: boolean;
 }
 
 interface ApiKey {
@@ -61,6 +71,21 @@ export default function SettingsPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [keyToDelete, setKeyToDelete] = useState<string | null>(null);
 
+  // Privacy settings state
+  const [showFollowers, setShowFollowers] = useState(true);
+  const [showFollowing, setShowFollowing] = useState(true);
+  const [allowTeamInvitations, setAllowTeamInvitations] = useState(true);
+  const [isSavingPrivacy, setIsSavingPrivacy] = useState(false);
+
+  // Notification preferences state
+  const [notifLikedProjectUpdates, setNotifLikedProjectUpdates] = useState(true);
+  const [notifNewCreatorUploads, setNotifNewCreatorUploads] = useState(true);
+  const [notifNewFollowers, setNotifNewFollowers] = useState(true);
+  const [notifVersionStatus, setNotifVersionStatus] = useState(true);
+  const [notifCollectionAdditions, setNotifCollectionAdditions] = useState(true);
+  const [notifShowcaseInteractions, setNotifShowcaseInteractions] = useState(true);
+  const [isSavingNotifications, setIsSavingNotifications] = useState(false);
+
   // Fetch user data on mount
   useEffect(() => {
     fetchUserData();
@@ -86,6 +111,16 @@ export default function SettingsPage() {
       const data = await response.json();
       setUser(data);
       setUsername(data.username || '');
+      setShowFollowers(data.showFollowers ?? true);
+      setShowFollowing(data.showFollowing ?? true);
+      setAllowTeamInvitations(data.allowTeamInvitations ?? true);
+      // Initialize notification preferences
+      setNotifLikedProjectUpdates(data.notifLikedProjectUpdates ?? true);
+      setNotifNewCreatorUploads(data.notifNewCreatorUploads ?? true);
+      setNotifNewFollowers(data.notifNewFollowers ?? true);
+      setNotifVersionStatus(data.notifVersionStatus ?? true);
+      setNotifCollectionAdditions(data.notifCollectionAdditions ?? true);
+      setNotifShowcaseInteractions(data.notifShowcaseInteractions ?? true);
     } catch (error) {
       console.error('Error fetching user data:', error);
       toast.error('Failed to load user data');
@@ -323,6 +358,109 @@ export default function SettingsPage() {
     }
   };
 
+  const handlePrivacyUpdate = async (field: 'showFollowers' | 'showFollowing' | 'allowTeamInvitations', value: boolean) => {
+    setIsSavingPrivacy(true);
+
+    try {
+      const response = await fetch(`${API_URL}/users/me`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          [field]: value,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to update privacy settings');
+      }
+
+      const updatedUser = await response.json();
+      setUser(updatedUser);
+
+      if (field === 'showFollowers') {
+        setShowFollowers(value);
+      } else if (field === 'showFollowing') {
+        setShowFollowing(value);
+      } else {
+        setAllowTeamInvitations(value);
+      }
+
+      toast.success('Privacy settings updated successfully!');
+    } catch (error: any) {
+      console.error('Privacy update error:', error);
+      toast.error(error.message || 'Failed to update privacy settings');
+
+      // Revert the toggle
+      if (field === 'showFollowers') {
+        setShowFollowers(!value);
+      } else if (field === 'showFollowing') {
+        setShowFollowing(!value);
+      } else {
+        setAllowTeamInvitations(!value);
+      }
+    } finally {
+      setIsSavingPrivacy(false);
+    }
+  };
+
+  const handleNotificationUpdate = async (field: string, value: boolean) => {
+    setIsSavingNotifications(true);
+
+    try {
+      const response = await fetch(`${API_URL}/users/me`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          [field]: value,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to update notification settings');
+      }
+
+      const updatedUser = await response.json();
+      setUser(updatedUser);
+
+      // Update the corresponding state
+      switch (field) {
+        case 'notifLikedProjectUpdates':
+          setNotifLikedProjectUpdates(value);
+          break;
+        case 'notifNewCreatorUploads':
+          setNotifNewCreatorUploads(value);
+          break;
+        case 'notifNewFollowers':
+          setNotifNewFollowers(value);
+          break;
+        case 'notifVersionStatus':
+          setNotifVersionStatus(value);
+          break;
+        case 'notifCollectionAdditions':
+          setNotifCollectionAdditions(value);
+          break;
+        case 'notifShowcaseInteractions':
+          setNotifShowcaseInteractions(value);
+          break;
+      }
+
+      toast.success('Notification settings updated successfully!');
+    } catch (error: any) {
+      console.error('Notification update error:', error);
+      toast.error(error.message || 'Failed to update notification settings');
+    } finally {
+      setIsSavingNotifications(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -428,6 +566,324 @@ export default function SettingsPage() {
                 <Button variant="destructive" className="font-hebden" disabled>
                   Delete Account
                 </Button>
+              </div>
+            </div>
+          )}
+
+          {activeSection === 'privacy' && (
+            <div className="space-y-6">
+              <div className="bg-secondary/30 rounded-lg p-6">
+                <h2 className="font-hebden text-xl font-semibold mb-2 text-foreground">
+                  Profile Visibility
+                </h2>
+                <p className="text-sm text-muted-foreground font-nunito mb-4">
+                  Control who can see your social connections
+                </p>
+
+                <div className="space-y-4">
+                  {/* Followers Visibility */}
+                  <div className="flex items-center justify-between p-4 bg-background/50 rounded-lg border border-border">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Icon icon="mdi:account-group" width="20" height="20" className="text-primary" />
+                        <h3 className="font-hebden font-medium text-foreground">
+                          Public Followers List
+                        </h3>
+                      </div>
+                      <p className="text-sm text-muted-foreground font-nunito">
+                        Allow others to see who follows you
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => handlePrivacyUpdate('showFollowers', !showFollowers)}
+                      disabled={isSavingPrivacy}
+                      className={cn(
+                        'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
+                        showFollowers ? 'bg-primary' : 'bg-muted',
+                        isSavingPrivacy && 'opacity-50 cursor-not-allowed'
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
+                          showFollowers ? 'translate-x-6' : 'translate-x-1'
+                        )}
+                      />
+                    </button>
+                  </div>
+
+                  {/* Following Visibility */}
+                  <div className="flex items-center justify-between p-4 bg-background/50 rounded-lg border border-border">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Icon icon="mdi:account-multiple" width="20" height="20" className="text-primary" />
+                        <h3 className="font-hebden font-medium text-foreground">
+                          Public Following List
+                        </h3>
+                      </div>
+                      <p className="text-sm text-muted-foreground font-nunito">
+                        Allow others to see who you follow
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => handlePrivacyUpdate('showFollowing', !showFollowing)}
+                      disabled={isSavingPrivacy}
+                      className={cn(
+                        'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
+                        showFollowing ? 'bg-primary' : 'bg-muted',
+                        isSavingPrivacy && 'opacity-50 cursor-not-allowed'
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
+                          showFollowing ? 'translate-x-6' : 'translate-x-1'
+                        )}
+                      />
+                    </button>
+                  </div>
+
+                  {/* Team Invitations */}
+                  <div className="flex items-center justify-between p-4 bg-background/50 rounded-lg border border-border">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Icon icon="mdi:account-multiple-plus" width="20" height="20" className="text-primary" />
+                        <h3 className="font-hebden font-medium text-foreground">
+                          Allow Team Invitations
+                        </h3>
+                      </div>
+                      <p className="text-sm text-muted-foreground font-nunito">
+                        Allow others to invite you to join their teams
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => handlePrivacyUpdate('allowTeamInvitations', !allowTeamInvitations)}
+                      disabled={isSavingPrivacy}
+                      className={cn(
+                        'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
+                        allowTeamInvitations ? 'bg-primary' : 'bg-muted',
+                        isSavingPrivacy && 'opacity-50 cursor-not-allowed'
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
+                          allowTeamInvitations ? 'translate-x-6' : 'translate-x-1'
+                        )}
+                      />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeSection === 'notifications' && (
+            <div className="space-y-6">
+              <div className="bg-secondary/30 rounded-lg p-6">
+                <h2 className="font-hebden text-xl font-semibold mb-2 text-foreground">
+                  Notification Preferences
+                </h2>
+                <p className="text-sm text-muted-foreground font-nunito mb-4">
+                  Choose which notifications you want to receive
+                </p>
+
+                <div className="space-y-6">
+                  {/* Social Notifications */}
+                  <div>
+                    <h3 className="font-hebden text-md font-medium mb-3 text-foreground flex items-center gap-2">
+                      <Icon icon="mdi:account-group" width="20" height="20" className="text-primary" />
+                      Social
+                    </h3>
+                    <div className="space-y-3 ml-7">
+                      {/* New Followers */}
+                      <div className="flex items-center justify-between p-3 bg-background/50 rounded-lg border border-border">
+                        <div className="flex-1">
+                          <h4 className="font-hebden font-medium text-foreground text-sm">
+                            New Followers
+                          </h4>
+                          <p className="text-xs text-muted-foreground font-nunito">
+                            When someone starts following you
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => handleNotificationUpdate('notifNewFollowers', !notifNewFollowers)}
+                          disabled={isSavingNotifications}
+                          className={cn(
+                            'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
+                            notifNewFollowers ? 'bg-primary' : 'bg-muted',
+                            isSavingNotifications && 'opacity-50 cursor-not-allowed'
+                          )}
+                        >
+                          <span
+                            className={cn(
+                              'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
+                              notifNewFollowers ? 'translate-x-6' : 'translate-x-1'
+                            )}
+                          />
+                        </button>
+                      </div>
+
+                      {/* New Creator Uploads */}
+                      <div className="flex items-center justify-between p-3 bg-background/50 rounded-lg border border-border">
+                        <div className="flex-1">
+                          <h4 className="font-hebden font-medium text-foreground text-sm">
+                            New Creator Uploads
+                          </h4>
+                          <p className="text-xs text-muted-foreground font-nunito">
+                            When creators you follow publish new resources
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => handleNotificationUpdate('notifNewCreatorUploads', !notifNewCreatorUploads)}
+                          disabled={isSavingNotifications}
+                          className={cn(
+                            'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
+                            notifNewCreatorUploads ? 'bg-primary' : 'bg-muted',
+                            isSavingNotifications && 'opacity-50 cursor-not-allowed'
+                          )}
+                        >
+                          <span
+                            className={cn(
+                              'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
+                              notifNewCreatorUploads ? 'translate-x-6' : 'translate-x-1'
+                            )}
+                          />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Resource Notifications */}
+                  <div>
+                    <h3 className="font-hebden text-md font-medium mb-3 text-foreground flex items-center gap-2">
+                      <Icon icon="mdi:package-variant" width="20" height="20" className="text-primary" />
+                      Resources
+                    </h3>
+                    <div className="space-y-3 ml-7">
+                      {/* Liked Project Updates */}
+                      <div className="flex items-center justify-between p-3 bg-background/50 rounded-lg border border-border">
+                        <div className="flex-1">
+                          <h4 className="font-hebden font-medium text-foreground text-sm">
+                            Liked Project Updates
+                          </h4>
+                          <p className="text-xs text-muted-foreground font-nunito">
+                            When resources you've liked receive updates
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => handleNotificationUpdate('notifLikedProjectUpdates', !notifLikedProjectUpdates)}
+                          disabled={isSavingNotifications}
+                          className={cn(
+                            'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
+                            notifLikedProjectUpdates ? 'bg-primary' : 'bg-muted',
+                            isSavingNotifications && 'opacity-50 cursor-not-allowed'
+                          )}
+                        >
+                          <span
+                            className={cn(
+                              'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
+                              notifLikedProjectUpdates ? 'translate-x-6' : 'translate-x-1'
+                            )}
+                          />
+                        </button>
+                      </div>
+
+                      {/* Version Approvals */}
+                      <div className="flex items-center justify-between p-3 bg-background/50 rounded-lg border border-border">
+                        <div className="flex-1">
+                          <h4 className="font-hebden font-medium text-foreground text-sm">
+                            Version Approvals
+                          </h4>
+                          <p className="text-xs text-muted-foreground font-nunito">
+                            When your resource versions are approved or rejected
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => handleNotificationUpdate('notifVersionStatus', !notifVersionStatus)}
+                          disabled={isSavingNotifications}
+                          className={cn(
+                            'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
+                            notifVersionStatus ? 'bg-primary' : 'bg-muted',
+                            isSavingNotifications && 'opacity-50 cursor-not-allowed'
+                          )}
+                        >
+                          <span
+                            className={cn(
+                              'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
+                              notifVersionStatus ? 'translate-x-6' : 'translate-x-1'
+                            )}
+                          />
+                        </button>
+                      </div>
+
+                      {/* Collection Additions */}
+                      <div className="flex items-center justify-between p-3 bg-background/50 rounded-lg border border-border">
+                        <div className="flex-1">
+                          <h4 className="font-hebden font-medium text-foreground text-sm">
+                            Collection Additions
+                          </h4>
+                          <p className="text-xs text-muted-foreground font-nunito">
+                            When your resources are added to public collections
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => handleNotificationUpdate('notifCollectionAdditions', !notifCollectionAdditions)}
+                          disabled={isSavingNotifications}
+                          className={cn(
+                            'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
+                            notifCollectionAdditions ? 'bg-primary' : 'bg-muted',
+                            isSavingNotifications && 'opacity-50 cursor-not-allowed'
+                          )}
+                        >
+                          <span
+                            className={cn(
+                              'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
+                              notifCollectionAdditions ? 'translate-x-6' : 'translate-x-1'
+                            )}
+                          />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Showcase Notifications */}
+                  <div>
+                    <h3 className="font-hebden text-md font-medium mb-3 text-foreground flex items-center gap-2">
+                      <Icon icon="mdi:image-multiple" width="20" height="20" className="text-primary" />
+                      Showcase
+                    </h3>
+                    <div className="space-y-3 ml-7">
+                      {/* Showcase Interactions */}
+                      <div className="flex items-center justify-between p-3 bg-background/50 rounded-lg border border-border">
+                        <div className="flex-1">
+                          <h4 className="font-hebden font-medium text-foreground text-sm">
+                            Showcase Interactions
+                          </h4>
+                          <p className="text-xs text-muted-foreground font-nunito">
+                            When someone likes or comments on your showcase posts
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => handleNotificationUpdate('notifShowcaseInteractions', !notifShowcaseInteractions)}
+                          disabled={isSavingNotifications}
+                          className={cn(
+                            'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
+                            notifShowcaseInteractions ? 'bg-primary' : 'bg-muted',
+                            isSavingNotifications && 'opacity-50 cursor-not-allowed'
+                          )}
+                        >
+                          <span
+                            className={cn(
+                              'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
+                              notifShowcaseInteractions ? 'translate-x-6' : 'translate-x-1'
+                            )}
+                          />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}
