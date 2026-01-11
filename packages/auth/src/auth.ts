@@ -153,6 +153,7 @@ export const getAuth = () => {
                                 return {
                                     data: {
                                         ...user,
+                                        name: newUsername,
                                         username: newUsername
                                     }
                                 };
@@ -162,6 +163,7 @@ export const getAuth = () => {
                             return {
                                 data: {
                                     ...user,
+                                    name: formattedUsername,
                                     username: formattedUsername
                                 }
                             };
