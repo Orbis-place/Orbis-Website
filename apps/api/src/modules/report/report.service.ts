@@ -66,6 +66,67 @@ export class ReportService {
         });
     }
 
+    async reportResource(reporterId: string, resourceId: string, createReportDto: CreateReportDto) {
+        // Check if resource exists
+        const resourceExists = await prisma.resource.findUnique({
+            where: { id: resourceId },
+            select: {
+                id: true,
+                ownerUserId: true
+            },
+        });
+
+        if (!resourceExists) {
+            throw new NotFoundException('Resource not found');
+        }
+
+        // Prevent reporting own resource
+        if (reporterId === resourceExists.ownerUserId) {
+            throw new BadRequestException('You cannot report your own resource');
+        }
+
+        // Validate description is provided when reason is OTHER
+        if (createReportDto.reason === 'OTHER' && !createReportDto.description) {
+            throw new BadRequestException('Description is required when reason is OTHER');
+        }
+
+        // Check if user already reported this resource
+        const existingReport = await prisma.report.findFirst({
+            where: {
+                reporterId,
+                resourceType: 'RESOURCE',
+                resourceId: resourceId,
+                status: {
+                    in: ['PENDING', 'UNDER_REVIEW'],
+                },
+            },
+        });
+
+        if (existingReport) {
+            throw new BadRequestException('You have already reported this resource');
+        }
+
+        // Create the report
+        return prisma.report.create({
+            data: {
+                resourceType: 'RESOURCE',
+                resourceId: resourceId,
+                reason: createReportDto.reason,
+                description: createReportDto.description,
+                reporterId,
+            },
+            include: {
+                reporter: {
+                    select: {
+                        id: true,
+                        username: true,
+                        displayName: true,
+                    },
+                },
+            },
+        });
+    }
+
     async getMyReports(userId: string) {
         return prisma.report.findMany({
             where: {

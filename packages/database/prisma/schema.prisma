@@ -68,7 +68,8 @@ enum ReportStatus {
 
 enum ReportResourceType {
   USER
-  // Future: SERVER, MOD, PLUGIN, etc.
+  RESOURCE
+  // Future: SERVER, etc.
 }
 
 enum SocialLinkType {
@@ -240,6 +241,9 @@ model User {
   ownedShowcasePosts   ShowcasePost[]        @relation("OwnedShowcasePosts")
   showcaseLikes        ShowcasePostLike[]    @relation("ShowcaseLikes")
   showcaseComments     ShowcasePostComment[] @relation("ShowcaseComments")
+
+  // Resource Comments
+  resourceComments     ResourceComment[] @relation("ResourceComments")
 
   // Resource Collections
   resourceCollections  UserResourceCollection[] @relation("UserCollections")
@@ -809,6 +813,10 @@ model Resource {
   // User Collections
   collectionItems UserResourceCollectionItem[]
 
+  // Comments
+  comments      ResourceComment[]
+  commentCount  Int @default(0)
+
   // Moderation
   moderationNotes String? // Internal staff notes
   rejectionReason String? // If status = REJECTED
@@ -1128,10 +1136,11 @@ model ResourceVersion {
   updatedAt   DateTime  @updatedAt
 
   // Relations
-  resource      Resource                    @relation(fields: [resourceId], references: [id], onDelete: Cascade)
-  latestFor     Resource[]                  @relation("LatestVersion")
-  dependencies  ResourceVersionDependency[]
-  downloadCount Int                         @default(0)
+  resource          Resource                    @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  latestFor         Resource[]                  @relation("LatestVersion")
+  dependencies      ResourceVersionDependency[]
+  commentsAtVersion ResourceComment[]           @relation("CommentAtVersion")
+  downloadCount     Int                         @default(0)
 
   @@unique([resourceId, versionNumber])
   @@index([resourceId, channel])
@@ -1621,4 +1630,30 @@ model ShowcasePostComment {
   @@index([userId])
   @@index([parentId])
   @@map("showcase_post_comments")
+}
+
+// ============================================
+// RESOURCE COMMENTS
+// ============================================
+
+model ResourceComment {
+  id         String   @id @default(cuid())
+  content    String   @db.Text
+  userId     String
+  resourceId String
+  versionId  String?  // The version at time of comment (only for main comments, NULL for replies)
+  parentId   String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user     User               @relation("ResourceComments", fields: [userId], references: [id], onDelete: Cascade)
+  resource Resource           @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  version  ResourceVersion?   @relation("CommentAtVersion", fields: [versionId], references: [id], onDelete: SetNull)
+  parent   ResourceComment?   @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies  ResourceComment[]  @relation("CommentReplies")
+
+  @@index([resourceId, createdAt])
+  @@index([userId])
+  @@index([parentId])
+  @@map("resource_comments")
 }

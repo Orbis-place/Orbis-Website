@@ -118,12 +118,16 @@ export const getAuth = () => {
             databaseHooks: {
                 user: {
                     create: {
-                        before: async (user) => {
-                            // Check if username already exists (case-insensitive)
+                        before: async (user: any) => {
+                            if (!user.username) {
+                                throw new Error('Username is required');
+                            }
+
+                            let formattedUsername = user.username.replace(/\s+/g, '').trim();
                             const existingUser = await prisma.user.findFirst({
                                 where: {
                                     username: {
-                                        equals: user.username,
+                                        equals: formattedUsername,
                                         mode: 'insensitive'
                                     }
                                 }
@@ -132,7 +136,7 @@ export const getAuth = () => {
                             // If username exists, add a suffix
                             if (existingUser) {
                                 let suffix = 2;
-                                let newUsername = `${user.username}_${suffix}`;
+                                let newUsername = `${formattedUsername}_${suffix}`;
 
                                 // Keep incrementing suffix until we find an available username
                                 while (await prisma.user.findFirst({
@@ -144,7 +148,7 @@ export const getAuth = () => {
                                     }
                                 })) {
                                     suffix++;
-                                    newUsername = `${user.username}_${suffix}`;
+                                    newUsername = `${formattedUsername}_${suffix}`;
                                 }
 
                                 return {
@@ -156,7 +160,10 @@ export const getAuth = () => {
                             }
 
                             return {
-                                data: user
+                                data: {
+                                    ...user,
+                                    username: formattedUsername
+                                }
                             };
                         },
                     },

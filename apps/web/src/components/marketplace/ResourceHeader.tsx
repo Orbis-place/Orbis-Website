@@ -16,6 +16,7 @@ import {
 import { useState } from 'react';
 import { DownloadVersionModal } from '@/components/marketplace/DownloadVersionModal';
 import { SaveToCollectionPopover } from '@/components/marketplace/SaveToCollectionPopover';
+import { ReportResourceDialog } from '@/components/ReportResourceDialog';
 
 export interface ResourceHeaderProps {
     title: string;
@@ -67,6 +68,7 @@ export default function ResourceHeader({
 }: ResourceHeaderProps) {
     const [copySuccess, setCopySuccess] = useState(false);
     const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
+    const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
 
     const handleCopyId = () => {
         if (resourceId) {
@@ -170,7 +172,10 @@ export default function ResourceHeader({
                             </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48 bg-accent border border-border font-hebden">
-                            <DropdownMenuItem className="text-destructive cursor-pointer flex items-center gap-2 data-[highlighted]:text-destructive">
+                            <DropdownMenuItem
+                                onClick={() => setIsReportDialogOpen(true)}
+                                className="text-destructive cursor-pointer flex items-center gap-2 data-[highlighted]:text-destructive"
+                            >
                                 <Flag className="w-4 h-4 text-destructive" />
                                 Report
                             </DropdownMenuItem>
@@ -293,6 +298,16 @@ export default function ResourceHeader({
                 <DownloadVersionModal
                     open={isDownloadModalOpen}
                     onOpenChange={setIsDownloadModalOpen}
+                    resourceId={resourceId}
+                    resourceName={title}
+                />
+            )}
+
+            {/* Report Resource Dialog */}
+            {resourceId && (
+                <ReportResourceDialog
+                    open={isReportDialogOpen}
+                    onOpenChange={setIsReportDialogOpen}
                     resourceId={resourceId}
                     resourceName={title}
                 />

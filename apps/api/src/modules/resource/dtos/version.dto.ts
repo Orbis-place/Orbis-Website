@@ -88,8 +88,8 @@ export class UpdateVersionDto {
 
 export class UpdateChangelogDto {
     @ApiProperty({
-        description: 'Changelog in Markdown format',
-        example: '# Version 1.0.0\n\n- Added new features\n- Fixed bugs',
+        description: 'Changelog in HTML format (Tiptap editor output)',
+        example: '<p>Version 1.0.0</p><ul><li>Added new features</li><li>Fixed bugs</li></ul>',
     })
     @IsString()
     @IsNotEmpty()

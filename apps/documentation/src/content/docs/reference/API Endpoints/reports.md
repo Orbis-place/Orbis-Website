@@ -57,6 +57,54 @@ Report a user for violating community guidelines.
 
 ---
 
+## Resource Reporting
+
+### Report Resource
+
+```http
+POST /reports/resources/:resourceId
+```
+
+Report a resource for violating community guidelines.
+
+**Authentication:** Required
+
+**URL Parameters:**
+- `resourceId` (string) - Resource ID to report
+
+**Request Body:**
+```json
+{
+  "reason": "MALICIOUS",
+  "description": "Detailed description of the violation"
+}
+```
+
+**Report Reasons:**
+- `SPAM` - Spam or advertising
+- `REUPLOADED_WORK` - Reuploaded work without permission
+- `INAPPROPRIATE` - Inappropriate content
+- `MALICIOUS` - Malicious content or malware
+- `NAME_SQUATTING` - Name squatting
+- `POOR_DESCRIPTION` - Poor or misleading description
+- `INVALID_METADATA` - Invalid metadata
+- `OTHER` - Other violations (requires description)
+
+**Response:**
+```json
+{
+  "id": "report-id",
+  "reporterId": "your-user-id",
+  "resourceType": "RESOURCE",
+  "resourceId": "resource-id",
+  "reason": "MALICIOUS",
+  "status": "PENDING",
+  "createdAt": "2024-01-01T00:00:00Z"
+}
+```
+
+---
+
 ## My Reports
 
 ### Get My Reports

@@ -23,6 +23,17 @@ export class ReportController {
         return this.reportService.reportUser(session.user.id, userId, createReportDto);
     }
 
+    @Post('resources/:resourceId')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Report a resource' })
+    async reportResource(
+        @Session() session: UserSession,
+        @Param('resourceId') resourceId: string,
+        @Body() createReportDto: CreateReportDto,
+    ) {
+        return this.reportService.reportResource(session.user.id, resourceId, createReportDto);
+    }
+
     @Get('me')
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Get my submitted reports' })

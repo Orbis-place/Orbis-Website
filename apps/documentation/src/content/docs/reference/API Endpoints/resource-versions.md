@@ -228,7 +228,7 @@ Update the version changelog. **Allowed in all statuses except ARCHIVED.**
 }
 ```
 
-**Note:** Changelog supports Markdown format and is displayed with Tiptap editor.
+**Note:** Changelog supports HTML format and is displayed with Tiptap editor.
 
 **Response:** Updated version object
 

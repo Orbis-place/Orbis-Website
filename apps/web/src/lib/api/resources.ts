@@ -1416,3 +1416,127 @@ export async function getPublicCollection(collectionId: string): Promise<Collect
     return response.json();
 }
 
+
+/**
+ * Comments API
+ */
+
+export interface CommentUser {
+    id: string;
+    username: string;
+    displayName: string | null;
+    image: string | null;
+}
+
+export interface CommentVersion {
+    id: string;
+    versionNumber: string;
+}
+
+export interface ResourceComment {
+    id: string;
+    content: string;
+    userId: string;
+    resourceId: string;
+    versionId: string | null;
+    parentId: string | null;
+    createdAt: string;
+    updatedAt: string;
+    user: CommentUser;
+    version: CommentVersion | null;
+    replies?: ResourceComment[];
+}
+
+export interface PaginatedCommentsResponse {
+    data: ResourceComment[];
+    meta: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+    };
+}
+
+/**
+ * Fetch comments for a resource
+ */
+export async function fetchResourceComments(
+    resourceId: string,
+    page: number = 1,
+    limit: number = 20
+): Promise<PaginatedCommentsResponse> {
+    const response = await fetch(
+        `${API_URL}/resources/${resourceId}/comments?page=${page}&limit=${limit}`,
+        {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        }
+    );
+
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({
+            message: 'Failed to fetch comments',
+        }));
+        throw new Error(error.message || `Request failed with status ${response.status}`);
+    }
+
+    return response.json();
+}
+
+/**
+ * Create a comment on a resource
+ */
+export async function createResourceComment(
+    resourceId: string,
+    content: string,
+    parentId?: string
+): Promise<ResourceComment> {
+    const response = await fetch(`${API_URL}/resources/${resourceId}/comments`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ content, parentId }),
+    });
+
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({
+            message: 'Failed to create comment',
+        }));
+        throw new Error(error.message || `Request failed with status ${response.status}`);
+    }
+
+    return response.json();
+}
+
+/**
+ * Delete a comment
+ */
+export async function deleteResourceComment(
+    resourceId: string,
+    commentId: string
+): Promise<{ message: string }> {
+    const response = await fetch(
+        `${API_URL}/resources/${resourceId}/comments/${commentId}`,
+        {
+            method: 'DELETE',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        }
+    );
+
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({
+            message: 'Failed to delete comment',
+        }));
+        throw new Error(error.message || `Request failed with status ${response.status}`);
+    }
+
+    return response.json();
+}

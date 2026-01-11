@@ -10,3 +10,4 @@ export default function ResourceDetailPage() {
 
     return <ResourceContent content={resource.description || 'No description available.'} />;
 }
+

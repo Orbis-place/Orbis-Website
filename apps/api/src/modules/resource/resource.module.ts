@@ -20,6 +20,8 @@ import { VersionChangelogImageController } from './version-changelog-image.contr
 import { VersionChangelogImageService } from './version-changelog-image.service';
 import { CollectionController } from './collection.controller';
 import { CollectionService } from './collection.service';
+import { CommentController } from './comment.controller';
+import { CommentService } from './comment.service';
 import { StorageModule } from '../storage/storage.module';
 import { RedisModule } from '../../common/redis.module';
 import { NotificationModule } from '../notification/notification.module';
@@ -38,6 +40,7 @@ import { NotificationModule } from '../notification/notification.module';
         VersionController,
         VersionChangelogImageController,
         CollectionController,
+        CommentController,
     ],
     providers: [
         ResourceService,
@@ -50,6 +53,7 @@ import { NotificationModule } from '../notification/notification.module';
         VersionService,
         VersionChangelogImageService,
         CollectionService,
+        CommentService,
     ],
     exports: [
         ResourceService,
@@ -62,6 +66,7 @@ import { NotificationModule } from '../notification/notification.module';
         VersionService,
         VersionChangelogImageService,
         CollectionService,
+        CommentService,
     ],
 })
 export class ResourceModule { }
