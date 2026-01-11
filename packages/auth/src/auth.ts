@@ -119,10 +119,6 @@ export const getAuth = () => {
                 user: {
                     create: {
                         before: async (user: any) => {
-                            if (!user.username) {
-                                throw new Error('Username is required');
-                            }
-
                             let formattedUsername = user.username.replace(/\s+/g, '').trim();
                             const existingUser = await prisma.user.findFirst({
                                 where: {
