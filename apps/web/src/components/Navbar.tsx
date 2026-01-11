@@ -1,6 +1,7 @@
 'use client'
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
 import {
@@ -25,6 +26,9 @@ import { Button } from "@/components/ui/button";
 import { authClient } from "@repo/auth/client";
 import { useSessionStore } from "@/stores/useSessionStore";
 import { Session } from '@repo/auth';
+import { CreateResourceDialog } from "@/components/CreateResourceDialog";
+import { CreateServerDialog } from "@/components/CreateServerDialog";
+import { CreateTeamDialog } from "@/components/CreateTeamDialog";
 import * as React from "react";
 
 const marketplaceCategories = [
@@ -43,8 +47,12 @@ interface NavbarProps {
 }
 
 export default function Navbar({ session }: NavbarProps) {
+    const router = useRouter();
     const [mobileNavOpen, setMobileNavOpen] = useState(false);
     const [mobileProfileOpen, setMobileProfileOpen] = useState(false);
+    const [createResourceOpen, setCreateResourceOpen] = useState(false);
+    const [createServerOpen, setCreateServerOpen] = useState(false);
+    const [createTeamOpen, setCreateTeamOpen] = useState(false);
 
     useEffect(() => {
         if (mobileNavOpen || mobileProfileOpen) {
@@ -119,7 +127,7 @@ export default function Navbar({ session }: NavbarProps) {
                                                     href="/resources"
                                                     className="flex flex-row items-center gap-2 select-none rounded-lg p-2 leading-none no-underline outline-none transition-colors hover:bg-white/5 hover:text-foreground focus:bg-white/5 focus:text-foreground"
                                                 >
-                                                    <div className="p-1.5 rounded-lg bg-[#109EB1]/10 text-[#109EB1]">
+                                                    <div className="p-1.5 rounded-lg bg-[#109EB1]/10 shrink-0 text-[#109EB1]">
                                                         <Icon icon="mdi:compass" width="18" height="18" />
                                                     </div>
                                                     <div className="flex flex-col gap-0.5">
@@ -133,7 +141,7 @@ export default function Navbar({ session }: NavbarProps) {
                                                     href="/servers"
                                                     className="flex flex-row items-center gap-2 select-none rounded-lg p-2 leading-none no-underline outline-none transition-colors hover:bg-white/5 hover:text-foreground focus:bg-white/5 focus:text-foreground"
                                                 >
-                                                    <div className="p-1.5 rounded-lg bg-[#109EB1]/10 text-[#109EB1]">
+                                                    <div className="p-1.5 rounded-lg bg-[#109EB1]/10 shrink-0 text-[#109EB1]">
                                                         <Icon icon="mdi:server" width="16" height="16" />
                                                     </div>
                                                     <div className="flex flex-col gap-0.5">
@@ -147,7 +155,7 @@ export default function Navbar({ session }: NavbarProps) {
                                                     href="/creators"
                                                     className="flex flex-row items-center gap-2 select-none rounded-lg p-2 leading-none no-underline outline-none transition-colors hover:bg-white/5 hover:text-foreground focus:bg-white/5 focus:text-foreground"
                                                 >
-                                                    <div className="p-1.5 rounded-lg bg-[#109EB1]/10 text-[#109EB1]">
+                                                    <div className="p-1.5 rounded-lg bg-[#109EB1]/10 shrink-0 text-[#109EB1]">
                                                         <Icon icon="mdi:account-group" width="16" height="16" />
                                                     </div>
                                                     <div className="flex flex-col gap-0.5">
@@ -161,7 +169,7 @@ export default function Navbar({ session }: NavbarProps) {
                                                     href="/showcase"
                                                     className="flex flex-row items-center gap-2 select-none rounded-lg p-2 leading-none no-underline outline-none transition-colors hover:bg-white/5 hover:text-foreground focus:bg-white/5 focus:text-foreground"
                                                 >
-                                                    <div className="p-1.5 rounded-lg bg-[#109EB1]/10 text-[#109EB1]">
+                                                    <div className="p-1.5 rounded-lg bg-[#109EB1]/10 shrink-0 text-[#109EB1]">
                                                         <Icon icon="mdi:image-multiple" width="16" height="16" />
                                                     </div>
                                                     <div className="flex flex-col gap-0.5">
@@ -195,7 +203,7 @@ export default function Navbar({ session }: NavbarProps) {
                                                         href={category.href}
                                                         className="flex flex-row items-start gap-2 select-none rounded-lg p-2 leading-none no-underline outline-none transition-colors hover:bg-white/5 hover:text-foreground focus:bg-white/5 focus:text-foreground"
                                                     >
-                                                        <div className="p-1.5 rounded-lg bg-[#109EB1]/10 text-[#109EB1]">
+                                                        <div className="p-1.5 rounded-lg bg-[#109EB1]/10 shrink-0 text-[#109EB1]">
                                                             <Icon icon={category.icon} width="18" height="18" />
                                                         </div>
                                                         <div className="flex flex-col gap-0.5">
@@ -219,127 +227,205 @@ export default function Navbar({ session }: NavbarProps) {
                     </div>
 
                     {session?.user ? (
-                        <DropdownMenu>
-                            <DropdownMenuTrigger className="flex items-center gap-3 outline-none group">
-                                <Avatar
-                                    className="h-11 w-11 border-2 border-primary/80 hover:border-primary transition-colors">
-                                    <AvatarImage src={session.user.image || undefined}
-                                        alt={session.user.name || 'User'} />
-                                    <AvatarFallback className="bg-primary/80 text-white font-hebden">
-                                        {session.user.name ? getInitials(session.user.name) : 'U'}
-                                    </AvatarFallback>
-                                </Avatar>
-                                <span className="font-hebden text-base text-foreground hidden xl:block">
-                                    {session.user.name || session.user.email}
-                                </span>
-                                <Icon
-                                    icon="eva:arrow-down-fill"
-                                    className="relative top-[1px] ml-1 transition duration-300 group-data-[state=open]:rotate-180"
-                                    aria-hidden="true"
-                                />
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent
-                                align="end"
-                                className="w-56 bg-accent border border-border font-hebden mt-2"
-                            >
-                                {/* General Section */}
-                                <DropdownMenuItem asChild className="text-foreground cursor-pointer">
-                                    <Link href={`/user/${session.user.name}`}
-                                        className="flex items-center gap-2 w-full px-2 py-2">
-                                        <Icon icon="mdi:account" width="16" height="16" className="text-current" />
-                                        Profile
-                                    </Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem asChild className="text-foreground cursor-pointer">
-                                    <Link href="/dashboard/reports"
-                                        className="flex items-center gap-2 w-full px-2 py-2">
-                                        <Icon icon="mdi:flag" width="16" height="16" className="text-current" />
-                                        My Reports
-                                    </Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem asChild className="text-foreground cursor-pointer">
-                                    <Link href="/dashboard/notifications"
-                                        className="flex items-center gap-2 w-full px-2 py-2">
-                                        <Icon icon="mdi:bell" width="16" height="16" className="text-current" />
-                                        Notifications
-                                    </Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem asChild className="text-foreground cursor-pointer">
-                                    <Link href="/dashboard/collections"
-                                        className="flex items-center gap-2 w-full px-2 py-2">
-                                        <Icon icon="mdi:folder-multiple" width="16" height="16" className="text-current" />
-                                        Collections
-                                    </Link>
-                                </DropdownMenuItem>
-
-                                <DropdownMenuSeparator className="bg-[#084B54]" />
-
-                                {/* Content Section */}
-                                <DropdownMenuItem asChild className="text-foreground cursor-pointer">
-                                    <Link href="/dashboard/resources"
-                                        className="flex items-center gap-2 w-full px-2 py-2">
-                                        <Icon icon="mdi:package-variant" width="16" height="16" className="text-current" />
-                                        My Resources
-                                    </Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem asChild className="text-foreground cursor-pointer">
-                                    <Link href="/dashboard/teams"
-                                        className="flex items-center gap-2 w-full px-2 py-2">
-                                        <Icon icon="mdi:account-group" width="16" height="16" className="text-current" />
-                                        My Teams
-                                    </Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem asChild className="text-foreground cursor-pointer">
-                                    <Link href="/dashboard/servers"
-                                        className="flex items-center gap-2 w-full px-2 py-2">
-                                        <Icon icon="mdi:server" width="16" height="16" className="text-current" />
-                                        My Servers
-                                    </Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem asChild className="text-foreground cursor-pointer">
-                                    <Link href="/dashboard/showcase"
-                                        className="flex items-center gap-2 w-full px-2 py-2">
-                                        <Icon icon="mdi:image-multiple" width="16" height="16" className="text-current" />
-                                        My Showcase
-                                    </Link>
-                                </DropdownMenuItem>
-
-                                <DropdownMenuSeparator className="bg-[#084B54]" />
-
-                                {/* Admin Panel - Only for Moderator+ */}
-                                {(session.user as any).role && ['MODERATOR', 'ADMIN', 'SUPER_ADMIN'].includes((session.user as any).role) && (
-                                    <>
-                                        <DropdownMenuItem asChild className="text-foreground cursor-pointer bg-primary/10 hover:bg-primary/20">
-                                            <Link href="/admin"
-                                                className="flex items-center gap-2 w-full px-2 py-2">
-                                                <Icon icon="mdi:shield-crown" width="16" height="16" className="text-primary" />
-                                                <span className="font-semibold">Admin Panel</span>
-                                            </Link>
-                                        </DropdownMenuItem>
-                                        <DropdownMenuSeparator className="bg-[#084B54]" />
-                                    </>
-                                )}
-
-                                {/* Settings Section */}
-                                <DropdownMenuItem asChild className="text-foreground cursor-pointer">
-                                    <Link href="/dashboard/settings"
-                                        className="flex items-center gap-2 w-full px-2 py-2">
-                                        <Icon icon="mdi:cog" width="16" height="16" className="text-current" />
-                                        Settings
-                                    </Link>
-                                </DropdownMenuItem>
-
-                                <DropdownMenuSeparator className="bg-[#084B54]" />
-
-                                <DropdownMenuItem
-                                    onClick={handleSignOut}
-                                    className="text-destructive cursor-pointer data-[highlighted]:text-destructive"
+                        <div className="flex items-center gap-3">
+                            {/* Create Menu */}
+                            <DropdownMenu>
+                                <DropdownMenuTrigger className="flex items-center gap-1 px-3 py-2 rounded-lg hover:bg-accent transition-colors outline-none group">
+                                    <Icon icon="mdi:plus" width="20" height="20" className="text-foreground" />
+                                    <Icon
+                                        icon="eva:arrow-down-fill"
+                                        width="16"
+                                        height="16"
+                                        className="transition duration-300 group-data-[state=open]:rotate-180"
+                                        aria-hidden="true"
+                                    />
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent
+                                    align="end"
+                                    className="w-56 bg-accent border border-border font-hebden mt-2 flex flex-col gap-1.5"
                                 >
-                                    <Icon icon="mdi:logout" width="16" height="16" className="text-current" />
-                                    Sign Out
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                                    <DropdownMenuItem
+                                        onClick={() => setCreateResourceOpen(true)}
+                                        className="text-foreground cursor-pointer"
+                                    >
+                                        <div className="flex items-center gap-2 w-full">
+                                            <div className="p-1.5 rounded-lg bg-primary/10 shrink-0">
+                                                <Icon icon="mdi:package-variant-plus" width="16" height="16" className="text-primary" />
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <span className="font-semibold">New Resource</span>
+                                                <span className="text-xs text-foreground/60 font-nunito">Mod, plugin, world...</span>
+                                            </div>
+                                        </div>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                        onClick={() => setCreateServerOpen(true)}
+                                        className="text-foreground cursor-pointer"
+                                    >
+                                        <div className="flex items-center gap-2 w-full">
+                                            <div className="p-1.5 rounded-lg bg-[#109EB1]/10 shrink-0">
+                                                <Icon icon="mdi:server-plus" width="16" height="16" className="text-[#109EB1]" />
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <span className="font-semibold">Add Server</span>
+                                                <span className="text-xs text-foreground/60 font-nunito">List your game server</span>
+                                            </div>
+                                        </div>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                        onClick={() => setCreateTeamOpen(true)}
+                                        className="text-foreground cursor-pointer"
+                                    >
+                                        <div className="flex items-center gap-2 w-full">
+                                            <div className="p-1.5 rounded-lg bg-[#109EB1]/10 shrink-0">
+                                                <Icon icon="mdi:account-group-outline" width="16" height="16" className="text-[#109EB1]" />
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <span className="font-semibold">New Team</span>
+                                                <span className="text-xs text-foreground/60 font-nunito">Collaborate with others</span>
+                                            </div>
+                                        </div>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                        onClick={() => router.push('/showcase/new')}
+                                        className="text-foreground cursor-pointer"
+                                    >
+                                        <div className="flex items-center gap-2 w-full">
+                                            <div className="p-1.5 rounded-lg bg-[#109EB1]/10 shrink-0">
+                                                <Icon icon="mdi:image-plus" width="16" height="16" className="text-[#109EB1]" />
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <span className="font-semibold">Showcase Post</span>
+                                                <span className="text-xs text-foreground/60 font-nunito">Share your work</span>
+                                            </div>
+                                        </div>
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+
+                            {/* User Profile Menu */}
+                            <DropdownMenu>
+                                <DropdownMenuTrigger className="flex items-center gap-3 outline-none group">
+                                    <Avatar
+                                        className="h-11 w-11 border-2 border-primary/80 hover:border-primary transition-colors">
+                                        <AvatarImage src={session.user.image || undefined}
+                                            alt={session.user.name || 'User'} />
+                                        <AvatarFallback className="bg-primary/80 text-white font-hebden">
+                                            {session.user.name ? getInitials(session.user.name) : 'U'}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                    <span className="font-hebden text-base text-foreground hidden xl:block">
+                                        {session.user.name || session.user.email}
+                                    </span>
+                                    <Icon
+                                        icon="eva:arrow-down-fill"
+                                        className="relative top-[1px] ml-1 transition duration-300 group-data-[state=open]:rotate-180"
+                                        aria-hidden="true"
+                                    />
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent
+                                    align="end"
+                                    className="w-56 bg-accent border border-border font-hebden mt-2"
+                                >
+                                    {/* General Section */}
+                                    <DropdownMenuItem asChild className="text-foreground cursor-pointer">
+                                        <Link href={`/user/${session.user.name}`}
+                                            className="flex items-center gap-2 w-full px-2 py-2">
+                                            <Icon icon="mdi:account" width="16" height="16" className="text-current" />
+                                            Profile
+                                        </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem asChild className="text-foreground cursor-pointer">
+                                        <Link href="/dashboard/reports"
+                                            className="flex items-center gap-2 w-full px-2 py-2">
+                                            <Icon icon="mdi:flag" width="16" height="16" className="text-current" />
+                                            My Reports
+                                        </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem asChild className="text-foreground cursor-pointer">
+                                        <Link href="/dashboard/notifications"
+                                            className="flex items-center gap-2 w-full px-2 py-2">
+                                            <Icon icon="mdi:bell" width="16" height="16" className="text-current" />
+                                            Notifications
+                                        </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem asChild className="text-foreground cursor-pointer">
+                                        <Link href="/dashboard/collections"
+                                            className="flex items-center gap-2 w-full px-2 py-2">
+                                            <Icon icon="mdi:folder-multiple" width="16" height="16" className="text-current" />
+                                            Collections
+                                        </Link>
+                                    </DropdownMenuItem>
+
+                                    <DropdownMenuSeparator className="bg-[#084B54]" />
+
+                                    {/* Content Section */}
+                                    <DropdownMenuItem asChild className="text-foreground cursor-pointer">
+                                        <Link href="/dashboard/resources"
+                                            className="flex items-center gap-2 w-full px-2 py-2">
+                                            <Icon icon="mdi:package-variant" width="16" height="16" className="text-current" />
+                                            My Resources
+                                        </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem asChild className="text-foreground cursor-pointer">
+                                        <Link href="/dashboard/teams"
+                                            className="flex items-center gap-2 w-full px-2 py-2">
+                                            <Icon icon="mdi:account-group" width="16" height="16" className="text-current" />
+                                            My Teams
+                                        </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem asChild className="text-foreground cursor-pointer">
+                                        <Link href="/dashboard/servers"
+                                            className="flex items-center gap-2 w-full px-2 py-2">
+                                            <Icon icon="mdi:server" width="16" height="16" className="text-current" />
+                                            My Servers
+                                        </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem asChild className="text-foreground cursor-pointer">
+                                        <Link href="/dashboard/showcase"
+                                            className="flex items-center gap-2 w-full px-2 py-2">
+                                            <Icon icon="mdi:image-multiple" width="16" height="16" className="text-current" />
+                                            My Showcase
+                                        </Link>
+                                    </DropdownMenuItem>
+
+                                    <DropdownMenuSeparator className="bg-[#084B54]" />
+
+                                    {/* Admin Panel - Only for Moderator+ */}
+                                    {(session.user as any).role && ['MODERATOR', 'ADMIN', 'SUPER_ADMIN'].includes((session.user as any).role) && (
+                                        <>
+                                            <DropdownMenuItem asChild className="text-foreground cursor-pointer bg-primary/10 hover:bg-primary/20">
+                                                <Link href="/admin"
+                                                    className="flex items-center gap-2 w-full px-2 py-2">
+                                                    <Icon icon="mdi:shield-crown" width="16" height="16" className="text-primary" />
+                                                    <span className="font-semibold">Admin Panel</span>
+                                                </Link>
+                                            </DropdownMenuItem>
+                                            <DropdownMenuSeparator className="bg-[#084B54]" />
+                                        </>
+                                    )}
+
+                                    {/* Settings Section */}
+                                    <DropdownMenuItem asChild className="text-foreground cursor-pointer">
+                                        <Link href="/dashboard/settings"
+                                            className="flex items-center gap-2 w-full px-2 py-2">
+                                            <Icon icon="mdi:cog" width="16" height="16" className="text-current" />
+                                            Settings
+                                        </Link>
+                                    </DropdownMenuItem>
+
+                                    <DropdownMenuSeparator className="bg-[#084B54]" />
+
+                                    <DropdownMenuItem
+                                        onClick={handleSignOut}
+                                        className="text-destructive cursor-pointer data-[highlighted]:text-destructive"
+                                    >
+                                        <Icon icon="mdi:logout" width="16" height="16" className="text-current" />
+                                        Sign Out
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
                     ) : (
                         <button
                             className="rounded-full flex h-11 w-[130px] bg-primary/80 font-hebden text-base text-white data-active:bg-primary hover:bg-primary transition-all cursor-pointer">
@@ -370,28 +456,106 @@ export default function Navbar({ session }: NavbarProps) {
                         <Image
                             src="/navbar_header.png"
                             alt="Orbis Logo"
-                            width={100}
+                            width={75}
                             height={35}
                             priority
                         />
                     </Link>
 
                     {/* Profile Menu à droite */}
-                    <div className="flex items-center">
+                    <div className="flex items-center gap-2">
                         {session?.user ? (
-                            <button
-                                onClick={() => setMobileProfileOpen(!mobileProfileOpen)}
-                                className="p-0 z-50"
-                                aria-label="Toggle profile menu"
-                            >
-                                <Avatar className="h-10 w-10 border-2 border-primary/80">
-                                    <AvatarImage src={session.user.image || undefined}
-                                        alt={session.user.name || 'User'} />
-                                    <AvatarFallback className="bg-primary/80 text-white font-hebden">
-                                        {session.user.name ? getInitials(session.user.name) : 'U'}
-                                    </AvatarFallback>
-                                </Avatar>
-                            </button>
+                            <>
+                                {/* Create Menu Button */}
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger className="flex items-center gap-1 px-2 py-1.5 rounded-lg hover:bg-accent transition-colors outline-none group z-50">
+                                        <Icon icon="mdi:plus" width="18" height="18" className="text-foreground" />
+                                        <Icon
+                                            icon="eva:arrow-down-fill"
+                                            width="14"
+                                            height="14"
+                                            className="transition duration-300 group-data-[state=open]:rotate-180"
+                                            aria-hidden="true"
+                                        />
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent
+                                        align="end"
+                                        className="w-56 bg-accent border border-border font-hebden mt-2 flex flex-col gap-1.5"
+                                    >
+                                        <DropdownMenuItem
+                                            onClick={() => setCreateResourceOpen(true)}
+                                            className="text-foreground cursor-pointer"
+                                        >
+                                            <div className="flex items-center gap-2 w-full">
+                                                <div className="p-1.5 rounded-lg bg-primary/10 shrink-0">
+                                                    <Icon icon="mdi:package-variant-plus" width="16" height="16" className="text-primary" />
+                                                </div>
+                                                <div className="flex flex-col">
+                                                    <span className="font-semibold">New Resource</span>
+                                                    <span className="text-xs text-foreground/60 font-nunito">Mod, plugin, world...</span>
+                                                </div>
+                                            </div>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            onClick={() => setCreateServerOpen(true)}
+                                            className="text-foreground cursor-pointer"
+                                        >
+                                            <div className="flex items-center gap-2 w-full">
+                                                <div className="p-1.5 rounded-lg bg-[#109EB1]/10 shrink-0">
+                                                    <Icon icon="mdi:server-plus" width="16" height="16" className="text-[#109EB1]" />
+                                                </div>
+                                                <div className="flex flex-col">
+                                                    <span className="font-semibold">Add Server</span>
+                                                    <span className="text-xs text-foreground/60 font-nunito">List your game server</span>
+                                                </div>
+                                            </div>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            onClick={() => setCreateTeamOpen(true)}
+                                            className="text-foreground cursor-pointer"
+                                        >
+                                            <div className="flex items-center gap-2 w-full">
+                                                <div className="p-1.5 rounded-lg bg-[#109EB1]/10 shrink-0">
+                                                    <Icon icon="mdi:account-group-outline" width="16" height="16" className="text-[#109EB1]" />
+                                                </div>
+                                                <div className="flex flex-col">
+                                                    <span className="font-semibold">New Team</span>
+                                                    <span className="text-xs text-foreground/60 font-nunito">Collaborate with others</span>
+                                                </div>
+                                            </div>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            onClick={() => router.push('/showcase/new')}
+                                            className="text-foreground cursor-pointer"
+                                        >
+                                            <div className="flex items-center gap-2 w-full">
+                                                <div className="p-1.5 rounded-lg bg-[#109EB1]/10 shrink-0">
+                                                    <Icon icon="mdi:image-plus" width="16" height="16" className="text-[#109EB1]" />
+                                                </div>
+                                                <div className="flex flex-col">
+                                                    <span className="font-semibold">Showcase Post</span>
+                                                    <span className="text-xs text-foreground/60 font-nunito">Share your work</span>
+                                                </div>
+                                            </div>
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+
+                                {/* Profile Avatar */}
+                                <button
+                                    onClick={() => setMobileProfileOpen(!mobileProfileOpen)}
+                                    className="p-0 z-50"
+                                    aria-label="Toggle profile menu"
+                                >
+                                    <Avatar className="h-10 w-10 border-2 border-primary/80">
+                                        <AvatarImage src={session.user.image || undefined}
+                                            alt={session.user.name || 'User'} />
+                                        <AvatarFallback className="bg-primary/80 text-white font-hebden">
+                                            {session.user.name ? getInitials(session.user.name) : 'U'}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                </button>
+                            </>
                         ) : (
                             <Link
                                 href="/login"
@@ -486,7 +650,7 @@ export default function Navbar({ session }: NavbarProps) {
                                     onClick={closeMobileNav}
                                     className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent transition-colors group"
                                 >
-                                    <div className="p-1.5 rounded-lg bg-[#E9735B]/10 text-[#E9735B]">
+                                    <div className="p-1.5 rounded-lg bg-[#109EB1]/10 text-[#109EB1]">
                                         <Icon icon="mdi:image-multiple" width="18" height="18" />
                                     </div>
                                     <div className="flex flex-col flex-1">
@@ -683,6 +847,20 @@ export default function Navbar({ session }: NavbarProps) {
                     </div>
                 </div>
             )}
+
+            {/* Create Dialogs */}
+            <CreateResourceDialog
+                open={createResourceOpen}
+                onOpenChange={setCreateResourceOpen}
+            />
+            <CreateServerDialog
+                open={createServerOpen}
+                onOpenChange={setCreateServerOpen}
+            />
+            <CreateTeamDialog
+                open={createTeamOpen}
+                onOpenChange={setCreateTeamOpen}
+            />
         </>
     );
 }
