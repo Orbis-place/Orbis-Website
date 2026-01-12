@@ -178,7 +178,7 @@ function NewServerPageContent() {
             toast.success('Server created successfully!');
 
             // Redirect to the server management page
-            router.push(`/dashboard/servers/${server.id}`);
+            router.push(`/servers/${server.slug}/manage`);
         } catch (error) {
             console.error('Error creating server:', error);
             toast.error(error instanceof Error ? error.message : 'Failed to create server. Please try again.');

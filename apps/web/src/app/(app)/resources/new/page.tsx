@@ -50,7 +50,23 @@ function NewResourcePageContent() {
             .replace(/^-+|-+$/g, '');
     };
 
-    // Map ResourceType to URL path
+    // Map ResourceType to URL path segment
+    const getResourceTypePath = (type: ResourceType): string => {
+        const pathMap: Record<ResourceType, string> = {
+            [ResourceType.PLUGIN]: 'plugin',
+            [ResourceType.MOD]: 'mod',
+            [ResourceType.WORLD]: 'world',
+            [ResourceType.PREFAB]: 'prefab',
+            [ResourceType.ASSET_PACK]: 'asset-pack',
+            [ResourceType.DATA_PACK]: 'data-pack',
+            [ResourceType.MODPACK]: 'modpack',
+            [ResourceType.PREMADE_SERVER]: 'premade-server',
+            [ResourceType.TOOLS_SCRIPTS]: 'tools-scripts',
+        };
+        return pathMap[type];
+    };
+
+    // Map ResourceType to URL path for display
     const getResourcePath = (type: ResourceType): string => {
         const pathMap: Record<ResourceType, string> = {
             [ResourceType.PLUGIN]: 'plugins',
@@ -120,7 +136,8 @@ function NewResourcePageContent() {
             toast.success('Resource created successfully!');
 
             // Redirect to the resource management page
-            router.push(`/dashboard/resources/${result.resource.id}`);
+            const typePath = getResourceTypePath(formData.type);
+            router.push(`/${typePath}/${result.resource.slug}/manage`);
         } catch (error) {
             console.error('Error creating resource:', error);
             toast.error(error instanceof Error ? error.message : 'Failed to create resource. Please try again.');
