@@ -5,7 +5,6 @@ import { useParams, useRouter } from 'next/navigation';
 import { Icon } from '@iconify/react';
 import { Button } from '@/components/ui/button';
 import { OrbisConfirmDialog } from '@/components/OrbisDialog';
-import { CreateResourceDialog } from '@/components/CreateResourceDialog';
 import { toast } from 'sonner';
 import Image from 'next/image';
 
@@ -32,7 +31,6 @@ export default function TeamResourcesPage() {
     const [resources, setResources] = useState<Resource[]>([]);
     const [loading, setLoading] = useState(true);
     const [teamId, setTeamId] = useState<string>('');
-    const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [deletingResourceId, setDeletingResourceId] = useState<string | null>(null);
 
     useEffect(() => {
@@ -153,19 +151,11 @@ export default function TeamResourcesPage() {
                     </p>
                 </div>
 
-                {/* Create Resource Dialog */}
-                <CreateResourceDialog
-                    open={isCreateOpen}
-                    onOpenChange={setIsCreateOpen}
-                    onSuccess={fetchResources}
-                    defaultTeamId={teamId} // Lock to this team
-                    trigger={
-                        <Button className="font-hebden">
-                            <Icon icon="mdi:plus" width="20" height="20" />
-                            Create Resource
-                        </Button>
-                    }
-                />
+                {/* Create Resource Button */}
+                <Button className="font-hebden" onClick={() => router.push(`/resources/new?teamId=${teamId}`)}>
+                    <Icon icon="mdi:plus" width="20" height="20" />
+                    Create Resource
+                </Button>
             </div>
 
             {/* Stats */}
@@ -290,7 +280,7 @@ export default function TeamResourcesPage() {
                         </p>
                         <Button
                             className="font-hebden"
-                            onClick={() => setIsCreateOpen(true)}
+                            onClick={() => router.push(`/resources/new?teamId=${teamId}`)}
                         >
                             <Icon icon="mdi:plus" width="20" height="20" />
                             Create First Resource

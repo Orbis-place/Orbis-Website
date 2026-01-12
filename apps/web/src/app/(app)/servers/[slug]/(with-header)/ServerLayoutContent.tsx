@@ -15,6 +15,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { ReportDialog } from '@/components/ReportDialog';
 
 export default function ServerLayoutContent({ children }: { children: ReactNode }) {
     const params = useParams();
@@ -23,6 +24,7 @@ export default function ServerLayoutContent({ children }: { children: ReactNode 
     const { server, isLoading, isOwner } = useServer();
     const [copiedIP, setCopiedIP] = useState(false);
     const [copyIdSuccess, setCopyIdSuccess] = useState(false);
+    const [reportDialogOpen, setReportDialogOpen] = useState(false);
 
     const getInitials = (name: string) => {
         if (!name) return 'S';
@@ -201,7 +203,10 @@ export default function ServerLayoutContent({ children }: { children: ReactNode 
                                 </button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-48 bg-accent border border-border font-hebden">
-                                <DropdownMenuItem className="text-destructive cursor-pointer flex items-center gap-2 data-[highlighted]:text-destructive">
+                                <DropdownMenuItem
+                                    onClick={() => setReportDialogOpen(true)}
+                                    className="text-destructive cursor-pointer flex items-center gap-2 data-[highlighted]:text-destructive"
+                                >
                                     <Flag className="w-4 h-4 text-destructive" />
                                     Report
                                 </DropdownMenuItem>
@@ -324,6 +329,15 @@ export default function ServerLayoutContent({ children }: { children: ReactNode 
             <div className="pb-16">
                 {children}
             </div>
+
+            {/* Report Dialog */}
+            <ReportDialog
+                type="server"
+                targetId={server.id}
+                targetName={server.name}
+                open={reportDialogOpen}
+                onOpenChange={setReportDialogOpen}
+            />
         </div>
     );
 }

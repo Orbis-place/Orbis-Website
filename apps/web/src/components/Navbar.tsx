@@ -26,9 +26,6 @@ import { Button } from "@/components/ui/button";
 import { authClient } from "@repo/auth/client";
 import { useSessionStore } from "@/stores/useSessionStore";
 import { Session } from '@repo/auth';
-import { CreateResourceDialog } from "@/components/CreateResourceDialog";
-import { CreateServerDialog } from "@/components/CreateServerDialog";
-import { CreateTeamDialog } from "@/components/CreateTeamDialog";
 import * as React from "react";
 
 const marketplaceCategories = [
@@ -50,9 +47,6 @@ export default function Navbar({ session }: NavbarProps) {
     const router = useRouter();
     const [mobileNavOpen, setMobileNavOpen] = useState(false);
     const [mobileProfileOpen, setMobileProfileOpen] = useState(false);
-    const [createResourceOpen, setCreateResourceOpen] = useState(false);
-    const [createServerOpen, setCreateServerOpen] = useState(false);
-    const [createTeamOpen, setCreateTeamOpen] = useState(false);
 
     useEffect(() => {
         if (mobileNavOpen || mobileProfileOpen) {
@@ -245,7 +239,7 @@ export default function Navbar({ session }: NavbarProps) {
                                     className="w-56 bg-accent border border-border font-hebden mt-2 flex flex-col gap-1.5"
                                 >
                                     <DropdownMenuItem
-                                        onClick={() => setCreateResourceOpen(true)}
+                                        onClick={() => router.push('/resources/new')}
                                         className="text-foreground cursor-pointer"
                                     >
                                         <div className="flex items-center gap-2 w-full">
@@ -259,7 +253,7 @@ export default function Navbar({ session }: NavbarProps) {
                                         </div>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem
-                                        onClick={() => setCreateServerOpen(true)}
+                                        onClick={() => router.push('/servers/new')}
                                         className="text-foreground cursor-pointer"
                                     >
                                         <div className="flex items-center gap-2 w-full">
@@ -273,7 +267,7 @@ export default function Navbar({ session }: NavbarProps) {
                                         </div>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem
-                                        onClick={() => setCreateTeamOpen(true)}
+                                        onClick={() => router.push('/teams/new')}
                                         className="text-foreground cursor-pointer"
                                     >
                                         <div className="flex items-center gap-2 w-full">
@@ -483,7 +477,7 @@ export default function Navbar({ session }: NavbarProps) {
                                         className="w-56 bg-accent border border-border font-hebden mt-2 flex flex-col gap-1.5"
                                     >
                                         <DropdownMenuItem
-                                            onClick={() => setCreateResourceOpen(true)}
+                                            onClick={() => router.push('/resources/new')}
                                             className="text-foreground cursor-pointer"
                                         >
                                             <div className="flex items-center gap-2 w-full">
@@ -497,7 +491,7 @@ export default function Navbar({ session }: NavbarProps) {
                                             </div>
                                         </DropdownMenuItem>
                                         <DropdownMenuItem
-                                            onClick={() => setCreateServerOpen(true)}
+                                            onClick={() => router.push('/servers/new')}
                                             className="text-foreground cursor-pointer"
                                         >
                                             <div className="flex items-center gap-2 w-full">
@@ -511,7 +505,7 @@ export default function Navbar({ session }: NavbarProps) {
                                             </div>
                                         </DropdownMenuItem>
                                         <DropdownMenuItem
-                                            onClick={() => setCreateTeamOpen(true)}
+                                            onClick={() => router.push('/teams/new')}
                                             className="text-foreground cursor-pointer"
                                         >
                                             <div className="flex items-center gap-2 w-full">
@@ -847,20 +841,6 @@ export default function Navbar({ session }: NavbarProps) {
                     </div>
                 </div>
             )}
-
-            {/* Create Dialogs */}
-            <CreateResourceDialog
-                open={createResourceOpen}
-                onOpenChange={setCreateResourceOpen}
-            />
-            <CreateServerDialog
-                open={createServerOpen}
-                onOpenChange={setCreateServerOpen}
-            />
-            <CreateTeamDialog
-                open={createTeamOpen}
-                onOpenChange={setCreateTeamOpen}
-            />
         </>
     );
 }

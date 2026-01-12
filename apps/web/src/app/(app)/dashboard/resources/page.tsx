@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { Icon } from '@iconify/react';
 import { Button } from '@/components/ui/button';
 import { OrbisConfirmDialog } from '@/components/OrbisDialog';
-import { CreateResourceDialog } from '@/components/CreateResourceDialog';
 import { toast } from 'sonner';
 import Image from 'next/image';
 
@@ -74,7 +73,6 @@ interface Resource {
 
 export default function ResourcesPage() {
   const router = useRouter();
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [resources, setResources] = useState<Resource[]>([]);
   const [deletingResourceId, setDeletingResourceId] = useState<string | null>(null);
@@ -299,18 +297,11 @@ export default function ResourcesPage() {
           </p>
         </div>
 
-        {/* Create Resource Dialog */}
-        <CreateResourceDialog
-          open={isCreateOpen}
-          onOpenChange={setIsCreateOpen}
-          onSuccess={fetchResources}
-          trigger={
-            <Button className="font-hebden">
-              <Icon icon="mdi:plus" width="20" height="20" />
-              Create Resource
-            </Button>
-          }
-        />
+        {/* Create Resource Button */}
+        <Button className="font-hebden" onClick={() => router.push('/resources/new')}>
+          <Icon icon="mdi:plus" width="20" height="20" />
+          Create Resource
+        </Button>
       </div>
 
       {/* Stats */}
@@ -407,7 +398,7 @@ export default function ResourcesPage() {
             </p>
             <Button
               className="font-hebden"
-              onClick={() => setIsCreateOpen(true)}
+              onClick={() => router.push('/resources/new')}
             >
               <Icon icon="mdi:plus" width="20" height="20" />
               Create Your First Resource

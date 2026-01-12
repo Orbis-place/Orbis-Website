@@ -12,9 +12,14 @@ export class ReportController {
     constructor(private readonly reportService: ReportService) {
     }
 
+    // ============================================
+    // REPORT CREATION ENDPOINTS
+    // ============================================
+
     @Post('users/:userId')
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Report a user' })
+    @ApiParam({ name: 'userId', description: 'ID of the user to report' })
     async reportUser(
         @Session() session: UserSession,
         @Param('userId') userId: string,
@@ -26,6 +31,7 @@ export class ReportController {
     @Post('resources/:resourceId')
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Report a resource' })
+    @ApiParam({ name: 'resourceId', description: 'ID of the resource to report' })
     async reportResource(
         @Session() session: UserSession,
         @Param('resourceId') resourceId: string,
@@ -33,6 +39,70 @@ export class ReportController {
     ) {
         return this.reportService.reportResource(session.user.id, resourceId, createReportDto);
     }
+
+    @Post('resource-versions/:versionId')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Report a resource version' })
+    @ApiParam({ name: 'versionId', description: 'ID of the resource version to report' })
+    async reportResourceVersion(
+        @Session() session: UserSession,
+        @Param('versionId') versionId: string,
+        @Body() createReportDto: CreateReportDto,
+    ) {
+        return this.reportService.reportResourceVersion(session.user.id, versionId, createReportDto);
+    }
+
+    @Post('resource-comments/:commentId')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Report a resource comment' })
+    @ApiParam({ name: 'commentId', description: 'ID of the comment to report' })
+    async reportResourceComment(
+        @Session() session: UserSession,
+        @Param('commentId') commentId: string,
+        @Body() createReportDto: CreateReportDto,
+    ) {
+        return this.reportService.reportResourceComment(session.user.id, commentId, createReportDto);
+    }
+
+    @Post('showcase-posts/:postId')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Report a showcase post' })
+    @ApiParam({ name: 'postId', description: 'ID of the showcase post to report' })
+    async reportShowcasePost(
+        @Session() session: UserSession,
+        @Param('postId') postId: string,
+        @Body() createReportDto: CreateReportDto,
+    ) {
+        return this.reportService.reportShowcasePost(session.user.id, postId, createReportDto);
+    }
+
+    @Post('showcase-comments/:commentId')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Report a showcase comment' })
+    @ApiParam({ name: 'commentId', description: 'ID of the showcase comment to report' })
+    async reportShowcaseComment(
+        @Session() session: UserSession,
+        @Param('commentId') commentId: string,
+        @Body() createReportDto: CreateReportDto,
+    ) {
+        return this.reportService.reportShowcaseComment(session.user.id, commentId, createReportDto);
+    }
+
+    @Post('servers/:serverId')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Report a server' })
+    @ApiParam({ name: 'serverId', description: 'ID of the server to report' })
+    async reportServer(
+        @Session() session: UserSession,
+        @Param('serverId') serverId: string,
+        @Body() createReportDto: CreateReportDto,
+    ) {
+        return this.reportService.reportServer(session.user.id, serverId, createReportDto);
+    }
+
+    // ============================================
+    // USER REPORT MANAGEMENT
+    // ============================================
 
     @Get('me')
     @ApiBearerAuth()

@@ -16,6 +16,7 @@ import {
 } from '@/lib/api/showcase';
 import { useSessionStore } from '@/stores/useSessionStore';
 import { TiptapViewer } from '@/components/TiptapViewer';
+import { ReportDialog } from '@/components/ReportDialog';
 
 export default function ShowcaseDetailPage() {
     const params = useParams();
@@ -33,6 +34,7 @@ export default function ShowcaseDetailPage() {
     const [isSubmittingComment, setIsSubmittingComment] = useState(false);
     const [replyToId, setReplyToId] = useState<string | null>(null);
     const [replyContent, setReplyContent] = useState('');
+    const [reportDialogOpen, setReportDialogOpen] = useState(false);
 
     useEffect(() => {
         async function loadPost() {
@@ -501,6 +503,17 @@ export default function ShowcaseDetailPage() {
                                 Edit Post
                             </Link>
                         )}
+
+                        {/* Report Button */}
+                        {session && session?.user?.id !== post.author.id && session?.user?.id !== post.ownerUser?.id && (
+                            <button
+                                onClick={() => setReportDialogOpen(true)}
+                                className="flex items-center justify-center gap-2 w-full py-2.5 bg-[#032125] text-destructive rounded-lg font-nunito font-semibold hover:bg-destructive/10 transition-colors border border-destructive/20"
+                            >
+                                <Icon icon="mdi:flag-outline" />
+                                Report Post
+                            </button>
+                        )}
                     </div>
 
                     {/* Linked Resource */}
@@ -538,6 +551,15 @@ export default function ShowcaseDetailPage() {
                     )}
                 </div>
             </div>
+
+            {/* Report Dialog */}
+            <ReportDialog
+                type="showcase_post"
+                targetId={post.id}
+                targetName={post.title}
+                open={reportDialogOpen}
+                onOpenChange={setReportDialogOpen}
+            />
         </div>
     );
 }

@@ -56,6 +56,8 @@ enum ReportReason {
   NAME_SQUATTING
   POOR_DESCRIPTION
   INVALID_METADATA
+  HARASSMENT
+  IMPERSONATION
   OTHER
 }
 
@@ -69,7 +71,11 @@ enum ReportStatus {
 enum ReportResourceType {
   USER
   RESOURCE
-  // Future: SERVER, etc.
+  RESOURCE_VERSION
+  RESOURCE_COMMENT
+  SHOWCASE_POST
+  SHOWCASE_POST_COMMENT
+  SERVER
 }
 
 enum SocialLinkType {
@@ -211,6 +217,7 @@ model User {
   // Reports
   submittedReports Report[] @relation("ReportSubmitter")
   handledReports   Report[] @relation("ReportHandler")
+  reportsAgainst   Report[] @relation("ReportedUser")
 
   // Badges
   userBadges UserBadge[] @relation("UserBadges")
@@ -497,6 +504,7 @@ model Server {
   statusHistory     ServerStatusHistory[]
   socialLinks       ServerSocialLink[]           @relation("ServerSocialLinks")
   descriptionImages ServerDescriptionImage[] // Inline images in description
+  reports           Report[]                     @relation("ReportedServer")
 
   @@index([slug])
   @@index([status])
@@ -671,10 +679,31 @@ model Report {
 
   // Report details
   resourceType ReportResourceType
-  resourceId   String // ID of the reported resource (user, server, etc.)
   reason       ReportReason
   description  String?            @db.Text // Additional context if reason is OTHER
   status       ReportStatus       @default(PENDING)
+
+  // Polymorphic relations (only one should be set based on resourceType)
+  reportedUserId             String?
+  reportedUser               User?                @relation("ReportedUser", fields: [reportedUserId], references: [id], onDelete: Cascade)
+
+  reportedResourceId         String?
+  reportedResource           Resource?            @relation("ReportedResource", fields: [reportedResourceId], references: [id], onDelete: Cascade)
+
+  reportedResourceVersionId  String?
+  reportedResourceVersion    ResourceVersion?     @relation("ReportedResourceVersion", fields: [reportedResourceVersionId], references: [id], onDelete: Cascade)
+
+  reportedResourceCommentId  String?
+  reportedResourceComment    ResourceComment?     @relation("ReportedResourceComment", fields: [reportedResourceCommentId], references: [id], onDelete: Cascade)
+
+  reportedShowcasePostId     String?
+  reportedShowcasePost       ShowcasePost?        @relation("ReportedShowcasePost", fields: [reportedShowcasePostId], references: [id], onDelete: Cascade)
+
+  reportedShowcaseCommentId  String?
+  reportedShowcaseComment    ShowcasePostComment? @relation("ReportedShowcaseComment", fields: [reportedShowcaseCommentId], references: [id], onDelete: Cascade)
+
+  reportedServerId           String?
+  reportedServer             Server?              @relation("ReportedServer", fields: [reportedServerId], references: [id], onDelete: Cascade)
 
   // Reporter
   reporterId String
@@ -686,7 +715,14 @@ model Report {
   handledAt DateTime?
   response  String?   @db.Text // Moderator's response or notes
 
-  @@index([resourceType, resourceId])
+  @@index([resourceType])
+  @@index([reportedUserId])
+  @@index([reportedResourceId])
+  @@index([reportedResourceVersionId])
+  @@index([reportedResourceCommentId])
+  @@index([reportedShowcasePostId])
+  @@index([reportedShowcaseCommentId])
+  @@index([reportedServerId])
   @@index([reporterId])
   @@index([status])
   @@index([createdAt])
@@ -816,6 +852,9 @@ model Resource {
   // Comments
   comments      ResourceComment[]
   commentCount  Int @default(0)
+
+  // Reports
+  reports       Report[] @relation("ReportedResource")
 
   // Moderation
   moderationNotes String? // Internal staff notes
@@ -1141,6 +1180,7 @@ model ResourceVersion {
   dependencies      ResourceVersionDependency[]
   commentsAtVersion ResourceComment[]           @relation("CommentAtVersion")
   downloadCount     Int                         @default(0)
+  reports           Report[]                    @relation("ReportedResourceVersion")
 
   @@unique([resourceId, versionNumber])
   @@index([resourceId, channel])
@@ -1564,6 +1604,9 @@ model ShowcasePost {
   // Optional link to published resource
   linkedResourceId String?
   linkedResource   Resource? @relation("LinkedShowcase", fields: [linkedResourceId], references: [id], onDelete: SetNull)
+
+  // Reports
+  reports Report[] @relation("ReportedShowcasePost")
   
   // Timestamps
   createdAt DateTime @default(now())
@@ -1625,6 +1668,7 @@ model ShowcasePostComment {
   post    ShowcasePost          @relation(fields: [postId], references: [id], onDelete: Cascade)
   parent  ShowcasePostComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
   replies ShowcasePostComment[] @relation("CommentReplies")
+  reports Report[]              @relation("ReportedShowcaseComment")
   
   @@index([postId, createdAt])
   @@index([userId])
@@ -1651,6 +1695,7 @@ model ResourceComment {
   version  ResourceVersion?   @relation("CommentAtVersion", fields: [versionId], references: [id], onDelete: SetNull)
   parent   ResourceComment?   @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
   replies  ResourceComment[]  @relation("CommentReplies")
+  reports  Report[]           @relation("ReportedResourceComment")
 
   @@index([resourceId, createdAt])
   @@index([userId])

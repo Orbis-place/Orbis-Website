@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
-import { Download, Calendar, FileText, ChevronDown, FileIcon, Loader2 } from 'lucide-react';
+import { Download, Calendar, FileText, ChevronDown, FileIcon, Loader2, Flag } from 'lucide-react';
 import { useResource } from '@/contexts/ResourceContext';
 import { Badge } from '@/components/ui/badge';
 import { TiptapViewer } from '@/components/TiptapViewer';
 import { Icon } from '@iconify/react';
+import { ReportDialog } from '@/components/ReportDialog';
 
 // ============================================
 // TYPES
@@ -92,10 +93,12 @@ const ChannelBadge = ({ channel }: { channel: ResourceVersion['channel'] }) => {
 interface VersionItemProps {
     version: ResourceVersion;
     resourceId: string;
+    resourceName: string;
 }
 
-const VersionItem = ({ version, resourceId }: VersionItemProps) => {
+const VersionItem = ({ version, resourceId, resourceName }: VersionItemProps) => {
     const [isOpen, setIsOpen] = useState(false);
+    const [reportDialogOpen, setReportDialogOpen] = useState(false);
 
     const handleDownload = (e: React.MouseEvent, fileId?: string) => {
         e.stopPropagation();
@@ -104,6 +107,11 @@ const VersionItem = ({ version, resourceId }: VersionItemProps) => {
 
         const downloadUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/resources/${resourceId}/versions/${version.id}/download/${targetFileId}`;
         window.open(downloadUrl, '_blank');
+    };
+
+    const handleReport = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setReportDialogOpen(true);
     };
 
     return (
@@ -165,6 +173,13 @@ const VersionItem = ({ version, resourceId }: VersionItemProps) => {
 
                     <div className="flex items-center gap-3">
                         <button
+                            onClick={handleReport}
+                            className="p-2.5 hover:bg-destructive/10 rounded-full transition-colors group"
+                            title="Report version"
+                        >
+                            <Flag className="w-5 h-5 text-[#C7F4FA]/50 group-hover:text-destructive" />
+                        </button>
+                        <button
                             onClick={(e) => handleDownload(e)}
                             disabled={!version.primaryFileId}
                             className="flex items-center gap-2 px-6 py-3 bg-[#109EB1] hover:bg-[#0D8A9A] disabled:opacity-50 disabled:cursor-not-allowed rounded-full font-hebden font-bold text-base text-[#C7F4FA] transition-all shadow-lg whitespace-nowrap"
@@ -207,8 +222,8 @@ const VersionItem = ({ version, resourceId }: VersionItemProps) => {
                                     <div
                                         key={file.id}
                                         className={`flex items-center justify-between p-3 rounded-lg ${file.id === version.primaryFileId
-                                                ? 'bg-[#109EB1]/10 border border-[#109EB1]/30'
-                                                : 'bg-[#032125]'
+                                            ? 'bg-[#109EB1]/10 border border-[#109EB1]/30'
+                                            : 'bg-[#032125]'
                                             }`}
                                     >
                                         <div className="flex items-center gap-3 min-w-0">
@@ -238,6 +253,15 @@ const VersionItem = ({ version, resourceId }: VersionItemProps) => {
                     )}
                 </div>
             </div>
+
+            {/* Report Dialog */}
+            <ReportDialog
+                type="resource_version"
+                targetId={version.id}
+                targetName={`${resourceName} v${version.versionNumber}`}
+                open={reportDialogOpen}
+                onOpenChange={setReportDialogOpen}
+            />
         </div>
     );
 };
@@ -317,8 +341,8 @@ export default function VersionsPage() {
                                 key={channel}
                                 onClick={() => toggleChannel(channel)}
                                 className={`px-4 py-2 rounded-full font-hebden font-semibold text-sm transition-all border border-[#084B54] ${selectedChannels.includes(channel)
-                                        ? getChannelColor(channel)
-                                        : 'bg-[#06363D] text-[#C7F4FA]/60 hover:text-[#C7F4FA]'
+                                    ? getChannelColor(channel)
+                                    : 'bg-[#06363D] text-[#C7F4FA]/60 hover:text-[#C7F4FA]'
                                     }`}
                             >
                                 {channel.charAt(0) + channel.slice(1).toLowerCase()}
@@ -334,7 +358,7 @@ export default function VersionsPage() {
             <div className="flex flex-col gap-4">
                 {filteredVersions.length > 0 ? (
                     filteredVersions.map((version) => (
-                        <VersionItem key={version.id} version={version} resourceId={resource.id} />
+                        <VersionItem key={version.id} version={version} resourceId={resource.id} resourceName={resource.name} />
                     ))
                 ) : versions.length === 0 ? (
                     <div className="bg-[#06363D] border border-[#084B54] rounded-[25px] p-12 text-center">

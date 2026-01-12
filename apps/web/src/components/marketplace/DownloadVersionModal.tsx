@@ -5,7 +5,8 @@ import { OrbisDialog } from '@/components/OrbisDialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Icon } from '@iconify/react';
-import { Download, FileIcon } from 'lucide-react';
+import { Download, FileIcon, Flag } from 'lucide-react';
+import { ReportDialog } from '@/components/ReportDialog';
 
 // ============================================
 // TYPES
@@ -94,6 +95,8 @@ export function DownloadVersionModal({
     const [versions, setVersions] = useState<ResourceVersion[]>([]);
     const [selectedChannel, setSelectedChannel] = useState<ResourceVersion['channel'] | 'ALL'>('RELEASE');
     const [expandedVersion, setExpandedVersion] = useState<string | null>(null);
+    const [reportDialogOpen, setReportDialogOpen] = useState(false);
+    const [versionToReport, setVersionToReport] = useState<ResourceVersion | null>(null);
 
     // Fetch versions when modal opens
     useEffect(() => {
@@ -268,6 +271,17 @@ export function DownloadVersionModal({
                                             </div>
 
                                             <div className="flex items-center gap-2 flex-shrink-0">
+                                                {/* Report button */}
+                                                <button
+                                                    onClick={() => {
+                                                        setVersionToReport(version);
+                                                        setReportDialogOpen(true);
+                                                    }}
+                                                    className="p-2 hover:bg-destructive/10 rounded-lg transition-colors group"
+                                                    title="Report version"
+                                                >
+                                                    <Flag className="w-4 h-4 text-muted-foreground group-hover:text-destructive" />
+                                                </button>
                                                 {version.files.length > 1 && (
                                                     <button
                                                         onClick={() =>
@@ -344,6 +358,20 @@ export function DownloadVersionModal({
                     </>
                 )}
             </div>
+
+            {/* Report Dialog */}
+            {versionToReport && (
+                <ReportDialog
+                    type="resource_version"
+                    targetId={versionToReport.id}
+                    targetName={`${resourceName} v${versionToReport.versionNumber}`}
+                    open={reportDialogOpen}
+                    onOpenChange={(open) => {
+                        setReportDialogOpen(open);
+                        if (!open) setVersionToReport(null);
+                    }}
+                />
+            )}
         </OrbisDialog>
     );
 }

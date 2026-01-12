@@ -9,8 +9,11 @@ export class ReportService {
     constructor() {
     }
 
+    // ============================================
+    // USER REPORTS
+    // ============================================
+
     async reportUser(reporterId: string, userId: string, createReportDto: CreateReportDto) {
-        // Check if user exists
         const userExists = await prisma.user.findUnique({
             where: { id: userId },
         });
@@ -19,25 +22,20 @@ export class ReportService {
             throw new NotFoundException('User not found');
         }
 
-        // Prevent self-reporting
         if (reporterId === userId) {
             throw new BadRequestException('You cannot report yourself');
         }
 
-        // Validate description is provided when reason is OTHER
         if (createReportDto.reason === 'OTHER' && !createReportDto.description) {
             throw new BadRequestException('Description is required when reason is OTHER');
         }
 
-        // Check if user already reported this resource
         const existingReport = await prisma.report.findFirst({
             where: {
                 reporterId,
                 resourceType: 'USER',
-                resourceId: userId,
-                status: {
-                    in: ['PENDING', 'UNDER_REVIEW'],
-                },
+                reportedUserId: userId,
+                status: { in: ['PENDING', 'UNDER_REVIEW'] },
             },
         });
 
@@ -45,60 +43,50 @@ export class ReportService {
             throw new BadRequestException('You have already reported this user');
         }
 
-        // Create the report
         return prisma.report.create({
             data: {
                 resourceType: 'USER',
-                resourceId: userId,
+                reportedUserId: userId,
                 reason: createReportDto.reason,
                 description: createReportDto.description,
                 reporterId,
             },
             include: {
                 reporter: {
-                    select: {
-                        id: true,
-                        username: true,
-                        displayName: true,
-                    },
+                    select: { id: true, username: true, displayName: true },
                 },
             },
         });
     }
 
+    // ============================================
+    // RESOURCE REPORTS
+    // ============================================
+
     async reportResource(reporterId: string, resourceId: string, createReportDto: CreateReportDto) {
-        // Check if resource exists
         const resourceExists = await prisma.resource.findUnique({
             where: { id: resourceId },
-            select: {
-                id: true,
-                ownerUserId: true
-            },
+            select: { id: true, ownerUserId: true },
         });
 
         if (!resourceExists) {
             throw new NotFoundException('Resource not found');
         }
 
-        // Prevent reporting own resource
         if (reporterId === resourceExists.ownerUserId) {
             throw new BadRequestException('You cannot report your own resource');
         }
 
-        // Validate description is provided when reason is OTHER
         if (createReportDto.reason === 'OTHER' && !createReportDto.description) {
             throw new BadRequestException('Description is required when reason is OTHER');
         }
 
-        // Check if user already reported this resource
         const existingReport = await prisma.report.findFirst({
             where: {
                 reporterId,
                 resourceType: 'RESOURCE',
-                resourceId: resourceId,
-                status: {
-                    in: ['PENDING', 'UNDER_REVIEW'],
-                },
+                reportedResourceId: resourceId,
+                status: { in: ['PENDING', 'UNDER_REVIEW'] },
             },
         });
 
@@ -106,39 +94,294 @@ export class ReportService {
             throw new BadRequestException('You have already reported this resource');
         }
 
-        // Create the report
         return prisma.report.create({
             data: {
                 resourceType: 'RESOURCE',
-                resourceId: resourceId,
+                reportedResourceId: resourceId,
                 reason: createReportDto.reason,
                 description: createReportDto.description,
                 reporterId,
             },
             include: {
                 reporter: {
-                    select: {
-                        id: true,
-                        username: true,
-                        displayName: true,
-                    },
+                    select: { id: true, username: true, displayName: true },
                 },
             },
         });
     }
 
+    // ============================================
+    // RESOURCE VERSION REPORTS
+    // ============================================
+
+    async reportResourceVersion(reporterId: string, versionId: string, createReportDto: CreateReportDto) {
+        const versionExists = await prisma.resourceVersion.findUnique({
+            where: { id: versionId },
+            select: {
+                id: true,
+                resource: {
+                    select: { ownerUserId: true },
+                },
+            },
+        });
+
+        if (!versionExists) {
+            throw new NotFoundException('Resource version not found');
+        }
+
+        if (reporterId === versionExists.resource.ownerUserId) {
+            throw new BadRequestException('You cannot report your own resource version');
+        }
+
+        if (createReportDto.reason === 'OTHER' && !createReportDto.description) {
+            throw new BadRequestException('Description is required when reason is OTHER');
+        }
+
+        const existingReport = await prisma.report.findFirst({
+            where: {
+                reporterId,
+                resourceType: 'RESOURCE_VERSION',
+                reportedResourceVersionId: versionId,
+                status: { in: ['PENDING', 'UNDER_REVIEW'] },
+            },
+        });
+
+        if (existingReport) {
+            throw new BadRequestException('You have already reported this version');
+        }
+
+        return prisma.report.create({
+            data: {
+                resourceType: 'RESOURCE_VERSION',
+                reportedResourceVersionId: versionId,
+                reason: createReportDto.reason,
+                description: createReportDto.description,
+                reporterId,
+            },
+            include: {
+                reporter: {
+                    select: { id: true, username: true, displayName: true },
+                },
+            },
+        });
+    }
+
+    // ============================================
+    // RESOURCE COMMENT REPORTS
+    // ============================================
+
+    async reportResourceComment(reporterId: string, commentId: string, createReportDto: CreateReportDto) {
+        const commentExists = await prisma.resourceComment.findUnique({
+            where: { id: commentId },
+            select: { id: true, userId: true },
+        });
+
+        if (!commentExists) {
+            throw new NotFoundException('Comment not found');
+        }
+
+        if (reporterId === commentExists.userId) {
+            throw new BadRequestException('You cannot report your own comment');
+        }
+
+        if (createReportDto.reason === 'OTHER' && !createReportDto.description) {
+            throw new BadRequestException('Description is required when reason is OTHER');
+        }
+
+        const existingReport = await prisma.report.findFirst({
+            where: {
+                reporterId,
+                resourceType: 'RESOURCE_COMMENT',
+                reportedResourceCommentId: commentId,
+                status: { in: ['PENDING', 'UNDER_REVIEW'] },
+            },
+        });
+
+        if (existingReport) {
+            throw new BadRequestException('You have already reported this comment');
+        }
+
+        return prisma.report.create({
+            data: {
+                resourceType: 'RESOURCE_COMMENT',
+                reportedResourceCommentId: commentId,
+                reason: createReportDto.reason,
+                description: createReportDto.description,
+                reporterId,
+            },
+            include: {
+                reporter: {
+                    select: { id: true, username: true, displayName: true },
+                },
+            },
+        });
+    }
+
+    // ============================================
+    // SHOWCASE POST REPORTS
+    // ============================================
+
+    async reportShowcasePost(reporterId: string, postId: string, createReportDto: CreateReportDto) {
+        const postExists = await prisma.showcasePost.findUnique({
+            where: { id: postId },
+            select: { id: true, authorId: true, ownerUserId: true },
+        });
+
+        if (!postExists) {
+            throw new NotFoundException('Showcase post not found');
+        }
+
+        const ownerId = postExists.ownerUserId || postExists.authorId;
+        if (reporterId === ownerId) {
+            throw new BadRequestException('You cannot report your own showcase post');
+        }
+
+        if (createReportDto.reason === 'OTHER' && !createReportDto.description) {
+            throw new BadRequestException('Description is required when reason is OTHER');
+        }
+
+        const existingReport = await prisma.report.findFirst({
+            where: {
+                reporterId,
+                resourceType: 'SHOWCASE_POST',
+                reportedShowcasePostId: postId,
+                status: { in: ['PENDING', 'UNDER_REVIEW'] },
+            },
+        });
+
+        if (existingReport) {
+            throw new BadRequestException('You have already reported this showcase post');
+        }
+
+        return prisma.report.create({
+            data: {
+                resourceType: 'SHOWCASE_POST',
+                reportedShowcasePostId: postId,
+                reason: createReportDto.reason,
+                description: createReportDto.description,
+                reporterId,
+            },
+            include: {
+                reporter: {
+                    select: { id: true, username: true, displayName: true },
+                },
+            },
+        });
+    }
+
+    // ============================================
+    // SHOWCASE COMMENT REPORTS
+    // ============================================
+
+    async reportShowcaseComment(reporterId: string, commentId: string, createReportDto: CreateReportDto) {
+        const commentExists = await prisma.showcasePostComment.findUnique({
+            where: { id: commentId },
+            select: { id: true, userId: true },
+        });
+
+        if (!commentExists) {
+            throw new NotFoundException('Comment not found');
+        }
+
+        if (reporterId === commentExists.userId) {
+            throw new BadRequestException('You cannot report your own comment');
+        }
+
+        if (createReportDto.reason === 'OTHER' && !createReportDto.description) {
+            throw new BadRequestException('Description is required when reason is OTHER');
+        }
+
+        const existingReport = await prisma.report.findFirst({
+            where: {
+                reporterId,
+                resourceType: 'SHOWCASE_POST_COMMENT',
+                reportedShowcaseCommentId: commentId,
+                status: { in: ['PENDING', 'UNDER_REVIEW'] },
+            },
+        });
+
+        if (existingReport) {
+            throw new BadRequestException('You have already reported this comment');
+        }
+
+        return prisma.report.create({
+            data: {
+                resourceType: 'SHOWCASE_POST_COMMENT',
+                reportedShowcaseCommentId: commentId,
+                reason: createReportDto.reason,
+                description: createReportDto.description,
+                reporterId,
+            },
+            include: {
+                reporter: {
+                    select: { id: true, username: true, displayName: true },
+                },
+            },
+        });
+    }
+
+    // ============================================
+    // SERVER REPORTS
+    // ============================================
+
+    async reportServer(reporterId: string, serverId: string, createReportDto: CreateReportDto) {
+        const serverExists = await prisma.server.findUnique({
+            where: { id: serverId },
+            select: { id: true, ownerUserId: true },
+        });
+
+        if (!serverExists) {
+            throw new NotFoundException('Server not found');
+        }
+
+        if (reporterId === serverExists.ownerUserId) {
+            throw new BadRequestException('You cannot report your own server');
+        }
+
+        if (createReportDto.reason === 'OTHER' && !createReportDto.description) {
+            throw new BadRequestException('Description is required when reason is OTHER');
+        }
+
+        const existingReport = await prisma.report.findFirst({
+            where: {
+                reporterId,
+                resourceType: 'SERVER',
+                reportedServerId: serverId,
+                status: { in: ['PENDING', 'UNDER_REVIEW'] },
+            },
+        });
+
+        if (existingReport) {
+            throw new BadRequestException('You have already reported this server');
+        }
+
+        return prisma.report.create({
+            data: {
+                resourceType: 'SERVER',
+                reportedServerId: serverId,
+                reason: createReportDto.reason,
+                description: createReportDto.description,
+                reporterId,
+            },
+            include: {
+                reporter: {
+                    select: { id: true, username: true, displayName: true },
+                },
+            },
+        });
+    }
+
+    // ============================================
+    // USER METHODS (GET/CANCEL)
+    // ============================================
+
     async getMyReports(userId: string) {
         return prisma.report.findMany({
-            where: {
-                reporterId: userId,
-            },
-            orderBy: {
-                createdAt: 'desc',
-            },
+            where: { reporterId: userId },
+            orderBy: { createdAt: 'desc' },
             select: {
                 id: true,
                 resourceType: true,
-                resourceId: true,
                 reason: true,
                 description: true,
                 status: true,
@@ -146,6 +389,14 @@ export class ReportService {
                 updatedAt: true,
                 handledAt: true,
                 response: true,
+                // Include reported entity info
+                reportedUser: { select: { id: true, username: true, displayName: true } },
+                reportedResource: { select: { id: true, name: true, slug: true } },
+                reportedResourceVersion: { select: { id: true, versionNumber: true, resource: { select: { name: true } } } },
+                reportedResourceComment: { select: { id: true, content: true } },
+                reportedShowcasePost: { select: { id: true, title: true } },
+                reportedShowcaseComment: { select: { id: true, content: true } },
+                reportedServer: { select: { id: true, name: true, slug: true } },
             },
         });
     }
@@ -156,7 +407,6 @@ export class ReportService {
             select: {
                 id: true,
                 resourceType: true,
-                resourceId: true,
                 reason: true,
                 description: true,
                 status: true,
@@ -165,6 +415,13 @@ export class ReportService {
                 handledAt: true,
                 response: true,
                 reporterId: true,
+                reportedUser: { select: { id: true, username: true, displayName: true } },
+                reportedResource: { select: { id: true, name: true, slug: true } },
+                reportedResourceVersion: { select: { id: true, versionNumber: true, resource: { select: { name: true } } } },
+                reportedResourceComment: { select: { id: true, content: true } },
+                reportedShowcasePost: { select: { id: true, title: true } },
+                reportedShowcaseComment: { select: { id: true, content: true } },
+                reportedServer: { select: { id: true, name: true, slug: true } },
             },
         });
 
@@ -172,12 +429,10 @@ export class ReportService {
             throw new NotFoundException('Report not found');
         }
 
-        // Check if the report belongs to the user
         if (report.reporterId !== userId) {
             throw new ForbiddenException('You do not have permission to view this report');
         }
 
-        // Remove reporterId from the response
         const { reporterId, ...reportData } = report;
         return reportData;
     }
@@ -185,31 +440,22 @@ export class ReportService {
     async cancelReport(userId: string, reportId: string) {
         const report = await prisma.report.findUnique({
             where: { id: reportId },
-            select: {
-                id: true,
-                reporterId: true,
-                status: true,
-            },
+            select: { id: true, reporterId: true, status: true },
         });
 
         if (!report) {
             throw new NotFoundException('Report not found');
         }
 
-        // Check if the report belongs to the user
         if (report.reporterId !== userId) {
             throw new ForbiddenException('You do not have permission to cancel this report');
         }
 
-        // Only allow canceling PENDING reports
         if (report.status !== 'PENDING') {
             throw new BadRequestException('Only pending reports can be canceled');
         }
 
-        // Delete the report
-        await prisma.report.delete({
-            where: { id: reportId },
-        });
+        await prisma.report.delete({ where: { id: reportId } });
 
         return { message: 'Report canceled successfully' };
     }
@@ -219,7 +465,6 @@ export class ReportService {
     // ============================================
 
     async getAllReports(moderatorId: string, status?: string) {
-        // Verify moderator has proper role
         const moderator = await prisma.user.findUnique({
             where: { id: moderatorId },
             select: { role: true },
@@ -233,31 +478,26 @@ export class ReportService {
 
         return prisma.report.findMany({
             where,
-            orderBy: {
-                createdAt: 'desc',
-            },
+            orderBy: { createdAt: 'desc' },
             include: {
                 reporter: {
-                    select: {
-                        id: true,
-                        username: true,
-                        displayName: true,
-                        email: true,
-                    },
+                    select: { id: true, username: true, displayName: true, email: true },
                 },
                 handler: {
-                    select: {
-                        id: true,
-                        username: true,
-                        displayName: true,
-                    },
+                    select: { id: true, username: true, displayName: true },
                 },
+                reportedUser: { select: { id: true, username: true, displayName: true } },
+                reportedResource: { select: { id: true, name: true, slug: true } },
+                reportedResourceVersion: { select: { id: true, versionNumber: true, resource: { select: { name: true } } } },
+                reportedResourceComment: { select: { id: true, content: true } },
+                reportedShowcasePost: { select: { id: true, title: true } },
+                reportedShowcaseComment: { select: { id: true, content: true } },
+                reportedServer: { select: { id: true, name: true, slug: true } },
             },
         });
     }
 
     async getReportById(moderatorId: string, reportId: string) {
-        // Verify moderator has proper role
         const moderator = await prisma.user.findUnique({
             where: { id: moderatorId },
             select: { role: true },
@@ -271,21 +511,18 @@ export class ReportService {
             where: { id: reportId },
             include: {
                 reporter: {
-                    select: {
-                        id: true,
-                        username: true,
-                        displayName: true,
-                        email: true,
-                        createdAt: true,
-                    },
+                    select: { id: true, username: true, displayName: true, email: true, createdAt: true },
                 },
                 handler: {
-                    select: {
-                        id: true,
-                        username: true,
-                        displayName: true,
-                    },
+                    select: { id: true, username: true, displayName: true },
                 },
+                reportedUser: { select: { id: true, username: true, displayName: true, image: true } },
+                reportedResource: { select: { id: true, name: true, slug: true, iconUrl: true } },
+                reportedResourceVersion: { select: { id: true, versionNumber: true, resource: { select: { name: true, slug: true } } } },
+                reportedResourceComment: { select: { id: true, content: true, user: { select: { username: true } } } },
+                reportedShowcasePost: { select: { id: true, title: true, thumbnailUrl: true } },
+                reportedShowcaseComment: { select: { id: true, content: true, user: { select: { username: true } } } },
+                reportedServer: { select: { id: true, name: true, slug: true, logoUrl: true } },
             },
         });
 
@@ -297,7 +534,6 @@ export class ReportService {
     }
 
     async moderateReport(moderatorId: string, reportId: string, moderateDto: ModerateReportDto) {
-        // Verify moderator has proper role
         const moderator = await prisma.user.findUnique({
             where: { id: moderatorId },
             select: { role: true },
@@ -307,7 +543,6 @@ export class ReportService {
             throw new ForbiddenException('You do not have permission to moderate reports');
         }
 
-        // Check if report exists
         const report = await prisma.report.findUnique({
             where: { id: reportId },
         });
@@ -316,12 +551,10 @@ export class ReportService {
             throw new NotFoundException('Report not found');
         }
 
-        // Check if report is already handled
         if (report.status === 'RESOLVED' || report.status === 'DISMISSED') {
             throw new BadRequestException('This report has already been handled');
         }
 
-        // Map action to status
         const statusMap = {
             [ReportAction.DISMISS]: 'DISMISSED',
             [ReportAction.RESOLVE]: 'RESOLVED',
@@ -330,7 +563,6 @@ export class ReportService {
 
         const newStatus = statusMap[moderateDto.action];
 
-        // Update report
         return prisma.report.update({
             where: { id: reportId },
             data: {
@@ -341,25 +573,16 @@ export class ReportService {
             },
             include: {
                 reporter: {
-                    select: {
-                        id: true,
-                        username: true,
-                        displayName: true,
-                    },
+                    select: { id: true, username: true, displayName: true },
                 },
                 handler: {
-                    select: {
-                        id: true,
-                        username: true,
-                        displayName: true,
-                    },
+                    select: { id: true, username: true, displayName: true },
                 },
             },
         });
     }
 
     async deleteReport(moderatorId: string, reportId: string) {
-        // Verify moderator has proper role (only ADMIN and SUPER_ADMIN can delete)
         const moderator = await prisma.user.findUnique({
             where: { id: moderatorId },
             select: { role: true },
@@ -369,7 +592,6 @@ export class ReportService {
             throw new ForbiddenException('You do not have permission to delete reports');
         }
 
-        // Check if report exists
         const report = await prisma.report.findUnique({
             where: { id: reportId },
         });
@@ -378,10 +600,7 @@ export class ReportService {
             throw new NotFoundException('Report not found');
         }
 
-        // Delete the report
-        await prisma.report.delete({
-            where: { id: reportId },
-        });
+        await prisma.report.delete({ where: { id: reportId } });
 
         return { message: 'Report deleted successfully' };
     }

@@ -10,7 +10,8 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { formatDistanceToNow } from 'date-fns';
-import { MessageCircle, Reply, Trash2, Send, LogIn } from 'lucide-react';
+import { MessageCircle, Reply, Trash2, Send, LogIn, Flag } from 'lucide-react';
+import { ReportDialog } from '@/components/ReportDialog';
 
 export default function ResourceComments() {
     const { resource, isOwner } = useResource();
@@ -25,6 +26,8 @@ export default function ResourceComments() {
     const [totalPages, setTotalPages] = useState(1);
     const [total, setTotal] = useState(0);
     const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set());
+    const [reportDialogOpen, setReportDialogOpen] = useState(false);
+    const [commentToReport, setCommentToReport] = useState<ResourceComment | null>(null);
 
     const MAX_COMMENT_LENGTH = 500;
 
@@ -214,6 +217,19 @@ export default function ResourceComments() {
                                 Delete
                             </button>
                         )}
+                        {/* Report button - only if not the comment author */}
+                        {session?.user && session.user.id !== comment.userId && (
+                            <button
+                                onClick={() => {
+                                    setCommentToReport(comment);
+                                    setReportDialogOpen(true);
+                                }}
+                                className="flex items-center gap-1 text-muted-foreground hover:text-destructive transition-colors text-sm font-nunito"
+                            >
+                                <Flag className="w-4 h-4" />
+                                Report
+                            </button>
+                        )}
                     </div>
 
                     {/* Reply form */}
@@ -347,6 +363,20 @@ export default function ResourceComments() {
                         </div>
                     )}
                 </div>
+            )}
+
+            {/* Report Dialog */}
+            {commentToReport && (
+                <ReportDialog
+                    type="resource_comment"
+                    targetId={commentToReport.id}
+                    targetName={`Comment by ${commentToReport.user.displayName || commentToReport.user.username}`}
+                    open={reportDialogOpen}
+                    onOpenChange={(open) => {
+                        setReportDialogOpen(open);
+                        if (!open) setCommentToReport(null);
+                    }}
+                />
             )}
         </div>
     );

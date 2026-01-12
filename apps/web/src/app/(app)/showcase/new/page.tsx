@@ -212,13 +212,13 @@ function NewShowcasePageContent() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {/* Header */}
             <div className="mb-8">
-                <Link
-                    href="/showcase"
+                <button
+                    onClick={() => router.back()}
                     className="inline-flex items-center gap-2 text-[#C7F4FA]/70 hover:text-[#C7F4FA] transition-colors mb-4"
                 >
                     <Icon icon="mdi:arrow-left" />
-                    <span className="font-nunito">Back to Showcase</span>
-                </Link>
+                    <span className="font-nunito">Back</span>
+                </button>
                 <h1 className="font-hebden text-3xl text-[#C7F4FA]">Create Showcase Post</h1>
                 <p className="mt-2 text-[#C7F4FA]/60 font-nunito">
                     Share your Hytale creations with the community
