@@ -69,23 +69,6 @@
               ></span>
             </button>
           </div>
-          <div class="flex items-center justify-between opacity-50">
-            <div>
-              <p class="font-medium">CurseForge</p>
-              <p class="text-sm text-muted-foreground">
-                CurseForge mod repository (Coming soon)
-              </p>
-            </div>
-            <button
-              disabled
-              aria-label="Toggle CurseForge source"
-              class="relative inline-flex h-6 w-11 items-center rounded-full bg-muted transition-colors"
-            >
-              <span
-                class="inline-block size-4 translate-x-1 transform rounded-full bg-white transition-transform"
-              ></span>
-            </button>
-          </div>
         </Card.Content>
       </Card.Root>
 

@@ -78,7 +78,7 @@
                 : 'text-[#c7f4fa]/70 group-hover:text-[#c7f4fa]',
             )}
           />
-          <span class="flex-1 text-left">Browse Mods</span>
+          <span class="flex-1 text-left">Browse</span>
           {#if isActive('/')}
             <ChevronRight class="size-4 opacity-50" />
           {/if}

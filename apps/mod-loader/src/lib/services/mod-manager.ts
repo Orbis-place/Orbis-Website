@@ -2,7 +2,6 @@ import type { IModSource } from './mod-source.interface';
 import type { Mod, ModDetails, ModFilters } from '../types/mod';
 import type { InstalledMod } from '../types/installed-mod';
 import { OrbisModSource } from './sources/orbis-source';
-import { CurseForgeModSource } from './sources/curseforge-source';
 
 /**
  * Central mod manager service
@@ -15,7 +14,6 @@ export class ModManager {
     constructor() {
         // Register available mod sources
         this.registerSource(new OrbisModSource());
-        this.registerSource(new CurseForgeModSource());
 
         // Enable Orbis by default
         this.activeSources.add('orbis');
