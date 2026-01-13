@@ -18,6 +18,7 @@
   import { modManager } from '$lib/services/mod-manager';
   import type { InstalledMod } from '$lib/types/installed-mod';
   import { invoke } from '@tauri-apps/api/core';
+  import { open } from '@tauri-apps/plugin-opener';
 
   const saveName = $derived($page.params.id);
   const currentSave = $derived($saves.find((s) => s.name === saveName));
@@ -64,6 +65,24 @@
     } catch (error) {
       console.error('Failed to toggle mod:', error);
       alert(`Failed to toggle mod: ${error}`);
+    }
+  }
+
+  async function openSaveFolder() {
+    if (!currentSave) return;
+    try {
+      await open(currentSave.path);
+    } catch (error) {
+      console.error('Failed to open save folder:', error);
+    }
+  }
+
+  async function openModFolder() {
+    if (!currentSave) return;
+    try {
+      await open(currentSave.path + '/mods');
+    } catch (error) {
+      console.error('Failed to open mod folder:', error);
     }
   }
 </script>
@@ -127,6 +146,8 @@
             size="icon"
             variant="outline"
             class="border-[#084b54] hover:bg-[#109eb1]/10 text-[#c7f4fa] bg-[#032125]"
+            onclick={openSaveFolder}
+            title="Open Save Folder"
           >
             <FolderOpen class="size-5" />
           </Button>
@@ -151,13 +172,7 @@
             variant="outline"
             size="sm"
             class="h-8 text-xs font-nunito border-[#084b54] bg-[#032125] text-[#c7f4fa] hover:bg-[#109eb1]/10 hover:text-[#c7f4fa]"
-          >
-            Check for Updates
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            class="h-8 text-xs font-nunito border-[#084b54] bg-[#032125] text-[#c7f4fa] hover:bg-[#109eb1]/10 hover:text-[#c7f4fa]"
+            onclick={openModFolder}
           >
             Open Mod Folder
           </Button>

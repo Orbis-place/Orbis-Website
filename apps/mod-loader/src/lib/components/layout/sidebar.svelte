@@ -106,8 +106,8 @@
       {#if isSavesOpen}
         <div transition:slide={{ duration: 200 }} class="space-y-1">
           {#each $saves as save}
-            {@const isSelected = $selectedSave?.path === save.path}
             {@const saveUrl = `/saves/${encodeURIComponent(save.name)}`}
+            {@const isSelected = $page.url.pathname.startsWith(saveUrl)}
             <!-- Using name as ID for demo -->
             <a
               href={saveUrl}
