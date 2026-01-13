@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import { Nunito } from 'next/font/google';
+import Script from 'next/script';
 import './globals.css';
 import { headers } from "next/headers";
 import { SessionProvider } from "@/components/providers/SessionProvider";
@@ -100,6 +101,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     return (
         <html lang="en">
             <body className={`${hebden.variable} ${nunito.variable}`}>
+                <Script
+                    defer
+                    data-domain="orbis.place"
+                    src="https://analytics.rematchtracker.com/js/script.outbound-links.js"
+                    strategy="afterInteractive"
+                />
+                <Script id="plausible-init" strategy="afterInteractive">
+                    {`window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }`}
+                </Script>
                 <SessionProvider initialSession={session}>
                     <ExternalLinkProvider>
                         {children}
