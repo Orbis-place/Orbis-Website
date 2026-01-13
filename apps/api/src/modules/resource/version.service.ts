@@ -14,7 +14,7 @@ import {
     UpdateChangelogDto,
     RejectVersionDto,
 } from './dtos/version.dto';
-import { prisma, VersionStatus, FileType, UserRole, NotificationType } from '@repo/db';
+import { prisma, VersionStatus, FileType, UserRole, NotificationType, ResourceStatus } from '@repo/db';
 import { NotificationService } from '../notification/notification.service';
 import * as crypto from 'crypto';
 import archiver from 'archiver';
@@ -447,6 +447,16 @@ export class VersionService {
             throw new BadRequestException('A primary file must be set before submitting');
         }
 
+        // Check if this is the first version being submitted
+        const approvedVersionsCount = await prisma.resourceVersion.count({
+            where: {
+                resourceId,
+                status: VersionStatus.APPROVED,
+            },
+        });
+
+        const isFirstVersion = approvedVersionsCount === 0;
+
         const updatedVersion = await prisma.resourceVersion.update({
             where: { id: versionId },
             data: { status: VersionStatus.PENDING },
@@ -460,6 +470,14 @@ export class VersionService {
                 primaryFile: true,
             },
         });
+
+        // If this is the first version and resource is DRAFT, update resource to PENDING
+        if (isFirstVersion && version.resource.status === ResourceStatus.DRAFT) {
+            await prisma.resource.update({
+                where: { id: resourceId },
+                data: { status: ResourceStatus.PENDING },
+            });
+        }
 
         return {
             message: 'Version submitted for review',
@@ -487,6 +505,16 @@ export class VersionService {
             throw new BadRequestException('A primary file must be set before resubmitting');
         }
 
+        // Check if this is the first version being resubmitted
+        const approvedVersionsCount = await prisma.resourceVersion.count({
+            where: {
+                resourceId,
+                status: VersionStatus.APPROVED,
+            },
+        });
+
+        const isFirstVersion = approvedVersionsCount === 0;
+
         const updatedVersion = await prisma.resourceVersion.update({
             where: { id: versionId },
             data: {
@@ -503,6 +531,14 @@ export class VersionService {
                 primaryFile: true,
             },
         });
+
+        // If this is the first version and resource is REJECTED or DRAFT, update resource to PENDING
+        if (isFirstVersion && (version.resource.status === ResourceStatus.REJECTED || version.resource.status === ResourceStatus.DRAFT)) {
+            await prisma.resource.update({
+                where: { id: resourceId },
+                data: { status: ResourceStatus.PENDING },
+            });
+        }
 
         return {
             message: 'Version resubmitted for review',
