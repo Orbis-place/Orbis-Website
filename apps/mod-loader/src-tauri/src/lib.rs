@@ -1,4 +1,5 @@
 mod mods;
+mod saves;
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
@@ -17,7 +18,9 @@ pub fn run() {
             greet,
             mods::get_installed_mods,
             mods::toggle_mod,
-            mods::add_mod_to_config
+            mods::add_mod_to_config,
+            mods::register_jar_in_config,
+            saves::import_save
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

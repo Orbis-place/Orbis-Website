@@ -2,6 +2,7 @@
   import '../app.css';
   import * as Tooltip from '$lib/components/ui/tooltip';
   import Sidebar from '$lib/components/layout/sidebar.svelte';
+  import Toaster from '$lib/components/ui/sonner.svelte';
 
   let { children } = $props();
 </script>
@@ -19,6 +20,7 @@
   />
 </svelte:head>
 
+<Toaster />
 <Tooltip.Provider>
   <div
     class="flex h-screen w-screen overflow-hidden bg-background text-foreground"

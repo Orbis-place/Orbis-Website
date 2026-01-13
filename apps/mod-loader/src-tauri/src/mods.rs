@@ -14,22 +14,30 @@ pub struct ModManifest {
     #[serde(rename = "Version")]
     pub version: String,
     #[serde(rename = "Description")]
+    #[serde(default)]
     pub description: String,
     #[serde(rename = "Authors")]
+    #[serde(default)]
     pub authors: Vec<ModAuthor>,
     #[serde(rename = "Website")]
     pub website: Option<String>,
     #[serde(rename = "ServerVersion")]
+    #[serde(default)]
     pub server_version: String,
     #[serde(rename = "Dependencies")]
+    #[serde(default)]
     pub dependencies: HashMap<String, String>,
     #[serde(rename = "OptionalDependencies")]
+    #[serde(default)]
     pub optional_dependencies: HashMap<String, String>,
     #[serde(rename = "DisabledByDefault")]
+    #[serde(default)]
     pub disabled_by_default: bool,
     #[serde(rename = "Main")]
+    #[serde(default)]
     pub main: String,
     #[serde(rename = "IncludesAssetPack")]
+    #[serde(default)]
     pub includes_asset_pack: bool,
 }
 
@@ -58,14 +66,17 @@ pub struct ModConfigEntry {
     pub enabled: bool,
 }
 
-/// Extract manifest.json from a .jar file
+/// Extract manifest from the downloaded jar and add to config.json from a .jar file
 fn extract_manifest_from_jar(jar_path: &Path) -> Result<ModManifest, String> {
+    println!("extract_manifest_from_jar: Opening {:?}", jar_path);
     let file = File::open(jar_path)
         .map_err(|e| format!("Failed to open jar file: {}", e))?;
     
+    println!("extract_manifest_from_jar: Reading zip archive");
     let mut archive = ZipArchive::new(file)
         .map_err(|e| format!("Failed to read jar archive: {}", e))?;
     
+    println!("extract_manifest_from_jar: Looking for manifest.json");
     let mut manifest_file = archive
         .by_name("manifest.json")
         .map_err(|e| format!("manifest.json not found in jar: {}", e))?;
@@ -75,6 +86,7 @@ fn extract_manifest_from_jar(jar_path: &Path) -> Result<ModManifest, String> {
         .read_to_string(&mut contents)
         .map_err(|e| format!("Failed to read manifest.json: {}", e))?;
     
+    println!("extract_manifest_from_jar: Parsing manifest");
     serde_json::from_str(&contents)
         .map_err(|e| format!("Failed to parse manifest.json: {}", e))
 }
@@ -110,10 +122,13 @@ fn write_mod_config(save_path: &Path, config: &ModConfig) -> Result<(), String> 
 
 #[tauri::command]
 pub fn get_installed_mods(save_path: String) -> Result<Vec<InstalledMod>, String> {
+    println!("get_installed_mods called with path: {}", save_path);
     let save_path = Path::new(&save_path);
     let mods_dir = save_path.join("mods");
+    println!("Looking for mods in: {:?}", mods_dir);
     
     if !mods_dir.exists() {
+        println!("Mods directory does not exist: {:?}", mods_dir);
         return Ok(Vec::new());
     }
     
@@ -129,11 +144,14 @@ pub fn get_installed_mods(save_path: String) -> Result<Vec<InstalledMod>, String
     for entry in entries {
         let entry = entry.map_err(|e| format!("Failed to read directory entry: {}", e))?;
         let path = entry.path();
+        println!("Checking file: {:?}", path);
         
         // Check if it's a .jar file
         if path.extension().and_then(|s| s.to_str()) == Some("jar") {
+            println!("Found jar file, extracting manifest...");
             match extract_manifest_from_jar(&path) {
                 Ok(manifest) => {
+                    println!("Successfully extracted manifest for {}", manifest.name);
                     let mod_key = format!("{}:{}", manifest.group, manifest.name);
                     let enabled = config
                         .mods
@@ -159,6 +177,7 @@ pub fn get_installed_mods(save_path: String) -> Result<Vec<InstalledMod>, String
         }
     }
     
+    println!("Found {} installed mods", installed_mods.len());
     Ok(installed_mods)
 }
 
@@ -194,4 +213,48 @@ pub fn add_mod_to_config(save_path: String, group: String, name: String) -> Resu
     }
     
     Ok(())
+}
+
+#[tauri::command]
+pub fn register_jar_in_config(save_path: String, jar_filename: String) -> Result<ModManifest, String> {
+    let save_path = Path::new(&save_path);
+    let mods_dir = save_path.join("mods");
+    let jar_path = mods_dir.join(&jar_filename);
+    
+    println!("Registering jar: {:?}", jar_path);
+    
+    if !jar_path.exists() {
+        let err = format!("Jar file not found: {:?}", jar_path);
+        println!("{}", err);
+        return Err(err);
+    }
+    
+    let manifest = match extract_manifest_from_jar(&jar_path) {
+        Ok(m) => m,
+        Err(e) => {
+            let err = format!("Failed to extract manifest from {:?}: {}", jar_path, e);
+            println!("{}", err);
+            return Err(err);
+        }
+    };
+    
+    let mut config = read_mod_config(save_path)?;
+    let mod_key = format!("{}:{}", manifest.group, manifest.name);
+    
+    if !config.mods.contains_key(&mod_key) {
+        println!("Adding {} to config", mod_key);
+        config.mods.insert(
+            mod_key,
+            ModConfigEntry { enabled: true },
+        );
+        if let Err(e) = write_mod_config(save_path, &config) {
+            let err = format!("Failed to write config: {}", e);
+            println!("{}", err);
+            return Err(err);
+        }
+    } else {
+        println!("{} already in config", mod_key);
+    }
+    
+    Ok(manifest)
 }

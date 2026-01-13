@@ -10,6 +10,7 @@
   import { ModSource, type Mod } from '$lib/types/mod';
   import { saves, selectedSave } from '$lib/stores/saves';
   import * as Select from '$lib/components/ui/select';
+  import { toast } from '$lib/stores/toast';
 
   let mods = $state<Mod[]>([]);
   let searchQuery = $state('');
@@ -75,17 +76,20 @@
     version: string,
   ) {
     if (!$selectedSave) {
-      alert('Please select a save locally first.');
+      toast.warning('Please select a save first');
       return;
     }
 
     try {
       // Use modManager to install
       await modManager.installMod(modId, source, version, $selectedSave.path);
-      alert(`Successfully installed mod to ${$selectedSave.name}`);
+      toast.success(
+        'Mod installed',
+        `Successfully installed to ${$selectedSave.name}`,
+      );
     } catch (e) {
       console.error('Install failed:', e);
-      alert(`Failed to install mod: ${e}`);
+      toast.error('Installation failed', String(e));
     }
   }
 

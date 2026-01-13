@@ -192,22 +192,76 @@ export class ModManager {
 
         await source.downloadMod(modId, version, destination);
 
+        // Also copy to global mods folder (UserData/Mods)
+        console.log('[ModManager] === Starting global mods folder copy ===');
+        try {
+            const { copyFile } = await import('@tauri-apps/plugin-fs');
+            const { get } = await import('svelte/store');
+
+            console.log('[ModManager] Imported fs and store utilities');
+
+            // Dynamic import of settings to avoid initialization issues
+            const { settings } = await import('../stores/settings');
+            console.log('[ModManager] Imported settings store');
+
+            // Ensure settings loaded
+            let hytaleRoot = get(settings).hytaleRoot;
+            console.log(`[ModManager] Initial hytaleRoot: "${hytaleRoot}"`);
+
+            if (!hytaleRoot) {
+                console.log('[ModManager] hytaleRoot is empty, loading settings...');
+                await settings.load();
+                hytaleRoot = get(settings).hytaleRoot;
+                console.log(`[ModManager] After loading, hytaleRoot: "${hytaleRoot}"`);
+            }
+
+            if (!hytaleRoot) {
+                throw new Error('hytaleRoot is still empty after loading settings');
+            }
+
+            const userDataDir = await join(hytaleRoot, 'UserData');
+            console.log(`[ModManager] UserData directory: "${userDataDir}"`);
+
+            const globalModsDir = await join(userDataDir, 'Mods');
+            console.log(`[ModManager] Global Mods directory: "${globalModsDir}"`);
+
+            const globalModsDirExists = await exists(globalModsDir);
+            console.log(`[ModManager] Global Mods directory exists: ${globalModsDirExists}`);
+
+            if (!globalModsDirExists) {
+                console.log('[ModManager] Creating global Mods directory...');
+                await mkdir(globalModsDir, { recursive: true });
+                console.log('[ModManager] Global Mods directory created successfully');
+            }
+
+            const globalDestination = await join(globalModsDir, fileName);
+            console.log(`[ModManager] Source: "${destination}"`);
+            console.log(`[ModManager] Destination: "${globalDestination}"`);
+            console.log('[ModManager] Starting file copy...');
+
+            await copyFile(destination, globalDestination);
+            console.log('[ModManager] ✅ File copied successfully to global Mods folder!');
+        } catch (error) {
+            console.error('[ModManager] ❌ Failed to copy mod to global Mods folder:', error);
+            console.error('[ModManager] Error details:', {
+                name: error instanceof Error ? error.name : 'Unknown',
+                message: error instanceof Error ? error.message : String(error),
+                stack: error instanceof Error ? error.stack : undefined
+            });
+            // Don't fail the whole installation, just log
+        }
+        console.log('[ModManager] === End global mods folder copy ===');
+
         // Extract manifest from the downloaded jar and add to config.json
         try {
-            // Get all installed mods to find the one we just installed
-            const installedMods = await invoke<InstalledMod[]>('get_installed_mods', { savePath });
-            const installedMod = installedMods.find(mod => mod.jar_name === fileName);
-
-            if (installedMod) {
-                await invoke('add_mod_to_config', {
-                    savePath,
-                    group: installedMod.manifest.Group,
-                    name: installedMod.manifest.Name
-                });
-                console.log(`[ModManager] Added ${installedMod.manifest.Group}:${installedMod.manifest.Name} to config.json`);
-            }
+            console.log(`[ModManager] Registering installed jar: ${fileName}`);
+            await invoke('register_jar_in_config', {
+                savePath,
+                jarFilename: fileName
+            });
+            console.log(`[ModManager] Successfully registered ${fileName} in config.json`);
         } catch (error) {
-            console.error('[ModManager] Failed to add mod to config.json:', error);
+            console.error('[ModManager] Failed to register mod in config.json:', error);
             // Don't fail the installation, just log the error
         }
 

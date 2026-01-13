@@ -12,6 +12,7 @@
     ChevronDown,
   } from 'lucide-svelte';
   import { slide } from 'svelte/transition';
+  import ImportSaveDialog from '$lib/components/import-save-dialog.svelte';
 
   type NavItem = {
     label: string;
@@ -20,6 +21,7 @@
   };
 
   let isSavesOpen = true;
+  let isImportDialogOpen = $state(false);
 
   function isActive(href: string): boolean {
     if (href === '/') {
@@ -30,6 +32,10 @@
 
   function toggleSaves() {
     isSavesOpen = !isSavesOpen;
+  }
+
+  function openImportDialog() {
+    isImportDialogOpen = true;
   }
 </script>
 
@@ -60,8 +66,8 @@
           class={cn(
             'group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all font-nunito',
             isActive('/')
-              ? 'bg-[#109eb1]/10 text-[#109eb1] shadow-[0_0_20px_rgba(16,158,177,0.15)] border border-[#109eb1]/20'
-              : 'text-muted-foreground hover:bg-white/5 hover:text-foreground border border-transparent',
+              ? 'bg-[#06363d] text-[#c7f4fa] border border-[#084b54]'
+              : 'text-[#c7f4fa]/70 hover:bg-[#06363d]/50 hover:text-[#c7f4fa] border border-transparent',
           )}
         >
           <Compass
@@ -69,7 +75,7 @@
               'size-5 shrink-0 transition-transform group-hover:scale-110',
               isActive('/')
                 ? 'text-[#109eb1]'
-                : 'text-muted-foreground group-hover:text-foreground',
+                : 'text-[#c7f4fa]/70 group-hover:text-[#c7f4fa]',
             )}
           />
           <span class="flex-1 text-left">Browse Mods</span>
@@ -152,6 +158,7 @@
 
           <!-- Add Save Button -->
           <button
+            onclick={openImportDialog}
             class="w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-[#c7f4fa]/60 hover:text-[#109eb1] transition-colors group mt-2"
           >
             <div
@@ -196,3 +203,5 @@
     </div>
   </nav>
 </aside>
+
+<ImportSaveDialog bind:isOpen={isImportDialogOpen} />

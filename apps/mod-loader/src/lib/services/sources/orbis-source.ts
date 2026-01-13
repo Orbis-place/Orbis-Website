@@ -72,7 +72,7 @@ export class OrbisModSource implements IModSource {
             params.append('limit', '50');
 
             // Only fetch mods, exclude plugins etc.
-            params.append('type', 'MOD');
+            params.append('type', 'PLUGIN');
 
             if (filters?.query) {
                 params.append('search', filters.query);

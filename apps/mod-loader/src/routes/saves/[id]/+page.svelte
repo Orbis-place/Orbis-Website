@@ -13,35 +13,60 @@
     Trash2,
     RefreshCw,
   } from 'lucide-svelte';
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
   import { goto } from '$app/navigation';
   import { modManager } from '$lib/services/mod-manager';
   import type { InstalledMod } from '$lib/types/installed-mod';
   import { invoke } from '@tauri-apps/api/core';
-  import { open } from '@tauri-apps/plugin-opener';
+  import { openPath, openUrl } from '@tauri-apps/plugin-opener';
+  import { toast } from '$lib/stores/toast';
 
   const saveName = $derived($page.params.id);
   const currentSave = $derived($saves.find((s) => s.name === saveName));
 
   let installedMods = $state<InstalledMod[]>([]);
   let loading = $state(true);
+  let pollInterval: ReturnType<typeof setInterval>;
+  let lastSavePath = '';
 
-  onMount(async () => {
-    if (!currentSave) {
-      // Handle 404
-      goto('/');
-    } else {
+  $effect(() => {
+    if (currentSave && currentSave.path !== lastSavePath) {
+      lastSavePath = currentSave.path;
+      installedMods = [];
+      loading = true;
       selectSave(currentSave);
-      await loadInstalledMods();
+      loadInstalledMods();
+    } else if (!currentSave && $saves.length > 0) {
+      // Only redirect if saves are loaded but this one isn't found
+      goto('/');
+    }
+  });
+
+  onMount(() => {
+    // Poll for updates every 10 seconds
+    pollInterval = setInterval(loadInstalledMods, 10000);
+  });
+
+  onDestroy(() => {
+    if (pollInterval) {
+      clearInterval(pollInterval);
     }
   });
 
   async function loadInstalledMods() {
     if (!currentSave) return;
 
-    loading = true;
+    // Don't set loading=true for background polls to avoid flickering
+    // Only set it if we have no mods (initial load)
+    if (installedMods.length === 0) {
+      loading = true;
+    }
+
     try {
-      installedMods = await modManager.getInstalledMods(currentSave.path);
+      const mods = await modManager.getInstalledMods(currentSave.path);
+      // Only update if changed to verify deep equality if needed,
+      // but for now replacing is fine as Svelte handles it reasonably well
+      installedMods = mods;
     } catch (error) {
       console.error('Failed to load installed mods:', error);
     } finally {
@@ -64,14 +89,14 @@
       await loadInstalledMods();
     } catch (error) {
       console.error('Failed to toggle mod:', error);
-      alert(`Failed to toggle mod: ${error}`);
+      toast.error('Failed to toggle mod', String(error));
     }
   }
 
   async function openSaveFolder() {
     if (!currentSave) return;
     try {
-      await open(currentSave.path);
+      await openPath(currentSave.path);
     } catch (error) {
       console.error('Failed to open save folder:', error);
     }
@@ -80,7 +105,7 @@
   async function openModFolder() {
     if (!currentSave) return;
     try {
-      await open(currentSave.path + '/mods');
+      await openPath(currentSave.path + '/mods');
     } catch (error) {
       console.error('Failed to open mod folder:', error);
     }
@@ -228,9 +253,8 @@
                   <Badge
                     variant={mod.enabled ? 'default' : 'secondary'}
                     class={mod.enabled
-                      ? 'bg-[#109eb1]/20 text-[#109eb1] hover:bg-[#109eb1]/30 cursor-pointer'
-                      : 'bg-[#032125] text-[#c7f4fa]/50 cursor-pointer'}
-                    onclick={() => toggleMod(mod)}
+                      ? 'bg-[#109eb1]/20 text-[#109eb1]'
+                      : 'bg-[#032125] text-[#c7f4fa]/50'}
                   >
                     {mod.enabled ? 'Enabled' : 'Disabled'}
                   </Badge>
@@ -239,15 +263,25 @@
                   <div
                     class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity"
                   >
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      class="size-8 hover:bg-[#032125] text-[#c7f4fa]/70 hover:text-[#109eb1]"
-                      onclick={() => toggleMod(mod)}
-                      title={mod.enabled ? 'Disable mod' : 'Enable mod'}
-                    >
-                      <RefreshCw class="size-4" />
-                    </Button>
+                    {#if mod.enabled}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        class="h-8 text-xs border-[#084b54] bg-[#032125] text-[#c7f4fa] hover:bg-red-500/10 hover:text-red-400 hover:border-red-500"
+                        onclick={() => toggleMod(mod)}
+                      >
+                        Disable
+                      </Button>
+                    {:else}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        class="h-8 text-xs border-[#084b54] bg-[#032125] text-[#c7f4fa] hover:bg-[#10b981]/10 hover:text-[#10b981] hover:border-[#10b981]"
+                        onclick={() => toggleMod(mod)}
+                      >
+                        Enable
+                      </Button>
+                    {/if}
                     <Button
                       size="icon"
                       variant="ghost"
