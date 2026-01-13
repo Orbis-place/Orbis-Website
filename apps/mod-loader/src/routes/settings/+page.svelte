@@ -1,6 +1,5 @@
 <script lang="ts">
   import Sidebar from '$lib/components/layout/sidebar.svelte';
-  import Header from '$lib/components/layout/header.svelte';
   import * as Card from '$lib/components/ui/card';
   import { Button } from '$lib/components/ui/button';
   import { FolderOpen } from 'lucide-svelte';
@@ -9,8 +8,6 @@
 <Sidebar />
 
 <div class="flex flex-1 flex-col overflow-hidden">
-  <Header />
-
   <main class="flex-1 overflow-y-auto p-6">
     <div class="mx-auto max-w-4xl space-y-6">
       <!-- Header -->

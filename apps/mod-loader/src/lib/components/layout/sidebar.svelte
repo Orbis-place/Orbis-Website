@@ -37,11 +37,12 @@
   class="flex w-64 flex-col gap-6 p-4 bg-[#032125] border-r border-[#084b54] overflow-y-auto custom-scrollbar"
 >
   <!-- Logo -->
-  <div class="px-2">
-    <h1 class="font-hebden text-xl font-bold text-foreground">
-      <span class="text-[#109eb1]">ORBIS</span>
-    </h1>
-    <p class="text-xs text-muted-foreground font-nunito">Mod Loader</p>
+  <div class="px-2 pt-6 pb-2" data-tauri-drag-region>
+    <img
+      src="/navbar_header.png"
+      alt="Orbis Logo"
+      class="h-8 object-contain pointer-events-none"
+    />
   </div>
 
   <!-- Navigation -->
@@ -158,7 +159,7 @@
             >
               <Plus class="size-4" />
             </div>
-            <span>Add New Save</span>
+            <span>Import Save</span>
           </button>
         </div>
       {/if}

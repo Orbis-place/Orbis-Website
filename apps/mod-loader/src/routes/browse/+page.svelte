@@ -24,16 +24,24 @@
     }
   });
 
-  function installMod(mod: Mod) {
+  async function handleInstall(
+    modId: string,
+    source: ModSource,
+    version: string,
+  ) {
     if (!$selectedSave) {
-      alert('Please select a save from the sidebar first.'); // Replace with toast if available
+      alert('Please select a save from the sidebar first.');
       return;
     }
 
-    // Mock install
-    console.log(`Installing ${mod.name} to ${$selectedSave.name}`);
-    alert(`Installing ${mod.name} to ${$selectedSave.name}`);
-    // In real implementation: modManager.install(mod, $selectedSave)
+    try {
+      // Use modManager to install
+      await modManager.installMod(modId, source, version, $selectedSave.path);
+      alert(`Successfully installed mod to ${$selectedSave.name}`);
+    } catch (e) {
+      console.error('Install failed:', e);
+      alert(`Failed to install mod: ${e}`);
+    }
   }
 
   function getRefUrl(source: ModSource) {
@@ -169,7 +177,7 @@
                   <p
                     class="font-nunito text-xs leading-relaxed text-[#c7f4fa]/70 line-clamp-2 mb-3 h-8"
                   >
-                    {mod.description}
+                    {@html mod.description}
                   </p>
 
                   <!-- Tags -->
@@ -200,11 +208,11 @@
 
                 <Button
                   size="sm"
-                  class="h-8 rounded-full bg-[#109eb1] hover:bg-[#109eb1]/90 text-[#c7f4fa] font-hebden text-[10px] uppercase tracking-wider px-4"
-                  onclick={() => installMod(mod)}
+                  variant="default"
+                  onclick={() => handleInstall(mod.id, mod.source, mod.version)}
                 >
-                  <Download class="size-3 mr-1.5" />
-                  Install
+                  <Download class="mr-2 size-4" />
+                  Add Mod
                 </Button>
               </div>
             </div>

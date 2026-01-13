@@ -50,6 +50,7 @@ export interface ModFilters {
     sortOrder?: 'asc' | 'desc';
     page?: number;
     limit?: number;
+    offset?: number;
 }
 
 export interface InstalledMod {

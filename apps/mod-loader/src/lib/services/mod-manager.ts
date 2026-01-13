@@ -141,12 +141,25 @@ export class ModManager {
             throw new Error(`Mod source '${sourceName}' not found`);
         }
 
-        // TODO: Get save path from Tauri backend
-        const destination = `/path/to/saves/${saveName}/mods/${modId}-${version}.jar`;
+        // Import necessary Tauri functions
+        const { join } = await import('@tauri-apps/api/path');
+        const { exists, mkdir } = await import('@tauri-apps/plugin-fs');
+
+        const modsPath = await join(saveName, 'mods'); // saveName here is actually the full path based on my saves.ts change
+
+        if (!await exists(modsPath)) {
+            await mkdir(modsPath, { recursive: true });
+        }
+
+        // TODO: Get actual filename from content-disposition if possible, or use modId-version.jar
+        const fileName = `${modId}-${version}.jar`;
+        const destination = await join(modsPath, fileName);
 
         await source.downloadMod(modId, version, destination);
 
-        // TODO: Update installed mods metadata
+        console.log(`Installed ${modId} version ${version} to ${destination}`);
+        // TODO: Update installed mods metadata in save config
+
     }
 
     /**

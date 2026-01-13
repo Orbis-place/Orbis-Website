@@ -1,27 +1,54 @@
-import { writable, type Writable } from 'svelte/store';
+import { writable } from 'svelte/store';
 import type { HytaleSave } from '$lib/types/mod';
-
-// Mock initial data - this would normally come from the backend/load
-const initialSaves: HytaleSave[] = [
-    {
-        name: 'My Survival World',
-        path: '/Users/.../Hytale/UserData/Saves/aze',
-        lastPlayed: '2026-01-13',
-        installedModsCount: 12,
-    },
-    {
-        name: 'Creative Test',
-        path: '/Users/.../Hytale/UserData/Saves/dssdf',
-        lastPlayed: '2026-01-10',
-        installedModsCount: 5,
-    },
-];
+import { readDir, exists } from '@tauri-apps/plugin-fs';
+import { homeDir, join } from '@tauri-apps/api/path';
 
 function createSavesStore() {
-    const { subscribe, set, update } = writable<HytaleSave[]>(initialSaves);
+    const { subscribe, set, update } = writable<HytaleSave[]>([]);
 
     return {
         subscribe,
+        load: async () => {
+            try {
+                const home = await homeDir();
+                console.log('Home dir:', home);
+
+                // TODO: Handle Windows path
+                const saveRoot = await join(home, 'Library', 'Application Support', 'Hytale', 'UserData', 'Saves');
+                console.log('Scanning saves at:', saveRoot);
+
+                const existsResult = await exists(saveRoot);
+                console.log('Save root exists:', existsResult);
+
+                if (!existsResult) {
+                    console.warn('Saves directory not found:', saveRoot);
+                    return;
+                }
+
+                const entries = await readDir(saveRoot);
+                console.log(`Found ${entries.length} entries in saves dir`);
+
+                const saves: HytaleSave[] = [];
+
+                for (const entry of entries) {
+                    console.log(`Entry: ${entry.name}, isDirectory: ${entry.isDirectory}`);
+                    if (entry.isDirectory) {
+                        const fullPath = await join(saveRoot, entry.name);
+                        // Basic info for now
+                        saves.push({
+                            name: entry.name,
+                            path: fullPath,
+                            installedModsCount: 0, // TODO: Scan mods folder
+                            lastPlayed: new Date().toISOString() // Placeholder
+                        });
+                    }
+                }
+                console.log('Saves loaded:', saves);
+                set(saves);
+            } catch (e) {
+                console.error('Failed to load saves:', e);
+            }
+        },
         add: (save: HytaleSave) => update(saves => [...saves, save]),
         remove: (path: string) => update(saves => saves.filter(s => s.path !== path)),
         updateSave: (path: string, data: Partial<HytaleSave>) =>
@@ -31,9 +58,13 @@ function createSavesStore() {
 }
 
 export const saves = createSavesStore();
-export const selectedSave = writable<HytaleSave | null>(initialSaves[0] || null);
+export const selectedSave = writable<HytaleSave | null>(null);
 
-// Helper to select a save by id (using path as id for now or we could add an id field)
+// Initialize saves on load
+setTimeout(() => {
+    saves.load();
+}, 100);
+
 export function selectSave(save: HytaleSave) {
     selectedSave.set(save);
 }
