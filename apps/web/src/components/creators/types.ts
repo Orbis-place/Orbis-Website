@@ -33,7 +33,7 @@ export const RESOURCE_CATEGORIES = [
     { id: 'asset-packs', label: 'Asset Packs' },
     { id: 'prefabs', label: 'Prefabs' },
     { id: 'data-packs', label: 'Data Packs' },
-    { id: 'tools-scripts', label: 'Tools & Scripts' },
+
 ] as const;
 
 export type ResourceCategory = typeof RESOURCE_CATEGORIES[number]['id'];

@@ -55,14 +55,7 @@ export const RESOURCE_TYPES = {
         description: 'Collections of mods',
         count: 43,
     },
-    'tools-scripts': {
-        singular: 'tool',
-        plural: 'tools-scripts',
-        label: 'Tools & Scripts',
-        labelSingular: 'Tool',
-        description: 'Development tools and scripts',
-        count: 82,
-    },
+
 } as const;
 
 export type ResourceTypeKey = keyof typeof RESOURCE_TYPES;

@@ -101,11 +101,7 @@ export default function Footer() {
                                     Data packs
                                 </Link>
                             </li>
-                            <li>
-                                <Link href="/tools-scripts" className="text-[#C7F4FA]/70 hover:text-[#109EB1] transition-colors">
-                                    Tools & Scripts
-                                </Link>
-                            </li>
+
                         </ul>
                     </div>
 

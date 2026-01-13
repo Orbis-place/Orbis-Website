@@ -13,7 +13,6 @@ const CATEGORY_ICONS: Record<string, any> = {
     'asset-packs': ImageIcon,
     'prefabs': Boxes,
     'data-packs': Database,
-    'tools-scripts': Wrench,
 };
 
 interface FeaturedCreatorProps {
