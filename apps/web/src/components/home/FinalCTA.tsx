@@ -19,7 +19,7 @@ export function FinalCTA() {
                     {/* For Players */}
                     <div className="bg-[#06363D] border border-[#084B54] rounded-2xl p-8 text-center hover:border-[#109EB1]/50 transition-all duration-300">
                         <div className="w-16 h-16 bg-[#109EB1]/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                            <Icon icon="mdi:gamepad-variant" className="w-8 h-8 text-[#109EB1]" />
+                            <Icon ssr={true} icon="mdi:gamepad-variant" className="w-8 h-8 text-[#109EB1]" />
                         </div>
                         <h3 className="font-hebden font-bold text-2xl text-[#C7F4FA] mb-2">
                             For Players
@@ -32,14 +32,14 @@ export function FinalCTA() {
                             className="inline-flex items-center justify-center w-full gap-2 px-6 py-3.5 bg-[#109EB1] rounded-full font-hebden font-semibold text-[#C7F4FA] hover:bg-[#0d8a9b] transition-colors"
                         >
                             Browse Marketplace
-                            <Icon icon="mdi:arrow-right" className="w-5 h-5" />
+                            <Icon ssr={true} icon="mdi:arrow-right" className="w-5 h-5" />
                         </Link>
                     </div>
 
                     {/* For Creators */}
                     <div className="bg-[#06363D] border border-[#084B54] rounded-2xl p-8 text-center hover:border-[#109EB1]/50 transition-all duration-300">
                         <div className="w-16 h-16 bg-[#109EB1]/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                            <Icon icon="mdi:palette" className="w-8 h-8 text-[#109EB1]" />
+                            <Icon ssr={true} icon="mdi:palette" className="w-8 h-8 text-[#109EB1]" />
                         </div>
                         <h3 className="font-hebden font-bold text-2xl text-[#C7F4FA] mb-2">
                             For Creators
@@ -52,7 +52,7 @@ export function FinalCTA() {
                             className="inline-flex items-center justify-center w-full gap-2 px-6 py-3.5 bg-[#109EB1] rounded-full font-hebden font-semibold text-[#C7F4FA] hover:bg-[#0d8a9b] transition-colors"
                         >
                             Start Creating
-                            <Icon icon="mdi:arrow-right" className="w-5 h-5" />
+                            <Icon ssr={true} icon="mdi:arrow-right" className="w-5 h-5" />
                         </Link>
                     </div>
                 </div>
@@ -66,7 +66,7 @@ export function FinalCTA() {
                         className="inline-flex items-center gap-2 font-nunito text-[#C7F4FA]/70 hover:text-[#109EB1] transition-colors"
                     >
                         <span>Questions? Join our Discord</span>
-                        <Icon icon="mdi:arrow-right" className="w-4 h-4" />
+                        <Icon ssr={true} icon="mdi:arrow-right" className="w-4 h-4" />
                     </a>
                 </div>
             </div>

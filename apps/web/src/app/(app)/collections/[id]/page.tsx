@@ -96,12 +96,12 @@ export default function PublicCollectionViewPage() {
             <div className="container max-w-7xl mx-auto space-y-6 py-8 px-4" >
                 <div className="flex items-center gap-4 mb-8">
                     <Button variant="ghost" onClick={() => router.back()}>
-                        <Icon icon="mdi:arrow-left" width="20" height="20" />
+                        <Icon ssr={true} icon="mdi:arrow-left" width="20" height="20" />
                         Back
                     </Button>
                 </div>
                 <div className="flex items-center justify-center py-16">
-                    <Icon icon="mdi:loading" width="40" height="40" className="animate-spin text-muted-foreground" />
+                    <Icon ssr={true} icon="mdi:loading" width="40" height="40" className="animate-spin text-muted-foreground" />
                 </div>
             </div>
         );
@@ -112,12 +112,12 @@ export default function PublicCollectionViewPage() {
             <div className="container max-w-7xl mx-auto space-y-6 py-8 px-4">
                 <div className="flex items-center gap-4 mb-8">
                     <Button variant="ghost" onClick={() => router.back()}>
-                        <Icon icon="mdi:arrow-left" width="20" height="20" />
+                        <Icon ssr={true} icon="mdi:arrow-left" width="20" height="20" />
                         Back
                     </Button>
                 </div>
                 <div className="flex flex-col items-center justify-center py-16">
-                    <Icon icon="mdi:folder-off" width="48" height="48" className="text-muted-foreground mb-3" />
+                    <Icon ssr={true} icon="mdi:folder-off" width="48" height="48" className="text-muted-foreground mb-3" />
                     <p className="text-muted-foreground">Collection not found or is private (ID: {collectionId})</p>
                 </div>
             </div>
@@ -131,7 +131,7 @@ export default function PublicCollectionViewPage() {
                 {collection.user && (
                     <Link href={`/user/${collection.user.username}/collections`}>
                         <Button variant="ghost">
-                            <Icon icon="mdi:arrow-left" width="20" height="20" className="mr-2" />
+                            <Icon ssr={true} icon="mdi:arrow-left" width="20" height="20" className="mr-2" />
                             See more from {collection.user.username}
                         </Button>
                     </Link>
@@ -141,8 +141,7 @@ export default function PublicCollectionViewPage() {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
                 <div className="flex items-center gap-4">
                     <div className="p-3 bg-primary/10 rounded-lg">
-                        <Icon
-                            icon="mdi:folder-star"
+                        <Icon ssr={true} icon="mdi:folder-star"
                             width="32"
                             height="32"
                             className="text-primary"
@@ -175,7 +174,7 @@ export default function PublicCollectionViewPage() {
             {/* Search */}
             {items.length > 0 && (
                 <div className="relative max-w-sm">
-                    <Icon icon="mdi:magnify" className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" width="18" height="18" />
+                    <Icon ssr={true} icon="mdi:magnify" className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" width="18" height="18" />
                     <Input
                         placeholder="Search resources..."
                         value={searchQuery}
@@ -192,7 +191,7 @@ export default function PublicCollectionViewPage() {
             <div className="bg-secondary/30 rounded-lg p-6">
                 {filteredItems.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-16">
-                        <Icon icon="mdi:package-variant-closed" width="48" height="48" className="text-muted-foreground mb-3" />
+                        <Icon ssr={true} icon="mdi:package-variant-closed" width="48" height="48" className="text-muted-foreground mb-3" />
                         <p className="text-muted-foreground">
                             {searchQuery ? 'No resources match your search' : 'No resources in this collection'}
                         </p>
@@ -223,11 +222,11 @@ export default function PublicCollectionViewPage() {
                                         </p>
                                         <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
                                             <span className="flex items-center gap-1">
-                                                <Icon icon="mdi:download" width="14" height="14" />
+                                                <Icon ssr={true} icon="mdi:download" width="14" height="14" />
                                                 {item.resource.downloadCount}
                                             </span>
                                             <span className="flex items-center gap-1">
-                                                <Icon icon="mdi:heart" width="14" height="14" />
+                                                <Icon ssr={true} icon="mdi:heart" width="14" height="14" />
                                                 {item.resource.likeCount}
                                             </span>
                                         </div>
@@ -249,7 +248,7 @@ export default function PublicCollectionViewPage() {
                                         onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                                         disabled={currentPage === 1}
                                     >
-                                        <Icon icon="mdi:chevron-left" width="18" height="18" />
+                                        <Icon ssr={true} icon="mdi:chevron-left" width="18" height="18" />
                                         Previous
                                     </Button>
                                     <Button
@@ -259,7 +258,7 @@ export default function PublicCollectionViewPage() {
                                         disabled={currentPage === totalPages}
                                     >
                                         Next
-                                        <Icon icon="mdi:chevron-right" width="18" height="18" />
+                                        <Icon ssr={true} icon="mdi:chevron-right" width="18" height="18" />
                                     </Button>
                                 </div>
                             </div>

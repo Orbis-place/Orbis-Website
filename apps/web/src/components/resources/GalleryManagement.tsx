@@ -141,7 +141,7 @@ export function GalleryManagement({ resourceId }: GalleryManagementProps) {
     if (loading) {
         return (
             <div className="flex items-center justify-center py-12">
-                <Icon icon="mdi:loading" width="48" height="48" className="text-primary animate-spin" />
+                <Icon ssr={true} icon="mdi:loading" width="48" height="48" className="text-primary animate-spin" />
             </div>
         );
     }
@@ -204,7 +204,7 @@ export function GalleryManagement({ resourceId }: GalleryManagementProps) {
                                         onClick={() => setEditingImage(image)}
                                         className="h-8 px-2"
                                     >
-                                        <Icon icon="mdi:pencil" width="16" height="16" />
+                                        <Icon ssr={true} icon="mdi:pencil" width="16" height="16" />
                                     </Button>
                                     <Button
                                         size="sm"
@@ -241,7 +241,7 @@ export function GalleryManagement({ resourceId }: GalleryManagementProps) {
             ) : (
                 <div className="flex flex-col items-center justify-center py-16 bg-secondary/30 rounded-lg">
                     <div className="p-4 bg-accent rounded-full mb-4">
-                        <Icon icon="mdi:image-multiple" width="48" height="48" className="text-muted-foreground" />
+                        <Icon ssr={true} icon="mdi:image-multiple" width="48" height="48" className="text-muted-foreground" />
                     </div>
                     <p className="text-foreground font-nunito text-lg mb-2">No images yet</p>
                     <p className="text-muted-foreground font-nunito text-sm mb-6 text-center max-w-md">
@@ -478,7 +478,7 @@ function UploadImagesDialog({ open, onOpenChange, onUpload }: UploadImagesDialog
                         )}
                     >
                         {uploading && (
-                            <Icon icon="mdi:loading" width="16" height="16" className="animate-spin" />
+                            <Icon ssr={true} icon="mdi:loading" width="16" height="16" className="animate-spin" />
                         )}
                         Upload {selectedFiles.length > 0 && `(${selectedFiles.length})`}
                     </button>
@@ -499,7 +499,7 @@ function UploadImagesDialog({ open, onOpenChange, onUpload }: UploadImagesDialog
                             : "border-border hover:border-primary/50 bg-secondary/20"
                     )}
                 >
-                    <Icon icon="mdi:cloud-upload" width="48" height="48" className="mx-auto mb-4 text-muted-foreground" />
+                    <Icon ssr={true} icon="mdi:cloud-upload" width="48" height="48" className="mx-auto mb-4 text-muted-foreground" />
                     <p className="text-foreground font-nunito mb-2">
                         Drag and drop images here, or click to browse
                     </p>
@@ -516,7 +516,7 @@ function UploadImagesDialog({ open, onOpenChange, onUpload }: UploadImagesDialog
                             disabled={uploading}
                         />
                         <Button className="font-hebden" size="sm" disabled={uploading}>
-                            <Icon icon="mdi:folder-open" width="18" height="18" className="mr-2" />
+                            <Icon ssr={true} icon="mdi:folder-open" width="18" height="18" className="mr-2" />
                             Browse Files
                         </Button>
                     </label>
@@ -532,7 +532,7 @@ function UploadImagesDialog({ open, onOpenChange, onUpload }: UploadImagesDialog
                                     key={index}
                                     className="flex items-center gap-3 p-3 bg-secondary/30 rounded-lg"
                                 >
-                                    <Icon icon="mdi:file-image" width="24" height="24" className="text-primary" />
+                                    <Icon ssr={true} icon="mdi:file-image" width="24" height="24" className="text-primary" />
                                     <div className="flex-1 min-w-0">
                                         <p className="text-sm font-nunito text-foreground truncate">
                                             {file.name}
@@ -546,7 +546,7 @@ function UploadImagesDialog({ open, onOpenChange, onUpload }: UploadImagesDialog
                                         disabled={uploading}
                                         className="p-1 hover:bg-destructive/20 rounded transition-colors disabled:opacity-50"
                                     >
-                                        <Icon icon="mdi:close" width="20" height="20" className="text-destructive" />
+                                        <Icon ssr={true} icon="mdi:close" width="20" height="20" className="text-destructive" />
                                     </button>
                                 </div>
                             ))}

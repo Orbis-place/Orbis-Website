@@ -95,7 +95,7 @@ export default function ServerManageLayout({ children }: ManageLayoutProps) {
     if (loading) {
         return (
             <div className="min-h-screen bg-background flex items-center justify-center">
-                <Icon icon="mdi:loading" className="animate-spin text-primary" width="40" height="40" />
+                <Icon ssr={true} icon="mdi:loading" className="animate-spin text-primary" width="40" height="40" />
             </div>
         );
     }
@@ -109,7 +109,7 @@ export default function ServerManageLayout({ children }: ManageLayoutProps) {
                         <nav className="bg-secondary/30 rounded-lg p-4 space-y-6">
                             <div className="space-y-3">
                                 <Badge variant="secondary" className="w-fit gap-1.5 font-nunito text-xs">
-                                    <Icon icon="mdi:server" width="14" height="14" />
+                                    <Icon ssr={true} icon="mdi:server" width="14" height="14" />
                                     Server
                                 </Badge>
                                 <h2 className="font-hebden text-lg font-semibold text-foreground">
@@ -139,7 +139,7 @@ export default function ServerManageLayout({ children }: ManageLayoutProps) {
                                                                 : 'text-foreground hover:bg-secondary/50'
                                                         )}
                                                     >
-                                                        <Icon icon={item.icon} width="20" height="20" />
+                                                        <Icon ssr={true} icon={item.icon} width="20" height="20" />
                                                         {item.label}
                                                     </Link>
                                                 </li>

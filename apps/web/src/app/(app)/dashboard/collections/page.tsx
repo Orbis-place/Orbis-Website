@@ -188,7 +188,7 @@ export default function CollectionsPage() {
           </p>
         </div>
         <Button className="font-hebden" onClick={() => setCreateModalOpen(true)}>
-          <Icon icon="mdi:plus" width="20" height="20" />
+          <Icon ssr={true} icon="mdi:plus" width="20" height="20" />
           New Collection
         </Button>
       </div>
@@ -197,7 +197,7 @@ export default function CollectionsPage() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div className="flex gap-4 items-center">
           <div className="relative">
-            <Icon icon="mdi:magnify" className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" width="18" height="18" />
+            <Icon ssr={true} icon="mdi:magnify" className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" width="18" height="18" />
             <Input
               placeholder="Search collections..."
               value={searchQuery}
@@ -225,7 +225,7 @@ export default function CollectionsPage() {
                 : 'bg-secondary/30 text-foreground hover:bg-accent'
             )}
           >
-            <Icon icon="mdi:view-grid" width="20" height="20" />
+            <Icon ssr={true} icon="mdi:view-grid" width="20" height="20" />
           </button>
           <button
             onClick={() => setView('list')}
@@ -236,7 +236,7 @@ export default function CollectionsPage() {
                 : 'bg-secondary/30 text-foreground hover:bg-accent'
             )}
           >
-            <Icon icon="mdi:view-list" width="20" height="20" />
+            <Icon ssr={true} icon="mdi:view-list" width="20" height="20" />
           </button>
         </div>
       </div>
@@ -245,7 +245,7 @@ export default function CollectionsPage() {
       <div className="bg-secondary/30 rounded-lg p-6">
         {loading ? (
           <div className="flex items-center justify-center py-16">
-            <Icon icon="mdi:loading" width="40" height="40" className="animate-spin text-muted-foreground" />
+            <Icon ssr={true} icon="mdi:loading" width="40" height="40" className="animate-spin text-muted-foreground" />
           </div>
         ) : (
           <>
@@ -258,7 +258,7 @@ export default function CollectionsPage() {
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="p-2 bg-red-500/10 rounded-lg">
-                      <Icon icon="mdi:heart" width="24" height="24" className="text-red-500" />
+                      <Icon ssr={true} icon="mdi:heart" width="24" height="24" className="text-red-500" />
                     </div>
                   </div>
                   <h3 className="font-hebden text-lg font-semibold text-foreground mb-1 truncate">
@@ -268,7 +268,7 @@ export default function CollectionsPage() {
                     Your liked resources
                   </p>
                   <div className="flex items-center gap-2 text-sm text-muted-foreground font-nunito">
-                    <Icon icon="mdi:package-variant" width="16" height="16" />
+                    <Icon ssr={true} icon="mdi:package-variant" width="16" height="16" />
                     <span>{favoritesCount} {favoritesCount === 1 ? 'item' : 'items'}</span>
                   </div>
                 </div>
@@ -282,7 +282,7 @@ export default function CollectionsPage() {
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div className="p-2 bg-primary/10 rounded-lg">
-                        <Icon icon="mdi:folder" width="24" height="24" className="text-primary" />
+                        <Icon ssr={true} icon="mdi:folder" width="24" height="24" className="text-primary" />
                       </div>
                       <div className="flex items-center gap-2">
                         {collection.isDefault && (
@@ -298,12 +298,12 @@ export default function CollectionsPage() {
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                             <button className="opacity-0 group-hover:opacity-100 transition-opacity">
-                              <Icon icon="mdi:dots-vertical" width="20" height="20" className="text-muted-foreground" />
+                              <Icon ssr={true} icon="mdi:dots-vertical" width="20" height="20" className="text-muted-foreground" />
                             </button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={(e) => { e.stopPropagation(); openEditModal(collection); }}>
-                              <Icon icon="mdi:pencil" width="16" height="16" className="mr-2" />
+                              <Icon ssr={true} icon="mdi:pencil" width="16" height="16" className="mr-2" />
                               Edit
                             </DropdownMenuItem>
                             {!collection.isDefault && (
@@ -311,7 +311,7 @@ export default function CollectionsPage() {
                                 onClick={(e) => { e.stopPropagation(); openDeleteModal(collection); }}
                                 className="text-destructive"
                               >
-                                <Icon icon="mdi:delete" width="16" height="16" className="mr-2" />
+                                <Icon ssr={true} icon="mdi:delete" width="16" height="16" className="mr-2" />
                                 Delete
                               </DropdownMenuItem>
                             )}
@@ -328,7 +328,7 @@ export default function CollectionsPage() {
                       </p>
                     )}
                     <div className="flex items-center gap-2 text-sm text-muted-foreground font-nunito">
-                      <Icon icon="mdi:package-variant" width="16" height="16" />
+                      <Icon ssr={true} icon="mdi:package-variant" width="16" height="16" />
                       <span>{collection.itemCount} {collection.itemCount === 1 ? 'item' : 'items'}</span>
                     </div>
                   </div>
@@ -351,7 +351,7 @@ export default function CollectionsPage() {
                   className="bg-accent border border-border rounded-lg p-4 hover:border-red-500/50 transition-colors cursor-pointer group flex items-center gap-4"
                 >
                   <div className="p-2 bg-red-500/10 rounded-lg">
-                    <Icon icon="mdi:heart" width="24" height="24" className="text-red-500" />
+                    <Icon ssr={true} icon="mdi:heart" width="24" height="24" className="text-red-500" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-hebden text-lg font-semibold text-foreground truncate">
@@ -374,7 +374,7 @@ export default function CollectionsPage() {
                     className="bg-accent border border-border rounded-lg p-4 hover:border-primary transition-colors cursor-pointer group flex items-center gap-4"
                   >
                     <div className="p-2 bg-primary/10 rounded-lg">
-                      <Icon icon="mdi:folder" width="24" height="24" className="text-primary" />
+                      <Icon ssr={true} icon="mdi:folder" width="24" height="24" className="text-primary" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
@@ -405,12 +405,12 @@ export default function CollectionsPage() {
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                           <button className="opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Icon icon="mdi:dots-vertical" width="20" height="20" className="text-muted-foreground" />
+                            <Icon ssr={true} icon="mdi:dots-vertical" width="20" height="20" className="text-muted-foreground" />
                           </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={(e) => { e.stopPropagation(); openEditModal(collection); }}>
-                            <Icon icon="mdi:pencil" width="16" height="16" className="mr-2" />
+                            <Icon ssr={true} icon="mdi:pencil" width="16" height="16" className="mr-2" />
                             Edit
                           </DropdownMenuItem>
                           {!collection.isDefault && (
@@ -418,7 +418,7 @@ export default function CollectionsPage() {
                               onClick={(e) => { e.stopPropagation(); openDeleteModal(collection); }}
                               className="text-destructive"
                             >
-                              <Icon icon="mdi:delete" width="16" height="16" className="mr-2" />
+                              <Icon ssr={true} icon="mdi:delete" width="16" height="16" className="mr-2" />
                               Delete
                             </DropdownMenuItem>
                           )}
@@ -474,7 +474,7 @@ export default function CollectionsPage() {
               Cancel
             </Button>
             <Button onClick={handleCreateCollection} disabled={!newCollectionName.trim() || isSubmitting}>
-              {isSubmitting ? <Icon icon="mdi:loading" className="animate-spin mr-2" /> : null}
+              {isSubmitting ? <Icon ssr={true} icon="mdi:loading" className="animate-spin mr-2" /> : null}
               Create
             </Button>
           </DialogFooter>
@@ -520,7 +520,7 @@ export default function CollectionsPage() {
               Cancel
             </Button>
             <Button onClick={handleEditCollection} disabled={!editName.trim() || isSubmitting}>
-              {isSubmitting ? <Icon icon="mdi:loading" className="animate-spin mr-2" /> : null}
+              {isSubmitting ? <Icon ssr={true} icon="mdi:loading" className="animate-spin mr-2" /> : null}
               Save
             </Button>
           </DialogFooter>
@@ -541,7 +541,7 @@ export default function CollectionsPage() {
               Cancel
             </Button>
             <Button variant="destructive" onClick={handleDeleteCollection} disabled={isSubmitting}>
-              {isSubmitting ? <Icon icon="mdi:loading" className="animate-spin mr-2" /> : null}
+              {isSubmitting ? <Icon ssr={true} icon="mdi:loading" className="animate-spin mr-2" /> : null}
               Delete
             </Button>
           </DialogFooter>

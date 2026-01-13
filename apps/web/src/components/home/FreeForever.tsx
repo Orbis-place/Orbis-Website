@@ -43,7 +43,7 @@ export function FreeForever() {
                             className="bg-[#06363D] border border-[#084B54] rounded-2xl p-6 hover:border-[#109EB1]/50 transition-all duration-300 hover:-translate-y-1"
                         >
                             <div className="w-14 h-14 bg-[#109EB1]/20 rounded-xl flex items-center justify-center mb-4">
-                                <Icon icon={feature.icon} className="w-7 h-7 text-[#109EB1]" />
+                                <Icon ssr={true} icon={feature.icon} className="w-7 h-7 text-[#109EB1]" />
                             </div>
                             <h3 className="font-hebden font-semibold text-xl text-[#C7F4FA] mb-3">
                                 {feature.title}
@@ -72,9 +72,9 @@ export function FreeForever() {
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#06363D] border border-[#084B54] rounded-full hover:border-[#109EB1] transition-colors"
                     >
-                        <Icon icon="mdi:star" className="w-5 h-5 text-[#109EB1]" />
+                        <Icon ssr={true} icon="mdi:star" className="w-5 h-5 text-[#109EB1]" />
                         <span className="font-nunito text-sm text-[#C7F4FA]">Star us on GitHub</span>
-                        <Icon icon="mdi:arrow-right" className="w-4 h-4 text-[#C7F4FA]/70" />
+                        <Icon ssr={true} icon="mdi:arrow-right" className="w-4 h-4 text-[#C7F4FA]/70" />
                     </Link>
                 </div>
             </div>

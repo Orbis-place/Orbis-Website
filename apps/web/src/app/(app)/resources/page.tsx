@@ -105,7 +105,7 @@ export default async function ResourcesPage() {
                         {/* Left: Text Content */}
                         <div className="flex-1 space-y-6">
                             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#109EB1] text-[#032125] text-xs font-hebden tracking-wider shadow-lg shadow-[#109EB1]/30">
-                                <Icon icon="mdi:star" className="text-sm" />
+                                <Icon ssr={true} icon="mdi:star" className="text-sm" />
                                 SELECTION OF THE WEEK
                             </div>
 
@@ -126,18 +126,18 @@ export default async function ResourcesPage() {
                             {/* Stats */}
                             <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-sm">
                                 <span className="flex items-center gap-2 px-3 py-1.5 bg-[#06363D]/60 border border-[#084B54] rounded-full">
-                                    <Icon icon="mdi:download" className="w-4 h-4 text-[#109EB1]" />
+                                    <Icon ssr={true} icon="mdi:download" className="w-4 h-4 text-[#109EB1]" />
                                     <span className="font-hebden text-[#C7F4FA]">{featuredResource.downloads}</span>
                                     <span className="text-[#C7F4FA]/50 hidden sm:inline">downloads</span>
                                 </span>
                                 <span className="flex items-center gap-2 px-3 py-1.5 bg-[#06363D]/60 border border-[#084B54] rounded-full">
-                                    <Icon icon="mdi:heart" className="w-4 h-4 text-[#109EB1]" />
+                                    <Icon ssr={true} icon="mdi:heart" className="w-4 h-4 text-[#109EB1]" />
                                     <span className="font-hebden text-[#C7F4FA]">{featuredResource.likes}</span>
                                     <span className="text-[#C7F4FA]/50 hidden sm:inline">likes</span>
                                 </span>
                                 {featuredResource.updatedAt && (
                                     <span className="flex items-center gap-2 text-[#C7F4FA]/50">
-                                        <Icon icon="mdi:clock-outline" className="w-4 h-4" />
+                                        <Icon ssr={true} icon="mdi:clock-outline" className="w-4 h-4" />
                                         {featuredResource.updatedAt}
                                     </span>
                                 )}
@@ -158,7 +158,7 @@ export default async function ResourcesPage() {
                                     href={`/${featuredResource.type.toLowerCase()}/${featuredResource.slug}`}
                                     className="px-8 py-3.5 bg-[#109EB1] hover:bg-[#0d8a9a] text-[#C7F4FA] font-hebden rounded-full transition-all flex items-center gap-2 shadow-lg shadow-[#109EB1]/30 hover:shadow-[#109EB1]/50 hover:scale-105"
                                 >
-                                    Discover this {featuredResource.type?.toLowerCase()} <Icon icon="mdi:arrow-right" className="w-4 h-4" />
+                                    Discover this {featuredResource.type?.toLowerCase()} <Icon ssr={true} icon="mdi:arrow-right" className="w-4 h-4" />
                                 </Link>
                             </div>
                         </div>
@@ -258,7 +258,7 @@ export default async function ResourcesPage() {
                 {/* Call to Action */}
                 <section className="flex flex-col items-center justify-center text-center py-16 bg-gradient-to-b from-transparent to-[#06363D]/20 rounded-[32px]">
                     <div className="p-4 rounded-full bg-[#109EB1]/10 border border-[#109EB1]/20 mb-6">
-                        <Icon icon="mdi:compass" className="w-8 h-8 text-[#109EB1]" />
+                        <Icon ssr={true} icon="mdi:compass" className="w-8 h-8 text-[#109EB1]" />
                     </div>
                     <h2 className="font-hebden text-3xl text-[#C7F4FA] mb-4">Explore the Full Marketplace</h2>
                     <p className="text-[#C7F4FA]/60 max-w-lg mb-8">

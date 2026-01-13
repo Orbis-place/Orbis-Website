@@ -264,7 +264,7 @@ export default function TeamMembersManagePage() {
     if (loading) {
         return (
             <div className="flex items-center justify-center py-12">
-                <Icon icon="mdi:loading" className="animate-spin text-primary" width="48" height="48" />
+                <Icon ssr={true} icon="mdi:loading" className="animate-spin text-primary" width="48" height="48" />
             </div>
         );
     }
@@ -272,7 +272,7 @@ export default function TeamMembersManagePage() {
     if (!team) {
         return (
             <div className="flex flex-col items-center justify-center py-12">
-                <Icon icon="mdi:account-group-outline" width="48" height="48" className="text-muted-foreground" />
+                <Icon ssr={true} icon="mdi:account-group-outline" width="48" height="48" className="text-muted-foreground" />
                 <p className="text-foreground font-nunito text-lg mt-4">Team not found</p>
                 <Button onClick={() => router.push('/dashboard/teams')} className="mt-4 font-hebden">
                     Back to Teams
@@ -288,7 +288,7 @@ export default function TeamMembersManagePage() {
                 <h1 className="text-2xl font-bold font-hebden text-foreground">Members</h1>
                 {canEdit && (
                     <Button onClick={() => setShowAddMember(true)} className="font-hebden">
-                        <Icon icon="mdi:email-plus" width="20" height="20" />
+                        <Icon ssr={true} icon="mdi:email-plus" width="20" height="20" />
                         Invite Member
                     </Button>
                 )}
@@ -321,7 +321,7 @@ export default function TeamMembersManagePage() {
                             disabled={!selectedUser}
                             className="font-hebden"
                         >
-                            <Icon icon="mdi:email-send" width="20" height="20" />
+                            <Icon ssr={true} icon="mdi:email-send" width="20" height="20" />
                             Send Invitation
                         </Button>
                     </>
@@ -354,7 +354,7 @@ export default function TeamMembersManagePage() {
                                 variant="ghost"
                                 onClick={() => setSelectedUser(null)}
                             >
-                                <Icon icon="mdi:close" width="16" height="16" />
+                                <Icon ssr={true} icon="mdi:close" width="16" height="16" />
                             </Button>
                         </div>
                     )}
@@ -425,7 +425,7 @@ export default function TeamMembersManagePage() {
                                         size="sm"
                                         className="font-hebden"
                                     >
-                                        <Icon icon="mdi:delete" width="16" height="16" />
+                                        <Icon ssr={true} icon="mdi:delete" width="16" height="16" />
                                     </Button>
                                 )}
                             </div>
@@ -472,7 +472,7 @@ export default function TeamMembersManagePage() {
                                     size="sm"
                                     className="font-hebden text-destructive"
                                 >
-                                    <Icon icon="mdi:close" width="16" height="16" />
+                                    <Icon ssr={true} icon="mdi:close" width="16" height="16" />
                                     Cancel
                                 </Button>
                             </div>

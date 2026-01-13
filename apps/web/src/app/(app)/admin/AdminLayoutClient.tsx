@@ -85,7 +85,7 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
                             {/* Header */}
                             <div className="pb-4 border-b border-border/30">
                                 <div className="flex items-center gap-2 mb-1">
-                                    <Icon icon="mdi:shield-crown" width="24" height="24" className="text-primary" />
+                                    <Icon ssr={true} icon="mdi:shield-crown" width="24" height="24" className="text-primary" />
                                     <h2 className="font-hebden text-xl font-semibold text-foreground">
                                         Admin Panel
                                     </h2>
@@ -115,7 +115,7 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
                                                                 : 'text-foreground hover:bg-secondary/50'
                                                         )}
                                                     >
-                                                        <Icon icon={item.icon} width="20" height="20" />
+                                                        <Icon ssr={true} icon={item.icon} width="20" height="20" />
                                                         {item.name}
                                                     </Link>
                                                 </li>
@@ -131,7 +131,7 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
                                     href="/dashboard"
                                     className="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors font-nunito text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
                                 >
-                                    <Icon icon="mdi:arrow-left" width="20" height="20" />
+                                    <Icon ssr={true} icon="mdi:arrow-left" width="20" height="20" />
                                     Back to Dashboard
                                 </Link>
                             </div>

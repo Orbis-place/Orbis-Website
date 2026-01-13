@@ -40,6 +40,7 @@ interface PendingResourceVersion {
 interface PendingServer {
     id: string;
     name: string;
+    slug: string;
     description: string;
     createdAt: string;
     ownerUser: {
@@ -173,7 +174,7 @@ export default function ModerationPage() {
             <div className="space-y-6">
                 <h1 className="font-hebden text-3xl font-bold text-foreground">Moderation Queue</h1>
                 <div className="flex items-center justify-center py-12">
-                    <Icon icon="mdi:loading" width="48" height="48" className="text-primary animate-spin" />
+                    <Icon ssr={true} icon="mdi:loading" width="48" height="48" className="text-primary animate-spin" />
                 </div>
             </div>
         );
@@ -195,7 +196,7 @@ export default function ModerationPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-4">
                     <div className="flex items-center gap-3">
-                        <Icon icon="mdi:flag" width="24" height="24" className="text-orange-400" />
+                        <Icon ssr={true} icon="mdi:flag" width="24" height="24" className="text-orange-400" />
                         <div>
                             <p className="font-hebden text-2xl font-bold text-foreground">{pendingReports.length}</p>
                             <p className="font-nunito text-sm text-muted-foreground">Pending Reports</p>
@@ -204,7 +205,7 @@ export default function ModerationPage() {
                 </div>
                 <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4">
                     <div className="flex items-center gap-3">
-                        <Icon icon="mdi:package-variant" width="24" height="24" className="text-green-400" />
+                        <Icon ssr={true} icon="mdi:package-variant" width="24" height="24" className="text-green-400" />
                         <div>
                             <p className="font-hebden text-2xl font-bold text-foreground">{pendingVersions.length}</p>
                             <p className="font-nunito text-sm text-muted-foreground">Pending Versions</p>
@@ -213,7 +214,7 @@ export default function ModerationPage() {
                 </div>
                 <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4">
                     <div className="flex items-center gap-3">
-                        <Icon icon="mdi:server" width="24" height="24" className="text-purple-400" />
+                        <Icon ssr={true} icon="mdi:server" width="24" height="24" className="text-purple-400" />
                         <div>
                             <p className="font-hebden text-2xl font-bold text-foreground">{pendingServers.length}</p>
                             <p className="font-nunito text-sm text-muted-foreground">Pending Servers</p>
@@ -229,7 +230,7 @@ export default function ModerationPage() {
                 </div>
                 {pendingReports.length === 0 ? (
                     <div className="text-center py-8">
-                        <Icon icon="mdi:check-circle" width="48" height="48" className="text-green-500 mx-auto mb-2" />
+                        <Icon ssr={true} icon="mdi:check-circle" width="48" height="48" className="text-green-500 mx-auto mb-2" />
                         <p className="font-nunito text-muted-foreground">No pending reports</p>
                     </div>
                 ) : (
@@ -241,7 +242,7 @@ export default function ModerationPage() {
                                         <img src={report.reporter.image} alt={report.reporter.username} className="w-10 h-10 rounded-full" />
                                     ) : (
                                         <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                                            <Icon icon="mdi:account" width="20" height="20" className="text-primary" />
+                                            <Icon ssr={true} icon="mdi:account" width="20" height="20" className="text-primary" />
                                         </div>
                                     )}
                                     <div>
@@ -262,7 +263,7 @@ export default function ModerationPage() {
                 <h2 className="font-hebden text-xl font-semibold text-foreground mb-4">Pending Resource Versions</h2>
                 {pendingVersions.length === 0 ? (
                     <div className="text-center py-8">
-                        <Icon icon="mdi:check-circle" width="48" height="48" className="text-green-500 mx-auto mb-2" />
+                        <Icon ssr={true} icon="mdi:check-circle" width="48" height="48" className="text-green-500 mx-auto mb-2" />
                         <p className="font-nunito text-muted-foreground">No pending versions</p>
                     </div>
                 ) : (
@@ -271,7 +272,7 @@ export default function ModerationPage() {
                             <div key={version.id} className="bg-accent rounded-lg p-4 flex items-center justify-between">
                                 <div className="flex items-center gap-3 flex-1">
                                     <div className="p-2 bg-green-500/20 rounded-lg">
-                                        <Icon icon="mdi:package-variant" width="24" height="24" className="text-green-400" />
+                                        <Icon ssr={true} icon="mdi:package-variant" width="24" height="24" className="text-green-400" />
                                     </div>
                                     <div className="flex-1">
                                         <div className="flex items-center gap-2">
@@ -300,8 +301,17 @@ export default function ModerationPage() {
                                         onClick={() => window.open(`/resources/${version.resource.slug}`, '_blank')}
                                         className="font-nunito"
                                     >
-                                        <Icon icon="mdi:eye" width="16" height="16" />
+                                        <Icon ssr={true} icon="mdi:eye" width="16" height="16" />
                                         View
+                                    </Button>
+                                    <Button
+                                        size="sm"
+                                        variant="secondary"
+                                        onClick={() => window.location.href = `/admin/moderation/resources/${version.id}`}
+                                        className="font-nunito"
+                                    >
+                                        <Icon ssr={true} icon="mdi:magnify-scan" width="16" height="16" />
+                                        Inspect
                                     </Button>
                                     <Button
                                         size="sm"
@@ -309,7 +319,7 @@ export default function ModerationPage() {
                                         disabled={actionLoading === version.id}
                                         className="font-nunito bg-green-600 hover:bg-green-700"
                                     >
-                                        <Icon icon="mdi:check" width="16" height="16" />
+                                        <Icon ssr={true} icon="mdi:check" width="16" height="16" />
                                         Approve
                                     </Button>
                                     <Button
@@ -319,7 +329,7 @@ export default function ModerationPage() {
                                         disabled={actionLoading === version.id}
                                         className="font-nunito"
                                     >
-                                        <Icon icon="mdi:close" width="16" height="16" />
+                                        <Icon ssr={true} icon="mdi:close" width="16" height="16" />
                                         Reject
                                     </Button>
                                 </div>
@@ -334,7 +344,7 @@ export default function ModerationPage() {
                 <h2 className="font-hebden text-xl font-semibold text-foreground mb-4">Pending Servers</h2>
                 {pendingServers.length === 0 ? (
                     <div className="text-center py-8">
-                        <Icon icon="mdi:check-circle" width="48" height="48" className="text-green-500 mx-auto mb-2" />
+                        <Icon ssr={true} icon="mdi:check-circle" width="48" height="48" className="text-green-500 mx-auto mb-2" />
                         <p className="font-nunito text-muted-foreground">No pending servers</p>
                     </div>
                 ) : (
@@ -343,7 +353,7 @@ export default function ModerationPage() {
                             <div key={server.id} className="bg-accent rounded-lg p-4 flex items-center justify-between">
                                 <div className="flex items-center gap-3 flex-1">
                                     <div className="p-2 bg-purple-500/20 rounded-lg">
-                                        <Icon icon="mdi:server" width="24" height="24" className="text-purple-400" />
+                                        <Icon ssr={true} icon="mdi:server" width="24" height="24" className="text-purple-400" />
                                     </div>
                                     <div className="flex-1">
                                         <p className="font-hebden font-semibold text-foreground">{server.name}</p>
@@ -356,10 +366,10 @@ export default function ModerationPage() {
                                     <Button
                                         size="sm"
                                         variant="outline"
-                                        onClick={() => window.open(`/servers/${server.id}`, '_blank')}
+                                        onClick={() => window.open(`/servers/${server.slug}`, '_blank')}
                                         className="font-nunito"
                                     >
-                                        <Icon icon="mdi:eye" width="16" height="16" />
+                                        <Icon ssr={true} icon="mdi:eye" width="16" height="16" />
                                         View
                                     </Button>
                                     <Button
@@ -368,7 +378,7 @@ export default function ModerationPage() {
                                         disabled={actionLoading === server.id}
                                         className="font-nunito bg-green-600 hover:bg-green-700"
                                     >
-                                        <Icon icon="mdi:check" width="16" height="16" />
+                                        <Icon ssr={true} icon="mdi:check" width="16" height="16" />
                                         Approve
                                     </Button>
                                     <Button
@@ -378,7 +388,7 @@ export default function ModerationPage() {
                                         disabled={actionLoading === server.id}
                                         className="font-nunito"
                                     >
-                                        <Icon icon="mdi:close" width="16" height="16" />
+                                        <Icon ssr={true} icon="mdi:close" width="16" height="16" />
                                         Reject
                                     </Button>
                                 </div>

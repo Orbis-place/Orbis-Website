@@ -38,7 +38,7 @@ export default function UserShowcasePage() {
     if (isLoading) {
         return (
             <div className="flex justify-center py-12">
-                <Icon icon="mdi:loading" className="animate-spin text-[#109EB1] text-4xl" />
+                <Icon ssr={true} icon="mdi:loading" className="animate-spin text-[#109EB1] text-4xl" />
             </div>
         );
     }
@@ -65,7 +65,7 @@ export default function UserShowcasePage() {
                                         />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center">
-                                            <Icon icon={categoryInfo.icon} className="text-4xl text-[#C7F4FA]/20" />
+                                            <Icon ssr={true} icon={categoryInfo.icon} className="text-4xl text-[#C7F4FA]/20" />
                                         </div>
                                     )}
                                     {/* Category Badge */}
@@ -73,7 +73,7 @@ export default function UserShowcasePage() {
                                         className="absolute top-3 left-3 px-2 py-1 rounded-full text-xs font-nunito font-semibold flex items-center gap-1"
                                         style={{ backgroundColor: categoryInfo.color, color: '#032125' }}
                                     >
-                                        <Icon icon={categoryInfo.icon} className="text-sm" />
+                                        <Icon ssr={true} icon={categoryInfo.icon} className="text-sm" />
                                         {categoryInfo.label}
                                     </div>
                                 </div>
@@ -85,15 +85,15 @@ export default function UserShowcasePage() {
                                     </h3>
                                     <div className="flex items-center gap-4 text-xs text-[#C7F4FA]/60 font-nunito">
                                         <span className="flex items-center gap-1">
-                                            <Icon icon="mdi:heart-outline" />
+                                            <Icon ssr={true} icon="mdi:heart-outline" />
                                             {post.likeCount}
                                         </span>
                                         <span className="flex items-center gap-1">
-                                            <Icon icon="mdi:eye-outline" />
+                                            <Icon ssr={true} icon="mdi:eye-outline" />
                                             {post.viewCount}
                                         </span>
                                         <span className="flex items-center gap-1">
-                                            <Icon icon="mdi:comment-outline" />
+                                            <Icon ssr={true} icon="mdi:comment-outline" />
                                             {post.commentCount}
                                         </span>
                                     </div>
@@ -104,7 +104,7 @@ export default function UserShowcasePage() {
                 </div>
             ) : (
                 <div className="col-span-full text-center py-16 border border-dashed border-[#084B54] rounded-[20px]">
-                    <Icon icon="mdi:palette-outline" width="64" height="64" className="mx-auto mb-4 text-[#C7F4FA]/30" />
+                    <Icon ssr={true} icon="mdi:palette-outline" width="64" height="64" className="mx-auto mb-4 text-[#C7F4FA]/30" />
                     <h3 className="font-hebden text-lg font-bold text-[#C7F4FA] mb-2">No showcase posts yet</h3>
                     <p className="text-sm text-[#C7F4FA]/60 font-nunito">
                         This user hasn't published any showcase posts.

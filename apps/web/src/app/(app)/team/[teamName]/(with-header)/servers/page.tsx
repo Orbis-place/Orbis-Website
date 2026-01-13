@@ -23,7 +23,7 @@ export default function TeamServersPage() {
                                     {server.logo ? (
                                         <img src={server.logo} alt={server.name} className="w-full h-full object-cover" />
                                     ) : (
-                                        <Icon icon="mdi:server" width="24" height="24" className="text-[#C7F4FA]/60" />
+                                        <Icon ssr={true} icon="mdi:server" width="24" height="24" className="text-[#C7F4FA]/60" />
                                     )}
                                 </div>
                                 <div className="flex-1 min-w-0">
@@ -38,12 +38,12 @@ export default function TeamServersPage() {
                             )}
                             <div className="flex items-center gap-4 text-xs text-[#C7F4FA]/60 font-nunito">
                                 <span className={`flex items-center gap-1 ${server.isOnline ? 'text-green-400' : 'text-red-400'}`}>
-                                    <Icon icon={server.isOnline ? "mdi:circle" : "mdi:circle-outline"} width="8" height="8" />
+                                    <Icon ssr={true} icon={server.isOnline ? "mdi:circle" : "mdi:circle-outline"} width="8" height="8" />
                                     {server.isOnline ? 'Online' : 'Offline'}
                                 </span>
                                 {server.isOnline && (
                                     <span className="flex items-center gap-1">
-                                        <Icon icon="mdi:account-group" width="14" height="14" />
+                                        <Icon ssr={true} icon="mdi:account-group" width="14" height="14" />
                                         {server.currentPlayers}/{server.maxPlayers}
                                     </span>
                                 )}
@@ -52,7 +52,7 @@ export default function TeamServersPage() {
                     ))
                 ) : (
                     <div className="col-span-full text-center py-16 border border-dashed border-[#084B54] rounded-[20px]">
-                        <Icon icon="mdi:server-off" width="64" height="64" className="mx-auto mb-4 text-[#C7F4FA]/30" />
+                        <Icon ssr={true} icon="mdi:server-off" width="64" height="64" className="mx-auto mb-4 text-[#C7F4FA]/30" />
                         <h3 className="font-hebden text-lg font-bold text-[#C7F4FA] mb-2">No servers</h3>
                         <p className="text-sm text-[#C7F4FA]/60 font-nunito">
                             This team doesn't own any servers.

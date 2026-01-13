@@ -137,6 +137,28 @@ export default function ServerManagePage() {
     }
   };
 
+  const handleSubmitForReview = async () => {
+    if (!server?.id) return;
+
+    try {
+      const response = await fetch(`${API_URL}/servers/${server.id}/submit`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || 'Failed to submit server');
+      }
+
+      toast.success('Server submitted for moderation review');
+      await refreshServer();
+    } catch (error) {
+      console.error('Error submitting server:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to submit server');
+    }
+  };
+
   const handleFileUpload = async (file: File, type: 'logo' | 'banner') => {
     if (!server?.id) return;
 
@@ -219,7 +241,7 @@ export default function ServerManagePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Icon icon="mdi:loading" className="animate-spin text-primary" width="48" height="48" />
+        <Icon ssr={true} icon="mdi:loading" className="animate-spin text-primary" width="48" height="48" />
       </div>
     );
   }
@@ -227,7 +249,7 @@ export default function ServerManagePage() {
   if (!server) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
-        <Icon icon="mdi:server-off" width="48" height="48" className="text-muted-foreground" />
+        <Icon ssr={true} icon="mdi:server-off" width="48" height="48" className="text-muted-foreground" />
         <p className="text-foreground font-nunito text-lg mt-4">Server not found</p>
         <Button onClick={() => router.push('/dashboard/servers')} className="mt-4 font-hebden">
           Back to Servers
@@ -240,7 +262,38 @@ export default function ServerManagePage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold font-hebden text-foreground">General Settings</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-bold font-hebden text-foreground">General Settings</h1>
+          {server.status === 'DRAFT' && (
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-500/10 text-gray-400 text-sm font-nunito">
+              <Icon ssr={true} icon="mdi:pencil" width="16" height="16" />
+              Draft
+            </div>
+          )}
+          {server.status === 'PENDING' && (
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-500/10 text-yellow-400 text-sm font-nunito">
+              <Icon ssr={true} icon="mdi:clock" width="16" height="16" />
+              Pending Review
+            </div>
+          )}
+          {server.status === 'REJECTED' && (
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 text-red-400 text-sm font-nunito">
+              <Icon ssr={true} icon="mdi:close-circle" width="16" height="16" />
+              Rejected
+            </div>
+          )}
+          {server.status === 'APPROVED' && (
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/10 text-green-400 text-sm font-nunito">
+              <Icon ssr={true} icon="mdi:check-circle" width="16" height="16" />
+              Approved
+            </div>
+          )}
+        </div>
+        {(server.status === 'DRAFT' || server.status === 'REJECTED') && (
+          <Button onClick={handleSubmitForReview} className="font-hebden">
+            Submit for Review
+          </Button>
+        )}
       </div>
 
       {/* Banner */}
@@ -267,7 +320,7 @@ export default function ServerManagePage() {
               className="font-hebden"
               onClick={() => bannerInputRef.current?.click()}
             >
-              <Icon icon="mdi:upload" width="16" height="16" />
+              <Icon ssr={true} icon="mdi:upload" width="16" height="16" />
               Upload Banner
             </Button>
             {server.bannerUrl && (
@@ -277,7 +330,7 @@ export default function ServerManagePage() {
                 onClick={() => setDeleteImageId('banner')}
                 className="font-hebden"
               >
-                <Icon icon="mdi:delete" width="16" height="16" />
+                <Icon ssr={true} icon="mdi:delete" width="16" height="16" />
               </Button>
             )}
           </div>
@@ -299,7 +352,7 @@ export default function ServerManagePage() {
               />
             ) : (
               <div className="w-24 h-24 rounded-lg bg-primary/20 flex items-center justify-center">
-                <Icon icon="mdi:server" width="48" height="48" />
+                <Icon ssr={true} icon="mdi:server" width="48" height="48" />
               </div>
             )}
             {isOwner && (
@@ -316,7 +369,7 @@ export default function ServerManagePage() {
                   className="font-hebden h-8 w-8 p-0"
                   onClick={() => logoInputRef.current?.click()}
                 >
-                  <Icon icon="mdi:upload" width="16" height="16" />
+                  <Icon ssr={true} icon="mdi:upload" width="16" height="16" />
                 </Button>
                 {server.logoUrl && (
                   <Button
@@ -325,7 +378,7 @@ export default function ServerManagePage() {
                     onClick={() => setDeleteImageId('logo')}
                     className="font-hebden h-8 w-8 p-0"
                   >
-                    <Icon icon="mdi:delete" width="16" height="16" />
+                    <Icon ssr={true} icon="mdi:delete" width="16" height="16" />
                   </Button>
                 )}
               </div>
@@ -409,8 +462,8 @@ export default function ServerManagePage() {
               </div>
               <div className="flex gap-2">
                 <Button type="submit" className="font-hebden" disabled={isSaving}>
-                  {isSaving && <Icon icon="mdi:loading" className="animate-spin" width="20" height="20" />}
-                  {!isSaving && <Icon icon="mdi:check" width="20" height="20" />}
+                  {isSaving && <Icon ssr={true} icon="mdi:loading" className="animate-spin" width="20" height="20" />}
+                  {!isSaving && <Icon ssr={true} icon="mdi:check" width="20" height="20" />}
                   Save Changes
                 </Button>
               </div>
@@ -431,7 +484,7 @@ export default function ServerManagePage() {
             variant="destructive"
             className="font-hebden"
           >
-            <Icon icon="mdi:delete" width="20" height="20" />
+            <Icon ssr={true} icon="mdi:delete" width="20" height="20" />
             Delete Server
           </Button>
         </div>

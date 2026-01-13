@@ -5,6 +5,7 @@ import {
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
+import { UserRole } from '@repo/db';
 
 import { StorageService } from '../storage/storage.service';
 import { CreateServerDto } from './dtos/create-server.dto';
@@ -153,7 +154,7 @@ export class ServerService {
                     // Set either ownerUserId (personal) or ownerTeamId (team), never both
                     ownerUserId: createDto.teamId ? null : userId,
                     ownerTeamId: createDto.teamId || null,
-                    status: ServerStatus.PENDING,
+                    status: ServerStatus.DRAFT,
 
                     // Create category relations
                     categories: {
@@ -199,7 +200,7 @@ export class ServerService {
                     statusHistory: {
                         create: {
                             oldStatus: null,
-                            newStatus: ServerStatus.PENDING,
+                            newStatus: ServerStatus.DRAFT,
                             reason: 'Server created',
                         },
                     },
@@ -1229,6 +1230,16 @@ export class ServerService {
             return false;
         }
 
+        // Check if user is a moderator (can view servers in any status)
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { role: true },
+        });
+
+        if (user && (user.role === UserRole.MODERATOR || user.role === UserRole.ADMIN || user.role === UserRole.SUPER_ADMIN)) {
+            return true;
+        }
+
         // If user is the server owner, allow access
         if (server.ownerUserId === userId) {
             return true;
@@ -1274,6 +1285,148 @@ export class ServerService {
             default:
                 return { voteCount: 'desc' as const };
         }
+    }
+
+    /**
+     * Submit server for moderation review
+     */
+    async submit(userId: string, serverId: string) {
+        const server = await prisma.server.findUnique({
+            where: { id: serverId },
+            include: {
+                categories: true,
+            },
+        });
+
+        if (!server) {
+            throw new NotFoundException('Server not found');
+        }
+
+        const canEdit = await this.checkEditPermission(userId, server);
+        if (!canEdit) {
+            throw new ForbiddenException('You do not have permission to edit this server');
+        }
+
+        // Check status - only DRAFT or REJECTED can be submitted
+        if (server.status !== ServerStatus.DRAFT && server.status !== ServerStatus.REJECTED) {
+            throw new BadRequestException('Only draft or rejected servers can be submitted for review');
+        }
+
+        if (server.status as any === ServerStatus.SUSPENDED) {
+            throw new ForbiddenException('Server is suspended and cannot be submitted');
+        }
+
+        // Validate required fields for submission
+        if (!server.logoUrl) {
+            throw new BadRequestException('Server logo is required for submission');
+        }
+
+        if (!server.bannerUrl) {
+            throw new BadRequestException('Server banner is required for submission');
+        }
+
+        if ((server.shortDesc?.length || 0) < 10) {
+            throw new BadRequestException('Short description must be at least 10 characters long');
+        }
+
+        // Update status to PENDING
+        await prisma.server.update({
+            where: { id: serverId },
+            data: {
+                status: ServerStatus.PENDING,
+                updatedAt: new Date(),
+                // Clear rejection reason if resubmitting
+                ...(server.status === ServerStatus.REJECTED && { rejectionReason: null }),
+            },
+        });
+
+        // Create status history entry
+        await prisma.serverStatusHistory.create({
+            data: {
+                serverId: server.id,
+                oldStatus: server.status,
+                newStatus: ServerStatus.PENDING,
+                reason:
+                    server.status === ServerStatus.REJECTED
+                        ? 'Resubmitted for review after rejection'
+                        : 'Submitted for moderation review',
+                changedBy: userId,
+            },
+        });
+
+        return {
+            success: true,
+            message: 'Server submitted for moderation review',
+        };
+    }
+
+    /**
+     * Get pending servers for moderation (Moderator+ only)
+     */
+    async getPendingServers(moderatorId: string) {
+        // Verify moderator has proper role
+        const moderator = await prisma.user.findUnique({
+            where: { id: moderatorId },
+            select: { role: true },
+        });
+
+        if (
+            !moderator ||
+            ![UserRole.MODERATOR, UserRole.ADMIN, UserRole.SUPER_ADMIN].includes(moderator.role as any)
+        ) {
+            throw new ForbiddenException('Access denied - Moderator role required');
+        }
+
+        const pendingServers = await prisma.server.findMany({
+            where: {
+                status: ServerStatus.PENDING,
+            },
+            select: {
+                id: true,
+                name: true,
+                slug: true,
+                description: true,
+                createdAt: true,
+                ownerUser: {
+                    select: {
+                        id: true,
+                        username: true,
+                        displayName: true,
+                        image: true,
+                    },
+                },
+                ownerTeam: {
+                    select: {
+                        id: true,
+                        name: true,
+                        slug: true,
+                        logo: true,
+                    },
+                },
+                categories: {
+                    where: { isPrimary: true },
+                    include: {
+                        category: {
+                            select: {
+                                id: true,
+                                name: true,
+                                slug: true,
+                            },
+                        },
+                    },
+                },
+            },
+            orderBy: {
+                updatedAt: 'desc', // Most recently submitted first
+            },
+        });
+
+        return {
+            data: pendingServers,
+            meta: {
+                total: pendingServers.length,
+            },
+        };
     }
 
     /**

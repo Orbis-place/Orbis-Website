@@ -131,7 +131,7 @@ export default function DashboardLayoutClient({ children }: { children: React.Re
                                 : 'text-foreground hover:bg-secondary/50'
                             )}
                           >
-                            <Icon icon={item.icon} width="20" height="20" />
+                            <Icon ssr={true} icon={item.icon} width="20" height="20" />
                             {item.name}
                           </Link>
                         </li>

@@ -11,6 +11,7 @@ import { LicenseType, UpdateResourceDto } from './dtos/update-resource.dto';
 import { prisma, ResourceStatus, ResourceType, UserRole } from '@repo/db';
 import { PaginationDto, PaginatedResponse } from '../../common/dtos/pagination.dto';
 import { FilterResourcesDto, ResourceSortOption } from './dtos/filter-resources.dto';
+import { EmailService } from '../email/email.service';
 
 import { ModerateResourceDto } from './dtos/moderate-resource.dto';
 import { ResourceDescriptionImageService } from './resource-description-image.service';
@@ -23,6 +24,7 @@ export class ResourceService {
     constructor(
 
         private readonly storage: StorageService,
+        private readonly emailService: EmailService,
         private descriptionImageService?: ResourceDescriptionImageService,
         private readonly notificationService?: NotificationService,
     ) { }
@@ -806,6 +808,49 @@ export class ResourceService {
         return {
             message: 'Banner uploaded successfully',
             resource: updated,
+        };
+    }
+
+    /**
+     * Schedule a donation reminder
+     */
+    async scheduleDonationReminder(resourceId: string, email: string) {
+        const resource = await prisma.resource.findUnique({
+            where: { id: resourceId },
+            include: {
+                externalLinks: true,
+            },
+        });
+
+        if (!resource) {
+            throw new NotFoundException('Resource not found');
+        }
+
+        const donationLink = resource.externalLinks.find(
+            (link) => link.type === 'DONATION',
+        );
+
+        if (!donationLink) {
+            throw new BadRequestException('This resource does not have a donation link');
+        }
+
+        // Schedule for 8 hours later
+        const scheduledAt = new Date();
+        scheduledAt.setHours(scheduledAt.getHours() + 8);
+        const scheduledAtIso = scheduledAt.toISOString();
+
+        await this.emailService.sendDonationReminderEmail(
+            email,
+            resource.name,
+            donationLink.url,
+            scheduledAtIso,
+            resource.slug,
+            resource.type
+        );
+
+        return {
+            message: 'Donation reminder scheduled',
+            scheduledAt: scheduledAtIso,
         };
     }
 

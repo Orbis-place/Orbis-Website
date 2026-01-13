@@ -198,7 +198,7 @@ function NewShowcasePageContent() {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="animate-spin">
-                    <Icon icon="mdi:loading" className="text-4xl text-[#109EB1]" />
+                    <Icon ssr={true} icon="mdi:loading" className="text-4xl text-[#109EB1]" />
                 </div>
             </div>
         );
@@ -216,7 +216,7 @@ function NewShowcasePageContent() {
                     onClick={() => router.back()}
                     className="inline-flex items-center gap-2 text-[#C7F4FA]/70 hover:text-[#C7F4FA] transition-colors mb-4"
                 >
-                    <Icon icon="mdi:arrow-left" />
+                    <Icon ssr={true} icon="mdi:arrow-left" />
                     <span className="font-nunito">Back</span>
                 </button>
                 <h1 className="font-hebden text-3xl text-[#C7F4FA]">Create Showcase Post</h1>
@@ -228,7 +228,7 @@ function NewShowcasePageContent() {
             {step === 'uploading' ? (
                 <div className="bg-[#06363D]/50 backdrop-blur-sm border border-[#109EB1]/10 rounded-xl p-12 space-y-6">
                     <div className="text-center">
-                        <Icon icon="mdi:cloud-upload-outline" className="text-6xl text-[#109EB1] mx-auto mb-4" />
+                        <Icon ssr={true} icon="mdi:cloud-upload-outline" className="text-6xl text-[#109EB1] mx-auto mb-4" />
                         <h3 className="font-hebden text-lg text-[#C7F4FA]">Uploading your showcase...</h3>
                         <p className="text-[#C7F4FA]/60 font-nunito text-sm mt-2">
                             Please wait while we upload your files
@@ -260,7 +260,7 @@ function NewShowcasePageContent() {
                             onClick={() => fileInputRef.current?.click()}
                             className="border-2 border-dashed border-[#109EB1]/30 rounded-xl p-8 text-center cursor-pointer hover:border-[#109EB1]/50 hover:bg-[#109EB1]/5 transition-all"
                         >
-                            <Icon icon="mdi:cloud-upload-outline" className="text-4xl text-[#109EB1] mx-auto mb-3" />
+                            <Icon ssr={true} icon="mdi:cloud-upload-outline" className="text-4xl text-[#109EB1] mx-auto mb-3" />
                             <p className="font-nunito text-[#C7F4FA]">
                                 Click to upload or drag and drop
                             </p>
@@ -301,7 +301,7 @@ function NewShowcasePageContent() {
                                             onClick={(e) => { e.stopPropagation(); removeFile(index); }}
                                             className="absolute top-1 right-1 w-6 h-6 rounded-full bg-red-500 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 hover:bg-red-600 transition-all"
                                         >
-                                            <Icon icon="mdi:close" className="text-sm" />
+                                            <Icon ssr={true} icon="mdi:close" className="text-sm" />
                                         </button>
                                     </div>
                                 ))}
@@ -329,14 +329,14 @@ function NewShowcasePageContent() {
                                     <SelectContent>
                                         <SelectItem value="personal">
                                             <span className="flex items-center gap-2">
-                                                <Icon icon="mdi:account" width="16" height="16" />
+                                                <Icon ssr={true} icon="mdi:account" width="16" height="16" />
                                                 Personal
                                             </span>
                                         </SelectItem>
                                         {teams.map((team) => (
                                             <SelectItem key={team.id} value={team.id}>
                                                 <span className="flex items-center gap-2">
-                                                    <Icon icon="mdi:account-group" width="16" height="16" />
+                                                    <Icon ssr={true} icon="mdi:account-group" width="16" height="16" />
                                                     {team.name}
                                                 </span>
                                             </SelectItem>
@@ -382,7 +382,7 @@ function NewShowcasePageContent() {
                                             }`}
                                         style={category === key ? { backgroundColor: info.color } : {}}
                                     >
-                                        <Icon icon={info.icon} className="text-lg" />
+                                        <Icon ssr={true} icon={info.icon} className="text-lg" />
                                         {info.label}
                                     </button>
                                 ))}
@@ -420,7 +420,7 @@ function NewShowcasePageContent() {
                             disabled={isSubmitting || !title.trim() || files.length === 0}
                             className="px-8 py-3 bg-[#109EB1] text-white rounded-lg font-nunito font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#109EB1]/80 transition-colors flex items-center gap-2"
                         >
-                            <Icon icon="mdi:publish" className="text-xl" />
+                            <Icon ssr={true} icon="mdi:publish" className="text-xl" />
                             Publish
                         </button>
                     </div>

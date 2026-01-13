@@ -86,7 +86,7 @@ export default function ThemeOfMonthSection({ themeOfMonth }: ThemeOfMonthSectio
                                 }`}
                             aria-label="Scroll left"
                         >
-                            <Icon icon="mdi:arrow-left" className="w-4 h-4" />
+                            <Icon ssr={true} icon="mdi:arrow-left" className="w-4 h-4" />
                         </button>
                         <button
                             onClick={() => scroll('right')}
@@ -97,13 +97,13 @@ export default function ThemeOfMonthSection({ themeOfMonth }: ThemeOfMonthSectio
                                 }`}
                             aria-label="Scroll right"
                         >
-                            <Icon icon="mdi:arrow-right" className="w-4 h-4" />
+                            <Icon ssr={true} icon="mdi:arrow-right" className="w-4 h-4" />
                         </button>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-3 mb-3">
-                    <Icon icon="mdi:trophy" className="w-6 h-6 text-[#109EB1]" />
+                    <Icon ssr={true} icon="mdi:trophy" className="w-6 h-6 text-[#109EB1]" />
                     <h2 className="font-hebden text-3xl sm:text-4xl text-[#C7F4FA]">
                         {themeOfMonth.collection.title || 'Theme of the Month'}
                     </h2>

@@ -43,7 +43,7 @@ export function FoundingCommunity() {
                             className="bg-[#06363D] border border-[#084B54] rounded-2xl p-6 text-center hover:border-[#109EB1]/50 transition-all duration-300"
                         >
                             <div className="w-16 h-16 bg-[#109EB1]/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                                <Icon icon={prop.icon} className="w-8 h-8 text-[#109EB1]" />
+                                <Icon ssr={true} icon={prop.icon} className="w-8 h-8 text-[#109EB1]" />
                             </div>
                             <h3 className="font-hebden font-semibold text-xl text-[#C7F4FA] mb-3">
                                 {prop.title}
@@ -59,7 +59,7 @@ export function FoundingCommunity() {
                 <div className="flex justify-center mb-8">
                     <div className="inline-flex items-center gap-3 px-6 py-3 bg-[#06363D] border border-[#084B54] rounded-full">
                         <div className="w-8 h-8 bg-gradient-to-br from-[#109EB1] to-[#15C8E0] rounded-full flex items-center justify-center">
-                            <Icon icon="mdi:star-four-points" className="w-4 h-4 text-white" />
+                            <Icon ssr={true} icon="mdi:star-four-points" className="w-4 h-4 text-white" />
                         </div>
                         <span className="font-hebden text-[#C7F4FA]">Founding Member</span>
                         <span className="px-2 py-0.5 bg-[#109EB1]/20 rounded text-xs font-nunito text-[#109EB1]">
@@ -75,7 +75,7 @@ export function FoundingCommunity() {
                         className="inline-flex items-center gap-2 px-8 py-4 bg-[#109EB1] rounded-full font-hebden font-semibold text-lg text-[#C7F4FA] hover:bg-[#0d8a9b] transition-colors"
                     >
                         Join the Founding Community
-                        <Icon icon="mdi:arrow-right" className="w-5 h-5" />
+                        <Icon ssr={true} icon="mdi:arrow-right" className="w-5 h-5" />
                     </Link>
                     <p className="font-nunito text-sm text-[#C7F4FA]/50 mt-4">
                         Launching January 13, 2025 with Hytale

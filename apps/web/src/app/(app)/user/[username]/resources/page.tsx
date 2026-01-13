@@ -24,7 +24,7 @@ export default function UserResourcesPage() {
                                     {resource.iconUrl ? (
                                         <img src={resource.iconUrl} alt={resource.name} className="w-full h-full object-cover" />
                                     ) : (
-                                        <Icon icon="mdi:package-variant" width="24" height="24" className="text-[#C7F4FA]/60" />
+                                        <Icon ssr={true} icon="mdi:package-variant" width="24" height="24" className="text-[#C7F4FA]/60" />
                                     )}
                                 </div>
                                 <div className="flex-1 min-w-0">
@@ -37,11 +37,11 @@ export default function UserResourcesPage() {
                             </p>
                             <div className="flex items-center gap-4 text-xs text-[#C7F4FA]/60 font-nunito">
                                 <span className="flex items-center gap-1">
-                                    <Icon icon="mdi:download" width="14" height="14" />
+                                    <Icon ssr={true} icon="mdi:download" width="14" height="14" />
                                     {resource.downloadCount}
                                 </span>
                                 <span className="flex items-center gap-1">
-                                    <Icon icon="mdi:heart" width="14" height="14" />
+                                    <Icon ssr={true} icon="mdi:heart" width="14" height="14" />
                                     {resource.likeCount}
                                 </span>
                             </div>
@@ -49,7 +49,7 @@ export default function UserResourcesPage() {
                     ))
                 ) : (
                     <div className="col-span-full text-center py-16 border border-dashed border-[#084B54] rounded-[20px]">
-                        <Icon icon="mdi:package-variant-closed" width="64" height="64" className="mx-auto mb-4 text-[#C7F4FA]/30" />
+                        <Icon ssr={true} icon="mdi:package-variant-closed" width="64" height="64" className="mx-auto mb-4 text-[#C7F4FA]/30" />
                         <h3 className="font-hebden text-lg font-bold text-[#C7F4FA] mb-2">No resources yet</h3>
                         <p className="text-sm text-[#C7F4FA]/60 font-nunito">
                             This user hasn't published any resources.

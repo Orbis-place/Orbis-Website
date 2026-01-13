@@ -9,7 +9,6 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/
 import { Area, AreaChart, XAxis, YAxis } from 'recharts';
 import Image from 'next/image';
 import { OrbisConfirmDialog } from '@/components/OrbisDialog';
-import { CreateServerDialog } from '@/components/CreateServerDialog';
 import { toast } from 'sonner';
 
 interface Server {
@@ -71,7 +70,6 @@ export default function ServersPage() {
   const [servers, setServers] = useState<Server[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingServerId, setDeletingServerId] = useState<string | null>(null);
-  const [isCreateServerOpen, setIsCreateServerOpen] = useState(false);
 
   useEffect(() => {
     fetchServers();
@@ -143,21 +141,21 @@ export default function ServersPage() {
           {server.logo ? (
             <Image src={server.logo} alt={server.name} width={64} height={64} className="rounded-lg object-cover" />
           ) : (
-            <Icon icon="mdi:server" width="32" height="32" className="text-primary" />
+            <Icon ssr={true} icon="mdi:server" width="32" height="32" className="text-primary" />
           )}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <h3 className="font-hebden text-lg font-semibold text-foreground">{server.name}</h3>
             {server.featured && (
-              <Icon icon="mdi:star" width="16" height="16" className="text-yellow-500" />
+              <Icon ssr={true} icon="mdi:star" width="16" height="16" className="text-yellow-500" />
             )}
             {server.verified && (
-              <Icon icon="mdi:check-decagram" width="16" height="16" className="text-blue-500" />
+              <Icon ssr={true} icon="mdi:check-decagram" width="16" height="16" className="text-blue-500" />
             )}
           </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground font-nunito mb-2">
-            <Icon icon={getStatusIcon(server.status)} width="16" height="16" className={getStatusColor(server.status)} />
+            <Icon ssr={true} icon={getStatusIcon(server.status)} width="16" height="16" className={getStatusColor(server.status)} />
             <span className={getStatusColor(server.status)}>{server.status}</span>
             <span>•</span>
             <span className={server.isOnline ? 'text-green-500' : 'text-destructive'}>
@@ -169,11 +167,11 @@ export default function ServersPage() {
           )}
           <div className="flex items-center gap-4 text-sm text-muted-foreground font-nunito mb-2">
             <span className="flex items-center gap-1">
-              <Icon icon="mdi:account-multiple" width="16" height="16" />
+              <Icon ssr={true} icon="mdi:account-multiple" width="16" height="16" />
               {server.currentPlayers}/{server.maxPlayers}
             </span>
             <span className="flex items-center gap-1">
-              <Icon icon="mdi:thumb-up" width="16" height="16" />
+              <Icon ssr={true} icon="mdi:thumb-up" width="16" height="16" />
               {server.voteCount} votes
             </span>
           </div>
@@ -227,15 +225,15 @@ export default function ServersPage() {
 
       <div className="flex gap-2 mt-4">
         <Button size="sm" variant="outline" className="font-nunito text-sm" onClick={() => router.push(`/servers/${server.slug}`)}>
-          <Icon icon="mdi:eye" width="16" height="16" />
+          <Icon ssr={true} icon="mdi:eye" width="16" height="16" />
           View
         </Button>
         <Button size="sm" variant="outline" className="font-nunito text-sm" onClick={() => router.push(`/servers/${server.slug}/manage`)}>
-          <Icon icon="mdi:pencil" width="16" height="16" />
+          <Icon ssr={true} icon="mdi:pencil" width="16" height="16" />
           Manage
         </Button>
         <Button size="sm" variant="destructive" className="font-nunito text-sm" onClick={() => setDeletingServerId(server.id)}>
-          <Icon icon="mdi:delete" width="16" height="16" />
+          <Icon ssr={true} icon="mdi:delete" width="16" height="16" />
           Delete
         </Button>
       </div>
@@ -286,7 +284,7 @@ export default function ServersPage() {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-center py-12">
-          <Icon icon="mdi:loading" width="48" height="48" className="text-primary animate-spin" />
+          <Icon ssr={true} icon="mdi:loading" width="48" height="48" className="text-primary animate-spin" />
         </div>
       </div>
     );
@@ -302,17 +300,10 @@ export default function ServersPage() {
             Manage your Hytale servers and monitor their status
           </p>
         </div>
-        <CreateServerDialog
-          open={isCreateServerOpen}
-          onOpenChange={setIsCreateServerOpen}
-          trigger={
-            <Button className="font-hebden">
-              <Icon icon="mdi:plus" width="20" height="20" />
-              Create Server
-            </Button>
-          }
-          onSuccess={fetchServers}
-        />
+        <Button className="font-hebden" onClick={() => router.push('/servers/new')}>
+          <Icon ssr={true} icon="mdi:plus" width="20" height="20" />
+          Create Server
+        </Button>
       </div>
 
       {/* Stats */}
@@ -320,7 +311,7 @@ export default function ServersPage() {
         <div className="bg-gradient-to-br from-primary/20 to-primary/5 rounded-lg p-6">
           <div className="flex items-center gap-3">
             <div className="flex flex-col items-center justify-center p-3 bg-primary/20 rounded-lg">
-              <Icon icon="mdi:server" width="24" height="24" className="text-primary" />
+              <Icon ssr={true} icon="mdi:server" width="24" height="24" className="text-primary" />
             </div>
             <div>
               <p className="text-2xl font-bold font-hebden text-foreground">{totalServers}</p>
@@ -332,7 +323,7 @@ export default function ServersPage() {
         <div className="bg-gradient-to-br from-green-500/20 to-green-500/5 rounded-lg p-6">
           <div className="flex items-center gap-3">
             <div className="flex flex-col items-center justify-center p-3 bg-green-500/20 rounded-lg">
-              <Icon icon="mdi:check-circle" width="24" height="24" className="text-green-500" />
+              <Icon ssr={true} icon="mdi:check-circle" width="24" height="24" className="text-green-500" />
             </div>
             <div>
               <p className="text-2xl font-bold font-hebden text-foreground">{onlineServers}</p>
@@ -344,7 +335,7 @@ export default function ServersPage() {
         <div className="bg-gradient-to-br from-secondary/40 to-secondary/10 rounded-lg p-6">
           <div className="flex items-center gap-3">
             <div className="flex flex-col items-center justify-center p-3 bg-primary/20 rounded-lg">
-              <Icon icon="mdi:account-multiple" width="24" height="24" className="text-primary" />
+              <Icon ssr={true} icon="mdi:account-multiple" width="24" height="24" className="text-primary" />
             </div>
             <div>
               <p className="text-2xl font-bold font-hebden text-foreground">{totalPlayers}</p>
@@ -378,7 +369,7 @@ export default function ServersPage() {
                     {team.logo ? (
                       <Image src={team.logo} alt={team.name} width={40} height={40} className="rounded-lg object-cover" />
                     ) : (
-                      <Icon icon="mdi:account-group" width="24" height="24" className="text-primary" />
+                      <Icon ssr={true} icon="mdi:account-group" width="24" height="24" className="text-primary" />
                     )}
                   </div>
                   <div>
@@ -402,14 +393,14 @@ export default function ServersPage() {
           <div className="bg-secondary/30 rounded-lg p-6">
             <div className="flex flex-col items-center justify-center py-12">
               <div className="p-4 bg-accent rounded-full mb-4">
-                <Icon icon="mdi:server" width="48" height="48" className="text-muted-foreground" />
+                <Icon ssr={true} icon="mdi:server" width="48" height="48" className="text-muted-foreground" />
               </div>
               <p className="text-foreground font-nunito text-lg mb-2">No servers yet</p>
               <p className="text-muted-foreground font-nunito text-sm mb-6 text-center max-w-md">
                 Add your Hytale servers to track their status, manage players, and showcase them to the community.
               </p>
-              <Button className="font-hebden" onClick={() => setIsCreateServerOpen(true)}>
-                <Icon icon="mdi:plus" width="20" height="20" />
+              <Button className="font-hebden" onClick={() => router.push('/servers/new')}>
+                <Icon ssr={true} icon="mdi:plus" width="20" height="20" />
                 Create Your First Server
               </Button>
             </div>

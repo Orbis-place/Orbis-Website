@@ -118,7 +118,7 @@ export default function NotificationsPage() {
         </div>
         {notifications.some(n => !n.read) && (
           <Button variant="outline" className="font-hebden" onClick={markAllAsRead}>
-            <Icon icon="mdi:check-all" width="20" height="20" />
+            <Icon ssr={true} icon="mdi:check-all" width="20" height="20" />
             Mark All Read
           </Button>
         )}
@@ -137,7 +137,7 @@ export default function NotificationsPage() {
                 : 'bg-secondary/30 text-foreground hover:bg-accent'
             )}
           >
-            <Icon icon={f.icon} width="18" height="18" />
+            <Icon ssr={true} icon={f.icon} width="18" height="18" />
             {f.name}
           </button>
         ))}
@@ -147,22 +147,22 @@ export default function NotificationsPage() {
       <div className="bg-secondary/30 rounded-lg overflow-hidden">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-16 px-4">
-            <Icon icon="mdi:loading" width="48" height="48" className="text-muted-foreground animate-spin" />
+            <Icon ssr={true} icon="mdi:loading" width="48" height="48" className="text-muted-foreground animate-spin" />
             <p className="text-foreground font-nunito text-lg mt-4">Loading notifications...</p>
           </div>
         ) : error ? (
           <div className="flex flex-col items-center justify-center py-16 px-4">
-            <Icon icon="mdi:alert-circle" width="48" height="48" className="text-destructive" />
+            <Icon ssr={true} icon="mdi:alert-circle" width="48" height="48" className="text-destructive" />
             <p className="text-foreground font-nunito text-lg mt-4">{error}</p>
             <Button variant="outline" className="mt-4" onClick={fetchNotifications}>
-              <Icon icon="mdi:refresh" width="20" height="20" />
+              <Icon ssr={true} icon="mdi:refresh" width="20" height="20" />
               Retry
             </Button>
           </div>
         ) : notifications.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 px-4">
             <div className="p-4 bg-accent rounded-full mb-4">
-              <Icon icon="mdi:bell-outline" width="48" height="48" className="text-muted-foreground" />
+              <Icon ssr={true} icon="mdi:bell-outline" width="48" height="48" className="text-muted-foreground" />
             </div>
             <p className="text-foreground font-nunito text-lg mb-2">No notifications</p>
             <p className="text-muted-foreground font-nunito text-sm text-center max-w-md">
@@ -181,8 +181,7 @@ export default function NotificationsPage() {
                 )}
               >
                 <div className="p-2 bg-primary/10 rounded-lg h-fit">
-                  <Icon
-                    icon={getNotificationIcon(notification.type)}
+                  <Icon ssr={true} icon={getNotificationIcon(notification.type)}
                     width="24"
                     height="24"
                     className="text-primary"

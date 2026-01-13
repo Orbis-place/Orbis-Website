@@ -53,8 +53,7 @@ export default function ServerChart({
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                     <div className="p-2 rounded-lg bg-[#084B54]/50">
-                        <Icon
-                            icon={icon}
+                        <Icon ssr={true} icon={icon}
                             width="24"
                             height="24"
                             style={{ color: color }}

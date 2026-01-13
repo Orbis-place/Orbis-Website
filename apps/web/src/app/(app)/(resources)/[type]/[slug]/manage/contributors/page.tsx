@@ -211,7 +211,7 @@ export default function ManageContributorsPage() {
     if (loading) {
         return (
             <div className="flex items-center justify-center py-12">
-                <Icon icon="mdi:loading" width="48" height="48" className="text-primary animate-spin" />
+                <Icon ssr={true} icon="mdi:loading" width="48" height="48" className="text-primary animate-spin" />
             </div>
         );
     }
@@ -262,7 +262,7 @@ export default function ManageContributorsPage() {
                                                 <img src={user.image} alt={user.username} className="w-10 h-10 rounded-full" />
                                             ) : (
                                                 <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
-                                                    <Icon icon="mdi:account" width="24" height="24" />
+                                                    <Icon ssr={true} icon="mdi:account" width="24" height="24" />
                                                 </div>
                                             )}
                                             <div className="text-left">
@@ -281,7 +281,7 @@ export default function ManageContributorsPage() {
                                     <img src={selectedUser.image} alt={selectedUser.username} className="w-10 h-10 rounded-full" />
                                 ) : (
                                     <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
-                                        <Icon icon="mdi:account" width="24" height="24" />
+                                        <Icon ssr={true} icon="mdi:account" width="24" height="24" />
                                     </div>
                                 )}
                                 <div className="flex-1">
@@ -293,7 +293,7 @@ export default function ManageContributorsPage() {
                                     size="sm"
                                     onClick={() => setSelectedUser(null)}
                                 >
-                                    <Icon icon="mdi:close" width="20" height="20" />
+                                    <Icon ssr={true} icon="mdi:close" width="20" height="20" />
                                 </Button>
                             </div>
 
@@ -314,7 +314,7 @@ export default function ManageContributorsPage() {
                             >
                                 {adding ? (
                                     <>
-                                        <Icon icon="mdi:loading" width="20" height="20" className="animate-spin mr-2" />
+                                        <Icon ssr={true} icon="mdi:loading" width="20" height="20" className="animate-spin mr-2" />
                                         Adding...
                                     </>
                                 ) : (
@@ -336,7 +336,7 @@ export default function ManageContributorsPage() {
                 {contributors.length === 0 ? (
                     <div className="text-center py-8">
                         <div className="bg-secondary p-4 rounded-full mb-4 inline-block">
-                            <Icon icon="mdi:account-group" width="48" height="48" className="text-muted-foreground" />
+                            <Icon ssr={true} icon="mdi:account-group" width="48" height="48" className="text-muted-foreground" />
                         </div>
                         <p className="text-muted-foreground font-nunito">No contributors yet</p>
                     </div>
@@ -348,7 +348,7 @@ export default function ManageContributorsPage() {
                                     <img src={contributor.user.image} alt={contributor.user.username} className="w-12 h-12 rounded-full" />
                                 ) : (
                                     <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center">
-                                        <Icon icon="mdi:account" width="28" height="28" />
+                                        <Icon ssr={true} icon="mdi:account" width="28" height="28" />
                                     </div>
                                 )}
 
@@ -398,7 +398,7 @@ export default function ManageContributorsPage() {
                                                     setEditRole(contributor.role);
                                                 }}
                                             >
-                                                <Icon icon="mdi:pencil" width="18" height="18" />
+                                                <Icon ssr={true} icon="mdi:pencil" width="18" height="18" />
                                             </Button>
                                             <Button
                                                 size="sm"

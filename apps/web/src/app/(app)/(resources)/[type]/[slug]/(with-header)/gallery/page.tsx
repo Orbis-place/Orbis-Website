@@ -62,7 +62,7 @@ export default function GalleryPage() {
     if (loading) {
         return (
             <div className="flex items-center justify-center py-16">
-                <Icon icon="mdi:loading" width="48" height="48" className="text-primary animate-spin" />
+                <Icon ssr={true} icon="mdi:loading" width="48" height="48" className="text-primary animate-spin" />
             </div>
         );
     }
@@ -183,7 +183,7 @@ export default function GalleryPage() {
                                     disabled={selectedIndex === 0}
                                     className="w-12 h-12 flex items-center justify-center rounded-full bg-secondary/30 border border-[#084B54] hover:border-primary disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                                 >
-                                    <Icon icon="mdi:chevron-left" width="24" height="24" className="text-[#C7F4FA]" />
+                                    <Icon ssr={true} icon="mdi:chevron-left" width="24" height="24" className="text-[#C7F4FA]" />
                                 </button>
 
                                 <div className="px-6 py-2 bg-secondary/30 rounded-full border border-[#084B54]">
@@ -200,7 +200,7 @@ export default function GalleryPage() {
                                     disabled={selectedIndex === gallery.length - 1}
                                     className="w-12 h-12 flex items-center justify-center rounded-full bg-secondary/30 border border-[#084B54] hover:border-primary disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                                 >
-                                    <Icon icon="mdi:chevron-right" width="24" height="24" className="text-[#C7F4FA]" />
+                                    <Icon ssr={true} icon="mdi:chevron-right" width="24" height="24" className="text-[#C7F4FA]" />
                                 </button>
                             </div>
 

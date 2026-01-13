@@ -36,6 +36,8 @@ export class StorageService {
         const extension = file.originalname.split('.').pop();
         const filename = `${folder}/${createId()}.${extension}`;
 
+        const safeOriginalName = file.originalname.replace(/"/g, '');
+
         if (file.size < 5 * 1024 * 1024) {
             await this.s3Client.send(new PutObjectCommand({
                 Bucket: this.publicBucket,
@@ -43,6 +45,7 @@ export class StorageService {
                 Body: file.buffer,
                 ContentType: file.mimetype,
                 CacheControl: 'public, max-age=31536000',
+                ContentDisposition: `attachment; filename="${safeOriginalName}"`,
             }));
         } else {
             const upload = new Upload({
@@ -53,6 +56,7 @@ export class StorageService {
                     Body: file.buffer,
                     ContentType: file.mimetype,
                     CacheControl: 'public, max-age=31536000',
+                    ContentDisposition: `attachment; filename="${safeOriginalName}"`,
                 },
             });
 

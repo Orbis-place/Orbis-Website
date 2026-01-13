@@ -62,7 +62,7 @@ export default function UserCollectionsPage() {
     if (loading) {
         return (
             <div className="flex justify-center py-12">
-                <Icon icon="mdi:loading" width="40" height="40" className="animate-spin text-muted-foreground" />
+                <Icon ssr={true} icon="mdi:loading" width="40" height="40" className="animate-spin text-muted-foreground" />
             </div>
         );
     }
@@ -70,7 +70,7 @@ export default function UserCollectionsPage() {
     if (collections.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center py-16 text-center">
-                <Icon icon="mdi:folder-open-outline" width="64" height="64" className="text-muted-foreground/50 mb-4" />
+                <Icon ssr={true} icon="mdi:folder-open-outline" width="64" height="64" className="text-muted-foreground/50 mb-4" />
                 <h3 className="font-hebden text-xl text-foreground mb-2">No Public Collections</h3>
                 <p className="text-muted-foreground font-nunito max-w-md">
                     {username} hasn't created any public collections yet.
@@ -94,7 +94,7 @@ function CollectionCard({ collection, username }: { collection: UserCollection, 
             <div className="bg-secondary/30 border border-border rounded-lg p-5 hover:border-primary/50 transition-all cursor-pointer group hover:shadow-md h-full">
                 <div className="flex items-center gap-3 mb-4">
                     <div className="p-2.5 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
-                        <Icon icon="mdi:folder-star" width="24" height="24" className="text-primary" />
+                        <Icon ssr={true} icon="mdi:folder-star" width="24" height="24" className="text-primary" />
                     </div>
                     <div className="flex-1 min-w-0">
                         <h3 className="font-hebden text-lg font-semibold text-foreground truncate group-hover:text-primary transition-colors">

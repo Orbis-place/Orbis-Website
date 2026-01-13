@@ -59,7 +59,7 @@ export default function ServerDescriptionPage() {
     if (loading) {
         return (
             <div className="flex items-center justify-center py-12">
-                <Icon icon="mdi:loading" className="animate-spin text-primary" width="48" height="48" />
+                <Icon ssr={true} icon="mdi:loading" className="animate-spin text-primary" width="48" height="48" />
             </div>
         );
     }
@@ -67,7 +67,7 @@ export default function ServerDescriptionPage() {
     if (!contextServer) {
         return (
             <div className="flex flex-col items-center justify-center py-12">
-                <Icon icon="mdi:server-off" width="48" height="48" className="text-muted-foreground" />
+                <Icon ssr={true} icon="mdi:server-off" width="48" height="48" className="text-muted-foreground" />
                 <p className="text-foreground font-nunito text-lg mt-4">Server not found</p>
                 <Button onClick={() => router.push('/dashboard/servers')} className="mt-4 font-hebden">
                     Back to Servers
@@ -79,7 +79,7 @@ export default function ServerDescriptionPage() {
     if (!isOwner) {
         return (
             <div className="flex flex-col items-center justify-center py-12">
-                <Icon icon="mdi:lock" width="48" height="48" className="text-muted-foreground" />
+                <Icon ssr={true} icon="mdi:lock" width="48" height="48" className="text-muted-foreground" />
                 <p className="text-foreground font-nunito text-lg mt-4">You don't have permission to edit this server</p>
             </div>
         );
@@ -100,8 +100,8 @@ export default function ServerDescriptionPage() {
                     className="font-hebden"
                     disabled={isSaving}
                 >
-                    {isSaving && <Icon icon="mdi:loading" className="animate-spin" width="20" height="20" />}
-                    {!isSaving && <Icon icon="mdi:content-save" width="20" height="20" />}
+                    {isSaving && <Icon ssr={true} icon="mdi:loading" className="animate-spin" width="20" height="20" />}
+                    {!isSaving && <Icon ssr={true} icon="mdi:content-save" width="20" height="20" />}
                     Save Changes
                 </Button>
             </div>

@@ -123,7 +123,7 @@ export default function ShowcaseDetailPage() {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="animate-spin">
-                    <Icon icon="mdi:loading" className="text-4xl text-[#109EB1]" />
+                    <Icon ssr={true} icon="mdi:loading" className="text-4xl text-[#109EB1]" />
                 </div>
             </div>
         );
@@ -133,7 +133,7 @@ export default function ShowcaseDetailPage() {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="text-center">
-                    <Icon icon="mdi:alert-circle-outline" className="text-6xl text-[#C7F4FA]/30 mx-auto mb-4" />
+                    <Icon ssr={true} icon="mdi:alert-circle-outline" className="text-6xl text-[#C7F4FA]/30 mx-auto mb-4" />
                     <h2 className="font-hebden text-xl text-[#C7F4FA]">Post not found</h2>
                 </div>
             </div>
@@ -150,7 +150,7 @@ export default function ShowcaseDetailPage() {
                 href="/showcase"
                 className="inline-flex items-center gap-2 text-[#C7F4FA]/70 hover:text-[#C7F4FA] transition-colors mb-6"
             >
-                <Icon icon="mdi:arrow-left" />
+                <Icon ssr={true} icon="mdi:arrow-left" />
                 <span className="font-nunito">Back to Showcase</span>
             </Link>
 
@@ -183,13 +183,13 @@ export default function ShowcaseDetailPage() {
                                             onClick={() => setCurrentMediaIndex((i) => (i - 1 + media.length) % media.length)}
                                             className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-[#032125]/80 border border-[#109EB1]/30 flex items-center justify-center text-[#C7F4FA] hover:bg-[#109EB1]/20 transition-colors"
                                         >
-                                            <Icon icon="mdi:chevron-left" className="text-2xl" />
+                                            <Icon ssr={true} icon="mdi:chevron-left" className="text-2xl" />
                                         </button>
                                         <button
                                             onClick={() => setCurrentMediaIndex((i) => (i + 1) % media.length)}
                                             className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-[#032125]/80 border border-[#109EB1]/30 flex items-center justify-center text-[#C7F4FA] hover:bg-[#109EB1]/20 transition-colors"
                                         >
-                                            <Icon icon="mdi:chevron-right" className="text-2xl" />
+                                            <Icon ssr={true} icon="mdi:chevron-right" className="text-2xl" />
                                         </button>
                                     </>
                                 )}
@@ -313,7 +313,7 @@ export default function ShowcaseDetailPage() {
                                                         onClick={() => setReplyToId(replyToId === comment.id ? null : comment.id)}
                                                         className="mt-2 text-xs text-[#C7F4FA]/50 hover:text-[#109EB1] transition-colors font-nunito flex items-center gap-1"
                                                     >
-                                                        <Icon icon="mdi:reply" />
+                                                        <Icon ssr={true} icon="mdi:reply" />
                                                         Reply
                                                     </button>
                                                 )}
@@ -338,13 +338,13 @@ export default function ShowcaseDetailPage() {
                                                             disabled={!replyContent.trim() || isSubmittingComment}
                                                             className="px-3 py-2 bg-[#109EB1] text-white rounded-lg text-sm font-nunito disabled:opacity-50 hover:bg-[#109EB1]/80 transition-colors"
                                                         >
-                                                            <Icon icon="mdi:send" />
+                                                            <Icon ssr={true} icon="mdi:send" />
                                                         </button>
                                                         <button
                                                             onClick={() => { setReplyToId(null); setReplyContent(''); }}
                                                             className="px-3 py-2 text-[#C7F4FA]/50 hover:text-[#C7F4FA] transition-colors"
                                                         >
-                                                            <Icon icon="mdi:close" />
+                                                            <Icon ssr={true} icon="mdi:close" />
                                                         </button>
                                                     </div>
                                                 )}
@@ -407,7 +407,7 @@ export default function ShowcaseDetailPage() {
                             className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-nunito font-semibold"
                             style={{ backgroundColor: categoryInfo.color, color: '#032125' }}
                         >
-                            <Icon icon={categoryInfo.icon} />
+                            <Icon ssr={true} icon={categoryInfo.icon} />
                             {categoryInfo.label}
                         </div>
 
@@ -428,7 +428,7 @@ export default function ShowcaseDetailPage() {
                                     />
                                 ) : (
                                     <div className="w-12 h-12 rounded-lg bg-[#109EB1]/20 flex items-center justify-center">
-                                        <Icon icon="mdi:account-group" className="text-2xl text-[#109EB1]" />
+                                        <Icon ssr={true} icon="mdi:account-group" className="text-2xl text-[#109EB1]" />
                                     </div>
                                 )}
                                 <div>
@@ -475,11 +475,11 @@ export default function ShowcaseDetailPage() {
                                     : 'bg-[#032125] text-[#C7F4FA] hover:bg-[#032125]/80'
                                     } disabled:cursor-not-allowed`}
                             >
-                                <Icon icon={hasLiked ? 'mdi:heart' : 'mdi:heart-outline'} className="text-xl" />
+                                <Icon ssr={true} icon={hasLiked ? 'mdi:heart' : 'mdi:heart-outline'} className="text-xl" />
                                 {likeCount}
                             </button>
                             <div className="flex items-center gap-2 text-[#C7F4FA]/60">
-                                <Icon icon="mdi:eye-outline" />
+                                <Icon ssr={true} icon="mdi:eye-outline" />
                                 <span className="font-nunito">{post.viewCount}</span>
                             </div>
                         </div>
@@ -499,7 +499,7 @@ export default function ShowcaseDetailPage() {
                                 href={`/showcase/${post.id}/edit`}
                                 className="flex items-center justify-center gap-2 w-full py-2.5 bg-[#032125] text-[#C7F4FA] rounded-lg font-nunito font-semibold hover:bg-[#109EB1]/20 hover:text-[#109EB1] transition-colors border border-[#109EB1]/20"
                             >
-                                <Icon icon="mdi:pencil-outline" />
+                                <Icon ssr={true} icon="mdi:pencil-outline" />
                                 Edit Post
                             </Link>
                         )}
@@ -510,7 +510,7 @@ export default function ShowcaseDetailPage() {
                                 onClick={() => setReportDialogOpen(true)}
                                 className="flex items-center justify-center gap-2 w-full py-2.5 bg-[#032125] text-destructive rounded-lg font-nunito font-semibold hover:bg-destructive/10 transition-colors border border-destructive/20"
                             >
-                                <Icon icon="mdi:flag-outline" />
+                                <Icon ssr={true} icon="mdi:flag-outline" />
                                 Report Post
                             </button>
                         )}
@@ -534,7 +534,7 @@ export default function ShowcaseDetailPage() {
                                     />
                                 ) : (
                                     <div className="w-12 h-12 rounded-lg bg-[#109EB1]/20 flex items-center justify-center">
-                                        <Icon icon="mdi:package-variant" className="text-2xl text-[#109EB1]" />
+                                        <Icon ssr={true} icon="mdi:package-variant" className="text-2xl text-[#109EB1]" />
                                     </div>
                                 )}
                                 <div className="flex-1 min-w-0">
@@ -545,7 +545,7 @@ export default function ShowcaseDetailPage() {
                                         {post.linkedResource.type.replace('_', ' ')}
                                     </p>
                                 </div>
-                                <Icon icon="mdi:arrow-right" className="text-[#C7F4FA]/40" />
+                                <Icon ssr={true} icon="mdi:arrow-right" className="text-[#C7F4FA]/40" />
                             </Link>
                         </div>
                     )}

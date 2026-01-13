@@ -99,12 +99,12 @@ function UserProfileLayoutContent({ children }: { children: ReactNode }) {
         >
             {followLoading ? (
                 <>
-                    <Icon icon="mdi:loading" className="w-5 h-5 animate-spin" />
+                    <Icon ssr={true} icon="mdi:loading" className="w-5 h-5 animate-spin" />
                     <span>Loading...</span>
                 </>
             ) : isFollowing ? (
                 <>
-                    <Icon icon="mdi:account-check" className="w-5 h-5" />
+                    <Icon ssr={true} icon="mdi:account-check" className="w-5 h-5" />
                     <span>Following</span>
                 </>
             ) : (
@@ -120,7 +120,7 @@ function UserProfileLayoutContent({ children }: { children: ReactNode }) {
         return (
             <div className="max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-4 py-6 sm:py-8">
                 <div className="flex items-center justify-center min-h-screen">
-                    <Icon icon="mdi:loading" className="animate-spin text-primary" width="40" height="40" />
+                    <Icon ssr={true} icon="mdi:loading" className="animate-spin text-primary" width="40" height="40" />
                 </div>
             </div>
         );
@@ -131,7 +131,7 @@ function UserProfileLayoutContent({ children }: { children: ReactNode }) {
             <div className="max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-4 py-6 sm:py-8">
                 <div className="flex items-center justify-center min-h-screen">
                     <div className="text-center">
-                        <Icon icon="mdi:account-alert" className="text-muted-foreground mx-auto mb-4" width="64" height="64" />
+                        <Icon ssr={true} icon="mdi:account-alert" className="text-muted-foreground mx-auto mb-4" width="64" height="64" />
                         <h1 className="font-hebden text-2xl font-bold mb-2">{error}</h1>
                         <p className="text-muted-foreground font-nunito mb-4">The user doesn't exist.</p>
                     </div>
@@ -242,14 +242,14 @@ function UserProfileLayoutContent({ children }: { children: ReactNode }) {
                     <span className="text-[#109EB1] font-semibold">@{user.username}</span>
                     <span>•</span>
                     <span className="flex items-center gap-1.5">
-                        <Icon icon="mdi:calendar" className="w-4 h-4" />
+                        <Icon ssr={true} icon="mdi:calendar" className="w-4 h-4" />
                         Joined {formatDate(user.createdAt)}
                     </span>
                     {user.showLocation && user.location && (
                         <>
                             <span>•</span>
                             <span className="flex items-center gap-1.5">
-                                <Icon icon="mdi:map-marker" className="w-4 h-4" />
+                                <Icon ssr={true} icon="mdi:map-marker" className="w-4 h-4" />
                                 {user.location}
                             </span>
                         </>
@@ -258,7 +258,7 @@ function UserProfileLayoutContent({ children }: { children: ReactNode }) {
                         <>
                             <span>•</span>
                             <a href={user.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-[#109EB1] hover:underline">
-                                <Icon icon="mdi:link" className="w-4 h-4" />
+                                <Icon ssr={true} icon="mdi:link" className="w-4 h-4" />
                                 Website
                             </a>
                         </>
@@ -414,15 +414,13 @@ function UserProfileLayoutContent({ children }: { children: ReactNode }) {
                                             className="flex items-center gap-3 text-[#109EB1] hover:underline font-hebden font-semibold text-sm group"
                                         >
                                             <span className="text-[#109EB1]">
-                                                <Icon
-                                                    icon={getIcon(link.type)}
+                                                <Icon ssr={true} icon={getIcon(link.type)}
                                                     width="20"
                                                     height="20"
                                                 />
                                             </span>
                                             <span className="flex-1 truncate">{displayLabel}</span>
-                                            <Icon
-                                                icon="mdi:external-link"
+                                            <Icon ssr={true} icon="mdi:external-link"
                                                 width="16"
                                                 height="16"
                                                 className="text-[#C7F4FA]/50 group-hover:text-[#C7F4FA] flex-shrink-0"
@@ -463,7 +461,7 @@ function UserProfileLayoutContent({ children }: { children: ReactNode }) {
                     {user.userBadges.length > 0 && (
                         <div className="bg-[#06363D] border border-[#084B54] rounded-[25px] p-5 flex flex-col gap-4">
                             <h3 className="font-hebden text-lg font-semibold text-[#C7F4FA] m-0 flex items-center gap-2">
-                                <Icon icon="mdi:trophy-variant" width="20" height="20" className="text-[#109EB1]" />
+                                <Icon ssr={true} icon="mdi:trophy-variant" width="20" height="20" className="text-[#109EB1]" />
                                 Badges ({user.userBadges.length})
                             </h3>
                             <div className="grid grid-cols-4 gap-3">
@@ -480,7 +478,7 @@ function UserProfileLayoutContent({ children }: { children: ReactNode }) {
                                                 className="w-8 h-8 rounded-full flex items-center justify-center"
                                                 style={{ backgroundColor: userBadge.badge.color || '#109EB1' }}
                                             >
-                                                <Icon icon="mdi:trophy" width="18" height="18" className="text-white" />
+                                                <Icon ssr={true} icon="mdi:trophy" width="18" height="18" className="text-white" />
                                             </div>
                                         )}
                                     </div>

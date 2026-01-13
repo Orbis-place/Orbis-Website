@@ -136,9 +136,9 @@ export function ServerTagSearchInput({ selectedTags, onTagsChange, maxTags = 10 
                 />
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
                     {loading ? (
-                        <Icon icon="mdi:loading" width="20" height="20" className="text-[#109EB1] animate-spin" />
+                        <Icon ssr={true} icon="mdi:loading" width="20" height="20" className="text-[#109EB1] animate-spin" />
                     ) : (
-                        <Icon icon="mdi:magnify" width="20" height="20" className="text-[#C7F4FA]/50" />
+                        <Icon ssr={true} icon="mdi:magnify" width="20" height="20" className="text-[#C7F4FA]/50" />
                     )}
                 </div>
             </div>
@@ -154,7 +154,7 @@ export function ServerTagSearchInput({ selectedTags, onTagsChange, maxTags = 10 
                             className="w-full px-4 py-3 text-left hover:bg-[#06363D] transition-colors border-b border-[#084B54] flex items-center gap-2"
                         >
                             <div className="flex items-center justify-center w-6 h-6 bg-[#109EB1] rounded-md">
-                                <Icon icon="mdi:plus" width="16" height="16" className="text-[#C7F4FA]" />
+                                <Icon ssr={true} icon="mdi:plus" width="16" height="16" className="text-[#C7F4FA]" />
                             </div>
                             <div className="flex-1">
                                 <div className="font-nunito text-sm text-[#C7F4FA]">
@@ -192,7 +192,7 @@ export function ServerTagSearchInput({ selectedTags, onTagsChange, maxTags = 10 
                                             {tag.name}
                                         </span>
                                         {isPopular && (
-                                            <Icon icon="mdi:fire" width="14" height="14" className="text-orange-400" />
+                                            <Icon ssr={true} icon="mdi:fire" width="14" height="14" className="text-orange-400" />
                                         )}
                                     </div>
                                 </div>
@@ -203,7 +203,7 @@ export function ServerTagSearchInput({ selectedTags, onTagsChange, maxTags = 10 
                                         </span>
                                     )}
                                     {isSelected && (
-                                        <Icon icon="mdi:check" width="16" height="16" className="text-[#109EB1]" />
+                                        <Icon ssr={true} icon="mdi:check" width="16" height="16" className="text-[#109EB1]" />
                                     )}
                                 </div>
                             </button>

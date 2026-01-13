@@ -455,7 +455,7 @@ export default function TeamManageGeneralPage() {
     if (loading) {
         return (
             <div className="flex items-center justify-center py-12">
-                <Icon icon="mdi:loading" className="animate-spin text-primary" width="48" height="48" />
+                <Icon ssr={true} icon="mdi:loading" className="animate-spin text-primary" width="48" height="48" />
             </div>
         );
     }
@@ -463,7 +463,7 @@ export default function TeamManageGeneralPage() {
     if (!team) {
         return (
             <div className="flex flex-col items-center justify-center py-12">
-                <Icon icon="mdi:account-group-outline" width="48" height="48" className="text-muted-foreground" />
+                <Icon ssr={true} icon="mdi:account-group-outline" width="48" height="48" className="text-muted-foreground" />
                 <p className="text-foreground font-nunito text-lg mt-4">Team not found</p>
                 <Button onClick={() => router.push('/dashboard/teams')} className="mt-4 font-hebden">
                     Back to Teams
@@ -483,7 +483,7 @@ export default function TeamManageGeneralPage() {
                         variant="destructive"
                         className="font-hebden"
                     >
-                        <Icon icon="mdi:exit-to-app" width="20" height="20" />
+                        <Icon ssr={true} icon="mdi:exit-to-app" width="20" height="20" />
                         Leave Team
                     </Button>
                 )}
@@ -513,7 +513,7 @@ export default function TeamManageGeneralPage() {
                             className="font-hebden"
                             onClick={() => bannerInputRef.current?.click()}
                         >
-                            <Icon icon="mdi:upload" width="16" height="16" />
+                            <Icon ssr={true} icon="mdi:upload" width="16" height="16" />
                             Upload Banner
                         </Button>
                         {team.banner && (
@@ -523,7 +523,7 @@ export default function TeamManageGeneralPage() {
                                 onClick={() => handleDeleteFile('banner')}
                                 className="font-hebden"
                             >
-                                <Icon icon="mdi:delete" width="16" height="16" />
+                                <Icon ssr={true} icon="mdi:delete" width="16" height="16" />
                             </Button>
                         )}
                     </div>
@@ -545,7 +545,7 @@ export default function TeamManageGeneralPage() {
                             />
                         ) : (
                             <div className="w-24 h-24 rounded-lg bg-primary/20 flex items-center justify-center">
-                                <Icon icon="mdi:account-group" width="48" height="48" />
+                                <Icon ssr={true} icon="mdi:account-group" width="48" height="48" />
                             </div>
                         )}
                         {canEdit && (
@@ -562,7 +562,7 @@ export default function TeamManageGeneralPage() {
                                     className="font-hebden h-8 w-8 p-0"
                                     onClick={() => logoInputRef.current?.click()}
                                 >
-                                    <Icon icon="mdi:upload" width="16" height="16" />
+                                    <Icon ssr={true} icon="mdi:upload" width="16" height="16" />
                                 </Button>
                                 {team.logo && (
                                     <Button
@@ -571,7 +571,7 @@ export default function TeamManageGeneralPage() {
                                         onClick={() => handleDeleteFile('logo')}
                                         className="font-hebden h-8 w-8 p-0"
                                     >
-                                        <Icon icon="mdi:delete" width="16" height="16" />
+                                        <Icon ssr={true} icon="mdi:delete" width="16" height="16" />
                                     </Button>
                                 )}
                             </div>
@@ -589,7 +589,7 @@ export default function TeamManageGeneralPage() {
                                     </div>
                                     {canEdit && (
                                         <Button onClick={() => setIsEditing(true)} className="font-hebden">
-                                            <Icon icon="mdi:pencil" width="20" height="20" />
+                                            <Icon ssr={true} icon="mdi:pencil" width="20" height="20" />
                                             Edit
                                         </Button>
                                     )}
@@ -599,12 +599,12 @@ export default function TeamManageGeneralPage() {
                                 )}
                                 <div className="flex gap-4 text-sm text-muted-foreground font-nunito">
                                     <span className="flex items-center gap-1">
-                                        <Icon icon="mdi:account-group" width="16" height="16" />
+                                        <Icon ssr={true} icon="mdi:account-group" width="16" height="16" />
                                         {team._count?.members || team.members.length} members
                                     </span>
                                     {team._count?.resources !== undefined && (
                                         <span className="flex items-center gap-1">
-                                            <Icon icon="mdi:package-variant" width="16" height="16" />
+                                            <Icon ssr={true} icon="mdi:package-variant" width="16" height="16" />
                                             {team._count.resources} resources
                                         </span>
                                     )}
@@ -633,8 +633,8 @@ export default function TeamManageGeneralPage() {
                                 </div>
                                 <div className="flex gap-2">
                                     <Button type="submit" className="font-hebden" disabled={isSaving}>
-                                        {isSaving && <Icon icon="mdi:loading" className="animate-spin" width="20" height="20" />}
-                                        {!isSaving && <Icon icon="mdi:check" width="20" height="20" />}
+                                        {isSaving && <Icon ssr={true} icon="mdi:loading" className="animate-spin" width="20" height="20" />}
+                                        {!isSaving && <Icon ssr={true} icon="mdi:check" width="20" height="20" />}
                                         Save Changes
                                     </Button>
                                     <Button
@@ -697,8 +697,7 @@ export default function TeamManageGeneralPage() {
                                     >
                                         <GripVertical className="w-4 h-4 text-muted-foreground cursor-move group-hover:text-primary transition-colors" />
 
-                                        <Icon
-                                            icon={platformInfo.icon}
+                                        <Icon ssr={true} icon={platformInfo.icon}
                                             width="24"
                                             height="24"
                                             style={{ color: platformInfo.color }}
@@ -744,7 +743,7 @@ export default function TeamManageGeneralPage() {
                         </div>
                     ) : (
                         <div className="text-center py-8">
-                            <Icon icon="mdi:link-variant-off" width="48" height="48" className="mx-auto text-muted-foreground mb-3" />
+                            <Icon ssr={true} icon="mdi:link-variant-off" width="48" height="48" className="mx-auto text-muted-foreground mb-3" />
                             <p className="text-muted-foreground font-nunito">No social links added yet</p>
                         </div>
                     )}
@@ -763,7 +762,7 @@ export default function TeamManageGeneralPage() {
                         variant="destructive"
                         className="font-hebden"
                     >
-                        <Icon icon="mdi:delete" width="20" height="20" />
+                        <Icon ssr={true} icon="mdi:delete" width="20" height="20" />
                         Delete Team
                     </Button>
                 </div>
@@ -843,7 +842,7 @@ export default function TeamManageGeneralPage() {
                                     {SOCIAL_PLATFORMS.map((platform) => (
                                         <SelectItem key={platform.type} value={platform.type} className="font-nunito">
                                             <div className="flex items-center gap-2">
-                                                <Icon icon={platform.icon} width="16" height="16" />
+                                                <Icon ssr={true} icon={platform.icon} width="16" height="16" />
                                                 {platform.label}
                                             </div>
                                         </SelectItem>

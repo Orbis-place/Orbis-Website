@@ -102,15 +102,15 @@ export default function UserListCard({ user, currentUserId, isFollowing: initial
                         }`}
                 >
                     {followLoading ? (
-                        <Icon icon="mdi:loading" className="w-4 h-4 animate-spin" />
+                        <Icon ssr={true} icon="mdi:loading" className="w-4 h-4 animate-spin" />
                     ) : isFollowing ? (
                         <>
-                            <Icon icon="mdi:account-check" className="w-4 h-4" />
+                            <Icon ssr={true} icon="mdi:account-check" className="w-4 h-4" />
                             <span>Following</span>
                         </>
                     ) : (
                         <>
-                            <Icon icon="mdi:account-plus" className="w-4 h-4" />
+                            <Icon ssr={true} icon="mdi:account-plus" className="w-4 h-4" />
                             <span>Follow</span>
                         </>
                     )}

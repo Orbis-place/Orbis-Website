@@ -129,7 +129,7 @@ export function SmartDiscovery({ initialResources = [] }: SmartDiscoveryProps) {
                         {features.map((feature, index) => (
                             <div key={index} className="flex gap-4">
                                 <div className="w-12 h-12 bg-[#109EB1]/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                                    <Icon icon={feature.icon} className="w-6 h-6 text-[#109EB1]" />
+                                    <Icon ssr={true} icon={feature.icon} className="w-6 h-6 text-[#109EB1]" />
                                 </div>
                                 <div>
                                     <h3 className="font-hebden font-semibold text-xl text-[#C7F4FA] mb-2">
@@ -149,7 +149,7 @@ export function SmartDiscovery({ initialResources = [] }: SmartDiscoveryProps) {
                                 className="inline-flex items-center gap-2 px-6 py-3 bg-[#109EB1] rounded-full font-hebden font-semibold text-[#C7F4FA] hover:bg-[#0d8a9b] transition-colors"
                             >
                                 Explore the Marketplace
-                                <Icon icon="mdi:arrow-right" className="w-5 h-5" />
+                                <Icon ssr={true} icon="mdi:arrow-right" className="w-5 h-5" />
                             </Link>
                         </div>
                     </div>
@@ -158,7 +158,7 @@ export function SmartDiscovery({ initialResources = [] }: SmartDiscoveryProps) {
                     <div className="bg-[#06363D] border border-[#084B54] rounded-2xl p-6">
                         {/* Search Bar */}
                         <div className="flex items-center gap-3 bg-[#032125] border border-[#084B54] rounded-full px-4 py-3 mb-4">
-                            <Icon icon="mdi:magnify" className="w-5 h-5 text-[#C7F4FA]/50" />
+                            <Icon ssr={true} icon="mdi:magnify" className="w-5 h-5 text-[#C7F4FA]/50" />
                             <input
                                 type="text"
                                 value={searchQuery}
@@ -171,7 +171,7 @@ export function SmartDiscovery({ initialResources = [] }: SmartDiscoveryProps) {
                                     onClick={() => setSearchQuery('')}
                                     className="text-[#C7F4FA]/50 hover:text-[#C7F4FA]"
                                 >
-                                    <Icon icon="mdi:close" className="w-4 h-4" />
+                                    <Icon ssr={true} icon="mdi:close" className="w-4 h-4" />
                                 </button>
                             )}
                         </div>
@@ -227,7 +227,7 @@ export function SmartDiscovery({ initialResources = [] }: SmartDiscoveryProps) {
                                             <p className="font-nunito text-xs text-[#C7F4FA]/60">by {result.author}</p>
                                         </div>
                                         <div className="flex items-center gap-1 text-xs text-[#C7F4FA]/50">
-                                            <Icon icon="mdi:download" className="w-3.5 h-3.5" />
+                                            <Icon ssr={true} icon="mdi:download" className="w-3.5 h-3.5" />
                                             {result.downloads}
                                         </div>
                                         <span className="px-2 py-1 bg-[#109EB1]/20 rounded text-xs font-nunito text-[#109EB1]">
@@ -237,7 +237,7 @@ export function SmartDiscovery({ initialResources = [] }: SmartDiscoveryProps) {
                                 ))
                             ) : (
                                 <div className="text-center py-6">
-                                    <Icon icon="mdi:magnify" className="w-12 h-12 text-[#C7F4FA]/20 mx-auto mb-2" />
+                                    <Icon ssr={true} icon="mdi:magnify" className="w-12 h-12 text-[#C7F4FA]/20 mx-auto mb-2" />
                                     <p className="font-nunito text-sm text-[#C7F4FA]/50">
                                         {searchQuery ? 'No resources found' : 'Start searching to discover resources'}
                                     </p>

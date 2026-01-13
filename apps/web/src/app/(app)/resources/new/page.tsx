@@ -150,7 +150,7 @@ function NewResourcePageContent() {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="animate-spin">
-                    <Icon icon="mdi:loading" className="text-4xl text-primary" />
+                    <Icon ssr={true} icon="mdi:loading" className="text-4xl text-primary" />
                 </div>
             </div>
         );
@@ -168,7 +168,7 @@ function NewResourcePageContent() {
                     onClick={() => router.back()}
                     className="inline-flex items-center gap-2 text-foreground/70 hover:text-foreground transition-colors mb-4"
                 >
-                    <Icon icon="mdi:arrow-left" />
+                    <Icon ssr={true} icon="mdi:arrow-left" />
                     <span className="font-nunito">Back</span>
                 </button>
                 <h1 className="font-hebden text-3xl text-foreground">Create New Resource</h1>
@@ -194,7 +194,7 @@ function NewResourcePageContent() {
                                     : 'bg-background hover:bg-accent text-foreground'
                                     }`}
                             >
-                                <Icon icon={type.icon} width="24" height="24" />
+                                <Icon ssr={true} icon={type.icon} width="24" height="24" />
                                 <span className="font-nunito text-sm font-semibold">{type.label}</span>
                             </button>
                         ))}
@@ -221,14 +221,14 @@ function NewResourcePageContent() {
                             <SelectContent>
                                 <SelectItem value="personal">
                                     <span className="flex items-center gap-2">
-                                        <Icon icon="mdi:account" width="16" height="16" />
+                                        <Icon ssr={true} icon="mdi:account" width="16" height="16" />
                                         Personal
                                     </span>
                                 </SelectItem>
                                 {loadingTeams ? (
                                     <SelectItem value="loading" disabled>
                                         <span className="flex items-center gap-2">
-                                            <Icon icon="mdi:loading" width="16" height="16" className="animate-spin" />
+                                            <Icon ssr={true} icon="mdi:loading" width="16" height="16" className="animate-spin" />
                                             Loading teams...
                                         </span>
                                     </SelectItem>
@@ -236,7 +236,7 @@ function NewResourcePageContent() {
                                     teams.map((team) => (
                                         <SelectItem key={team.id} value={team.id}>
                                             <span className="flex items-center gap-2">
-                                                <Icon icon="mdi:account-group" width="16" height="16" />
+                                                <Icon ssr={true} icon="mdi:account-group" width="16" height="16" />
                                                 {team.name}
                                             </span>
                                         </SelectItem>
@@ -279,7 +279,7 @@ function NewResourcePageContent() {
                                 disabled={!formData.name}
                                 className="text-xs text-primary hover:text-primary/80 disabled:text-muted-foreground disabled:cursor-not-allowed font-nunito"
                             >
-                                <Icon icon="mdi:auto-fix" width="14" height="14" className="inline mr-1" />
+                                <Icon ssr={true} icon="mdi:auto-fix" width="14" height="14" className="inline mr-1" />
                                 Generate from name
                             </button>
                         </div>
@@ -322,7 +322,7 @@ function NewResourcePageContent() {
                 {/* Info Box */}
                 <div className="bg-primary/10 p-4 rounded-lg border border-primary/20">
                     <div className="flex gap-3">
-                        <Icon icon="mdi:information" className="text-primary flex-shrink-0 mt-0.5" width="20" height="20" />
+                        <Icon ssr={true} icon="mdi:information" className="text-primary flex-shrink-0 mt-0.5" width="20" height="20" />
                         <p className="text-sm text-foreground/80 font-nunito">
                             Your resource will be created as a <strong>draft</strong>. You can add versions, images, and other details before publishing.
                         </p>
@@ -345,12 +345,12 @@ function NewResourcePageContent() {
                     >
                         {isSubmitting ? (
                             <>
-                                <Icon icon="mdi:loading" className="text-xl animate-spin" />
+                                <Icon ssr={true} icon="mdi:loading" className="text-xl animate-spin" />
                                 Creating...
                             </>
                         ) : (
                             <>
-                                <Icon icon="mdi:plus" className="text-xl" />
+                                <Icon ssr={true} icon="mdi:plus" className="text-xl" />
                                 Create Resource
                             </>
                         )}

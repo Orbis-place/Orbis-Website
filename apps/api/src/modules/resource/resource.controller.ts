@@ -298,4 +298,18 @@ export class ResourceController {
     ) {
         return this.resourceService.deleteExternalLink(id, session.user.id, linkId);
     }
+
+    // ============================================
+    // DONATION
+    // ============================================
+
+    @Post(':id/donation-reminder')
+    @AllowAnonymous()
+    @ApiOperation({ summary: 'Schedule a donation reminder email' })
+    async scheduleDonationReminder(
+        @Param('id') id: string,
+        @Body('email') email: string,
+    ) {
+        return this.resourceService.scheduleDonationReminder(id, email);
+    }
 }

@@ -1,18 +1,23 @@
-import { Body, Controller, Get, Param, Patch, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Query, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Roles, Session, UserSession } from '@thallesp/nestjs-better-auth';
 import { UserRole } from '@repo/db';
 import { AdminService } from './admin.service';
+import { ModerationService } from './moderation.service';
 import { FilterUsersDto } from './dtos/filter-users.dto';
 import { UpdateUserRoleDto } from './dtos/update-user-role.dto';
 import { BanUserDto } from './dtos/ban-user.dto';
 import { UpdateUserStatusDto } from './dtos/update-user-status.dto';
 import { ModerateResourceVersionDto } from './dtos/moderate-resource-version.dto';
+import { BadRequestException } from '@nestjs/common';
 
 @ApiTags('admin')
 @Controller('admin')
 export class AdminController {
-    constructor(private readonly adminService: AdminService) { }
+    constructor(
+        private readonly adminService: AdminService,
+        private readonly moderationService: ModerationService,
+    ) { }
 
     // ============================================
     // STATISTICS
@@ -116,5 +121,54 @@ export class AdminController {
             moderateDto.action,
             moderateDto.reason,
         );
+    }
+
+    // ============================================
+    // ADVANCED MODERATION (FILES & SCANNING)
+    // ============================================
+
+    @Get('moderation/versions/:versionId/files')
+    @ApiBearerAuth()
+    @Roles([UserRole.MODERATOR, UserRole.ADMIN, UserRole.SUPER_ADMIN])
+    @ApiOperation({ summary: 'Get file structure of a version (Moderator+ only)' })
+    async getVersionFileStructure(
+        @Param('versionId') versionId: string,
+        @Query('fileUrl') fileUrl: string,
+    ) {
+        if (!fileUrl) throw new BadRequestException('File URL is required');
+        return this.moderationService.getFileStructure(versionId, fileUrl);
+    }
+
+    @Get('moderation/versions/:versionId/files/content')
+    @ApiBearerAuth()
+    @Roles([UserRole.MODERATOR, UserRole.ADMIN, UserRole.SUPER_ADMIN])
+    @ApiOperation({ summary: 'Get content of a specific file (Moderator+ only)' })
+    async getVersionFileContent(
+        @Param('versionId') versionId: string,
+        @Query('fileUrl') fileUrl: string,
+        @Query('path') path: string,
+    ) {
+        if (!fileUrl) throw new BadRequestException('File URL is required');
+        return this.moderationService.getFileContent(fileUrl, path);
+    }
+
+    @Post('moderation/versions/:versionId/scan')
+    @ApiBearerAuth()
+    @Roles([UserRole.MODERATOR, UserRole.ADMIN, UserRole.SUPER_ADMIN])
+    @ApiOperation({ summary: 'Trigger VirusTotal scan (Moderator+ only)' })
+    async scanVersionFile(
+        @Param('versionId') versionId: string,
+        @Query('fileUrl') fileUrl: string,
+    ) {
+        if (!fileUrl) throw new BadRequestException('File URL is required');
+        return this.moderationService.scanFile(fileUrl);
+    }
+
+    @Get('moderation/analysis/:analysisId')
+    @ApiBearerAuth()
+    @Roles([UserRole.MODERATOR, UserRole.ADMIN, UserRole.SUPER_ADMIN])
+    @ApiOperation({ summary: 'Get VirusTotal analysis result' })
+    async getScanAnalysis(@Param('analysisId') analysisId: string) {
+        return this.moderationService.getScanAnalysis(analysisId);
     }
 }

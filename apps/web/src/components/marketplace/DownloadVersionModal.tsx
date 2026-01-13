@@ -7,6 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { Icon } from '@iconify/react';
 import { Download, FileIcon, Flag } from 'lucide-react';
 import { ReportDialog } from '@/components/ReportDialog';
+import { toast } from 'sonner';
+import { Input } from '@/components/ui/input';
 
 // ============================================
 // TYPES
@@ -49,6 +51,7 @@ interface DownloadVersionModalProps {
     onOpenChange: (open: boolean) => void;
     resourceId: string;
     resourceName: string;
+    donationLink?: string;
 }
 
 // ============================================
@@ -90,6 +93,7 @@ export function DownloadVersionModal({
     onOpenChange,
     resourceId,
     resourceName,
+    donationLink,
 }: DownloadVersionModalProps) {
     const [loading, setLoading] = useState(true);
     const [versions, setVersions] = useState<ResourceVersion[]>([]);
@@ -98,10 +102,23 @@ export function DownloadVersionModal({
     const [reportDialogOpen, setReportDialogOpen] = useState(false);
     const [versionToReport, setVersionToReport] = useState<ResourceVersion | null>(null);
 
+    // Donation Reminder State
+    const [showDonationPrompt, setShowDonationPrompt] = useState(false);
+    const [emailForReminder, setEmailForReminder] = useState('');
+    const [pendingDownload, setPendingDownload] = useState<{ url: string } | null>(null);
+    const [isSchedulingReminder, setIsSchedulingReminder] = useState(false);
+
     // Fetch versions when modal opens
     useEffect(() => {
-        if (open && resourceId) {
-            fetchVersions();
+        if (open) {
+            if (resourceId) {
+                fetchVersions();
+            }
+            // Reset donation prompt state
+            setShowDonationPrompt(false);
+            setPendingDownload(null);
+            setEmailForReminder('');
+            setIsSchedulingReminder(false);
         }
     }, [open, resourceId]);
 
@@ -135,6 +152,56 @@ export function DownloadVersionModal({
         }
     };
 
+    const handleDonationAction = async (action: 'donate' | 'remind' | 'skip') => {
+        if (!pendingDownload) return;
+
+        if (action === 'donate') {
+            if (donationLink) window.open(donationLink, '_blank');
+            setShowDonationPrompt(false);
+            setPendingDownload(null);
+        } else if (action === 'remind') {
+            if (!emailForReminder) {
+                toast.error('Please enter your email address');
+                return;
+            }
+
+            // Simple email validation
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailForReminder)) {
+                toast.error('Please enter a valid email address');
+                return;
+            }
+
+            setIsSchedulingReminder(true);
+            try {
+                const response = await fetch(
+                    `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/resources/${resourceId}/donation-reminder`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ email: emailForReminder }),
+                    }
+                );
+
+                if (response.ok) {
+                    toast.success('Reminder scheduled! check your email in 8 hours.');
+                } else {
+                    toast.error('Failed to schedule reminder');
+                }
+            } catch (error) {
+                toast.error('Failed to schedule reminder');
+            } finally {
+                setIsSchedulingReminder(false);
+                setShowDonationPrompt(false);
+                setPendingDownload(null);
+            }
+        } else {
+            setShowDonationPrompt(false);
+            setPendingDownload(null);
+        }
+    };
+
     const handleDownload = (version: ResourceVersion, fileId?: string) => {
         // If specific file requested, download that file
         // Otherwise, use smart download (single file or ZIP)
@@ -142,7 +209,13 @@ export function DownloadVersionModal({
             ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/resources/${resourceId}/versions/${version.id}/download/${fileId}`
             : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/resources/${resourceId}/versions/${version.id}/download`;
 
+        // Always download immediately
         window.open(downloadUrl, '_blank');
+
+        if (donationLink) {
+            setPendingDownload({ url: downloadUrl }); // Keep it for state coherence, though technically not needed for re-triggering
+            setShowDonationPrompt(true);
+        }
     };
 
     // Filter versions by channel
@@ -170,17 +243,88 @@ export function DownloadVersionModal({
             open={open}
             onOpenChange={onOpenChange}
             title={`Download ${resourceName}`}
-            description="Select a version to download"
+            description={showDonationPrompt ? "Consider supporting the creator" : "Select a version to download"}
             size="xl"
+            className="md:max-h-[85vh]" // Allow taller on mobile/desktop
+            hideHeader={showDonationPrompt}
         >
-            <div className="max-h-[60vh] overflow-hidden flex flex-col -my-2">
-                {loading ? (
+            <div className="max-h-[60vh] md:max-h-[70vh] overflow-y-auto flex flex-col -my-2 overscroll-contain">
+                {showDonationPrompt ? (
+                    <div className="py-8 px-4 flex flex-col items-center text-center space-y-6">
+                        <div className="w-16 h-16 bg-[#ff6b6b]/10 rounded-full flex items-center justify-center mb-2">
+                            <Icon ssr={true} icon="mdi:heart" width="32" height="32" className="text-[#ff6b6b]" />
+                        </div>
+
+                        <div className="space-y-2 max-w-md">
+                            <h3 className="text-xl font-bold font-hebden text-foreground">Support {resourceName}</h3>
+                            <p className="text-muted-foreground">
+                                This resource is provided for free, but creating and maintaining it takes time and effort.
+                                Would you like to donate to support the creator?
+                            </p>
+                        </div>
+
+                        <div className="w-full max-w-sm space-y-3 pt-2">
+                            <Button
+                                onClick={() => handleDonationAction('donate')}
+                                className="w-full h-12 text-lg bg-[#ff6b6b] hover:bg-[#ff5252] text-white font-bold"
+                            >
+                                <Icon ssr={true} icon="mdi:heart" className="mr-2 w-5 h-5" />
+                                Donate Now
+                            </Button>
+
+                            <div className="relative py-2">
+                                <div className="absolute inset-0 flex items-center">
+                                    <span className="w-full border-t border-border"></span>
+                                </div>
+                                <div className="relative flex justify-center text-xs uppercase">
+                                    <span className="bg-[#06363D] px-2 text-muted-foreground">Or</span>
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <p className="text-sm font-medium text-foreground">Remind me later</p>
+                                <div className="flex gap-2">
+                                    <Input
+                                        type="email"
+                                        placeholder="your@email.com"
+                                        value={emailForReminder}
+                                        onChange={(e) => setEmailForReminder(e.target.value)}
+                                        className="h-10"
+                                    />
+                                    <Button
+                                        onClick={() => handleDonationAction('remind')}
+                                        disabled={isSchedulingReminder || !emailForReminder}
+                                        variant="outline"
+                                        className="h-10 whitespace-nowrap"
+                                    >
+                                        {isSchedulingReminder ? (
+                                            <Icon ssr={true} icon="mdi:loading" className="animate-spin" />
+                                        ) : (
+                                            'Schedule'
+                                        )}
+                                    </Button>
+                                </div>
+                                <p className="text-xs text-muted-foreground text-left">
+                                    We'll send you a one-time reminder email in 8 hours.
+                                </p>
+                            </div>
+
+                            <Button
+                                onClick={() => handleDonationAction('skip')}
+                                variant="ghost"
+                                className="w-full mt-4 text-muted-foreground hover:text-foreground"
+                            >
+                                Close
+                            </Button>
+                        </div>
+                    </div>
+                ) : loading ? (
                     <div className="flex items-center justify-center py-12">
-                        <Icon icon="mdi:loading" width="32" height="32" className="animate-spin text-primary" />
+                        <Icon ssr={true} icon="mdi:loading" width="32" height="32" className="animate-spin text-primary" />
                     </div>
                 ) : versions.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-12 text-center">
-                        <Icon icon="mdi:package-variant" width="48" height="48" className="text-foreground/30 mb-4" />
+                        <Icon ssr={true} icon="mdi:package-variant" width="48" height="48" className="text-foreground/30 mb-4" />
                         <p className="text-muted-foreground">No versions available for download</p>
                     </div>
                 ) : (
@@ -233,7 +377,7 @@ export function DownloadVersionModal({
 
                                                 <div className="flex items-center gap-4 mt-1 text-xs text-muted-foreground">
                                                     <span className="flex items-center gap-1">
-                                                        <Icon icon="mdi:download" width="12" height="12" />
+                                                        <Icon ssr={true} icon="mdi:download" width="12" height="12" />
                                                         {version.downloadCount.toLocaleString()}
                                                     </span>
                                                     <span>
@@ -291,8 +435,7 @@ export function DownloadVersionModal({
                                                         }
                                                         className="p-2 hover:bg-secondary rounded-lg transition-colors"
                                                     >
-                                                        <Icon
-                                                            icon={expandedVersion === version.id ? 'mdi:chevron-up' : 'mdi:chevron-down'}
+                                                        <Icon ssr={true} icon={expandedVersion === version.id ? 'mdi:chevron-up' : 'mdi:chevron-down'}
                                                             width="20"
                                                             height="20"
                                                             className="text-muted-foreground"

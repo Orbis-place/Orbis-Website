@@ -65,7 +65,7 @@ export default function ScrollableSection({ title, iconName, link, children }: S
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-6">
                 <div className="flex items-center gap-3">
                     <div className="p-2 rounded-xl bg-[#109EB1]/10 border border-[#109EB1]/20">
-                        <Icon icon={iconString} className="w-5 h-5 text-[#109EB1]" />
+                        <Icon ssr={true} icon={iconString} className="w-5 h-5 text-[#109EB1]" />
                     </div>
                     <h2 className="font-hebden text-2xl text-[#C7F4FA]">{title}</h2>
                 </div>
@@ -85,7 +85,7 @@ export default function ScrollableSection({ title, iconName, link, children }: S
                                 }`}
                             aria-label="Scroll left"
                         >
-                            <Icon icon="mdi:arrow-left" className="w-4 h-4" />
+                            <Icon ssr={true} icon="mdi:arrow-left" className="w-4 h-4" />
                         </button>
                         <button
                             onClick={() => scroll('right')}
@@ -96,7 +96,7 @@ export default function ScrollableSection({ title, iconName, link, children }: S
                                 }`}
                             aria-label="Scroll right"
                         >
-                            <Icon icon="mdi:arrow-right" className="w-4 h-4" />
+                            <Icon ssr={true} icon="mdi:arrow-right" className="w-4 h-4" />
                         </button>
                     </div>
                 </div>

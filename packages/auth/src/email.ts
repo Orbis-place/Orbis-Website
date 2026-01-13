@@ -204,6 +204,7 @@ export const sendVerificationEmail = async (email: string, url: string) => {
     });
 };
 
+
 export const sendResetPasswordEmail = async (email: string, url: string) => {
     const resend = getResend();
 

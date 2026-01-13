@@ -179,7 +179,7 @@ export default function ManageLinksPage() {
     if (!resource || loading) {
         return (
             <div className="flex items-center justify-center py-12">
-                <Icon icon="mdi:loading" width="48" height="48" className="text-primary animate-spin" />
+                <Icon ssr={true} icon="mdi:loading" width="48" height="48" className="text-primary animate-spin" />
             </div>
         );
     }
@@ -231,8 +231,7 @@ export default function ManageLinksPage() {
                                     className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0"
                                     style={{ backgroundColor: linkType?.color + '20' }}
                                 >
-                                    <Icon
-                                        icon={linkType?.icon || 'mdi:link'}
+                                    <Icon ssr={true} icon={linkType?.icon || 'mdi:link'}
                                         width="24"
                                         height="24"
                                         style={{ color: linkType?.color }}
@@ -283,7 +282,7 @@ export default function ManageLinksPage() {
                 <div className="bg-secondary/30 rounded-lg p-12">
                     <div className="flex flex-col items-center justify-center text-center">
                         <div className="p-4 bg-accent rounded-full mb-4">
-                            <Icon icon="mdi:link-variant-off" width="48" height="48" className="text-muted-foreground" />
+                            <Icon ssr={true} icon="mdi:link-variant-off" width="48" height="48" className="text-muted-foreground" />
                         </div>
                         <p className="text-foreground font-nunito text-lg mb-2">No external links yet</p>
                         <p className="text-muted-foreground font-nunito text-sm mb-6 max-w-md">
@@ -324,7 +323,7 @@ export default function ManageLinksPage() {
                                     {LINK_TYPES.map((type) => (
                                         <SelectItem key={type.value} value={type.value}>
                                             <div className="flex items-center gap-2">
-                                                <Icon icon={type.icon} width="16" height="16" style={{ color: type.color }} />
+                                                <Icon ssr={true} icon={type.icon} width="16" height="16" style={{ color: type.color }} />
                                                 {type.label}
                                             </div>
                                         </SelectItem>

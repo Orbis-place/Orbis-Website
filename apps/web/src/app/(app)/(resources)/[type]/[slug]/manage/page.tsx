@@ -335,7 +335,7 @@ export default function ManageGeneralPage() {
     if (loading) {
         return (
             <div className="flex items-center justify-center py-12">
-                <Icon icon="mdi:loading" width="48" height="48" className="text-[#109EB1] animate-spin" />
+                <Icon ssr={true} icon="mdi:loading" width="48" height="48" className="text-[#109EB1] animate-spin" />
             </div>
         );
     }
@@ -398,7 +398,7 @@ export default function ManageGeneralPage() {
                                     <img src={iconPreview} alt="Icon" className="w-full h-full object-cover" />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center bg-[#109EB1]/10">
-                                        <Icon icon="mdi:image-outline" width="48" height="48" className="text-[#C7F4FA]/50" />
+                                        <Icon ssr={true} icon="mdi:image-outline" width="48" height="48" className="text-[#C7F4FA]/50" />
                                     </div>
                                 )}
                             </div>
@@ -526,8 +526,7 @@ export default function ManageGeneralPage() {
                                     ? "bg-primary/20"
                                     : "bg-accent"
                             )}>
-                                <Icon
-                                    icon="mdi:gift"
+                                <Icon ssr={true} icon="mdi:gift"
                                     width="24"
                                     height="24"
                                     className={formData.priceType === 'FREE' ? "text-primary" : "text-muted-foreground"}
@@ -539,7 +538,7 @@ export default function ManageGeneralPage() {
                                         Free
                                     </h3>
                                     {formData.priceType === 'FREE' && (
-                                        <Icon icon="mdi:check-circle" width="20" height="20" className="text-primary" />
+                                        <Icon ssr={true} icon="mdi:check-circle" width="20" height="20" className="text-primary" />
                                     )}
                                 </div>
                                 <p className="text-sm text-muted-foreground font-nunito">
@@ -568,8 +567,7 @@ export default function ManageGeneralPage() {
                                     ? "bg-primary/20"
                                     : "bg-accent"
                             )}>
-                                <Icon
-                                    icon="mdi:heart"
+                                <Icon ssr={true} icon="mdi:heart"
                                     width="24"
                                     height="24"
                                     className={formData.priceType === 'DONATION' ? "text-primary" : "text-muted-foreground"}
@@ -581,7 +579,7 @@ export default function ManageGeneralPage() {
                                         Donation
                                     </h3>
                                     {formData.priceType === 'DONATION' && (
-                                        <Icon icon="mdi:check-circle" width="20" height="20" className="text-primary" />
+                                        <Icon ssr={true} icon="mdi:check-circle" width="20" height="20" className="text-primary" />
                                     )}
                                 </div>
                                 <p className="text-sm text-muted-foreground font-nunito">
@@ -595,7 +593,7 @@ export default function ManageGeneralPage() {
                 {formData.priceType === 'DONATION' && (
                     <div className="bg-accent/50 rounded-lg p-4 border border-primary/20">
                         <div className="flex gap-3">
-                            <Icon icon="mdi:information" width="20" height="20" className="text-primary flex-shrink-0 mt-0.5" />
+                            <Icon ssr={true} icon="mdi:information" width="20" height="20" className="text-primary flex-shrink-0 mt-0.5" />
                             <div className="flex-1">
                                 <p className="text-sm font-nunito text-foreground">
                                     <span className="font-semibold">How donations work:</span> When users download your resource,
@@ -645,7 +643,7 @@ export default function ManageGeneralPage() {
                                                 onClick={() => toggleTag(tagId)}
                                                 className="hover:text-red-400 transition-colors"
                                             >
-                                                <Icon icon="mdi:close" width="14" height="14" />
+                                                <Icon ssr={true} icon="mdi:close" width="14" height="14" />
                                             </button>
                                         </div>
                                     );
@@ -692,8 +690,7 @@ export default function ManageGeneralPage() {
                                         )}
                                     >
                                         {category.icon && (
-                                            <Icon
-                                                icon={category.icon}
+                                            <Icon ssr={true} icon={category.icon}
                                                 width="24"
                                                 height="24"
                                                 className={isSelected ? "text-primary" : "text-muted-foreground"}
@@ -705,8 +702,7 @@ export default function ManageGeneralPage() {
                                             </div>
                                         </div>
                                         {isSelected && (
-                                            <Icon
-                                                icon="mdi:check-circle"
+                                            <Icon ssr={true} icon="mdi:check-circle"
                                                 width="20"
                                                 height="20"
                                                 className="text-primary flex-shrink-0"
@@ -728,12 +724,12 @@ export default function ManageGeneralPage() {
                 >
                     {saving ? (
                         <>
-                            <Icon icon="mdi:loading" width="20" height="20" className="animate-spin mr-2" />
+                            <Icon ssr={true} icon="mdi:loading" width="20" height="20" className="animate-spin mr-2" />
                             Saving Changes...
                         </>
                     ) : (
                         <>
-                            <Icon icon="mdi:check" width="20" height="20" className="mr-2" />
+                            <Icon ssr={true} icon="mdi:check" width="20" height="20" className="mr-2" />
                             Save Changes
                         </>
                     )}

@@ -124,7 +124,7 @@ export default function MyReportsPage() {
             <div className="space-y-6">
                 <h1 className="font-hebden text-3xl font-bold text-foreground">My Reports</h1>
                 <div className="flex items-center justify-center py-12">
-                    <Icon icon="mdi:loading" width="48" height="48" className="text-primary animate-spin" />
+                    <Icon ssr={true} icon="mdi:loading" width="48" height="48" className="text-primary animate-spin" />
                 </div>
             </div>
         );
@@ -150,8 +150,7 @@ export default function MyReportsPage() {
                     <div className="flex-1 min-w-0">
                         {/* Header */}
                         <div className="flex items-center gap-2 mb-2 flex-wrap">
-                            <Icon
-                                icon={getResourceTypeIcon(report.resourceType)}
+                            <Icon ssr={true} icon={getResourceTypeIcon(report.resourceType)}
                                 width="20"
                                 height="20"
                                 className="text-primary"
@@ -181,7 +180,7 @@ export default function MyReportsPage() {
                         {report.response && (
                             <div className="mt-3 p-3 bg-primary/10 border border-primary/20 rounded-lg">
                                 <p className="font-nunito text-xs font-semibold text-foreground/70 mb-1 flex items-center gap-1">
-                                    <Icon icon="mdi:message-reply" width="14" height="14" />
+                                    <Icon ssr={true} icon="mdi:message-reply" width="14" height="14" />
                                     Moderator Response
                                 </p>
                                 <p className="font-nunito text-sm text-foreground/80 line-clamp-2">
@@ -199,7 +198,7 @@ export default function MyReportsPage() {
                             onClick={() => setSelectedReport(report)}
                             className="font-nunito text-sm"
                         >
-                            <Icon icon="mdi:eye" width="16" height="16" />
+                            <Icon ssr={true} icon="mdi:eye" width="16" height="16" />
                             View
                         </Button>
                         {isPending && (
@@ -210,7 +209,7 @@ export default function MyReportsPage() {
                                 disabled={cancelingId === report.id}
                                 className="font-nunito text-sm"
                             >
-                                <Icon icon="mdi:delete" width="16" height="16" />
+                                <Icon ssr={true} icon="mdi:delete" width="16" height="16" />
                                 Cancel
                             </Button>
                         )}
@@ -236,7 +235,7 @@ export default function MyReportsPage() {
         return (
             <div className="space-y-3">
                 <div className="flex items-center gap-2">
-                    <Icon icon={icon} width="20" height="20" className={color} />
+                    <Icon ssr={true} icon={icon} width="20" height="20" className={color} />
                     <h2 className="font-hebden text-lg font-semibold text-foreground">
                         {title}
                     </h2>
@@ -269,7 +268,7 @@ export default function MyReportsPage() {
                     {reports.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-12">
                             <div className="p-4 bg-accent rounded-full mb-4">
-                                <Icon icon="mdi:flag" width="48" height="48" className="text-muted-foreground" />
+                                <Icon ssr={true} icon="mdi:flag" width="48" height="48" className="text-muted-foreground" />
                             </div>
                             <p className="text-foreground font-nunito text-lg mb-2">No Reports Yet</p>
                             <p className="text-muted-foreground font-nunito text-sm text-center max-w-md">
@@ -319,7 +318,7 @@ export default function MyReportsPage() {
                         {/* Status & Type */}
                         <div className="flex items-center gap-3 flex-wrap">
                             <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 border border-primary/30 rounded-full">
-                                <Icon icon={getResourceTypeIcon(selectedReport.resourceType)} width="16" height="16" className="text-primary" />
+                                <Icon ssr={true} icon={getResourceTypeIcon(selectedReport.resourceType)} width="16" height="16" className="text-primary" />
                                 <span className="font-hebden text-sm font-semibold text-primary">
                                     {selectedReport.resourceType}
                                 </span>
@@ -329,7 +328,7 @@ export default function MyReportsPage() {
                                         selectedReport.status === 'RESOLVED' ? 'bg-[#10b981]/10 border border-[#10b981]/30' :
                                             'bg-[#6b7280]/10 border border-[#6b7280]/30'
                                 }`}>
-                                <Icon icon={getStatusIcon(selectedReport.status)} width="16" height="16" className={getStatusColor(selectedReport.status)} />
+                                <Icon ssr={true} icon={getStatusIcon(selectedReport.status)} width="16" height="16" className={getStatusColor(selectedReport.status)} />
                                 <span className={`font-hebden text-sm font-semibold ${getStatusColor(selectedReport.status)}`}>
                                     {selectedReport.status.replace('_', ' ')}
                                 </span>
@@ -402,7 +401,7 @@ export default function MyReportsPage() {
                                         setSelectedReport(null);
                                     }}
                                 >
-                                    <Icon icon="mdi:delete" width="18" height="18" />
+                                    <Icon ssr={true} icon="mdi:delete" width="18" height="18" />
                                     Cancel This Report
                                 </Button>
                             </div>

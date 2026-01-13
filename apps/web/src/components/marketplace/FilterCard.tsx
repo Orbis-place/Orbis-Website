@@ -31,7 +31,7 @@ export function FilterCard({ title, children, defaultExpanded = true, icon }: Fi
                 className="w-full flex items-center justify-between text-left"
             >
                 <div className="flex items-center gap-2.5">
-                    <Icon
+                    <Icon ssr={true}
                         icon={displayIcon}
                         className="w-4 h-4 text-[#109EB1]"
                     />
@@ -43,7 +43,7 @@ export function FilterCard({ title, children, defaultExpanded = true, icon }: Fi
                     className="transition-transform duration-300 ease-out"
                     style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}
                 >
-                    <Icon
+                    <Icon ssr={true}
                         icon="solar:alt-arrow-down-bold"
                         className="w-4 h-4 text-[#C7F4FA]/50"
                     />

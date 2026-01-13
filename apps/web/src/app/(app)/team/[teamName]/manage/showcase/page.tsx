@@ -121,7 +121,7 @@ export default function TeamShowcasePage() {
     if (loading) {
         return (
             <div className="flex items-center justify-center py-12">
-                <Icon icon="mdi:loading" className="animate-spin text-primary" width="48" height="48" />
+                <Icon ssr={true} icon="mdi:loading" className="animate-spin text-primary" width="48" height="48" />
             </div>
         );
     }
@@ -139,7 +139,7 @@ export default function TeamShowcasePage() {
 
                 <Link href={`/showcase/new?teamId=${teamId}`}>
                     <Button className="font-hebden">
-                        <Icon icon="mdi:plus" width="20" height="20" />
+                        <Icon ssr={true} icon="mdi:plus" width="20" height="20" />
                         Create Post
                     </Button>
                 </Link>
@@ -150,7 +150,7 @@ export default function TeamShowcasePage() {
                 <div className="bg-gradient-to-br from-primary/20 to-primary/5 rounded-lg p-6">
                     <div className="flex items-center gap-3">
                         <div className="flex flex-col items-center justify-center p-3 bg-primary/20 rounded-lg">
-                            <Icon icon="mdi:image-multiple" width="24" height="24" className="text-primary" />
+                            <Icon ssr={true} icon="mdi:image-multiple" width="24" height="24" className="text-primary" />
                         </div>
                         <div>
                             <p className="text-2xl font-bold font-hebden text-foreground">{totalPosts}</p>
@@ -162,7 +162,7 @@ export default function TeamShowcasePage() {
                 <div className="bg-gradient-to-br from-secondary/40 to-secondary/10 rounded-lg p-6">
                     <div className="flex items-center gap-3">
                         <div className="flex flex-col items-center justify-center p-3 bg-primary/20 rounded-lg">
-                            <Icon icon="mdi:eye" width="24" height="24" className="text-primary" />
+                            <Icon ssr={true} icon="mdi:eye" width="24" height="24" className="text-primary" />
                         </div>
                         <div>
                             <p className="text-2xl font-bold font-hebden text-foreground">{totalViews}</p>
@@ -174,7 +174,7 @@ export default function TeamShowcasePage() {
                 <div className="bg-gradient-to-br from-accent/80 to-accent/40 rounded-lg p-6">
                     <div className="flex items-center gap-3">
                         <div className="flex flex-col items-center justify-center p-3 bg-primary/20 rounded-lg">
-                            <Icon icon="mdi:heart" width="24" height="24" className="text-primary" />
+                            <Icon ssr={true} icon="mdi:heart" width="24" height="24" className="text-primary" />
                         </div>
                         <div>
                             <p className="text-2xl font-bold font-hebden text-foreground">{totalLikes}</p>
@@ -200,13 +200,13 @@ export default function TeamShowcasePage() {
                                             {thumbnail ? (
                                                 <img src={thumbnail} alt={post.title} className="w-full h-full object-cover rounded-lg" />
                                             ) : (
-                                                <Icon icon="mdi:image-off-outline" width="32" height="32" className="text-muted-foreground" />
+                                                <Icon ssr={true} icon="mdi:image-off-outline" width="32" height="32" className="text-muted-foreground" />
                                             )}
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <h3 className="font-hebden text-lg font-semibold text-foreground line-clamp-1">{post.title}</h3>
                                             <div className="flex items-center gap-2 text-sm text-muted-foreground font-nunito mb-2">
-                                                <Icon icon={getStatusIcon(post.status)} width="16" height="16" className={getStatusColor(post.status)} />
+                                                <Icon ssr={true} icon={getStatusIcon(post.status)} width="16" height="16" className={getStatusColor(post.status)} />
                                                 <span className={getStatusColor(post.status)}>{post.status}</span>
                                                 <span>•</span>
                                                 <span
@@ -218,15 +218,15 @@ export default function TeamShowcasePage() {
                                             </div>
                                             <div className="flex items-center gap-4 text-sm text-muted-foreground font-nunito">
                                                 <span className="flex items-center gap-1">
-                                                    <Icon icon="mdi:eye" width="16" height="16" />
+                                                    <Icon ssr={true} icon="mdi:eye" width="16" height="16" />
                                                     {post.viewCount}
                                                 </span>
                                                 <span className="flex items-center gap-1">
-                                                    <Icon icon="mdi:heart" width="16" height="16" />
+                                                    <Icon ssr={true} icon="mdi:heart" width="16" height="16" />
                                                     {post._count.likes}
                                                 </span>
                                                 <span className="flex items-center gap-1">
-                                                    <Icon icon="mdi:comment" width="16" height="16" />
+                                                    <Icon ssr={true} icon="mdi:comment" width="16" height="16" />
                                                     {post._count.comments}
                                                 </span>
                                             </div>
@@ -240,7 +240,7 @@ export default function TeamShowcasePage() {
                                             className="font-nunito text-sm"
                                             onClick={() => router.push(`/showcase/${post.id}`)}
                                         >
-                                            <Icon icon="mdi:eye" width="16" height="16" />
+                                            <Icon ssr={true} icon="mdi:eye" width="16" height="16" />
                                             View
                                         </Button>
                                         <Button
@@ -249,7 +249,7 @@ export default function TeamShowcasePage() {
                                             className="font-nunito text-sm"
                                             onClick={() => router.push(`/showcase/${post.id}/edit`)}
                                         >
-                                            <Icon icon="mdi:pencil" width="16" height="16" />
+                                            <Icon ssr={true} icon="mdi:pencil" width="16" height="16" />
                                             Edit
                                         </Button>
                                         <Button
@@ -258,7 +258,7 @@ export default function TeamShowcasePage() {
                                             className="font-nunito text-sm"
                                             onClick={() => setDeletingPostId(post.id)}
                                         >
-                                            <Icon icon="mdi:delete" width="16" height="16" />
+                                            <Icon ssr={true} icon="mdi:delete" width="16" height="16" />
                                             Delete
                                         </Button>
                                     </div>
@@ -269,7 +269,7 @@ export default function TeamShowcasePage() {
                 ) : (
                     <div className="flex flex-col items-center justify-center py-12">
                         <div className="p-4 bg-accent rounded-full mb-4">
-                            <Icon icon="mdi:image-multiple-outline" width="48" height="48" className="text-muted-foreground" />
+                            <Icon ssr={true} icon="mdi:image-multiple-outline" width="48" height="48" className="text-muted-foreground" />
                         </div>
                         <p className="text-foreground font-nunito text-lg mb-2">No showcase posts yet</p>
                         <p className="text-muted-foreground font-nunito text-sm mb-6 text-center max-w-md">
@@ -277,7 +277,7 @@ export default function TeamShowcasePage() {
                         </p>
                         <Link href={`/showcase/new?teamId=${teamId}`}>
                             <Button className="font-hebden">
-                                <Icon icon="mdi:plus" width="20" height="20" />
+                                <Icon ssr={true} icon="mdi:plus" width="20" height="20" />
                                 Create First Post
                             </Button>
                         </Link>

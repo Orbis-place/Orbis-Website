@@ -24,7 +24,7 @@ interface Server {
     slug: string;
     description: string;
     shortDesc?: string;
-    serverIp: string;
+    serverAddress: string;
     port: number;
     status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'SUSPENDED' | 'ARCHIVED';
     logoUrl?: string;

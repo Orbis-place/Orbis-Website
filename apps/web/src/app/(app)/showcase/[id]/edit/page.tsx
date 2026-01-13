@@ -204,7 +204,7 @@ export default function EditShowcasePage() {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="animate-spin">
-                    <Icon icon="mdi:loading" className="text-4xl text-[#109EB1]" />
+                    <Icon ssr={true} icon="mdi:loading" className="text-4xl text-[#109EB1]" />
                 </div>
             </div>
         );
@@ -222,7 +222,7 @@ export default function EditShowcasePage() {
                     href="/dashboard/showcase"
                     className="inline-flex items-center gap-2 text-[#C7F4FA]/70 hover:text-[#C7F4FA] transition-colors mb-4"
                 >
-                    <Icon icon="mdi:arrow-left" />
+                    <Icon ssr={true} icon="mdi:arrow-left" />
                     <span className="font-nunito">Back to Dashboard</span>
                 </Link>
                 <h1 className="font-hebden text-3xl text-[#C7F4FA]">Edit Showcase Post</h1>
@@ -242,7 +242,7 @@ export default function EditShowcasePage() {
                             disabled={isUploadingMedia}
                             className="inline-flex items-center gap-2 px-4 py-2 bg-[#109EB1] text-white rounded-lg font-nunito text-sm font-semibold hover:bg-[#109EB1]/80 transition-colors disabled:opacity-50"
                         >
-                            <Icon icon={isUploadingMedia ? "mdi:loading" : "mdi:plus"} className={isUploadingMedia ? "animate-spin" : ""} />
+                            <Icon ssr={true} icon={isUploadingMedia ? "mdi:loading" : "mdi:plus"} className={isUploadingMedia ? "animate-spin" : ""} />
                             {isUploadingMedia ? 'Uploading...' : 'Add Media'}
                         </button>
                         <input
@@ -257,7 +257,7 @@ export default function EditShowcasePage() {
 
                     {media.length === 0 ? (
                         <div className="text-center py-8 border-2 border-dashed border-[#109EB1]/20 rounded-lg">
-                            <Icon icon="mdi:image-plus-outline" className="text-4xl text-[#C7F4FA]/30 mx-auto mb-2" />
+                            <Icon ssr={true} icon="mdi:image-plus-outline" className="text-4xl text-[#C7F4FA]/30 mx-auto mb-2" />
                             <p className="text-[#C7F4FA]/50 font-nunito">No media yet. Click "Add Media" to upload.</p>
                         </div>
                     ) : (
@@ -279,8 +279,7 @@ export default function EditShowcasePage() {
                                     {/* Info */}
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2">
-                                            <Icon
-                                                icon={item.type === 'VIDEO' ? 'mdi:video-outline' : 'mdi:image-outline'}
+                                            <Icon ssr={true} icon={item.type === 'VIDEO' ? 'mdi:video-outline' : 'mdi:image-outline'}
                                                 className="text-[#C7F4FA]/50"
                                             />
                                             <span className="text-sm text-[#C7F4FA]/70 font-nunito capitalize">
@@ -304,7 +303,7 @@ export default function EditShowcasePage() {
                                                 className="p-2 text-[#C7F4FA]/50 hover:text-[#109EB1] transition-colors"
                                                 title="Set as thumbnail"
                                             >
-                                                <Icon icon="mdi:image-check" className="text-lg" />
+                                                <Icon ssr={true} icon="mdi:image-check" className="text-lg" />
                                             </button>
                                         )}
                                         {/* Move up */}
@@ -315,7 +314,7 @@ export default function EditShowcasePage() {
                                             className="p-2 text-[#C7F4FA]/50 hover:text-[#C7F4FA] transition-colors disabled:opacity-30"
                                             title="Move up"
                                         >
-                                            <Icon icon="mdi:arrow-up" className="text-lg" />
+                                            <Icon ssr={true} icon="mdi:arrow-up" className="text-lg" />
                                         </button>
                                         {/* Move down */}
                                         <button
@@ -325,7 +324,7 @@ export default function EditShowcasePage() {
                                             className="p-2 text-[#C7F4FA]/50 hover:text-[#C7F4FA] transition-colors disabled:opacity-30"
                                             title="Move down"
                                         >
-                                            <Icon icon="mdi:arrow-down" className="text-lg" />
+                                            <Icon ssr={true} icon="mdi:arrow-down" className="text-lg" />
                                         </button>
                                         {/* Delete */}
                                         <button
@@ -334,7 +333,7 @@ export default function EditShowcasePage() {
                                             className="p-2 text-red-400/50 hover:text-red-400 transition-colors"
                                             title="Delete"
                                         >
-                                            <Icon icon="mdi:delete-outline" className="text-lg" />
+                                            <Icon ssr={true} icon="mdi:delete-outline" className="text-lg" />
                                         </button>
                                     </div>
                                 </div>
@@ -380,7 +379,7 @@ export default function EditShowcasePage() {
                                         }`}
                                     style={category === key ? { backgroundColor: info.color } : {}}
                                 >
-                                    <Icon icon={info.icon} className="text-lg" />
+                                    <Icon ssr={true} icon={info.icon} className="text-lg" />
                                     {info.label}
                                 </button>
                             ))}
@@ -417,7 +416,7 @@ export default function EditShowcasePage() {
                         disabled={isSaving || !title.trim()}
                         className="px-8 py-3 bg-[#109EB1] text-white rounded-lg font-nunito font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#109EB1]/80 transition-colors flex items-center gap-2"
                     >
-                        <Icon icon="mdi:content-save" className="text-xl" />
+                        <Icon ssr={true} icon="mdi:content-save" className="text-xl" />
                         {isSaving ? 'Saving...' : 'Save Changes'}
                     </button>
                 </div>

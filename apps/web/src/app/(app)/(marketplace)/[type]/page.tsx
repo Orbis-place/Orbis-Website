@@ -274,11 +274,11 @@ export default function MarketplacePage({ params }: { params: Promise<{ type: st
             <div className="flex flex-col lg:flex-row gap-6 lg:gap-11">
                 {/* Filter Sidebar with new filter cards */}
                 <aside className="hidden lg:block w-full lg:w-[273px] flex-shrink-0">
-                    <div className="space-y-4 sticky top-4">
+                    <div className="space-y-4 top-4">
                         {/* Browse / Quick Filters */}
                         <div className="bg-[#06363D] border border-[#084B54] rounded-[25px] p-5 flex flex-col gap-2.5">
                             <div className="flex items-center gap-2.5">
-                                <Icon icon="solar:compass-bold-duotone" className="w-4 h-4 text-[#109EB1]" />
+                                <Icon ssr={true} icon="solar:compass-bold-duotone" className="w-4 h-4 text-[#109EB1]" />
                                 <h3 className="font-hebden font-semibold text-xs leading-[14px] text-[#C7F4FA]/50 uppercase">
                                     Browse
                                 </h3>

@@ -178,13 +178,13 @@ export function ServerListingPreview({ initialServers = [], initialCategories = 
                                             </span>
                                         </div>
                                         <div className="flex items-center gap-1">
-                                            <Icon icon="mdi:account-group" className="w-4 h-4 text-[#C7F4FA]/50" />
+                                            <Icon ssr={true} icon="mdi:account-group" className="w-4 h-4 text-[#C7F4FA]/50" />
                                             <span className="font-nunito text-[#C7F4FA]/70">
                                                 {server.currentPlayers}/{server.maxPlayers}
                                             </span>
                                         </div>
                                         <div className="flex items-center gap-1">
-                                            <Icon icon="mdi:thumb-up" className="w-4 h-4 text-[#109EB1]" />
+                                            <Icon ssr={true} icon="mdi:thumb-up" className="w-4 h-4 text-[#109EB1]" />
                                             <span className="font-nunito text-[#C7F4FA]/70">{server.voteCount}</span>
                                         </div>
                                     </div>
@@ -206,7 +206,7 @@ export function ServerListingPreview({ initialServers = [], initialCategories = 
                     </div>
                 ) : (
                     <div className="text-center py-12 mb-10">
-                        <Icon icon="mdi:server-off" className="w-16 h-16 text-[#C7F4FA]/30 mx-auto mb-4" />
+                        <Icon ssr={true} icon="mdi:server-off" className="w-16 h-16 text-[#C7F4FA]/30 mx-auto mb-4" />
                         <p className="font-nunito text-lg text-[#C7F4FA]/60">
                             No servers available yet. Be the first to add yours!
                         </p>
@@ -220,7 +220,7 @@ export function ServerListingPreview({ initialServers = [], initialCategories = 
                         className="inline-flex items-center gap-2 px-6 py-3 bg-[#109EB1] rounded-full font-hebden font-semibold text-[#C7F4FA] hover:bg-[#0d8a9b] transition-colors"
                     >
                         Browse All Servers
-                        <Icon icon="mdi:arrow-right" className="w-5 h-5" />
+                        <Icon ssr={true} icon="mdi:arrow-right" className="w-5 h-5" />
                     </Link>
                 </div>
             </div>

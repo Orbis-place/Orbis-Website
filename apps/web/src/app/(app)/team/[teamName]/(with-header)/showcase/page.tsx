@@ -60,7 +60,7 @@ export default function TeamShowcasePage() {
     if (loading) {
         return (
             <div className="flex items-center justify-center py-16">
-                <Icon icon="mdi:loading" className="animate-spin text-[#109EB1]" width="40" height="40" />
+                <Icon ssr={true} icon="mdi:loading" className="animate-spin text-[#109EB1]" width="40" height="40" />
             </div>
         );
     }
@@ -89,7 +89,7 @@ export default function TeamShowcasePage() {
                                         />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center">
-                                            <Icon icon="mdi:image-off-outline" className="text-[#C7F4FA]/30" width="48" height="48" />
+                                            <Icon ssr={true} icon="mdi:image-off-outline" className="text-[#C7F4FA]/30" width="48" height="48" />
                                         </div>
                                     )}
                                     {/* Category badge */}
@@ -97,7 +97,7 @@ export default function TeamShowcasePage() {
                                         className="absolute top-2 left-2 px-2 py-1 rounded-md text-xs font-nunito font-semibold flex items-center gap-1"
                                         style={{ backgroundColor: categoryInfo.color, color: '#032125' }}
                                     >
-                                        <Icon icon={categoryInfo.icon} width="12" height="12" />
+                                        <Icon ssr={true} icon={categoryInfo.icon} width="12" height="12" />
                                         {categoryInfo.label}
                                     </div>
                                 </div>
@@ -109,15 +109,15 @@ export default function TeamShowcasePage() {
                                     </h3>
                                     <div className="flex items-center gap-4 text-xs text-[#C7F4FA]/60 font-nunito">
                                         <span className="flex items-center gap-1">
-                                            <Icon icon="mdi:heart" width="14" height="14" />
+                                            <Icon ssr={true} icon="mdi:heart" width="14" height="14" />
                                             {post._count.likes}
                                         </span>
                                         <span className="flex items-center gap-1">
-                                            <Icon icon="mdi:eye" width="14" height="14" />
+                                            <Icon ssr={true} icon="mdi:eye" width="14" height="14" />
                                             {post.viewCount}
                                         </span>
                                         <span className="flex items-center gap-1">
-                                            <Icon icon="mdi:comment" width="14" height="14" />
+                                            <Icon ssr={true} icon="mdi:comment" width="14" height="14" />
                                             {post._count.comments}
                                         </span>
                                     </div>
@@ -127,7 +127,7 @@ export default function TeamShowcasePage() {
                     })
                 ) : (
                     <div className="col-span-full text-center py-16 border border-dashed border-[#084B54] rounded-[20px]">
-                        <Icon icon="mdi:image-multiple-outline" width="64" height="64" className="mx-auto mb-4 text-[#C7F4FA]/30" />
+                        <Icon ssr={true} icon="mdi:image-multiple-outline" width="64" height="64" className="mx-auto mb-4 text-[#C7F4FA]/30" />
                         <h3 className="font-hebden text-lg font-bold text-[#C7F4FA] mb-2">No showcase posts yet</h3>
                         <p className="text-sm text-[#C7F4FA]/60 font-nunito">
                             This team hasn't published any showcase posts.

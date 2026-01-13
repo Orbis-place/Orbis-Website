@@ -466,7 +466,7 @@ export default function SettingsPage() {
       <div className="space-y-6">
         <h1 className="font-hebden text-3xl font-bold text-foreground">Settings</h1>
         <div className="flex items-center justify-center py-12">
-          <Icon icon="mdi:loading" className="animate-spin text-primary" width="32" height="32" />
+          <Icon ssr={true} icon="mdi:loading" className="animate-spin text-primary" width="32" height="32" />
         </div>
       </div>
     );
@@ -490,7 +490,7 @@ export default function SettingsPage() {
                   : 'bg-secondary/30 text-foreground hover:bg-secondary/50'
               )}
             >
-              <Icon icon={section.icon} width="18" height="18" />
+              <Icon ssr={true} icon={section.icon} width="18" height="18" />
               {section.name}
             </button>
           ))}
@@ -546,7 +546,7 @@ export default function SettingsPage() {
                   >
                     {isSavingAccount ? (
                       <>
-                        <Icon icon="mdi:loading" className="animate-spin mr-2" width="16" height="16" />
+                        <Icon ssr={true} icon="mdi:loading" className="animate-spin mr-2" width="16" height="16" />
                         Saving...
                       </>
                     ) : (
@@ -585,7 +585,7 @@ export default function SettingsPage() {
                   <div className="flex items-center justify-between p-4 bg-background/50 rounded-lg border border-border">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <Icon icon="mdi:account-group" width="20" height="20" className="text-primary" />
+                        <Icon ssr={true} icon="mdi:account-group" width="20" height="20" className="text-primary" />
                         <h3 className="font-hebden font-medium text-foreground">
                           Public Followers List
                         </h3>
@@ -616,7 +616,7 @@ export default function SettingsPage() {
                   <div className="flex items-center justify-between p-4 bg-background/50 rounded-lg border border-border">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <Icon icon="mdi:account-multiple" width="20" height="20" className="text-primary" />
+                        <Icon ssr={true} icon="mdi:account-multiple" width="20" height="20" className="text-primary" />
                         <h3 className="font-hebden font-medium text-foreground">
                           Public Following List
                         </h3>
@@ -647,7 +647,7 @@ export default function SettingsPage() {
                   <div className="flex items-center justify-between p-4 bg-background/50 rounded-lg border border-border">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <Icon icon="mdi:account-multiple-plus" width="20" height="20" className="text-primary" />
+                        <Icon ssr={true} icon="mdi:account-multiple-plus" width="20" height="20" className="text-primary" />
                         <h3 className="font-hebden font-medium text-foreground">
                           Allow Team Invitations
                         </h3>
@@ -692,7 +692,7 @@ export default function SettingsPage() {
                   {/* Social Notifications */}
                   <div>
                     <h3 className="font-hebden text-md font-medium mb-3 text-foreground flex items-center gap-2">
-                      <Icon icon="mdi:account-group" width="20" height="20" className="text-primary" />
+                      <Icon ssr={true} icon="mdi:account-group" width="20" height="20" className="text-primary" />
                       Social
                     </h3>
                     <div className="space-y-3 ml-7">
@@ -757,7 +757,7 @@ export default function SettingsPage() {
                   {/* Resource Notifications */}
                   <div>
                     <h3 className="font-hebden text-md font-medium mb-3 text-foreground flex items-center gap-2">
-                      <Icon icon="mdi:package-variant" width="20" height="20" className="text-primary" />
+                      <Icon ssr={true} icon="mdi:package-variant" width="20" height="20" className="text-primary" />
                       Resources
                     </h3>
                     <div className="space-y-3 ml-7">
@@ -850,7 +850,7 @@ export default function SettingsPage() {
                   {/* Showcase Notifications */}
                   <div>
                     <h3 className="font-hebden text-md font-medium mb-3 text-foreground flex items-center gap-2">
-                      <Icon icon="mdi:image-multiple" width="20" height="20" className="text-primary" />
+                      <Icon ssr={true} icon="mdi:image-multiple" width="20" height="20" className="text-primary" />
                       Showcase
                     </h3>
                     <div className="space-y-3 ml-7">
@@ -939,7 +939,7 @@ export default function SettingsPage() {
                   >
                     {isChangingPassword ? (
                       <>
-                        <Icon icon="mdi:loading" className="animate-spin mr-2" width="16" height="16" />
+                        <Icon ssr={true} icon="mdi:loading" className="animate-spin mr-2" width="16" height="16" />
                         Updating...
                       </>
                     ) : (
@@ -986,12 +986,12 @@ export default function SettingsPage() {
                   >
                     {isCreatingKey ? (
                       <>
-                        <Icon icon="mdi:loading" className="animate-spin mr-2" width="16" height="16" />
+                        <Icon ssr={true} icon="mdi:loading" className="animate-spin mr-2" width="16" height="16" />
                         Creating...
                       </>
                     ) : (
                       <>
-                        <Icon icon="mdi:key-plus" className="mr-2" width="16" height="16" />
+                        <Icon ssr={true} icon="mdi:key-plus" className="mr-2" width="16" height="16" />
                         Create API Key
                       </>
                     )}
@@ -1005,7 +1005,7 @@ export default function SettingsPage() {
                   <div className="space-y-4">
                     <div className="flex items-start gap-3">
                       <div className="p-2 bg-primary/20 rounded-lg">
-                        <Icon icon="mdi:key-variant" className="text-primary" width="24" height="24" />
+                        <Icon ssr={true} icon="mdi:key-variant" className="text-primary" width="24" height="24" />
                       </div>
                       <div className="flex-1">
                         <h3 className="font-hebden text-xl font-bold text-foreground mb-1">
@@ -1028,7 +1028,7 @@ export default function SettingsPage() {
                           onClick={() => copyToClipboard(generatedKey)}
                           className="h-7 gap-1.5 font-hebden"
                         >
-                          <Icon icon="mdi:content-copy" width="14" height="14" />
+                          <Icon ssr={true} icon="mdi:content-copy" width="14" height="14" />
                           Copy
                         </Button>
                       </div>
@@ -1038,7 +1038,7 @@ export default function SettingsPage() {
                     </div>
 
                     <div className="flex items-center gap-2 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-                      <Icon icon="mdi:alert-circle" className="text-yellow-500 flex-shrink-0" width="18" height="18" />
+                      <Icon ssr={true} icon="mdi:alert-circle" className="text-yellow-500 flex-shrink-0" width="18" height="18" />
                       <p className="text-xs text-muted-foreground">
                         <strong className="text-yellow-500 font-semibold">Important:</strong> Store this key in a secure location.
                         Once you close this message, you won't be able to see the full key again.
@@ -1050,7 +1050,7 @@ export default function SettingsPage() {
                         onClick={() => copyToClipboard(generatedKey)}
                         className="font-hebden flex-1"
                       >
-                        <Icon icon="mdi:content-copy" className="mr-2" width="16" height="16" />
+                        <Icon ssr={true} icon="mdi:content-copy" className="mr-2" width="16" height="16" />
                         Copy to Clipboard
                       </Button>
                       <Button
@@ -1058,7 +1058,7 @@ export default function SettingsPage() {
                         onClick={() => setGeneratedKey(null)}
                         className="font-hebden"
                       >
-                        <Icon icon="mdi:check" className="mr-2" width="16" height="16" />
+                        <Icon ssr={true} icon="mdi:check" className="mr-2" width="16" height="16" />
                         Done
                       </Button>
                     </div>
@@ -1076,11 +1076,11 @@ export default function SettingsPage() {
 
                 {isLoadingKeys ? (
                   <div className="flex items-center justify-center py-8">
-                    <Icon icon="mdi:loading" className="animate-spin text-primary" width="24" height="24" />
+                    <Icon ssr={true} icon="mdi:loading" className="animate-spin text-primary" width="24" height="24" />
                   </div>
                 ) : apiKeys.length === 0 ? (
                   <div className="text-center py-8">
-                    <Icon icon="mdi:key-outline" className="mx-auto text-muted-foreground mb-2" width="48" height="48" />
+                    <Icon ssr={true} icon="mdi:key-outline" className="mx-auto text-muted-foreground mb-2" width="48" height="48" />
                     <p className="text-muted-foreground font-nunito">
                       No API keys yet. Create one to get started.
                     </p>
@@ -1120,9 +1120,9 @@ export default function SettingsPage() {
                           className="text-destructive hover:text-destructive hover:bg-destructive/10 ml-4"
                         >
                           {deletingKeyId === key.id ? (
-                            <Icon icon="mdi:loading" className="animate-spin" width="16" height="16" />
+                            <Icon ssr={true} icon="mdi:loading" className="animate-spin" width="16" height="16" />
                           ) : (
-                            <Icon icon="mdi:delete" width="16" height="16" />
+                            <Icon ssr={true} icon="mdi:delete" width="16" height="16" />
                           )}
                         </Button>
                       </div>
@@ -1144,7 +1144,7 @@ export default function SettingsPage() {
                   {/* Endpoint Info */}
                   <div className="space-y-2">
                     <Label className="text-sm font-semibold flex items-center gap-2">
-                      <Icon icon="mdi:api" width="16" height="16" />
+                      <Icon ssr={true} icon="mdi:api" width="16" height="16" />
                       API Base URL
                     </Label>
                     <div className="bg-background border border-border rounded-lg p-3">
@@ -1157,7 +1157,7 @@ export default function SettingsPage() {
                   {/* Example Request */}
                   <div className="space-y-2">
                     <Label className="text-sm font-semibold flex items-center gap-2">
-                      <Icon icon="mdi:code-braces" width="16" height="16" />
+                      <Icon ssr={true} icon="mdi:code-braces" width="16" height="16" />
                       Example Request
                     </Label>
                     <div className="bg-background border border-border rounded-lg overflow-hidden">
@@ -1173,7 +1173,7 @@ export default function SettingsPage() {
                           )}
                           className="h-6 gap-1.5 text-xs"
                         >
-                          <Icon icon="mdi:content-copy" width="12" height="12" />
+                          <Icon ssr={true} icon="mdi:content-copy" width="12" height="12" />
                           Copy
                         </Button>
                       </div>
@@ -1188,7 +1188,7 @@ export default function SettingsPage() {
 
                   {/* Rate Limiting Info */}
                   <div className="flex items-start gap-3 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-                    <Icon icon="mdi:information" className="text-blue-500 flex-shrink-0 mt-0.5" width="18" height="18" />
+                    <Icon ssr={true} icon="mdi:information" className="text-blue-500 flex-shrink-0 mt-0.5" width="18" height="18" />
                     <div className="flex-1">
                       <p className="text-sm font-semibold text-blue-500 mb-1">Rate Limiting</p>
                       <p className="text-xs text-muted-foreground">

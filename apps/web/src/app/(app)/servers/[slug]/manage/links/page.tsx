@@ -238,7 +238,7 @@ export default function ServerLinksPage() {
     if (isLoading) {
         return (
             <div className="flex items-center justify-center py-12">
-                <Icon icon="mdi:loading" className="animate-spin text-primary" width="48" height="48" />
+                <Icon ssr={true} icon="mdi:loading" className="animate-spin text-primary" width="48" height="48" />
             </div>
         );
     }
@@ -292,8 +292,7 @@ export default function ServerLinksPage() {
                                 >
                                     <GripVertical className="w-4 h-4 text-muted-foreground cursor-move group-hover:text-primary transition-colors" />
 
-                                    <Icon
-                                        icon={platformInfo.icon}
+                                    <Icon ssr={true} icon={platformInfo.icon}
                                         width="24"
                                         height="24"
                                         style={{ color: platformInfo.color }}
@@ -341,7 +340,7 @@ export default function ServerLinksPage() {
             ) : (
                 <div className="bg-secondary/30 rounded-lg p-12 text-center">
                     <div className="p-4 bg-accent rounded-full mb-4 inline-block">
-                        <Icon icon="mdi:link-variant-off" width="48" height="48" className="text-muted-foreground" />
+                        <Icon ssr={true} icon="mdi:link-variant-off" width="48" height="48" className="text-muted-foreground" />
                     </div>
                     <p className="text-foreground font-nunito text-lg mb-2">No social links yet</p>
                     <p className="text-muted-foreground font-nunito text-sm mb-6 text-center max-w-md mx-auto">
@@ -404,7 +403,7 @@ export default function ServerLinksPage() {
                                     {SOCIAL_PLATFORMS.map((platform) => (
                                         <SelectItem key={platform.type} value={platform.type}>
                                             <div className="flex items-center gap-2">
-                                                <Icon icon={platform.icon} width="20" height="20" style={{ color: platform.color }} />
+                                                <Icon ssr={true} icon={platform.icon} width="20" height="20" style={{ color: platform.color }} />
                                                 <span>{platform.label}</span>
                                             </div>
                                         </SelectItem>

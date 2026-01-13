@@ -70,7 +70,7 @@ export default function DownloadsPage() {
         return (
             <div className="flex justify-center items-center min-h-[400px]">
                 <div className="text-center">
-                    <Icon icon="mdi:alert-circle-outline" className="w-16 h-16 text-red-500 mx-auto mb-4" />
+                    <Icon ssr={true} icon="mdi:alert-circle-outline" className="w-16 h-16 text-red-500 mx-auto mb-4" />
                     <p className="text-white/80 text-lg">{error}</p>
                 </div>
             </div>
@@ -81,7 +81,7 @@ export default function DownloadsPage() {
         return (
             <div className="flex justify-center items-center min-h-[400px]">
                 <div className="text-center">
-                    <Icon icon="mdi:download-off-outline" className="w-16 h-16 text-white/40 mx-auto mb-4" />
+                    <Icon ssr={true} icon="mdi:download-off-outline" className="w-16 h-16 text-white/40 mx-auto mb-4" />
                     <h3 className="text-xl font-semibold text-white/90 mb-2">No downloads yet</h3>
                     <p className="text-white/60">
                         Your download history will appear here when you download resources.
@@ -134,7 +134,7 @@ export default function DownloadsPage() {
                                         />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center">
-                                            <Icon icon="mdi:package-variant" className="w-8 h-8 text-white/40" />
+                                            <Icon ssr={true} icon="mdi:package-variant" className="w-8 h-8 text-white/40" />
                                         </div>
                                     )}
                                 </div>
@@ -166,7 +166,7 @@ export default function DownloadsPage() {
 
                                     {/* Download Date */}
                                     <div className="flex items-center gap-2 text-sm text-white/50">
-                                        <Icon icon="mdi:clock-outline" className="w-4 h-4" />
+                                        <Icon ssr={true} icon="mdi:clock-outline" className="w-4 h-4" />
                                         <span>Downloaded {formatRelativeTime(download.downloadedAt)}</span>
                                     </div>
                                 </div>
@@ -184,7 +184,7 @@ export default function DownloadsPage() {
                         disabled={page === 1 || isLoading}
                         className="px-4 py-2 bg-accent border border-border rounded-lg text-white disabled:opacity-50 disabled:cursor-not-allowed hover:border-primary/50 transition-colors"
                     >
-                        <Icon icon="mdi:chevron-left" className="w-5 h-5" />
+                        <Icon ssr={true} icon="mdi:chevron-left" className="w-5 h-5" />
                     </button>
 
                     <span className="text-white/80">
@@ -196,7 +196,7 @@ export default function DownloadsPage() {
                         disabled={page === totalPages || isLoading}
                         className="px-4 py-2 bg-accent border border-border rounded-lg text-white disabled:opacity-50 disabled:cursor-not-allowed hover:border-primary/50 transition-colors"
                     >
-                        <Icon icon="mdi:chevron-right" className="w-5 h-5" />
+                        <Icon ssr={true} icon="mdi:chevron-right" className="w-5 h-5" />
                     </button>
                 </div>
             )}

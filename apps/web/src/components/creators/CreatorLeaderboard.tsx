@@ -12,7 +12,7 @@ function RankBadge({ rank }: { rank: number }) {
     if (rank === 1) {
         return (
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center shadow-lg shadow-yellow-500/30">
-                <Icon icon="mdi:trophy" className="w-5 h-5 text-yellow-900" />
+                <Icon ssr={true} icon="mdi:trophy" className="w-5 h-5 text-yellow-900" />
             </div>
         );
     }
@@ -43,7 +43,7 @@ function MovementIndicator({ current, previous }: { current: number; previous: n
     if (diff > 0) {
         return (
             <div className="flex items-center gap-1 text-green-400">
-                <Icon icon="mdi:arrow-up" className="w-4 h-4" />
+                <Icon ssr={true} icon="mdi:arrow-up" className="w-4 h-4" />
                 <span className="text-xs font-hebden">{diff}</span>
             </div>
         );
@@ -51,14 +51,14 @@ function MovementIndicator({ current, previous }: { current: number; previous: n
     if (diff < 0) {
         return (
             <div className="flex items-center gap-1 text-red-400">
-                <Icon icon="mdi:arrow-down" className="w-4 h-4" />
+                <Icon ssr={true} icon="mdi:arrow-down" className="w-4 h-4" />
                 <span className="text-xs font-hebden">{Math.abs(diff)}</span>
             </div>
         );
     }
     return (
         <div className="flex items-center gap-1 text-[#C7F4FA]/40">
-            <Icon icon="mdi:minus" className="w-4 h-4" />
+            <Icon ssr={true} icon="mdi:minus" className="w-4 h-4" />
         </div>
     );
 }
@@ -121,8 +121,7 @@ function LeaderboardRow({ entry, index }: { entry: LeaderboardEntry; index: numb
 
 
             {/* Arrow */}
-            <Icon
-                icon="mdi:chevron-right"
+            <Icon ssr={true} icon="mdi:chevron-right"
                 className="w-5 h-5 text-[#C7F4FA]/30 group-hover:text-[#109EB1] transition-colors"
             />
         </Link>
@@ -141,7 +140,7 @@ export default function CreatorLeaderboard({ entries }: CreatorLeaderboardProps)
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
                     <div>
                         <div className="flex items-center gap-3 mb-2">
-                            <Icon icon="mdi:podium" className="w-7 h-7 text-[#109EB1]" />
+                            <Icon ssr={true} icon="mdi:podium" className="w-7 h-7 text-[#109EB1]" />
                             <h2 className="font-hebden text-2xl sm:text-3xl text-[#C7F4FA]">
                                 Weekly Leaderboard
                             </h2>
@@ -157,7 +156,7 @@ export default function CreatorLeaderboard({ entries }: CreatorLeaderboardProps)
                         className="px-5 py-2 bg-[#109EB1]/10 hover:bg-[#109EB1] border border-[#109EB1] text-[#109EB1] hover:text-[#C7F4FA] font-hebden text-sm rounded-full transition-all flex items-center gap-2 self-start sm:self-auto"
                     >
                         View Full Rankings
-                        <Icon icon="mdi:arrow-right" className="w-4 h-4" />
+                        <Icon ssr={true} icon="mdi:arrow-right" className="w-4 h-4" />
                     </Link>
                     */}
                 </div>

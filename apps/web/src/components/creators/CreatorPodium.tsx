@@ -90,7 +90,7 @@ export default function CreatorPodium({ creators }: CreatorPodiumProps) {
                             )}
                             {isTop3 && (
                                 <div className="absolute bottom-0 right-0 bg-[#032125] rounded-full p-0.5">
-                                    <Icon icon={style.icon} className={`w-3 h-3 ${style.text}`} />
+                                    <Icon ssr={true} icon={style.icon} className={`w-3 h-3 ${style.text}`} />
                                 </div>
                             )}
                         </div>
@@ -107,18 +107,18 @@ export default function CreatorPodium({ creators }: CreatorPodiumProps) {
                             {/* Stats */}
                             <div className="flex items-center gap-4 text-[10px] text-[#C7F4FA]/50">
                                 <div className="flex items-center gap-1">
-                                    <Icon icon="ph:cube-fill" className="w-3 h-3" />
+                                    <Icon ssr={true} icon="ph:cube-fill" className="w-3 h-3" />
                                     <span>{creator.stats.resources} Resources</span>
                                 </div>
                                 <div className="flex items-center gap-1">
-                                    <Icon icon="ph:download-simple-fill" className="w-3 h-3" />
+                                    <Icon ssr={true} icon="ph:download-simple-fill" className="w-3 h-3" />
                                     <span>{formatNumber(creator.stats.downloads)} Downloads</span>
                                 </div>
                             </div>
                         </div>
 
                         {/* Arrow */}
-                        <Icon icon="ph:caret-right-bold" className="text-[#084B54] group-hover:text-[#109EB1] transition-colors" />
+                        <Icon ssr={true} icon="ph:caret-right-bold" className="text-[#084B54] group-hover:text-[#109EB1] transition-colors" />
                     </Link>
                 );
             })}

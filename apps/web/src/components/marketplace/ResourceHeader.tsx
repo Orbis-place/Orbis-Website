@@ -40,6 +40,7 @@ export interface ResourceHeaderProps {
     resourceId?: string;
     isLoggedIn?: boolean;
     onLoginRequired?: () => void;
+    donationLink?: string;
 }
 
 
@@ -65,6 +66,7 @@ export default function ResourceHeader({
     resourceId,
     isLoggedIn = false,
     onLoginRequired,
+    donationLink,
 }: ResourceHeaderProps) {
     const [copySuccess, setCopySuccess] = useState(false);
     const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
@@ -134,7 +136,7 @@ export default function ResourceHeader({
                                 href={`/${type}/${slug}/manage`}
                                 className="flex items-center justify-center gap-3 px-6 py-3 bg-[#06363D] hover:bg-[#084B54] border border-[#084B54] rounded-full font-hebden font-bold text-base text-[#C7F4FA] transition-all"
                             >
-                                <Icon icon="mdi:cog" width="20" height="20" />
+                                <Icon ssr={true} icon="mdi:cog" width="20" height="20" />
                                 <span>Manage</span>
                             </Link>
                         )}
@@ -286,7 +288,7 @@ export default function ResourceHeader({
                             href={`/${type}/${slug}/manage`}
                             className="flex-1 flex items-center justify-center gap-3 px-6 py-3 bg-[#06363D] hover:bg-[#084B54] border border-[#084B54] rounded-full font-hebden font-bold text-base text-[#C7F4FA] transition-all"
                         >
-                            <Icon icon="mdi:cog" width="20" height="20" />
+                            <Icon ssr={true} icon="mdi:cog" width="20" height="20" />
                             <span>Manage</span>
                         </Link>
                     )}
@@ -300,6 +302,7 @@ export default function ResourceHeader({
                     onOpenChange={setIsDownloadModalOpen}
                     resourceId={resourceId}
                     resourceName={title}
+                    donationLink={donationLink}
                 />
             )}
 

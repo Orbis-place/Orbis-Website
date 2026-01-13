@@ -148,7 +148,7 @@ export default function UsersManagementPage() {
             <div className="space-y-6">
                 <h1 className="font-hebden text-3xl font-bold text-foreground">Users Management</h1>
                 <div className="flex items-center justify-center py-12">
-                    <Icon icon="mdi:loading" width="48" height="48" className="text-primary animate-spin" />
+                    <Icon ssr={true} icon="mdi:loading" width="48" height="48" className="text-primary animate-spin" />
                 </div>
             </div>
         );
@@ -231,7 +231,7 @@ export default function UsersManagementPage() {
                                                 <img src={user.image} alt={user.username} className="w-10 h-10 rounded-full" />
                                             ) : (
                                                 <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                                                    <Icon icon="mdi:account" width="24" height="24" className="text-primary" />
+                                                    <Icon ssr={true} icon="mdi:account" width="24" height="24" className="text-primary" />
                                                 </div>
                                             )}
                                             <div>
@@ -268,7 +268,7 @@ export default function UsersManagementPage() {
                                             onClick={() => setSelectedUser(user)}
                                             className="font-nunito"
                                         >
-                                            <Icon icon="mdi:cog" width="16" height="16" />
+                                            <Icon ssr={true} icon="mdi:cog" width="16" height="16" />
                                             Manage
                                         </Button>
                                     </td>
@@ -338,7 +338,7 @@ export default function UsersManagementPage() {
                                         disabled={actionLoading}
                                         className="w-full font-hebden"
                                     >
-                                        <Icon icon="mdi:account-check" width="18" height="18" />
+                                        <Icon ssr={true} icon="mdi:account-check" width="18" height="18" />
                                         Unban User
                                     </Button>
                                 </div>
@@ -354,7 +354,7 @@ export default function UsersManagementPage() {
                                     disabled={actionLoading}
                                     className="w-full font-hebden"
                                 >
-                                    <Icon icon="mdi:account-cancel" width="18" height="18" />
+                                    <Icon ssr={true} icon="mdi:account-cancel" width="18" height="18" />
                                     Ban User
                                 </Button>
                             )}

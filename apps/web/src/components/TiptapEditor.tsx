@@ -445,7 +445,7 @@ export function TiptapEditor({
       {/* Info footer */}
       <div className="border-t border-[#1E5A63] bg-[#0A1F24]/50 p-3 text-xs text-[#C7F4FA]/50 font-nunito">
         <div className="flex items-center gap-2">
-          <Icon icon="mdi:information-outline" width="14" height="14" />
+          <Icon ssr={true} icon="mdi:information-outline" width="14" height="14" />
           <span>
             Select text to format it • Paste or drag & drop images
           </span>
@@ -478,7 +478,7 @@ function MenuButton({ onClick, active, icon, tooltip, disabled = false }: MenuBu
       `}
       title={tooltip}
     >
-      <Icon icon={icon} width="18" height="18" />
+      <Icon ssr={true} icon={icon} width="18" height="18" />
     </button>
   )
 }

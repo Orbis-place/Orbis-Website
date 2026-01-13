@@ -135,7 +135,7 @@ export default function TeamResourcesPage() {
     if (loading) {
         return (
             <div className="flex items-center justify-center py-12">
-                <Icon icon="mdi:loading" className="animate-spin text-primary" width="48" height="48" />
+                <Icon ssr={true} icon="mdi:loading" className="animate-spin text-primary" width="48" height="48" />
             </div>
         );
     }
@@ -153,7 +153,7 @@ export default function TeamResourcesPage() {
 
                 {/* Create Resource Button */}
                 <Button className="font-hebden" onClick={() => router.push(`/resources/new?teamId=${teamId}`)}>
-                    <Icon icon="mdi:plus" width="20" height="20" />
+                    <Icon ssr={true} icon="mdi:plus" width="20" height="20" />
                     Create Resource
                 </Button>
             </div>
@@ -163,7 +163,7 @@ export default function TeamResourcesPage() {
                 <div className="bg-gradient-to-br from-primary/20 to-primary/5 rounded-lg p-6">
                     <div className="flex items-center gap-3">
                         <div className="flex flex-col items-center justify-center p-3 bg-primary/20 rounded-lg">
-                            <Icon icon="mdi:package-variant" width="24" height="24" className="text-primary" />
+                            <Icon ssr={true} icon="mdi:package-variant" width="24" height="24" className="text-primary" />
                         </div>
                         <div>
                             <p className="text-2xl font-bold font-hebden text-foreground">{totalResources}</p>
@@ -175,7 +175,7 @@ export default function TeamResourcesPage() {
                 <div className="bg-gradient-to-br from-secondary/40 to-secondary/10 rounded-lg p-6">
                     <div className="flex items-center gap-3">
                         <div className="flex flex-col items-center justify-center p-3 bg-primary/20 rounded-lg">
-                            <Icon icon="mdi:download" width="24" height="24" className="text-primary" />
+                            <Icon ssr={true} icon="mdi:download" width="24" height="24" className="text-primary" />
                         </div>
                         <div>
                             <p className="text-2xl font-bold font-hebden text-foreground">{totalDownloads}</p>
@@ -187,7 +187,7 @@ export default function TeamResourcesPage() {
                 <div className="bg-gradient-to-br from-accent/80 to-accent/40 rounded-lg p-6">
                     <div className="flex items-center gap-3">
                         <div className="flex flex-col items-center justify-center p-3 bg-primary/20 rounded-lg">
-                            <Icon icon="mdi:heart" width="24" height="24" className="text-primary" />
+                            <Icon ssr={true} icon="mdi:heart" width="24" height="24" className="text-primary" />
                         </div>
                         <div>
                             <p className="text-2xl font-bold font-hebden text-foreground">{totalLikes}</p>
@@ -209,16 +209,16 @@ export default function TeamResourcesPage() {
                                         {resource.iconUrl ? (
                                             <Image src={resource.iconUrl} alt={resource.name} width={64} height={64} className="rounded-lg object-cover" />
                                         ) : (
-                                            <Icon icon={getTypeIcon(resource.type)} width="32" height="32" className="text-primary" />
+                                            <Icon ssr={true} icon={getTypeIcon(resource.type)} width="32" height="32" className="text-primary" />
                                         )}
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <h3 className="font-hebden text-lg font-semibold text-foreground">{resource.name}</h3>
                                         <div className="flex items-center gap-2 text-sm text-muted-foreground font-nunito mb-2">
-                                            <Icon icon={getStatusIcon(resource.status)} width="16" height="16" className={getStatusColor(resource.status)} />
+                                            <Icon ssr={true} icon={getStatusIcon(resource.status)} width="16" height="16" className={getStatusColor(resource.status)} />
                                             <span className={getStatusColor(resource.status)}>{resource.status}</span>
                                             <span>•</span>
-                                            <Icon icon={getTypeIcon(resource.type)} width="16" height="16" />
+                                            <Icon ssr={true} icon={getTypeIcon(resource.type)} width="16" height="16" />
                                             <span>{resource.type}</span>
                                         </div>
                                         {resource.tagline && (
@@ -226,11 +226,11 @@ export default function TeamResourcesPage() {
                                         )}
                                         <div className="flex items-center gap-4 text-sm text-muted-foreground font-nunito">
                                             <span className="flex items-center gap-1">
-                                                <Icon icon="mdi:download" width="16" height="16" />
+                                                <Icon ssr={true} icon="mdi:download" width="16" height="16" />
                                                 {resource.downloadCount}
                                             </span>
                                             <span className="flex items-center gap-1">
-                                                <Icon icon="mdi:heart" width="16" height="16" />
+                                                <Icon ssr={true} icon="mdi:heart" width="16" height="16" />
                                                 {resource.likeCount}
                                             </span>
                                         </div>
@@ -244,7 +244,7 @@ export default function TeamResourcesPage() {
                                         className="font-nunito text-sm"
                                         onClick={() => router.push(`/${resource.type.toLowerCase().replace('_', '-')}/${resource.slug}`)}
                                     >
-                                        <Icon icon="mdi:eye" width="16" height="16" />
+                                        <Icon ssr={true} icon="mdi:eye" width="16" height="16" />
                                         View
                                     </Button>
                                     <Button
@@ -253,7 +253,7 @@ export default function TeamResourcesPage() {
                                         className="font-nunito text-sm"
                                         onClick={() => router.push(`/${resource.type.toLowerCase()}/${resource.slug}/manage`)}
                                     >
-                                        <Icon icon="mdi:pencil" width="16" height="16" />
+                                        <Icon ssr={true} icon="mdi:pencil" width="16" height="16" />
                                         Edit
                                     </Button>
                                     <Button
@@ -262,7 +262,7 @@ export default function TeamResourcesPage() {
                                         className="font-nunito text-sm"
                                         onClick={() => setDeletingResourceId(resource.id)}
                                     >
-                                        <Icon icon="mdi:delete" width="16" height="16" />
+                                        <Icon ssr={true} icon="mdi:delete" width="16" height="16" />
                                         Delete
                                     </Button>
                                 </div>
@@ -272,7 +272,7 @@ export default function TeamResourcesPage() {
                 ) : (
                     <div className="flex flex-col items-center justify-center py-12">
                         <div className="p-4 bg-accent rounded-full mb-4">
-                            <Icon icon="mdi:package-variant" width="48" height="48" className="text-muted-foreground" />
+                            <Icon ssr={true} icon="mdi:package-variant" width="48" height="48" className="text-muted-foreground" />
                         </div>
                         <p className="text-foreground font-nunito text-lg mb-2">No resources yet</p>
                         <p className="text-muted-foreground font-nunito text-sm mb-6 text-center max-w-md">
@@ -282,7 +282,7 @@ export default function TeamResourcesPage() {
                             className="font-hebden"
                             onClick={() => router.push(`/resources/new?teamId=${teamId}`)}
                         >
-                            <Icon icon="mdi:plus" width="20" height="20" />
+                            <Icon ssr={true} icon="mdi:plus" width="20" height="20" />
                             Create First Resource
                         </Button>
                     </div>

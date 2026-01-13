@@ -26,6 +26,7 @@ enum AccountStatus {
 }
 
 enum ServerStatus {
+  DRAFT // Being created by owner
   PENDING // Waiting for admin approval
   APPROVED // Live and visible
   REJECTED // Rejected by admin

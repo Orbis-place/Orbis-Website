@@ -95,7 +95,7 @@ export default function ShowcasePage() {
                     <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
                         <div className="max-w-2xl space-y-4">
                             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#109EB1]/10 border border-[#109EB1]/20 text-[#109EB1] text-xs font-hebden tracking-wider">
-                                <Icon icon="mdi:image-multiple" className="text-sm" />
+                                <Icon ssr={true} icon="mdi:image-multiple" className="text-sm" />
                                 COMMUNITY GALLERY
                             </div>
                             <h1 className="font-hebden text-4xl md:text-5xl text-[#C7F4FA] leading-tight">
@@ -112,7 +112,7 @@ export default function ShowcasePage() {
                                 href="/showcase/new"
                                 className="inline-flex items-center gap-2 px-6 py-3 bg-[#109EB1] hover:bg-[#109EB1]/80 text-white rounded-xl font-nunito font-semibold transition-all"
                             >
-                                <Icon icon="mdi:plus" className="text-xl" />
+                                <Icon ssr={true} icon="mdi:plus" className="text-xl" />
                                 Create Post
                             </Link>
                         )}
@@ -157,7 +157,7 @@ export default function ShowcasePage() {
                                         }`}
                                     style={selectedCategory === cat ? { backgroundColor: info.color } : {}}
                                 >
-                                    <Icon icon={info.icon} className="text-base" />
+                                    <Icon ssr={true} icon={info.icon} className="text-base" />
                                     {info.label}
                                     {count > 0 && <span className="opacity-70 text-xs">({count})</span>}
                                 </button>
@@ -169,7 +169,7 @@ export default function ShowcasePage() {
                     <Select value={sortBy} onValueChange={(value) => setSortBy(value as typeof sortBy)}>
                         <SelectTrigger className="w-[180px] bg-[#06363D] border-[#084B54] hover:border-[#109EB1]/40">
                             <div className="flex items-center gap-2">
-                                <Icon icon="mdi:sort" className="text-[#C7F4FA]/50" />
+                                <Icon ssr={true} icon="mdi:sort" className="text-[#C7F4FA]/50" />
                                 <SelectValue placeholder="Sort by" />
                             </div>
                         </SelectTrigger>
@@ -190,7 +190,7 @@ export default function ShowcasePage() {
                     </div>
                 ) : posts.length === 0 ? (
                     <div className="text-center py-20">
-                        <Icon icon="mdi:image-off-outline" className="text-6xl text-[#C7F4FA]/30 mx-auto mb-4" />
+                        <Icon ssr={true} icon="mdi:image-off-outline" className="text-6xl text-[#C7F4FA]/30 mx-auto mb-4" />
                         <h3 className="font-hebden text-xl text-[#C7F4FA]/70 mb-2">No posts found</h3>
                         <p className="text-[#C7F4FA]/50 font-nunito">
                             {search || selectedCategory
@@ -214,7 +214,7 @@ export default function ShowcasePage() {
                             disabled={page === 1}
                             className="px-4 py-2 bg-[#06363D] border border-[#109EB1]/20 rounded-lg text-[#C7F4FA] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#06363D]/80 transition-colors"
                         >
-                            <Icon icon="mdi:chevron-left" />
+                            <Icon ssr={true} icon="mdi:chevron-left" />
                         </button>
                         <span className="px-4 py-2 text-[#C7F4FA]/70 font-nunito">
                             Page {page} of {totalPages}
@@ -224,7 +224,7 @@ export default function ShowcasePage() {
                             disabled={page === totalPages}
                             className="px-4 py-2 bg-[#06363D] border border-[#109EB1]/20 rounded-lg text-[#C7F4FA] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#06363D]/80 transition-colors"
                         >
-                            <Icon icon="mdi:chevron-right" />
+                            <Icon ssr={true} icon="mdi:chevron-right" />
                         </button>
                     </div>
                 )}

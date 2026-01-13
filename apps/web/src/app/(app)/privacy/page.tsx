@@ -175,7 +175,7 @@ export default function PrivacyPolicy() {
                         href="/"
                         className="inline-flex items-center gap-2 px-6 py-3 bg-[#109EB1] hover:bg-[#0D8A9A] rounded-full font-hebden font-bold text-base text-[#C7F4FA] transition-all shadow-lg"
                     >
-                        <Icon icon="mdi:arrow-left" width="20" height="20" />
+                        <Icon ssr={true} icon="mdi:arrow-left" width="20" height="20" />
                         Back to Home
                     </Link>
                 </div>

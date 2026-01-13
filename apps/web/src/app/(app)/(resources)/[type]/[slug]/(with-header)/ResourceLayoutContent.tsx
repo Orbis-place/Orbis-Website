@@ -109,20 +109,20 @@ export default function ResourceLayoutContent({ children }: { children: ReactNod
     const getExternalLinkIcon = (type: string) => {
         switch (type) {
             case 'SOURCE_CODE':
-                return <Icon icon="mdi:github" width="20" height="20" />;
+                return <Icon ssr={true} icon="mdi:github" width="20" height="20" />;
             case 'ISSUE_TRACKER':
-                return <Icon icon="mdi:bug" width="20" height="20" />;
+                return <Icon ssr={true} icon="mdi:bug" width="20" height="20" />;
             case 'WIKI':
-                return <Icon icon="mdi:book-open-page-variant" width="20" height="20" />;
+                return <Icon ssr={true} icon="mdi:book-open-page-variant" width="20" height="20" />;
             case 'DISCORD':
-                return <Icon icon="ic:baseline-discord" width="20" height="20" />;
+                return <Icon ssr={true} icon="ic:baseline-discord" width="20" height="20" />;
             case 'DONATION':
-                return <Icon icon="mdi:heart" width="20" height="20" />;
+                return <Icon ssr={true} icon="mdi:heart" width="20" height="20" />;
             case 'WEBSITE':
-                return <Icon icon="mdi:web" width="20" height="20" />;
+                return <Icon ssr={true} icon="mdi:web" width="20" height="20" />;
             case 'OTHER':
             default:
-                return <Icon icon="mdi:link" width="20" height="20" />;
+                return <Icon ssr={true} icon="mdi:link" width="20" height="20" />;
         }
     };
 
@@ -132,6 +132,8 @@ export default function ResourceLayoutContent({ children }: { children: ReactNod
         url: link.url,
         icon: getExternalLinkIcon(link.type)
     }));
+
+    const donationLink = externalLinks.find((link: any) => link.type === 'DONATION')?.url;
 
     // Map creators
     const creators = resource.ownerTeam ? [
@@ -188,6 +190,7 @@ export default function ResourceLayoutContent({ children }: { children: ReactNod
                 resourceId={resource.id}
                 isLoggedIn={!!session?.user}
                 onLoginRequired={() => toast.error('Please log in to save resources')}
+                donationLink={donationLink}
             />
 
             {/* Main Content + Sidebar */}

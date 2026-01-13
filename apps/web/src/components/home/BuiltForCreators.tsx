@@ -72,7 +72,7 @@ export function BuiltForCreators() {
                                 className="flex gap-4 p-4 rounded-xl hover:bg-[#06363D]/50 transition-colors"
                             >
                                 <div className="w-12 h-12 bg-[#109EB1]/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                                    <Icon icon={feature.icon} className="w-6 h-6 text-[#109EB1]" />
+                                    <Icon ssr={true} icon={feature.icon} className="w-6 h-6 text-[#109EB1]" />
                                 </div>
                                 <div>
                                     <h3 className="font-hebden font-semibold text-lg text-[#C7F4FA] mb-1">
@@ -92,7 +92,7 @@ export function BuiltForCreators() {
                         <div className="flex items-center justify-between mb-6">
                             <h3 className="font-hebden font-bold text-lg text-[#C7F4FA]">Creator Dashboard</h3>
                             <div className="w-8 h-8 bg-[#109EB1]/20 rounded-full flex items-center justify-center">
-                                <Icon icon="mdi:account" className="w-4 h-4 text-[#109EB1]" />
+                                <Icon ssr={true} icon="mdi:account" className="w-4 h-4 text-[#109EB1]" />
                             </div>
                         </div>
 
@@ -103,7 +103,7 @@ export function BuiltForCreators() {
                                     <p className="font-hebden font-bold text-xl text-[#C7F4FA]">{stat.value}</p>
                                     <p className="font-nunito text-xs text-[#C7F4FA]/60 mb-1">{stat.label}</p>
                                     <span className="inline-flex items-center gap-0.5 text-xs text-[#10b981]">
-                                        <Icon icon="mdi:trending-up" className="w-3 h-3" />
+                                        <Icon ssr={true} icon="mdi:trending-up" className="w-3 h-3" />
                                         {stat.trend}
                                     </span>
                                 </div>
@@ -142,7 +142,7 @@ export function BuiltForCreators() {
                         className="inline-flex items-center gap-2 px-8 py-4 bg-[#109EB1] rounded-full font-hebden font-semibold text-lg text-[#C7F4FA] hover:bg-[#0d8a9b] transition-colors"
                     >
                         Start Publishing
-                        <Icon icon="mdi:arrow-right" className="w-5 h-5" />
+                        <Icon ssr={true} icon="mdi:arrow-right" className="w-5 h-5" />
                     </Link>
                     <p className="font-nunito text-sm text-[#C7F4FA]/50 mt-3">It's free, obviously.</p>
                 </div>

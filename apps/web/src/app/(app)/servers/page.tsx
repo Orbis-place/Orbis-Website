@@ -183,7 +183,7 @@ export default function ServersPage() {
                         {/* Browse / Quick Filters */}
                         <div className="bg-[#06363D] border border-[#084B54] rounded-[25px] p-5 flex flex-col gap-2.5">
                             <div className="flex items-center gap-2.5">
-                                <Icon icon="solar:compass-bold-duotone" className="w-4 h-4 text-[#109EB1]" />
+                                <Icon ssr={true} icon="solar:compass-bold-duotone" className="w-4 h-4 text-[#109EB1]" />
                                 <h3 className="font-hebden font-semibold text-xs leading-[14px] text-[#C7F4FA]/50 uppercase">
                                     Browse
                                 </h3>
@@ -212,7 +212,7 @@ export default function ServersPage() {
                         {/* Status Filters */}
                         <div className="bg-[#06363D] border border-[#084B54] rounded-[25px] p-5 flex flex-col gap-2.5">
                             <div className="flex items-center gap-2.5">
-                                <Icon icon="solar:settings-minimalistic-bold-duotone" className="w-4 h-4 text-[#109EB1]" />
+                                <Icon ssr={true} icon="solar:settings-minimalistic-bold-duotone" className="w-4 h-4 text-[#109EB1]" />
                                 <h3 className="font-hebden font-semibold text-xs leading-[14px] text-[#C7F4FA]/50 uppercase">
                                     Status
                                 </h3>

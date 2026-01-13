@@ -59,7 +59,7 @@ export default function AdminOverviewPage() {
             <div className="space-y-6">
                 <h1 className="font-hebden text-3xl font-bold text-foreground">Admin Overview</h1>
                 <div className="flex items-center justify-center py-12">
-                    <Icon icon="mdi:loading" width="48" height="48" className="text-primary animate-spin" />
+                    <Icon ssr={true} icon="mdi:loading" width="48" height="48" className="text-primary animate-spin" />
                 </div>
             </div>
         );
@@ -102,7 +102,7 @@ export default function AdminOverviewPage() {
                         )}
                     </div>
                     <div className="p-3 bg-white/20 rounded-lg">
-                        <Icon icon={icon} width="32" height="32" className="text-white" />
+                        <Icon ssr={true} icon={icon} width="32" height="32" className="text-white" />
                     </div>
                 </div>
             </div>
@@ -165,7 +165,7 @@ export default function AdminOverviewPage() {
                         href="/admin/users"
                         className="flex items-center gap-3 p-4 bg-accent rounded-lg hover:bg-accent/70 transition-colors"
                     >
-                        <Icon icon="mdi:account-supervisor" width="24" height="24" className="text-primary" />
+                        <Icon ssr={true} icon="mdi:account-supervisor" width="24" height="24" className="text-primary" />
                         <div>
                             <p className="font-hebden font-semibold text-foreground">Manage Users</p>
                             <p className="font-nunito text-xs text-muted-foreground">View and manage all users</p>
@@ -175,7 +175,7 @@ export default function AdminOverviewPage() {
                         href="/admin/moderation"
                         className="flex items-center gap-3 p-4 bg-accent rounded-lg hover:bg-accent/70 transition-colors"
                     >
-                        <Icon icon="mdi:shield-check" width="24" height="24" className="text-primary" />
+                        <Icon ssr={true} icon="mdi:shield-check" width="24" height="24" className="text-primary" />
                         <div>
                             <p className="font-hebden font-semibold text-foreground">Moderation Queue</p>
                             <p className="font-nunito text-xs text-muted-foreground">Review pending content</p>
@@ -185,7 +185,7 @@ export default function AdminOverviewPage() {
                         href="/admin/servers"
                         className="flex items-center gap-3 p-4 bg-accent rounded-lg hover:bg-accent/70 transition-colors"
                     >
-                        <Icon icon="mdi:server-security" width="24" height="24" className="text-primary" />
+                        <Icon ssr={true} icon="mdi:server-security" width="24" height="24" className="text-primary" />
                         <div>
                             <p className="font-hebden font-semibold text-foreground">Server Approval</p>
                             <p className="font-nunito text-xs text-muted-foreground">Approve pending servers</p>

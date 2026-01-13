@@ -18,6 +18,7 @@ import { useSessionStore } from '@/stores/useSessionStore';
 import { Camera, Plus, Trash2, Edit2, GripVertical, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 import { OrbisFormDialog, OrbisConfirmDialog } from '@/components/OrbisDialog';
+import { ImageCropperDialog } from '@/components/ImageCropperDialog';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
@@ -88,6 +89,13 @@ export default function ProfilePage() {
 
   // Delete banner dialog state
   const [showDeleteBannerDialog, setShowDeleteBannerDialog] = useState(false);
+
+  // Image cropper dialog state
+  const [cropperDialog, setCropperDialog] = useState<{
+    open: boolean;
+    file: File | null;
+    type: 'image' | 'banner';
+  } | null>(null);
 
   useEffect(() => {
     if (session?.user) {
@@ -349,11 +357,52 @@ export default function ProfilePage() {
       return;
     }
 
+    // For avatar, upload directly without cropping
+    if (type === 'image') {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      try {
+        const response = await fetch(`${API_URL}/users/me/image`, {
+          method: 'POST',
+          credentials: 'include',
+          body: formData,
+        });
+
+        if (response.ok) {
+          await fetchProfile();
+          toast.success('Avatar updated successfully!');
+        } else {
+          const error = await response.json().catch(() => ({ message: 'Failed to upload image' }));
+          toast.error(error.message || 'Failed to upload avatar');
+        }
+      } catch (error) {
+        console.error('Error uploading avatar:', error);
+        toast.error('Failed to upload avatar. Please try again.');
+      }
+      return;
+    }
+
+    // For banner, open cropper dialog
+    setCropperDialog({
+      open: true,
+      file,
+      type,
+    });
+  };
+
+  const handleCropComplete = async (blob: Blob) => {
+    if (!cropperDialog) return;
+
     const formData = new FormData();
-    formData.append(type, file);
+    formData.append(
+      cropperDialog.type,
+      blob,
+      `${cropperDialog.type}-${Date.now()}.jpg`
+    );
 
     try {
-      const response = await fetch(`${API_URL}/users/me/${type}`, {
+      const response = await fetch(`${API_URL}/users/me/${cropperDialog.type}`, {
         method: 'POST',
         credentials: 'include',
         body: formData,
@@ -361,14 +410,15 @@ export default function ProfilePage() {
 
       if (response.ok) {
         await fetchProfile();
-        toast.success(`${type === 'image' ? 'Avatar' : 'Banner'} updated successfully!`);
+        toast.success(`${cropperDialog.type === 'image' ? 'Avatar' : 'Banner'} updated successfully!`);
+        setCropperDialog(null);
       } else {
         const error = await response.json().catch(() => ({ message: 'Failed to upload image' }));
-        toast.error(error.message || `Failed to upload ${type}`);
+        toast.error(error.message || `Failed to upload ${cropperDialog.type}`);
       }
     } catch (error) {
-      console.error(`Error uploading ${type}:`, error);
-      toast.error(`Failed to upload ${type}. Please try again.`);
+      console.error(`Error uploading ${cropperDialog.type}:`, error);
+      toast.error(`Failed to upload ${cropperDialog.type}. Please try again.`);
     }
   };
 
@@ -388,7 +438,7 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Icon icon="mdi:loading" className="animate-spin text-primary" width="40" height="40" />
+        <Icon ssr={true} icon="mdi:loading" className="animate-spin text-primary" width="40" height="40" />
       </div>
     );
   }
@@ -558,8 +608,7 @@ export default function ProfilePage() {
                 >
                   <GripVertical className="w-4 h-4 text-muted-foreground cursor-move group-hover:text-primary transition-colors" />
 
-                  <Icon
-                    icon={platformInfo.icon}
+                  <Icon ssr={true} icon={platformInfo.icon}
                     width="24"
                     height="24"
                     style={{ color: platformInfo.color }}
@@ -605,7 +654,7 @@ export default function ProfilePage() {
           </div>
         ) : (
           <div className="text-center py-8">
-            <Icon icon="mdi:link-variant-off" width="48" height="48" className="mx-auto text-muted-foreground mb-3" />
+            <Icon ssr={true} icon="mdi:link-variant-off" width="48" height="48" className="mx-auto text-muted-foreground mb-3" />
             <p className="text-muted-foreground font-nunito">No social links added yet</p>
           </div>
         )}
@@ -655,7 +704,7 @@ export default function ProfilePage() {
                   {SOCIAL_PLATFORMS.map((platform) => (
                     <SelectItem key={platform.type} value={platform.type} className="font-nunito">
                       <div className="flex items-center gap-2">
-                        <Icon icon={platform.icon} width="16" height="16" />
+                        <Icon ssr={true} icon={platform.icon} width="16" height="16" />
                         {platform.label}
                       </div>
                     </SelectItem>
@@ -739,6 +788,20 @@ export default function ProfilePage() {
       >
         <></>
       </OrbisConfirmDialog>
+
+      {/* Image Cropper Dialog */}
+      {cropperDialog && (
+        <ImageCropperDialog
+          open={cropperDialog.open}
+          onOpenChange={(open) => {
+            if (!open) setCropperDialog(null);
+          }}
+          file={cropperDialog.file}
+          aspectRatio={cropperDialog.type === 'image' ? 1 : 3}
+          type={cropperDialog.type}
+          onComplete={handleCropComplete}
+        />
+      )}
     </div>
   );
 }

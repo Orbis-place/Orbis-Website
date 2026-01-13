@@ -41,8 +41,7 @@ function SpecialtyCard({ categoryId, categoryLabel, creator }: SpecialtyCardProp
             <div className="relative bg-[#06363D] border border-[#084B54] rounded-[20px] p-5 opacity-50">
                 <div className="flex items-center gap-3 mb-4">
                     <div className="w-10 h-10 rounded-xl bg-[#109EB1]/10 border border-[#109EB1]/30 flex items-center justify-center">
-                        <Icon
-                            icon={categoryIcons[categoryId] || 'mdi:cube'}
+                        <Icon ssr={true} icon={categoryIcons[categoryId] || 'mdi:cube'}
                             className="w-5 h-5 text-[#109EB1]"
                         />
                     </div>
@@ -70,8 +69,7 @@ function SpecialtyCard({ categoryId, categoryLabel, creator }: SpecialtyCardProp
             {/* Category Icon & Label */}
             <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 rounded-xl bg-[#109EB1]/10 border border-[#109EB1]/30 flex items-center justify-center group-hover:bg-[#109EB1]/20 transition-colors">
-                    <Icon
-                        icon={categoryIcons[categoryId] || 'mdi:cube'}
+                    <Icon ssr={true} icon={categoryIcons[categoryId] || 'mdi:cube'}
                         className="w-5 h-5 text-[#109EB1]"
                     />
                 </div>
@@ -110,7 +108,7 @@ function SpecialtyCard({ categoryId, categoryLabel, creator }: SpecialtyCardProp
 
             {/* Hover indicator */}
             <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Icon icon="mdi:arrow-right" className="w-5 h-5 text-[#109EB1]" />
+                <Icon ssr={true} icon="mdi:arrow-right" className="w-5 h-5 text-[#109EB1]" />
             </div>
         </Link>
     );
@@ -140,7 +138,7 @@ export default function SpecialtyGrid() {
     return (
         <section className="pt-8">
             <div className="flex items-center gap-3 mb-6">
-                <Icon icon="mdi:view-grid" className="w-6 h-6 text-[#109EB1]" />
+                <Icon ssr={true} icon="mdi:view-grid" className="w-6 h-6 text-[#109EB1]" />
                 <h2 className="font-hebden text-2xl sm:text-3xl text-[#C7F4FA]">
                     Browse by Specialty
                 </h2>

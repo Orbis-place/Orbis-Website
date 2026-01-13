@@ -108,8 +108,7 @@ export function UserSearchCombobox({ onSelect, placeholder = "Search users...", 
   return (
     <div ref={containerRef} className="relative w-full">
       <div className="relative">
-        <Icon
-          icon="mdi:magnify"
+        <Icon ssr={true} icon="mdi:magnify"
           width="18"
           height="18"
           className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
@@ -129,8 +128,7 @@ export function UserSearchCombobox({ onSelect, placeholder = "Search users...", 
           className="pl-10 pr-10"
         />
         {loading && (
-          <Icon
-            icon="mdi:loading"
+          <Icon ssr={true} icon="mdi:loading"
             width="18"
             height="18"
             className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground animate-spin"
@@ -158,7 +156,7 @@ export function UserSearchCombobox({ onSelect, placeholder = "Search users...", 
                 {user.image ? (
                   <Image src={user.image} alt={user.username} width={40} height={40} className="rounded-full" />
                 ) : (
-                  <Icon icon="mdi:account" width="24" height="24" className="text-primary" />
+                  <Icon ssr={true} icon="mdi:account" width="24" height="24" className="text-primary" />
                 )}
               </div>
               <div className="flex-1 text-left min-w-0">
@@ -169,7 +167,7 @@ export function UserSearchCombobox({ onSelect, placeholder = "Search users...", 
               </div>
               {user.reputation > 0 && (
                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Icon icon="mdi:star" width="14" height="14" className="text-yellow-500" />
+                  <Icon ssr={true} icon="mdi:star" width="14" height="14" className="text-yellow-500" />
                   {user.reputation}
                 </div>
               )}

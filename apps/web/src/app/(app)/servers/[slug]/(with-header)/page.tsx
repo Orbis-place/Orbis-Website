@@ -24,7 +24,7 @@ export default function ServerDetailPage() {
                     {/* Server Description */}
                     <div className="bg-[#06363D]/50 border border-[#084B54] rounded-[20px] p-6">
                         <h3 className="font-hebden text-xl font-bold text-[#C7F4FA] mb-4 flex items-center gap-2">
-                            <Icon icon="mdi:information-outline" width="24" height="24" className="text-[#109EB1]" />
+                            <Icon ssr={true} icon="mdi:information-outline" width="24" height="24" className="text-[#109EB1]" />
                             About {server.name}
                         </h3>
                         <TiptapViewer content={server.description || 'No description available.'} />
@@ -35,7 +35,7 @@ export default function ServerDetailPage() {
                     {((server.categories && server.categories.length > 0) || (server.tags && server.tags.length > 0)) && (
                         <div className="bg-[#06363D]/50 border border-[#084B54] rounded-[20px] p-6">
                             <h3 className="font-hebden text-xl font-bold text-[#C7F4FA] mb-4 flex items-center gap-2">
-                                <Icon icon="mdi:tag-multiple" width="24" height="24" className="text-[#109EB1]" />
+                                <Icon ssr={true} icon="mdi:tag-multiple" width="24" height="24" className="text-[#109EB1]" />
                                 Categories & Tags
                             </h3>
                             <div className="space-y-4">
@@ -57,8 +57,7 @@ export default function ServerDetailPage() {
                                                     }}
                                                 >
                                                     {category.icon && (
-                                                        <Icon
-                                                            icon={category.icon}
+                                                        <Icon ssr={true} icon={category.icon}
                                                             width="18"
                                                             height="18"
                                                             style={{ color: category.color || '#109EB1' }}
@@ -107,7 +106,7 @@ export default function ServerDetailPage() {
                     {/* FAQ Accordion */}
                     <div className="bg-[#06363D]/50 border border-[#084B54] rounded-[20px] p-6">
                         <h3 className="font-hebden text-xl font-bold text-[#C7F4FA] mb-4 flex items-center gap-2">
-                            <Icon icon="mdi:help-circle-outline" width="24" height="24" className="text-[#109EB1]" />
+                            <Icon ssr={true} icon="mdi:help-circle-outline" width="24" height="24" className="text-[#109EB1]" />
                             Frequently Asked Questions
                         </h3>
                         <Accordion type="single" collapsible defaultValue="item-1" className="w-full">
@@ -184,7 +183,7 @@ export default function ServerDetailPage() {
                     {/* Server Information Table */}
                     <div className="bg-[#06363D]/50 border border-[#084B54] rounded-[20px] p-6">
                         <h3 className="font-hebden text-xl font-bold text-[#C7F4FA] mb-4 flex items-center gap-2">
-                            <Icon icon="mdi:server" width="24" height="24" className="text-[#109EB1]" />
+                            <Icon ssr={true} icon="mdi:server" width="24" height="24" className="text-[#109EB1]" />
                             Server Information
                         </h3>
                         <table className="w-full text-sm">
@@ -208,7 +207,7 @@ export default function ServerDetailPage() {
                                                 className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#109EB1] text-white rounded-lg hover:bg-[#0d8a9c] transition-all duration-200 font-medium text-sm"
                                             >
                                                 Visit
-                                                <Icon icon="mdi:open-in-new" width="16" height="16" />
+                                                <Icon ssr={true} icon="mdi:open-in-new" width="16" height="16" />
                                             </a>
                                         </td>
                                     </tr>
@@ -231,7 +230,7 @@ export default function ServerDetailPage() {
                                     <tr className="border-b border-[#084B54]">
                                         <th className="text-left py-3 font-hebden font-medium text-[#C7F4FA]/60">Verified</th>
                                         <td className="text-right py-3 font-nunito">
-                                            <Icon icon="mdi:check-decagram" width="20" height="20" className="text-[#109EB1] inline" />
+                                            <Icon ssr={true} icon="mdi:check-decagram" width="20" height="20" className="text-[#109EB1] inline" />
                                         </td>
                                     </tr>
                                 )}
@@ -243,7 +242,7 @@ export default function ServerDetailPage() {
                     {(server.websiteUrl || server.discordUrl || server.youtubeUrl || server.twitterUrl || server.tiktokUrl) && (
                         <div className="bg-[#06363D]/50 border border-[#084B54] rounded-[20px] p-6">
                             <h3 className="font-hebden text-xl font-bold text-[#C7F4FA] mb-4 flex items-center gap-2">
-                                <Icon icon="mdi:link-variant" width="24" height="24" className="text-[#109EB1]" />
+                                <Icon ssr={true} icon="mdi:link-variant" width="24" height="24" className="text-[#109EB1]" />
                                 Social Links
                             </h3>
                             <div className="grid grid-cols-2 gap-3">
@@ -254,7 +253,7 @@ export default function ServerDetailPage() {
                                         rel="noopener noreferrer"
                                         className="flex items-center justify-center gap-2 px-4 py-3 bg-[#084B54] border border-[#084B54] rounded-lg hover:bg-[#109EB1]/10 hover:border-[#109EB1] transition-all text-[#C7F4FA]"
                                     >
-                                        <Icon icon="ic:baseline-discord" width="20" height="20" />
+                                        <Icon ssr={true} icon="ic:baseline-discord" width="20" height="20" />
                                         <span className="font-nunito text-sm">Discord</span>
                                     </a>
                                 )}
@@ -265,7 +264,7 @@ export default function ServerDetailPage() {
                                         rel="noopener noreferrer"
                                         className="flex items-center justify-center gap-2 px-4 py-3 bg-[#084B54] border border-[#084B54] rounded-lg hover:bg-[#109EB1]/10 hover:border-[#109EB1] transition-all text-[#C7F4FA]"
                                     >
-                                        <Icon icon="mdi:youtube" width="20" height="20" />
+                                        <Icon ssr={true} icon="mdi:youtube" width="20" height="20" />
                                         <span className="font-nunito text-sm">YouTube</span>
                                     </a>
                                 )}
@@ -276,7 +275,7 @@ export default function ServerDetailPage() {
                                         rel="noopener noreferrer"
                                         className="flex items-center justify-center gap-2 px-4 py-3 bg-[#084B54] border border-[#084B54] rounded-lg hover:bg-[#109EB1]/10 hover:border-[#109EB1] transition-all text-[#C7F4FA]"
                                     >
-                                        <Icon icon="mdi:twitter" width="20" height="20" />
+                                        <Icon ssr={true} icon="mdi:twitter" width="20" height="20" />
                                         <span className="font-nunito text-sm">Twitter</span>
                                     </a>
                                 )}
@@ -287,7 +286,7 @@ export default function ServerDetailPage() {
                                         rel="noopener noreferrer"
                                         className="flex items-center justify-center gap-2 px-4 py-3 bg-[#084B54] border border-[#084B54] rounded-lg hover:bg-[#109EB1]/10 hover:border-[#109EB1] transition-all text-[#C7F4FA]"
                                     >
-                                        <Icon icon="ic:baseline-tiktok" width="20" height="20" />
+                                        <Icon ssr={true} icon="ic:baseline-tiktok" width="20" height="20" />
                                         <span className="font-nunito text-sm">TikTok</span>
                                     </a>
                                 )}
@@ -298,7 +297,7 @@ export default function ServerDetailPage() {
                     {/* Share Section */}
                     <div className="bg-[#06363D]/50 border border-[#084B54] rounded-[20px] p-6">
                         <h3 className="font-hebden text-xl font-bold text-[#C7F4FA] mb-4 flex items-center gap-2">
-                            <Icon icon="mdi:share-variant" width="24" height="24" className="text-[#109EB1]" />
+                            <Icon ssr={true} icon="mdi:share-variant" width="24" height="24" className="text-[#109EB1]" />
                             Share Server
                         </h3>
                         <div className="space-y-3">

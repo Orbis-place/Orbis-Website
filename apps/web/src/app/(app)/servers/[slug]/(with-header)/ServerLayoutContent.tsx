@@ -71,7 +71,7 @@ export default function ServerLayoutContent({ children }: { children: ReactNode 
         return (
             <div className="max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-4 py-6 sm:py-8">
                 <div className="flex items-center justify-center min-h-screen">
-                    <Icon icon="mdi:loading" className="animate-spin text-primary" width="40" height="40" />
+                    <Icon ssr={true} icon="mdi:loading" className="animate-spin text-primary" width="40" height="40" />
                 </div>
             </div>
         );
@@ -115,8 +115,7 @@ export default function ServerLayoutContent({ children }: { children: ReactNode 
                                     }}
                                 >
                                     {primaryCategory.icon && (
-                                        <Icon
-                                            icon={primaryCategory.icon}
+                                        <Icon ssr={true} icon={primaryCategory.icon}
                                             width="18"
                                             height="18"
                                             style={{ color: primaryCategory.color || '#109EB1' }}
@@ -165,7 +164,7 @@ export default function ServerLayoutContent({ children }: { children: ReactNode 
                                 onClick={handleVote}
                                 className="flex items-center justify-center gap-3 px-6 py-3 bg-[#109EB1] hover:bg-[#0D8A9A] rounded-full font-hebden font-extrabold text-base text-[#C7F4FA] transition-all shadow-lg"
                             >
-                                <Icon icon="mdi:vote" width="20" height="20" />
+                                <Icon ssr={true} icon="mdi:vote" width="20" height="20" />
                                 <span>Vote</span>
                             </button>
 
@@ -173,7 +172,7 @@ export default function ServerLayoutContent({ children }: { children: ReactNode 
                                 onClick={handleCopyIP}
                                 className="flex items-center justify-center gap-3 px-6 py-3 bg-[#06363D] hover:bg-[#084B54] border border-[#084B54] rounded-full font-hebden font-bold text-base text-[#C7F4FA] transition-all"
                             >
-                                <Icon icon="mdi:content-copy" width="18" height="18" />
+                                <Icon ssr={true} icon="mdi:content-copy" width="18" height="18" />
                                 <span>{copiedIP ? 'Copied!' : 'Copy IP'}</span>
                             </button>
 
@@ -182,7 +181,7 @@ export default function ServerLayoutContent({ children }: { children: ReactNode 
                                     onClick={() => router.push(`/servers/${server.slug}/manage`)}
                                     className="flex items-center justify-center gap-3 px-6 py-3 bg-[#06363D] hover:bg-[#084B54] border border-[#084B54] rounded-full font-hebden font-bold text-base text-[#C7F4FA] transition-all"
                                 >
-                                    <Icon icon="mdi:cog" width="20" height="20" />
+                                    <Icon ssr={true} icon="mdi:cog" width="20" height="20" />
                                     <span>Manage</span>
                                 </button>
                             )}
@@ -239,14 +238,14 @@ export default function ServerLayoutContent({ children }: { children: ReactNode 
                         <span className="text-[#109EB1] font-semibold">@{server.slug}</span>
                         <span>•</span>
                         <span className="flex items-center gap-1.5">
-                            <Icon icon="mdi:calendar" className="w-4 h-4" />
+                            <Icon ssr={true} icon="mdi:calendar" className="w-4 h-4" />
                             Created {formatDate(server.createdAt)}
                         </span>
                         {server.gameVersion && (
                             <>
                                 <span>•</span>
                                 <span className="flex items-center gap-1.5">
-                                    <Icon icon="mdi:minecraft" className="w-4 h-4" />
+                                    <Icon ssr={true} icon="mdi:minecraft" className="w-4 h-4" />
                                     {server.gameVersion}
                                 </span>
                             </>
@@ -255,7 +254,7 @@ export default function ServerLayoutContent({ children }: { children: ReactNode 
                             <>
                                 <span>•</span>
                                 <span className="flex items-center gap-1.5">
-                                    <Icon icon="mdi:server-network" className="w-4 h-4" />
+                                    <Icon ssr={true} icon="mdi:server-network" className="w-4 h-4" />
                                     {server.serverIp}:{server.port}
                                 </span>
                             </>
@@ -300,7 +299,7 @@ export default function ServerLayoutContent({ children }: { children: ReactNode 
                             onClick={handleVote}
                             className="flex-1 flex items-center justify-center gap-3 px-6 py-3 bg-[#109EB1] hover:bg-[#0D8A9A] rounded-full font-hebden font-extrabold text-base text-[#C7F4FA] transition-all shadow-lg"
                         >
-                            <Icon icon="mdi:vote" width="20" height="20" />
+                            <Icon ssr={true} icon="mdi:vote" width="20" height="20" />
                             <span>Vote for Server</span>
                         </button>
 
@@ -308,7 +307,7 @@ export default function ServerLayoutContent({ children }: { children: ReactNode 
                             onClick={handleCopyIP}
                             className="flex-1 flex items-center justify-center gap-3 px-6 py-3 bg-[#06363D] hover:bg-[#084B54] border border-[#084B54] rounded-full font-hebden font-bold text-base text-[#C7F4FA] transition-all"
                         >
-                            <Icon icon="mdi:content-copy" width="18" height="18" />
+                            <Icon ssr={true} icon="mdi:content-copy" width="18" height="18" />
                             <span>{copiedIP ? 'Copied!' : 'Copy IP'}</span>
                         </button>
 
@@ -317,7 +316,7 @@ export default function ServerLayoutContent({ children }: { children: ReactNode 
                                 onClick={() => router.push(`/servers/${server.slug}/manage`)}
                                 className="flex-1 flex items-center justify-center gap-3 px-6 py-3 bg-[#06363D] hover:bg-[#084B54] border border-[#084B54] rounded-full font-hebden font-bold text-base text-[#C7F4FA] transition-all"
                             >
-                                <Icon icon="mdi:cog" width="20" height="20" />
+                                <Icon ssr={true} icon="mdi:cog" width="20" height="20" />
                                 <span>Manage</span>
                             </button>
                         )}

@@ -54,8 +54,7 @@ export function HowDonationsWork() {
                                         ? 'bg-[#109EB1]/30'
                                         : 'bg-[#06363D] border border-[#084B54]'
                                     }`}>
-                                    <Icon
-                                        icon={step.icon}
+                                    <Icon ssr={true} icon={step.icon}
                                         className={`w-10 h-10 ${step.number === 3 ? 'text-[#109EB1]' : 'text-[#C7F4FA]/80'
                                             }`}
                                     />
@@ -72,8 +71,7 @@ export function HowDonationsWork() {
 
                             {/* Arrow (not after last item) */}
                             {index < steps.length - 1 && (
-                                <Icon
-                                    icon="mdi:arrow-right"
+                                <Icon ssr={true} icon="mdi:arrow-right"
                                     className="w-6 h-6 text-[#C7F4FA]/30 hidden md:block mx-4"
                                 />
                             )}
@@ -88,7 +86,7 @@ export function HowDonationsWork() {
                     </p>
 
                     <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#109EB1]/10 rounded-full">
-                        <Icon icon="mdi:heart" className="w-5 h-5 text-[#109EB1]" />
+                        <Icon ssr={true} icon="mdi:heart" className="w-5 h-5 text-[#109EB1]" />
                         <span className="font-nunito text-sm text-[#C7F4FA]">
                             100% of tips go to creators. Orbis takes nothing.
                         </span>

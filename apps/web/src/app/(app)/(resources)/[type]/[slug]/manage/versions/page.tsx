@@ -506,7 +506,7 @@ export default function ManageVersionsPage() {
     if (loading && !versions.length) {
         return (
             <div className="flex items-center justify-center py-12">
-                <Icon icon="mdi:loading" width="48" height="48" className="text-primary animate-spin" />
+                <Icon ssr={true} icon="mdi:loading" width="48" height="48" className="text-primary animate-spin" />
             </div>
         );
     }
@@ -523,7 +523,7 @@ export default function ManageVersionsPage() {
                 </div>
 
                 <Button onClick={() => setIsCreateOpen(true)} className="font-hebden">
-                    <Icon icon="mdi:plus" width="20" height="20" />
+                    <Icon ssr={true} icon="mdi:plus" width="20" height="20" />
                     New Version
                 </Button>
             </div>
@@ -533,14 +533,14 @@ export default function ManageVersionsPage() {
                 {versions.length === 0 ? (
                     <div className="bg-secondary/30 rounded-lg p-12 text-center">
                         <div className="bg-secondary p-4 rounded-full mb-4 inline-block">
-                            <Icon icon="mdi:tag-multiple" width="48" height="48" className="text-muted-foreground" />
+                            <Icon ssr={true} icon="mdi:tag-multiple" width="48" height="48" className="text-muted-foreground" />
                         </div>
                         <p className="text-foreground font-nunito text-lg mb-2">No versions yet</p>
                         <p className="text-muted-foreground font-nunito text-sm mb-6 max-w-md mx-auto">
                             Create your first version to start publishing your resource
                         </p>
                         <Button onClick={() => setIsCreateOpen(true)} className="font-hebden">
-                            <Icon icon="mdi:plus" width="20" height="20" />
+                            <Icon ssr={true} icon="mdi:plus" width="20" height="20" />
                             Create First Version
                         </Button>
                     </div>
@@ -554,8 +554,7 @@ export default function ManageVersionsPage() {
                                         onClick={() => toggleVersionExpanded(version.id)}
                                         className="p-1 hover:bg-secondary/50 rounded transition-colors"
                                     >
-                                        <Icon
-                                            icon={expandedVersions.has(version.id) ? 'mdi:chevron-down' : 'mdi:chevron-right'}
+                                        <Icon ssr={true} icon={expandedVersions.has(version.id) ? 'mdi:chevron-down' : 'mdi:chevron-right'}
                                             width="24"
                                             height="24"
                                             className="text-muted-foreground"
@@ -576,18 +575,18 @@ export default function ManageVersionsPage() {
                                                 {version.channel}
                                             </Badge>
                                             <Badge variant="outline" className={getStatusColor(version.status)}>
-                                                <Icon icon={getStatusIcon(version.status)} width="14" height="14" className="mr-1" />
+                                                <Icon ssr={true} icon={getStatusIcon(version.status)} width="14" height="14" className="mr-1" />
                                                 {version.status}
                                             </Badge>
                                         </div>
 
                                         <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground font-nunito">
                                             <span className="flex items-center gap-1">
-                                                <Icon icon="mdi:download" width="14" height="14" />
+                                                <Icon ssr={true} icon="mdi:download" width="14" height="14" />
                                                 {version.downloadCount} downloads
                                             </span>
                                             <span className="flex items-center gap-1">
-                                                <Icon icon="mdi:file-multiple" width="14" height="14" />
+                                                <Icon ssr={true} icon="mdi:file-multiple" width="14" height="14" />
                                                 {version.files.length} file{version.files.length !== 1 ? 's' : ''}
                                             </span>
                                             <span>Created {formatDate(version.createdAt)}</span>
@@ -597,7 +596,7 @@ export default function ManageVersionsPage() {
                                         {version.status === 'REJECTED' && version.rejectionReason && (
                                             <div className="mt-2 p-2 bg-red-500/10 border border-red-500/20 rounded-md">
                                                 <p className="text-sm text-red-400 font-nunito">
-                                                    <Icon icon="mdi:alert-circle" width="14" height="14" className="inline mr-1" />
+                                                    <Icon ssr={true} icon="mdi:alert-circle" width="14" height="14" className="inline mr-1" />
                                                     <strong>Rejection reason:</strong> {version.rejectionReason}
                                                 </p>
                                             </div>
@@ -642,7 +641,7 @@ export default function ManageVersionsPage() {
                                                 });
                                             }}
                                         >
-                                            <Icon icon="mdi:pencil" width="16" height="16" />
+                                            <Icon ssr={true} icon="mdi:pencil" width="16" height="16" />
                                         </Button>
                                     )}
 
@@ -690,7 +689,7 @@ export default function ManageVersionsPage() {
                                                         setChangelogText(version.changelog || '');
                                                     }}
                                                 >
-                                                    <Icon icon="mdi:pencil" width="14" height="14" className="mr-1" />
+                                                    <Icon ssr={true} icon="mdi:pencil" width="14" height="14" className="mr-1" />
                                                     Edit
                                                 </Button>
                                             )}
@@ -712,7 +711,7 @@ export default function ManageVersionsPage() {
                                                         disabled={savingChangelog}
                                                     >
                                                         {savingChangelog ? (
-                                                            <Icon icon="mdi:loading" width="16" height="16" className="animate-spin mr-1" />
+                                                            <Icon ssr={true} icon="mdi:loading" width="16" height="16" className="animate-spin mr-1" />
                                                         ) : (
                                                             <Check className="w-4 h-4 mr-1" />
                                                         )}
@@ -766,7 +765,7 @@ export default function ManageVersionsPage() {
                                                         disabled={uploading}
                                                     >
                                                         {uploading ? (
-                                                            <Icon icon="mdi:loading" width="14" height="14" className="animate-spin mr-1" />
+                                                            <Icon ssr={true} icon="mdi:loading" width="14" height="14" className="animate-spin mr-1" />
                                                         ) : (
                                                             <Upload className="w-4 h-4 mr-1" />
                                                         )}

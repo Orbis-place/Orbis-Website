@@ -30,7 +30,7 @@ export function HytaleDedicated() {
                 {/* Content Types Grid */}
                 <div className="bg-[#06363D] border border-[#084B54] rounded-2xl p-8 text-center">
                     <div className="flex items-center justify-center gap-2 mb-6">
-                        <Icon icon="mdi:gamepad-variant" className="w-6 h-6 text-[#109EB1]" />
+                        <Icon ssr={true} icon="mdi:gamepad-variant" className="w-6 h-6 text-[#109EB1]" />
                         <span className="font-hebden font-semibold text-lg text-[#C7F4FA]">Hytale Compatible</span>
                     </div>
                     <p className="font-nunito text-[#C7F4FA]/70 mb-8">
@@ -43,7 +43,7 @@ export function HytaleDedicated() {
                                 key={type.name}
                                 className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#032125] border border-[#084B54] rounded-full hover:border-[#109EB1] transition-colors"
                             >
-                                <Icon icon={type.icon} className="w-4 h-4 text-[#109EB1]" />
+                                <Icon ssr={true} icon={type.icon} className="w-4 h-4 text-[#109EB1]" />
                                 <span className="font-nunito text-sm text-[#C7F4FA]">{type.name}</span>
                             </div>
                         ))}

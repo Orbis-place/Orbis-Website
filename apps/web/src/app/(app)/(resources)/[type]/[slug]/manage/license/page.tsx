@@ -138,7 +138,7 @@ export default function ManageLicensePage() {
     if (loading) {
         return (
             <div className="flex items-center justify-center py-12">
-                <Icon icon="mdi:loading" width="48" height="48" className="text-[#109EB1] animate-spin" />
+                <Icon ssr={true} icon="mdi:loading" width="48" height="48" className="text-[#109EB1] animate-spin" />
             </div>
         );
     }
@@ -228,12 +228,12 @@ export default function ManageLicensePage() {
                 >
                     {saving ? (
                         <>
-                            <Icon icon="mdi:loading" width="20" height="20" className="animate-spin mr-2" />
+                            <Icon ssr={true} icon="mdi:loading" width="20" height="20" className="animate-spin mr-2" />
                             Saving Changes...
                         </>
                     ) : (
                         <>
-                            <Icon icon="mdi:check" width="20" height="20" className="mr-2" />
+                            <Icon ssr={true} icon="mdi:check" width="20" height="20" className="mr-2" />
                             Save Changes
                         </>
                     )}

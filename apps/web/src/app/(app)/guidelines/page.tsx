@@ -31,7 +31,7 @@ export default function CommunityGuidelines() {
                     <section>
                         <div className="flex items-center gap-4 mb-4">
                             <div className="w-12 h-12 rounded-full bg-[#109EB1]/20 flex items-center justify-center">
-                                <Icon icon="mdi:account-heart" width="24" height="24" className="text-[#109EB1]" />
+                                <Icon ssr={true} icon="mdi:account-heart" width="24" height="24" className="text-[#109EB1]" />
                             </div>
                             <h2 className="font-hebden text-2xl font-semibold text-[#109EB1]">
                                 Be Respectful and Inclusive
@@ -60,7 +60,7 @@ export default function CommunityGuidelines() {
                     <section>
                         <div className="flex items-center gap-4 mb-4">
                             <div className="w-12 h-12 rounded-full bg-[#109EB1]/20 flex items-center justify-center">
-                                <Icon icon="mdi:star-check" width="24" height="24" className="text-[#109EB1]" />
+                                <Icon ssr={true} icon="mdi:star-check" width="24" height="24" className="text-[#109EB1]" />
                             </div>
                             <h2 className="font-hebden text-2xl font-semibold text-[#109EB1]">
                                 Create Quality Content
@@ -89,7 +89,7 @@ export default function CommunityGuidelines() {
                     <section>
                         <div className="flex items-center gap-4 mb-4">
                             <div className="w-12 h-12 rounded-full bg-[#109EB1]/20 flex items-center justify-center">
-                                <Icon icon="mdi:copyright" width="24" height="24" className="text-[#109EB1]" />
+                                <Icon ssr={true} icon="mdi:copyright" width="24" height="24" className="text-[#109EB1]" />
                             </div>
                             <h2 className="font-hebden text-2xl font-semibold text-[#109EB1]">
                                 Respect Intellectual Property
@@ -123,7 +123,7 @@ export default function CommunityGuidelines() {
                     <section>
                         <div className="flex items-center gap-4 mb-4">
                             <div className="w-12 h-12 rounded-full bg-[#109EB1]/20 flex items-center justify-center">
-                                <Icon icon="mdi:shield-check" width="24" height="24" className="text-[#109EB1]" />
+                                <Icon ssr={true} icon="mdi:shield-check" width="24" height="24" className="text-[#109EB1]" />
                             </div>
                             <h2 className="font-hebden text-2xl font-semibold text-[#109EB1]">
                                 Keep Content Safe
@@ -152,7 +152,7 @@ export default function CommunityGuidelines() {
                     <section>
                         <div className="flex items-center gap-4 mb-4">
                             <div className="w-12 h-12 rounded-full bg-[#109EB1]/20 flex items-center justify-center">
-                                <Icon icon="mdi:server-network" width="24" height="24" className="text-[#109EB1]" />
+                                <Icon ssr={true} icon="mdi:server-network" width="24" height="24" className="text-[#109EB1]" />
                             </div>
                             <h2 className="font-hebden text-2xl font-semibold text-[#109EB1]">
                                 Server Listing Guidelines
@@ -181,7 +181,7 @@ export default function CommunityGuidelines() {
                     <section>
                         <div className="flex items-center gap-4 mb-4">
                             <div className="w-12 h-12 rounded-full bg-[#109EB1]/20 flex items-center justify-center">
-                                <Icon icon="mdi:flag" width="24" height="24" className="text-[#109EB1]" />
+                                <Icon ssr={true} icon="mdi:flag" width="24" height="24" className="text-[#109EB1]" />
                             </div>
                             <h2 className="font-hebden text-2xl font-semibold text-[#109EB1]">
                                 Reporting Violations
@@ -209,7 +209,7 @@ export default function CommunityGuidelines() {
                     <section>
                         <div className="flex items-center gap-4 mb-4">
                             <div className="w-12 h-12 rounded-full bg-[#109EB1]/20 flex items-center justify-center">
-                                <Icon icon="mdi:gavel" width="24" height="24" className="text-[#109EB1]" />
+                                <Icon ssr={true} icon="mdi:gavel" width="24" height="24" className="text-[#109EB1]" />
                             </div>
                             <h2 className="font-hebden text-2xl font-semibold text-[#109EB1]">
                                 Enforcement
@@ -269,7 +269,7 @@ export default function CommunityGuidelines() {
                         href="/"
                         className="inline-flex items-center gap-2 px-6 py-3 bg-[#109EB1] hover:bg-[#0D8A9A] rounded-full font-hebden font-bold text-base text-[#C7F4FA] transition-all shadow-lg"
                     >
-                        <Icon icon="mdi:arrow-left" width="20" height="20" />
+                        <Icon ssr={true} icon="mdi:arrow-left" width="20" height="20" />
                         Back to Home
                     </Link>
                 </div>

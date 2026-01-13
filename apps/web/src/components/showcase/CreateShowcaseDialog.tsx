@@ -175,7 +175,7 @@ export default function CreateShowcaseDialog({ isOpen, onClose }: CreateShowcase
             {step === 'uploading' ? (
                 <div className="py-12 space-y-6">
                     <div className="text-center">
-                        <Icon icon="mdi:cloud-upload-outline" className="text-6xl text-[#109EB1] mx-auto mb-4" />
+                        <Icon ssr={true} icon="mdi:cloud-upload-outline" className="text-6xl text-[#109EB1] mx-auto mb-4" />
                         <h3 className="font-hebden text-lg text-[#C7F4FA]">Uploading your showcase...</h3>
                         <p className="text-[#C7F4FA]/60 font-nunito text-sm mt-2">
                             Please wait while we upload your files
@@ -231,7 +231,7 @@ export default function CreateShowcaseDialog({ isOpen, onClose }: CreateShowcase
                                         }`}
                                     style={category === key ? { backgroundColor: info.color } : {}}
                                 >
-                                    <Icon icon={info.icon} />
+                                    <Icon ssr={true} icon={info.icon} />
                                     {info.label}
                                 </button>
                             ))}
@@ -263,7 +263,7 @@ export default function CreateShowcaseDialog({ isOpen, onClose }: CreateShowcase
                             onClick={() => fileInputRef.current?.click()}
                             className="border-2 border-dashed border-[#109EB1]/30 rounded-xl p-8 text-center cursor-pointer hover:border-[#109EB1]/50 hover:bg-[#109EB1]/5 transition-all"
                         >
-                            <Icon icon="mdi:cloud-upload-outline" className="text-4xl text-[#109EB1] mx-auto mb-3" />
+                            <Icon ssr={true} icon="mdi:cloud-upload-outline" className="text-4xl text-[#109EB1] mx-auto mb-3" />
                             <p className="font-nunito text-[#C7F4FA]">
                                 Click to upload or drag and drop
                             </p>
@@ -295,7 +295,7 @@ export default function CreateShowcaseDialog({ isOpen, onClose }: CreateShowcase
                                             onClick={() => removeFile(index)}
                                             className="absolute top-1 right-1 w-6 h-6 rounded-full bg-red-500 flex items-center justify-center text-white hover:bg-red-600 transition-colors"
                                         >
-                                            <Icon icon="mdi:close" className="text-sm" />
+                                            <Icon ssr={true} icon="mdi:close" className="text-sm" />
                                         </button>
                                     </div>
                                 ))}
@@ -317,7 +317,7 @@ export default function CreateShowcaseDialog({ isOpen, onClose }: CreateShowcase
                             disabled={isSubmitting || !title.trim() || files.length === 0}
                             className="px-6 py-2 bg-[#109EB1] text-white rounded-lg font-nunito font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#109EB1]/80 transition-colors flex items-center gap-2"
                         >
-                            <Icon icon="mdi:upload" />
+                            <Icon ssr={true} icon="mdi:upload" />
                             Publish
                         </button>
                     </div>

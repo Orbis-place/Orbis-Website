@@ -134,7 +134,7 @@ export function CreateTeamDialog({ open, onOpenChange, trigger, onSuccess }: Cre
                             disabled={!formData.displayName}
                             className="text-xs text-primary hover:text-primary/80 disabled:text-muted-foreground disabled:cursor-not-allowed font-nunito"
                         >
-                            <Icon icon="mdi:auto-fix" width="14" height="14" className="inline mr-1" />
+                            <Icon ssr={true} icon="mdi:auto-fix" width="14" height="14" className="inline mr-1" />
                             Generate from name
                         </button>
                     </div>

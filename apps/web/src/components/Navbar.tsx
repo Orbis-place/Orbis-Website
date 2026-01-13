@@ -122,7 +122,7 @@ export default function Navbar({ session }: NavbarProps) {
                                                     className="flex flex-row items-center gap-2 select-none rounded-lg p-2 leading-none no-underline outline-none transition-colors hover:bg-white/5 hover:text-foreground focus:bg-white/5 focus:text-foreground"
                                                 >
                                                     <div className="p-1.5 rounded-lg bg-[#109EB1]/10 shrink-0 text-[#109EB1]">
-                                                        <Icon icon="mdi:compass" width="18" height="18" />
+                                                        <Icon ssr={true} icon="mdi:compass" width="18" height="18" />
                                                     </div>
                                                     <div className="flex flex-col gap-0.5">
                                                         <span className="font-hebden font-semibold text-foreground text-sm">Resources</span>
@@ -136,7 +136,7 @@ export default function Navbar({ session }: NavbarProps) {
                                                     className="flex flex-row items-center gap-2 select-none rounded-lg p-2 leading-none no-underline outline-none transition-colors hover:bg-white/5 hover:text-foreground focus:bg-white/5 focus:text-foreground"
                                                 >
                                                     <div className="p-1.5 rounded-lg bg-[#109EB1]/10 shrink-0 text-[#109EB1]">
-                                                        <Icon icon="mdi:server" width="16" height="16" />
+                                                        <Icon ssr={true} icon="mdi:server" width="16" height="16" />
                                                     </div>
                                                     <div className="flex flex-col gap-0.5">
                                                         <span className="font-hebden font-semibold text-foreground text-sm">Find Servers</span>
@@ -150,7 +150,7 @@ export default function Navbar({ session }: NavbarProps) {
                                                     className="flex flex-row items-center gap-2 select-none rounded-lg p-2 leading-none no-underline outline-none transition-colors hover:bg-white/5 hover:text-foreground focus:bg-white/5 focus:text-foreground"
                                                 >
                                                     <div className="p-1.5 rounded-lg bg-[#109EB1]/10 shrink-0 text-[#109EB1]">
-                                                        <Icon icon="mdi:account-group" width="16" height="16" />
+                                                        <Icon ssr={true} icon="mdi:account-group" width="16" height="16" />
                                                     </div>
                                                     <div className="flex flex-col gap-0.5">
                                                         <span className="font-hebden font-semibold text-foreground text-sm">Creators</span>
@@ -164,7 +164,7 @@ export default function Navbar({ session }: NavbarProps) {
                                                     className="flex flex-row items-center gap-2 select-none rounded-lg p-2 leading-none no-underline outline-none transition-colors hover:bg-white/5 hover:text-foreground focus:bg-white/5 focus:text-foreground"
                                                 >
                                                     <div className="p-1.5 rounded-lg bg-[#109EB1]/10 shrink-0 text-[#109EB1]">
-                                                        <Icon icon="mdi:image-multiple" width="16" height="16" />
+                                                        <Icon ssr={true} icon="mdi:image-multiple" width="16" height="16" />
                                                     </div>
                                                     <div className="flex flex-col gap-0.5">
                                                         <span className="font-hebden font-semibold text-foreground text-sm">Showcase</span>
@@ -198,7 +198,7 @@ export default function Navbar({ session }: NavbarProps) {
                                                         className="flex flex-row items-start gap-2 select-none rounded-lg p-2 leading-none no-underline outline-none transition-colors hover:bg-white/5 hover:text-foreground focus:bg-white/5 focus:text-foreground"
                                                     >
                                                         <div className="p-1.5 rounded-lg bg-[#109EB1]/10 shrink-0 text-[#109EB1]">
-                                                            <Icon icon={category.icon} width="18" height="18" />
+                                                            <Icon ssr={true} icon={category.icon} width="18" height="18" />
                                                         </div>
                                                         <div className="flex flex-col gap-0.5">
                                                             <span className="font-hebden font-semibold text-foreground text-sm">{category.name}</span>
@@ -225,9 +225,8 @@ export default function Navbar({ session }: NavbarProps) {
                             {/* Create Menu */}
                             <DropdownMenu>
                                 <DropdownMenuTrigger className="flex items-center gap-1 px-3 py-2 rounded-lg hover:bg-accent transition-colors outline-none group">
-                                    <Icon icon="mdi:plus" width="20" height="20" className="text-foreground" />
-                                    <Icon
-                                        icon="eva:arrow-down-fill"
+                                    <Icon ssr={true} icon="mdi:plus" width="20" height="20" className="text-foreground" />
+                                    <Icon ssr={true} icon="eva:arrow-down-fill"
                                         width="16"
                                         height="16"
                                         className="transition duration-300 group-data-[state=open]:rotate-180"
@@ -244,7 +243,7 @@ export default function Navbar({ session }: NavbarProps) {
                                     >
                                         <div className="flex items-center gap-2 w-full">
                                             <div className="p-1.5 rounded-lg bg-primary/10 shrink-0">
-                                                <Icon icon="mdi:package-variant-plus" width="16" height="16" className="text-primary" />
+                                                <Icon ssr={true} icon="mdi:package-variant-plus" width="16" height="16" className="text-primary" />
                                             </div>
                                             <div className="flex flex-col">
                                                 <span className="font-semibold">New Resource</span>
@@ -258,7 +257,7 @@ export default function Navbar({ session }: NavbarProps) {
                                     >
                                         <div className="flex items-center gap-2 w-full">
                                             <div className="p-1.5 rounded-lg bg-[#109EB1]/10 shrink-0">
-                                                <Icon icon="mdi:server-plus" width="16" height="16" className="text-[#109EB1]" />
+                                                <Icon ssr={true} icon="mdi:server-plus" width="16" height="16" className="text-[#109EB1]" />
                                             </div>
                                             <div className="flex flex-col">
                                                 <span className="font-semibold">Add Server</span>
@@ -272,7 +271,7 @@ export default function Navbar({ session }: NavbarProps) {
                                     >
                                         <div className="flex items-center gap-2 w-full">
                                             <div className="p-1.5 rounded-lg bg-[#109EB1]/10 shrink-0">
-                                                <Icon icon="mdi:account-group-outline" width="16" height="16" className="text-[#109EB1]" />
+                                                <Icon ssr={true} icon="mdi:account-group-outline" width="16" height="16" className="text-[#109EB1]" />
                                             </div>
                                             <div className="flex flex-col">
                                                 <span className="font-semibold">New Team</span>
@@ -286,7 +285,7 @@ export default function Navbar({ session }: NavbarProps) {
                                     >
                                         <div className="flex items-center gap-2 w-full">
                                             <div className="p-1.5 rounded-lg bg-[#109EB1]/10 shrink-0">
-                                                <Icon icon="mdi:image-plus" width="16" height="16" className="text-[#109EB1]" />
+                                                <Icon ssr={true} icon="mdi:image-plus" width="16" height="16" className="text-[#109EB1]" />
                                             </div>
                                             <div className="flex flex-col">
                                                 <span className="font-semibold">Showcase Post</span>
@@ -311,8 +310,7 @@ export default function Navbar({ session }: NavbarProps) {
                                     <span className="font-hebden text-base text-foreground hidden xl:block">
                                         {session.user.name || session.user.email}
                                     </span>
-                                    <Icon
-                                        icon="eva:arrow-down-fill"
+                                    <Icon ssr={true} icon="eva:arrow-down-fill"
                                         className="relative top-[1px] ml-1 transition duration-300 group-data-[state=open]:rotate-180"
                                         aria-hidden="true"
                                     />
@@ -325,28 +323,28 @@ export default function Navbar({ session }: NavbarProps) {
                                     <DropdownMenuItem asChild className="text-foreground cursor-pointer">
                                         <Link href={`/user/${session.user.name}`}
                                             className="flex items-center gap-2 w-full px-2 py-2">
-                                            <Icon icon="mdi:account" width="16" height="16" className="text-current" />
+                                            <Icon ssr={true} icon="mdi:account" width="16" height="16" className="text-current" />
                                             Profile
                                         </Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem asChild className="text-foreground cursor-pointer">
                                         <Link href="/dashboard/reports"
                                             className="flex items-center gap-2 w-full px-2 py-2">
-                                            <Icon icon="mdi:flag" width="16" height="16" className="text-current" />
+                                            <Icon ssr={true} icon="mdi:flag" width="16" height="16" className="text-current" />
                                             My Reports
                                         </Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem asChild className="text-foreground cursor-pointer">
                                         <Link href="/dashboard/notifications"
                                             className="flex items-center gap-2 w-full px-2 py-2">
-                                            <Icon icon="mdi:bell" width="16" height="16" className="text-current" />
+                                            <Icon ssr={true} icon="mdi:bell" width="16" height="16" className="text-current" />
                                             Notifications
                                         </Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem asChild className="text-foreground cursor-pointer">
                                         <Link href="/dashboard/collections"
                                             className="flex items-center gap-2 w-full px-2 py-2">
-                                            <Icon icon="mdi:folder-multiple" width="16" height="16" className="text-current" />
+                                            <Icon ssr={true} icon="mdi:folder-multiple" width="16" height="16" className="text-current" />
                                             Collections
                                         </Link>
                                     </DropdownMenuItem>
@@ -357,28 +355,28 @@ export default function Navbar({ session }: NavbarProps) {
                                     <DropdownMenuItem asChild className="text-foreground cursor-pointer">
                                         <Link href="/dashboard/resources"
                                             className="flex items-center gap-2 w-full px-2 py-2">
-                                            <Icon icon="mdi:package-variant" width="16" height="16" className="text-current" />
+                                            <Icon ssr={true} icon="mdi:package-variant" width="16" height="16" className="text-current" />
                                             My Resources
                                         </Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem asChild className="text-foreground cursor-pointer">
                                         <Link href="/dashboard/teams"
                                             className="flex items-center gap-2 w-full px-2 py-2">
-                                            <Icon icon="mdi:account-group" width="16" height="16" className="text-current" />
+                                            <Icon ssr={true} icon="mdi:account-group" width="16" height="16" className="text-current" />
                                             My Teams
                                         </Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem asChild className="text-foreground cursor-pointer">
                                         <Link href="/dashboard/servers"
                                             className="flex items-center gap-2 w-full px-2 py-2">
-                                            <Icon icon="mdi:server" width="16" height="16" className="text-current" />
+                                            <Icon ssr={true} icon="mdi:server" width="16" height="16" className="text-current" />
                                             My Servers
                                         </Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem asChild className="text-foreground cursor-pointer">
                                         <Link href="/dashboard/showcase"
                                             className="flex items-center gap-2 w-full px-2 py-2">
-                                            <Icon icon="mdi:image-multiple" width="16" height="16" className="text-current" />
+                                            <Icon ssr={true} icon="mdi:image-multiple" width="16" height="16" className="text-current" />
                                             My Showcase
                                         </Link>
                                     </DropdownMenuItem>
@@ -391,7 +389,7 @@ export default function Navbar({ session }: NavbarProps) {
                                             <DropdownMenuItem asChild className="text-foreground cursor-pointer bg-primary/10 hover:bg-primary/20">
                                                 <Link href="/admin"
                                                     className="flex items-center gap-2 w-full px-2 py-2">
-                                                    <Icon icon="mdi:shield-crown" width="16" height="16" className="text-primary" />
+                                                    <Icon ssr={true} icon="mdi:shield-crown" width="16" height="16" className="text-primary" />
                                                     <span className="font-semibold">Admin Panel</span>
                                                 </Link>
                                             </DropdownMenuItem>
@@ -403,7 +401,7 @@ export default function Navbar({ session }: NavbarProps) {
                                     <DropdownMenuItem asChild className="text-foreground cursor-pointer">
                                         <Link href="/dashboard/settings"
                                             className="flex items-center gap-2 w-full px-2 py-2">
-                                            <Icon icon="mdi:cog" width="16" height="16" className="text-current" />
+                                            <Icon ssr={true} icon="mdi:cog" width="16" height="16" className="text-current" />
                                             Settings
                                         </Link>
                                     </DropdownMenuItem>
@@ -414,7 +412,7 @@ export default function Navbar({ session }: NavbarProps) {
                                         onClick={handleSignOut}
                                         className="text-destructive cursor-pointer data-[highlighted]:text-destructive"
                                     >
-                                        <Icon icon="mdi:logout" width="16" height="16" className="text-current" />
+                                        <Icon ssr={true} icon="mdi:logout" width="16" height="16" className="text-current" />
                                         Sign Out
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
@@ -426,7 +424,7 @@ export default function Navbar({ session }: NavbarProps) {
                             <Link
                                 href="/login"
                                 className="w-full flex items-center gap-2.5 justify-center">
-                                <Icon icon="mdi:login" width="24" height="24" className="text-current" /> Sign In
+                                <Icon ssr={true} icon="mdi:login" width="24" height="24" className="text-current" /> Sign In
                             </Link>
                         </button>
                     )}
@@ -442,7 +440,7 @@ export default function Navbar({ session }: NavbarProps) {
                         className="p-2 text-foreground hover:text-primary transition-colors z-50"
                         aria-label="Toggle navigation"
                     >
-                        {mobileNavOpen ? <Icon icon="mdi:close" width="28" height="28" className="text-current" /> : <Icon icon="mdi:menu" width="28" height="28" className="text-current" />}
+                        {mobileNavOpen ? <Icon ssr={true} icon="mdi:close" width="28" height="28" className="text-current" /> : <Icon ssr={true} icon="mdi:menu" width="28" height="28" className="text-current" />}
                     </button>
 
                     {/* Logo au centre */}
@@ -463,9 +461,8 @@ export default function Navbar({ session }: NavbarProps) {
                                 {/* Create Menu Button */}
                                 <DropdownMenu>
                                     <DropdownMenuTrigger className="flex items-center gap-1 px-2 py-1.5 rounded-lg hover:bg-accent transition-colors outline-none group z-50">
-                                        <Icon icon="mdi:plus" width="18" height="18" className="text-foreground" />
-                                        <Icon
-                                            icon="eva:arrow-down-fill"
+                                        <Icon ssr={true} icon="mdi:plus" width="18" height="18" className="text-foreground" />
+                                        <Icon ssr={true} icon="eva:arrow-down-fill"
                                             width="14"
                                             height="14"
                                             className="transition duration-300 group-data-[state=open]:rotate-180"
@@ -482,7 +479,7 @@ export default function Navbar({ session }: NavbarProps) {
                                         >
                                             <div className="flex items-center gap-2 w-full">
                                                 <div className="p-1.5 rounded-lg bg-primary/10 shrink-0">
-                                                    <Icon icon="mdi:package-variant-plus" width="16" height="16" className="text-primary" />
+                                                    <Icon ssr={true} icon="mdi:package-variant-plus" width="16" height="16" className="text-primary" />
                                                 </div>
                                                 <div className="flex flex-col">
                                                     <span className="font-semibold">New Resource</span>
@@ -496,7 +493,7 @@ export default function Navbar({ session }: NavbarProps) {
                                         >
                                             <div className="flex items-center gap-2 w-full">
                                                 <div className="p-1.5 rounded-lg bg-[#109EB1]/10 shrink-0">
-                                                    <Icon icon="mdi:server-plus" width="16" height="16" className="text-[#109EB1]" />
+                                                    <Icon ssr={true} icon="mdi:server-plus" width="16" height="16" className="text-[#109EB1]" />
                                                 </div>
                                                 <div className="flex flex-col">
                                                     <span className="font-semibold">Add Server</span>
@@ -510,7 +507,7 @@ export default function Navbar({ session }: NavbarProps) {
                                         >
                                             <div className="flex items-center gap-2 w-full">
                                                 <div className="p-1.5 rounded-lg bg-[#109EB1]/10 shrink-0">
-                                                    <Icon icon="mdi:account-group-outline" width="16" height="16" className="text-[#109EB1]" />
+                                                    <Icon ssr={true} icon="mdi:account-group-outline" width="16" height="16" className="text-[#109EB1]" />
                                                 </div>
                                                 <div className="flex flex-col">
                                                     <span className="font-semibold">New Team</span>
@@ -524,7 +521,7 @@ export default function Navbar({ session }: NavbarProps) {
                                         >
                                             <div className="flex items-center gap-2 w-full">
                                                 <div className="p-1.5 rounded-lg bg-[#109EB1]/10 shrink-0">
-                                                    <Icon icon="mdi:image-plus" width="16" height="16" className="text-[#109EB1]" />
+                                                    <Icon ssr={true} icon="mdi:image-plus" width="16" height="16" className="text-[#109EB1]" />
                                                 </div>
                                                 <div className="flex flex-col">
                                                     <span className="font-semibold">Showcase Post</span>
@@ -555,7 +552,7 @@ export default function Navbar({ session }: NavbarProps) {
                                 href="/login"
                                 className="flex items-center justify-center gap-2 px-4 py-2 bg-primary/80 hover:bg-primary rounded-full transition-all"
                             >
-                                <Icon icon="mdi:login" width="18" height="18" className="text-white" />
+                                <Icon ssr={true} icon="mdi:login" width="18" height="18" className="text-white" />
                                 <span className="font-hebden text-sm text-white font-semibold">Sign In</span>
                             </Link>
                         )}
@@ -585,7 +582,7 @@ export default function Navbar({ session }: NavbarProps) {
                                     className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent transition-colors group"
                                 >
                                     <div className="p-1.5 rounded-lg bg-[#109EB1]/10 text-[#109EB1]">
-                                        <Icon icon="mdi:compass" width="18" height="18" />
+                                        <Icon ssr={true} icon="mdi:compass" width="18" height="18" />
                                     </div>
                                     <div className="flex flex-col flex-1">
                                         <span className="font-hebden font-semibold text-sm text-foreground">
@@ -595,7 +592,7 @@ export default function Navbar({ session }: NavbarProps) {
                                             Browse mods, plugins, and more
                                         </span>
                                     </div>
-                                    <Icon icon="mdi:chevron-right" width="20" height="20" className="text-foreground/40 group-hover:text-foreground/60" />
+                                    <Icon ssr={true} icon="mdi:chevron-right" width="20" height="20" className="text-foreground/40 group-hover:text-foreground/60" />
                                 </Link>
 
                                 {/* Find Servers */}
@@ -605,7 +602,7 @@ export default function Navbar({ session }: NavbarProps) {
                                     className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent transition-colors group"
                                 >
                                     <div className="p-1.5 rounded-lg bg-[#109EB1]/10 text-[#109EB1]">
-                                        <Icon icon="mdi:server" width="18" height="18" />
+                                        <Icon ssr={true} icon="mdi:server" width="18" height="18" />
                                     </div>
                                     <div className="flex flex-col flex-1">
                                         <span className="font-hebden font-semibold text-sm text-foreground">
@@ -615,7 +612,7 @@ export default function Navbar({ session }: NavbarProps) {
                                             Join active multiplayer communities
                                         </span>
                                     </div>
-                                    <Icon icon="mdi:chevron-right" width="20" height="20" className="text-foreground/40 group-hover:text-foreground/60" />
+                                    <Icon ssr={true} icon="mdi:chevron-right" width="20" height="20" className="text-foreground/40 group-hover:text-foreground/60" />
                                 </Link>
 
                                 {/* Creators */}
@@ -625,7 +622,7 @@ export default function Navbar({ session }: NavbarProps) {
                                     className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent transition-colors group"
                                 >
                                     <div className="p-1.5 rounded-lg bg-[#109EB1]/10 text-[#109EB1]">
-                                        <Icon icon="mdi:account-group" width="18" height="18" />
+                                        <Icon ssr={true} icon="mdi:account-group" width="18" height="18" />
                                     </div>
                                     <div className="flex flex-col flex-1">
                                         <span className="font-hebden font-semibold text-sm text-foreground">
@@ -635,7 +632,7 @@ export default function Navbar({ session }: NavbarProps) {
                                             Support & follow top developers
                                         </span>
                                     </div>
-                                    <Icon icon="mdi:chevron-right" width="20" height="20" className="text-foreground/40 group-hover:text-foreground/60" />
+                                    <Icon ssr={true} icon="mdi:chevron-right" width="20" height="20" className="text-foreground/40 group-hover:text-foreground/60" />
                                 </Link>
 
                                 {/* Showcase */}
@@ -645,7 +642,7 @@ export default function Navbar({ session }: NavbarProps) {
                                     className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent transition-colors group"
                                 >
                                     <div className="p-1.5 rounded-lg bg-[#109EB1]/10 text-[#109EB1]">
-                                        <Icon icon="mdi:image-multiple" width="18" height="18" />
+                                        <Icon ssr={true} icon="mdi:image-multiple" width="18" height="18" />
                                     </div>
                                     <div className="flex flex-col flex-1">
                                         <span className="font-hebden font-semibold text-sm text-foreground">
@@ -655,7 +652,7 @@ export default function Navbar({ session }: NavbarProps) {
                                             Community gallery & WIP projects
                                         </span>
                                     </div>
-                                    <Icon icon="mdi:chevron-right" width="20" height="20" className="text-foreground/40 group-hover:text-foreground/60" />
+                                    <Icon ssr={true} icon="mdi:chevron-right" width="20" height="20" className="text-foreground/40 group-hover:text-foreground/60" />
                                 </Link>
                             </div>
 
@@ -672,7 +669,7 @@ export default function Navbar({ session }: NavbarProps) {
                                             onClick={closeMobileNav}
                                             className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-accent/50 hover:bg-accent transition-colors"
                                         >
-                                            <Icon icon={category.icon} width="18" height="18" className="text-primary" />
+                                            <Icon ssr={true} icon={category.icon} width="18" height="18" className="text-primary" />
                                             <span className="font-hebden font-medium text-sm text-foreground">
                                                 {category.name}
                                             </span>
@@ -693,13 +690,13 @@ export default function Navbar({ session }: NavbarProps) {
                                 >
                                     <div className="flex items-center gap-3">
                                         <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
-                                            <Icon icon="mdi:server-network" width="18" height="18" />
+                                            <Icon ssr={true} icon="mdi:server-network" width="18" height="18" />
                                         </div>
                                         <span className="font-hebden font-semibold text-sm text-foreground">
                                             Server Hosting
                                         </span>
                                     </div>
-                                    <Icon icon="mdi:open-in-new" width="18" height="18" className="text-foreground/40 group-hover:text-foreground/60" />
+                                    <Icon ssr={true} icon="mdi:open-in-new" width="18" height="18" className="text-foreground/40 group-hover:text-foreground/60" />
                                 </Link>
                             </div>
                         </div>
@@ -743,25 +740,25 @@ export default function Navbar({ session }: NavbarProps) {
 
                                 <Link href={`/user/${session.user.name}`} onClick={closeMobileProfile}
                                     className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent transition-colors">
-                                    <Icon icon="mdi:account" width="20" height="20" className="text-primary" />
+                                    <Icon ssr={true} icon="mdi:account" width="20" height="20" className="text-primary" />
                                     <span className="font-hebden font-medium text-foreground">Profile</span>
                                 </Link>
 
                                 <Link href="/dashboard/reports" onClick={closeMobileProfile}
                                     className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent transition-colors">
-                                    <Icon icon="mdi:flag" width="20" height="20" className="text-primary" />
+                                    <Icon ssr={true} icon="mdi:flag" width="20" height="20" className="text-primary" />
                                     <span className="font-hebden font-medium text-foreground">My Reports</span>
                                 </Link>
 
                                 <Link href="/dashboard/notifications" onClick={closeMobileProfile}
                                     className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent transition-colors">
-                                    <Icon icon="mdi:bell" width="20" height="20" className="text-primary" />
+                                    <Icon ssr={true} icon="mdi:bell" width="20" height="20" className="text-primary" />
                                     <span className="font-hebden font-medium text-foreground">Notifications</span>
                                 </Link>
 
                                 <Link href="/dashboard/collections" onClick={closeMobileProfile}
                                     className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent transition-colors">
-                                    <Icon icon="mdi:folder-multiple" width="20" height="20" className="text-primary" />
+                                    <Icon ssr={true} icon="mdi:folder-multiple" width="20" height="20" className="text-primary" />
                                     <span className="font-hebden font-medium text-foreground">Collections</span>
                                 </Link>
                             </div>
@@ -774,25 +771,25 @@ export default function Navbar({ session }: NavbarProps) {
 
                                 <Link href="/dashboard/resources" onClick={closeMobileProfile}
                                     className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent transition-colors">
-                                    <Icon icon="mdi:package-variant" width="20" height="20" className="text-primary" />
+                                    <Icon ssr={true} icon="mdi:package-variant" width="20" height="20" className="text-primary" />
                                     <span className="font-hebden font-medium text-foreground">My Resources</span>
                                 </Link>
 
                                 <Link href="/dashboard/teams" onClick={closeMobileProfile}
                                     className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent transition-colors">
-                                    <Icon icon="mdi:account-group" width="20" height="20" className="text-primary" />
+                                    <Icon ssr={true} icon="mdi:account-group" width="20" height="20" className="text-primary" />
                                     <span className="font-hebden font-medium text-foreground">My Teams</span>
                                 </Link>
 
                                 <Link href="/dashboard/servers" onClick={closeMobileProfile}
                                     className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent transition-colors">
-                                    <Icon icon="mdi:server" width="20" height="20" className="text-primary" />
+                                    <Icon ssr={true} icon="mdi:server" width="20" height="20" className="text-primary" />
                                     <span className="font-hebden font-medium text-foreground">My Servers</span>
                                 </Link>
 
                                 <Link href="/dashboard/showcase" onClick={closeMobileProfile}
                                     className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent transition-colors">
-                                    <Icon icon="mdi:image-multiple" width="20" height="20" className="text-primary" />
+                                    <Icon ssr={true} icon="mdi:image-multiple" width="20" height="20" className="text-primary" />
                                     <span className="font-hebden font-medium text-foreground">My Showcase</span>
                                 </Link>
                             </div>
@@ -806,7 +803,7 @@ export default function Navbar({ session }: NavbarProps) {
 
                                     <Link href="/admin" onClick={closeMobileProfile}
                                         className="flex items-center gap-3 px-4 py-3 rounded-xl bg-primary/10 hover:bg-primary/20 transition-colors">
-                                        <Icon icon="mdi:shield-crown" width="20" height="20" className="text-primary" />
+                                        <Icon ssr={true} icon="mdi:shield-crown" width="20" height="20" className="text-primary" />
                                         <span className="font-hebden font-semibold text-foreground">Admin Panel</span>
                                     </Link>
                                 </div>
@@ -820,7 +817,7 @@ export default function Navbar({ session }: NavbarProps) {
 
                                 <Link href="/dashboard/settings" onClick={closeMobileProfile}
                                     className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent transition-colors">
-                                    <Icon icon="mdi:cog" width="20" height="20" className="text-primary" />
+                                    <Icon ssr={true} icon="mdi:cog" width="20" height="20" className="text-primary" />
                                     <span className="font-hebden font-medium text-foreground">Settings</span>
                                 </Link>
                             </div>
@@ -832,7 +829,7 @@ export default function Navbar({ session }: NavbarProps) {
                                 onClick={handleSignOut}
                                 className="flex items-center justify-center gap-3 w-full px-4 py-3 rounded-xl bg-destructive/10 hover:bg-destructive/20 transition-colors"
                             >
-                                <Icon icon="mdi:logout" width="20" height="20" className="text-destructive" />
+                                <Icon ssr={true} icon="mdi:logout" width="20" height="20" className="text-destructive" />
                                 <span className="font-hebden font-semibold text-base text-destructive">
                                     Sign Out
                                 </span>

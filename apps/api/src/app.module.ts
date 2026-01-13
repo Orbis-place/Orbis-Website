@@ -19,6 +19,7 @@ import { ShowcaseModule } from "./modules/showcase/showcase.module";
 import { RedisModule } from "./common/redis.module";
 import { AdminModule } from "./modules/admin/admin.module";
 import { NotificationModule } from "./modules/notification/notification.module";
+import { EmailModule } from "./modules/email/email.module";
 
 @Module({
     imports: [
@@ -38,7 +39,7 @@ import { NotificationModule } from "./modules/notification/notification.module";
             },
         }),
         RedisModule,
-        UserModule, OrbisAuthModule, ServerModule, TeamModule, ReportModule, BadgeModule, ResourceModule, HytaleVersionModule, DiscoveryModule, ShowcaseModule, AdminModule, NotificationModule],
+        UserModule, OrbisAuthModule, ServerModule, TeamModule, ReportModule, BadgeModule, ResourceModule, HytaleVersionModule, DiscoveryModule, ShowcaseModule, AdminModule, NotificationModule, EmailModule],
     controllers: [AppController],
     providers: [AppService],
 })

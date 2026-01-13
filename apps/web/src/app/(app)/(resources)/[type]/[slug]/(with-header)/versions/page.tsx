@@ -362,7 +362,7 @@ export default function VersionsPage() {
                     ))
                 ) : versions.length === 0 ? (
                     <div className="bg-[#06363D] border border-[#084B54] rounded-[25px] p-12 text-center">
-                        <Icon icon="mdi:package-variant" width="48" height="48" className="mx-auto mb-4 text-[#C7F4FA]/30" />
+                        <Icon ssr={true} icon="mdi:package-variant" width="48" height="48" className="mx-auto mb-4 text-[#C7F4FA]/30" />
                         <p className="font-nunito text-lg text-[#C7F4FA]/60">
                             No versions available yet.
                         </p>

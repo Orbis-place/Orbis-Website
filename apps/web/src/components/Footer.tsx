@@ -35,7 +35,7 @@ export default function Footer() {
                                 className="w-9 h-9 flex items-center justify-center rounded-full bg-[#084B54] hover:bg-[#109EB1] transition-colors"
                                 aria-label="Discord"
                             >
-                                <Icon icon="mdi:discord" width="20" height="20" className="text-[#C7F4FA]" />
+                                <Icon ssr={true} icon="mdi:discord" width="20" height="20" className="text-[#C7F4FA]" />
                             </a>
                             <a
                                 href="https://x.com/orbisplace"
@@ -55,7 +55,7 @@ export default function Footer() {
                                 className="w-9 h-9 flex items-center justify-center rounded-full bg-[#084B54] hover:bg-[#109EB1] transition-colors"
                                 aria-label="GitHub"
                             >
-                                <Icon icon="mdi:github" width="20" height="20" className="text-[#C7F4FA]" />
+                                <Icon ssr={true} icon="mdi:github" width="20" height="20" className="text-[#C7F4FA]" />
                             </a>
                         </div>
                     </div>
@@ -169,13 +169,13 @@ export default function Footer() {
                         © {currentYear} Orbis. All rights reserved.
                     </p>
                     <div className="flex items-center gap-6 text-sm font-nunito">
-                        <Link href="/sitemap" className="text-[#C7F4FA]/70 hover:text-[#109EB1] transition-colors">
+                        <Link href="/sitemap.xml" className="text-[#C7F4FA]/70 hover:text-[#109EB1] transition-colors">
                             Sitemap
                         </Link>
                         <Link href="https://status.orbis.place/" className="text-[#C7F4FA]/70 hover:text-[#109EB1] transition-colors">
                             Status
                         </Link>
-                        <Link href="/support" className="text-[#C7F4FA]/70 hover:text-[#109EB1] transition-colors">
+                        <Link href="https://discord.gg/6h2eVhntPf" className="text-[#C7F4FA]/70 hover:text-[#109EB1] transition-colors">
                             Support
                         </Link>
                     </div>

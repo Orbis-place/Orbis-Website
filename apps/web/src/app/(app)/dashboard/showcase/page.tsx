@@ -92,7 +92,7 @@ export default function ShowcaseDashboardPage() {
         return (
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div className="text-center py-20">
-                    <Icon icon="mdi:lock-outline" className="text-6xl text-[#C7F4FA]/30 mx-auto mb-4" />
+                    <Icon ssr={true} icon="mdi:lock-outline" className="text-6xl text-[#C7F4FA]/30 mx-auto mb-4" />
                     <h2 className="font-hebden text-xl text-[#C7F4FA] mb-2">Sign in required</h2>
                     <p className="text-[#C7F4FA]/50 font-nunito mb-6">
                         You need to sign in to manage your showcase posts.
@@ -101,7 +101,7 @@ export default function ShowcaseDashboardPage() {
                         href="/login"
                         className="inline-flex items-center gap-2 px-6 py-3 bg-[#109EB1] text-white rounded-lg font-nunito font-semibold hover:bg-[#109EB1]/80 transition-colors"
                     >
-                        <Icon icon="mdi:login" />
+                        <Icon ssr={true} icon="mdi:login" />
                         Sign In
                     </Link>
                 </div>
@@ -123,7 +123,7 @@ export default function ShowcaseDashboardPage() {
                     href="/showcase/new"
                     className="inline-flex items-center gap-2 px-4 py-2 bg-[#109EB1] text-white rounded-lg font-nunito font-semibold hover:bg-[#109EB1]/80 transition-colors"
                 >
-                    <Icon icon="mdi:plus" />
+                    <Icon ssr={true} icon="mdi:plus" />
                     Create New
                 </Link>
             </div>
@@ -137,7 +137,7 @@ export default function ShowcaseDashboardPage() {
                 </div>
             ) : posts.length === 0 ? (
                 <div className="text-center py-20 bg-[#06363D]/50 rounded-xl border border-[#109EB1]/10">
-                    <Icon icon="mdi:image-plus-outline" className="text-6xl text-[#C7F4FA]/30 mx-auto mb-4" />
+                    <Icon ssr={true} icon="mdi:image-plus-outline" className="text-6xl text-[#C7F4FA]/30 mx-auto mb-4" />
                     <h3 className="font-hebden text-xl text-[#C7F4FA]/70 mb-2">No posts yet</h3>
                     <p className="text-[#C7F4FA]/50 font-nunito mb-6">
                         Share your first creation with the community!
@@ -146,7 +146,7 @@ export default function ShowcaseDashboardPage() {
                         href="/showcase/new"
                         className="inline-flex items-center gap-2 px-6 py-3 bg-[#109EB1] text-white rounded-lg font-nunito font-semibold hover:bg-[#109EB1]/80 transition-colors"
                     >
-                        <Icon icon="mdi:plus" />
+                        <Icon ssr={true} icon="mdi:plus" />
                         Create Post
                     </Link>
                 </div>
@@ -170,7 +170,7 @@ export default function ShowcaseDashboardPage() {
                                             />
                                         ) : (
                                             <div className="w-20 h-20 rounded-lg bg-[#032125] flex items-center justify-center">
-                                                <Icon icon={categoryInfo.icon} className="text-2xl text-[#C7F4FA]/30" />
+                                                <Icon ssr={true} icon={categoryInfo.icon} className="text-2xl text-[#C7F4FA]/30" />
                                             </div>
                                         )}
                                     </Link>
@@ -191,19 +191,19 @@ export default function ShowcaseDashboardPage() {
                                                 className="inline-flex items-center gap-1"
                                                 style={{ color: categoryInfo.color }}
                                             >
-                                                <Icon icon={categoryInfo.icon} />
+                                                <Icon ssr={true} icon={categoryInfo.icon} />
                                                 {categoryInfo.label}
                                             </span>
                                             <span className="flex items-center gap-1">
-                                                <Icon icon="mdi:heart-outline" />
+                                                <Icon ssr={true} icon="mdi:heart-outline" />
                                                 {post.likeCount}
                                             </span>
                                             <span className="flex items-center gap-1">
-                                                <Icon icon="mdi:eye-outline" />
+                                                <Icon ssr={true} icon="mdi:eye-outline" />
                                                 {post.viewCount}
                                             </span>
                                             <span className="flex items-center gap-1">
-                                                <Icon icon="mdi:comment-outline" />
+                                                <Icon ssr={true} icon="mdi:comment-outline" />
                                                 {post.commentCount}
                                             </span>
                                         </div>
@@ -240,14 +240,14 @@ export default function ShowcaseDashboardPage() {
                                             className="p-2 text-[#C7F4FA]/60 hover:text-[#109EB1] transition-colors"
                                             title="Edit"
                                         >
-                                            <Icon icon="mdi:pencil-outline" className="text-xl" />
+                                            <Icon ssr={true} icon="mdi:pencil-outline" className="text-xl" />
                                         </Link>
                                         <Link
                                             href={`/showcase/${post.id}`}
                                             className="p-2 text-[#C7F4FA]/60 hover:text-[#C7F4FA] transition-colors"
                                             title="View"
                                         >
-                                            <Icon icon="mdi:eye-outline" className="text-xl" />
+                                            <Icon ssr={true} icon="mdi:eye-outline" className="text-xl" />
                                         </Link>
                                         <OrbisDialog
                                             open={deleteConfirmId === post.id}
@@ -259,7 +259,7 @@ export default function ShowcaseDashboardPage() {
                                                     className="p-2 text-red-400/60 hover:text-red-400 transition-colors"
                                                     title="Delete"
                                                 >
-                                                    <Icon icon="mdi:delete-outline" className="text-xl" />
+                                                    <Icon ssr={true} icon="mdi:delete-outline" className="text-xl" />
                                                 </button>
                                             }
                                             footer={

@@ -27,7 +27,7 @@ export default function ShowcaseCard({ post }: ShowcaseCardProps) {
                     />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                        <Icon icon={categoryInfo.icon} className="text-5xl text-[#C7F4FA]/20" />
+                        <Icon ssr={true} icon={categoryInfo.icon} className="text-5xl text-[#C7F4FA]/20" />
                     </div>
                 )}
 
@@ -36,14 +36,14 @@ export default function ShowcaseCard({ post }: ShowcaseCardProps) {
                     className="absolute top-3 left-3 px-2 py-1 rounded-full text-xs font-nunito font-semibold flex items-center gap-1"
                     style={{ backgroundColor: categoryInfo.color, color: 'white' }}
                 >
-                    <Icon icon={categoryInfo.icon} className="text-xs" />
+                    <Icon ssr={true} icon={categoryInfo.icon} className="text-xs" />
                     {categoryInfo.label}
                 </div>
 
                 {/* Featured Badge */}
                 {post.featured && (
                     <div className="absolute top-3 right-3 px-2 py-1 rounded-full text-xs font-nunito font-semibold bg-[#F5A623] text-white flex items-center gap-1">
-                        <Icon icon="mdi:star" className="text-xs" />
+                        <Icon ssr={true} icon="mdi:star" className="text-xs" />
                         Featured
                     </div>
                 )}
@@ -82,15 +82,15 @@ export default function ShowcaseCard({ post }: ShowcaseCardProps) {
                 {/* Stats */}
                 <div className="flex items-center gap-4 text-sm text-[#C7F4FA]/50">
                     <div className="flex items-center gap-1">
-                        <Icon icon="mdi:heart-outline" />
+                        <Icon ssr={true} icon="mdi:heart-outline" />
                         <span>{post.likeCount}</span>
                     </div>
                     <div className="flex items-center gap-1">
-                        <Icon icon="mdi:comment-outline" />
+                        <Icon ssr={true} icon="mdi:comment-outline" />
                         <span>{post.commentCount}</span>
                     </div>
                     <div className="flex items-center gap-1">
-                        <Icon icon="mdi:eye-outline" />
+                        <Icon ssr={true} icon="mdi:eye-outline" />
                         <span>{post.viewCount}</span>
                     </div>
                 </div>

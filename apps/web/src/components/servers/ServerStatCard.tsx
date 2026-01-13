@@ -26,8 +26,7 @@ export default function ServerStatCard({
             <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
                     <div className="p-2 rounded-lg bg-[#084B54]/50">
-                        <Icon
-                            icon={icon}
+                        <Icon ssr={true} icon={icon}
                             width="24"
                             height="24"
                             style={{ color: iconColor }}
@@ -44,8 +43,7 @@ export default function ServerStatCard({
                             ? "bg-[#69a024]/10 text-[#69a024]"
                             : "bg-red-500/10 text-red-400"
                     )}>
-                        <Icon
-                            icon={trend.isPositive ? "mdi:arrow-up" : "mdi:arrow-down"}
+                        <Icon ssr={true} icon={trend.isPositive ? "mdi:arrow-up" : "mdi:arrow-down"}
                             width="14"
                             height="14"
                         />

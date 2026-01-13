@@ -140,14 +140,14 @@ export function CreateResourceDialog({ open, onOpenChange, trigger, onSuccess, d
                         <SelectContent>
                             <SelectItem value="personal">
                                 <span className="flex items-center gap-2">
-                                    <Icon icon="mdi:account" width="16" height="16" />
+                                    <Icon ssr={true} icon="mdi:account" width="16" height="16" />
                                     Personal
                                 </span>
                             </SelectItem>
                             {loadingTeams ? (
                                 <SelectItem value="loading" disabled>
                                     <span className="flex items-center gap-2">
-                                        <Icon icon="mdi:loading" width="16" height="16" className="animate-spin" />
+                                        <Icon ssr={true} icon="mdi:loading" width="16" height="16" className="animate-spin" />
                                         Loading teams...
                                     </span>
                                 </SelectItem>
@@ -155,7 +155,7 @@ export function CreateResourceDialog({ open, onOpenChange, trigger, onSuccess, d
                                 teams.map((team) => (
                                     <SelectItem key={team.id} value={team.id}>
                                         <span className="flex items-center gap-2">
-                                            <Icon icon="mdi:account-group" width="16" height="16" />
+                                            <Icon ssr={true} icon="mdi:account-group" width="16" height="16" />
                                             {team.name}
                                         </span>
                                     </SelectItem>
@@ -198,7 +198,7 @@ export function CreateResourceDialog({ open, onOpenChange, trigger, onSuccess, d
                             disabled={!formData.name}
                             className="text-xs text-primary hover:text-primary/80 disabled:text-muted-foreground disabled:cursor-not-allowed font-nunito"
                         >
-                            <Icon icon="mdi:auto-fix" width="14" height="14" className="inline mr-1" />
+                            <Icon ssr={true} icon="mdi:auto-fix" width="14" height="14" className="inline mr-1" />
                             Generate from name
                         </button>
                     </div>
@@ -266,7 +266,7 @@ export function CreateResourceDialog({ open, onOpenChange, trigger, onSuccess, d
                 {/* Info Box */}
                 <div className="bg-primary/10 p-4 rounded-lg border border-primary/20">
                     <div className="flex gap-3">
-                        <Icon icon="mdi:information" className="text-primary flex-shrink-0 mt-0.5" width="20" height="20" />
+                        <Icon ssr={true} icon="mdi:information" className="text-primary flex-shrink-0 mt-0.5" width="20" height="20" />
                         <p className="text-sm text-foreground/80 font-nunito">
                             Your resource will be created as a <strong>draft</strong>. You can add versions, images, and other details before publishing.
                         </p>

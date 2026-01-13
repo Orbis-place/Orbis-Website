@@ -142,7 +142,7 @@ export function ExternalLinkProvider({ children }: ExternalLinkProviderProps) {
                             onClick={handleConfirm}
                             className="px-4 py-2 rounded-full font-hebden font-semibold text-sm border-2 border-primary bg-primary hover:bg-primary/90 text-primary-foreground transition-all flex items-center gap-2"
                         >
-                            <Icon icon="solar:arrow-right-bold" className="w-4 h-4" />
+                            <Icon ssr={true} icon="solar:arrow-right-bold" className="w-4 h-4" />
                             Continue
                         </button>
                     </>

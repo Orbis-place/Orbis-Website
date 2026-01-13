@@ -180,7 +180,7 @@ export default function ServerCategoriesPage() {
     if (isLoading) {
         return (
             <div className="flex items-center justify-center py-12">
-                <Icon icon="mdi:loading" className="animate-spin text-primary" width="48" height="48" />
+                <Icon ssr={true} icon="mdi:loading" className="animate-spin text-primary" width="48" height="48" />
             </div>
         );
     }
@@ -226,8 +226,7 @@ export default function ServerCategoriesPage() {
                                 )}
                             >
                                 {category.icon && (
-                                    <Icon
-                                        icon={category.icon}
+                                    <Icon ssr={true} icon={category.icon}
                                         width="24"
                                         height="24"
                                         className={isSelected ? 'text-primary' : 'text-muted-foreground'}
@@ -239,7 +238,7 @@ export default function ServerCategoriesPage() {
                                     </div>
                                 </div>
                                 {isSelected && (
-                                    <Icon icon="mdi:check-circle" width="20" height="20" className="text-primary flex-shrink-0" />
+                                    <Icon ssr={true} icon="mdi:check-circle" width="20" height="20" className="text-primary flex-shrink-0" />
                                 )}
                             </button>
                         );
@@ -279,8 +278,7 @@ export default function ServerCategoriesPage() {
                                     )}
                                 >
                                     {category.icon && (
-                                        <Icon
-                                            icon={category.icon}
+                                        <Icon ssr={true} icon={category.icon}
                                             width="24"
                                             height="24"
                                             className={isSelected ? 'text-primary' : 'text-muted-foreground'}
@@ -292,7 +290,7 @@ export default function ServerCategoriesPage() {
                                         </div>
                                     </div>
                                     {isSelected && (
-                                        <Icon icon="mdi:check-circle" width="20" height="20" className="text-primary flex-shrink-0" />
+                                        <Icon ssr={true} icon="mdi:check-circle" width="20" height="20" className="text-primary flex-shrink-0" />
                                     )}
                                 </button>
                             );
@@ -338,7 +336,7 @@ export default function ServerCategoriesPage() {
                                         onClick={() => handleToggleTag(tagName)}
                                         className="hover:text-destructive transition-colors"
                                     >
-                                        <Icon icon="mdi:close" width="14" height="14" />
+                                        <Icon ssr={true} icon="mdi:close" width="14" height="14" />
                                     </button>
                                 </div>
                             ))}
@@ -386,12 +384,12 @@ export default function ServerCategoriesPage() {
                 <Button onClick={handleSave} disabled={saving} className="font-hebden">
                     {saving ? (
                         <>
-                            <Icon icon="mdi:loading" width="20" height="20" className="animate-spin mr-2" />
+                            <Icon ssr={true} icon="mdi:loading" width="20" height="20" className="animate-spin mr-2" />
                             Saving Changes...
                         </>
                     ) : (
                         <>
-                            <Icon icon="mdi:check" width="20" height="20" className="mr-2" />
+                            <Icon ssr={true} icon="mdi:check" width="20" height="20" className="mr-2" />
                             Save Changes
                         </>
                     )}

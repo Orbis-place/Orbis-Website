@@ -101,6 +101,17 @@ export class ServerController {
         return this.serverService.update(session.user.id, serverId, updateDto);
     }
 
+    @Post(':id/submit')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Submit server for moderation review' })
+    @ApiParam({ name: 'id', description: 'Server ID' })
+    async submit(
+        @Session() session: UserSession,
+        @Param('id') serverId: string,
+    ) {
+        return this.serverService.submit(session.user.id, serverId);
+    }
+
     @Patch(':id/transfer-ownership')
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Transfer server ownership to another user or team' })
@@ -186,6 +197,35 @@ export class ServerController {
     // ============================================
     // ADMIN MODERATION ENDPOINTS
     // ============================================
+
+    @Get('moderation/pending')
+    @ApiBearerAuth()
+    @Roles([UserRole.MODERATOR, UserRole.ADMIN, UserRole.SUPER_ADMIN])
+    @ApiOperation({ summary: 'Get pending servers for moderation (Moderator+ only)' })
+    async getPendingServers(@Session() session: UserSession) {
+        return this.serverService.getPendingServers(session.user.id);
+    }
+
+    @Patch(':id/moderate')
+    @ApiBearerAuth()
+    @Roles([UserRole.MODERATOR, UserRole.ADMIN, UserRole.SUPER_ADMIN])
+    @ApiOperation({ summary: 'Moderate a server (approve/reject) (Moderator+ only)' })
+    @ApiParam({ name: 'id', description: 'Server ID' })
+    async moderate(
+        @Session() session: UserSession,
+        @Param('id') serverId: string,
+        @Body() moderateDto: { action: 'APPROVE' | 'REJECT'; reason?: string },
+    ) {
+        if (moderateDto.action === 'APPROVE') {
+            return this.serverService.approve(session.user.id, serverId, moderateDto.reason);
+        } else if (moderateDto.action === 'REJECT') {
+            if (!moderateDto.reason) {
+                throw new BadRequestException('Reason is required for rejection');
+            }
+            return this.serverService.reject(session.user.id, serverId, moderateDto.reason);
+        }
+        throw new BadRequestException('Invalid action');
+    }
 
     @Post(':id/approve')
     @ApiBearerAuth()

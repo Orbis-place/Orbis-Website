@@ -123,7 +123,7 @@ export function StayConnected({ initialUpdates = [] }: StayConnectedProps) {
                         {features.map((feature, index) => (
                             <div key={index} className="flex gap-4">
                                 <div className="w-12 h-12 bg-[#109EB1]/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                                    <Icon icon={feature.icon} className="w-6 h-6 text-[#109EB1]" />
+                                    <Icon ssr={true} icon={feature.icon} className="w-6 h-6 text-[#109EB1]" />
                                 </div>
                                 <div>
                                     <h3 className="font-hebden font-semibold text-xl text-[#C7F4FA] mb-2">
@@ -142,7 +142,7 @@ export function StayConnected({ initialUpdates = [] }: StayConnectedProps) {
                         {/* Header */}
                         <div className="flex items-center justify-between px-5 py-4 border-b border-[#084B54]">
                             <div className="flex items-center gap-2">
-                                <Icon icon="mdi:bell" className="w-5 h-5 text-[#109EB1]" />
+                                <Icon ssr={true} icon="mdi:bell" className="w-5 h-5 text-[#109EB1]" />
                                 <span className="font-hebden font-semibold text-[#C7F4FA]">Recent Updates</span>
                             </div>
                             {updates.length > 0 && (
@@ -199,7 +199,7 @@ export function StayConnected({ initialUpdates = [] }: StayConnectedProps) {
                                 ))
                             ) : (
                                 <div className="text-center py-8">
-                                    <Icon icon="mdi:bell-off" className="w-12 h-12 text-[#C7F4FA]/20 mx-auto mb-2" />
+                                    <Icon ssr={true} icon="mdi:bell-off" className="w-12 h-12 text-[#C7F4FA]/20 mx-auto mb-2" />
                                     <p className="font-nunito text-sm text-[#C7F4FA]/50">
                                         No recent updates
                                     </p>
@@ -211,7 +211,7 @@ export function StayConnected({ initialUpdates = [] }: StayConnectedProps) {
                         {updates.length > 0 && (
                             <div className="flex items-center justify-center gap-2 text-[#109EB1] font-nunito text-sm hover:underline px-5 py-3 border-t border-[#084B54] cursor-pointer">
                                 View all updates
-                                <Icon icon="mdi:arrow-right" className="w-4 h-4" />
+                                <Icon ssr={true} icon="mdi:arrow-right" className="w-4 h-4" />
                             </div>
                         )}
                     </div>

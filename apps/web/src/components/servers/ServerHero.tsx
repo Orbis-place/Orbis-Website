@@ -65,8 +65,7 @@ export default function ServerHero({
                                 }}
                             >
                                 {primaryCategory.icon && (
-                                    <Icon
-                                        icon={primaryCategory.icon}
+                                    <Icon ssr={true} icon={primaryCategory.icon}
                                         width="18"
                                         height="18"
                                         style={{ color: primaryCategory.color || '#109EB1' }}
@@ -110,7 +109,7 @@ export default function ServerHero({
 
                     {/* Player Count */}
                     <div className="flex items-center gap-2 mb-6">
-                        <Icon icon="mdi:account-group" width="20" height="20" className="text-[#C7F4FA]/60" />
+                        <Icon ssr={true} icon="mdi:account-group" width="20" height="20" className="text-[#C7F4FA]/60" />
                         <span className="font-hebden text-lg text-[#C7F4FA]">
                             {isOnline ? `${currentPlayers}/${maxPlayers}` : '0'} {' '}
                             <span className="text-[#C7F4FA]/60 font-nunito text-base">players online</span>
@@ -123,7 +122,7 @@ export default function ServerHero({
                             onClick={onVote}
                             className="bg-[#109EB1] hover:bg-[#109EB1]/80 text-white font-hebden px-6 py-2.5 rounded-lg transition-all duration-200 flex items-center gap-2"
                         >
-                            <Icon icon="mdi:vote" width="20" height="20" />
+                            <Icon ssr={true} icon="mdi:vote" width="20" height="20" />
                             Vote for Server
                         </Button>
 
@@ -132,7 +131,7 @@ export default function ServerHero({
                             variant="outline"
                             className="bg-[#084B54]/50 hover:bg-[#084B54] border-[#109EB1]/30 text-[#C7F4FA] font-hebden px-6 py-2.5 rounded-lg transition-all duration-200 flex items-center gap-2 backdrop-blur-sm"
                         >
-                            <Icon icon="mdi:content-copy" width="18" height="18" />
+                            <Icon ssr={true} icon="mdi:content-copy" width="18" height="18" />
                             Copy IP
                         </Button>
 
@@ -140,7 +139,7 @@ export default function ServerHero({
                             variant="outline"
                             className="bg-[#084B54]/50 hover:bg-[#084B54] border-[#109EB1]/30 text-[#C7F4FA] font-hebden px-6 py-2.5 rounded-lg transition-all duration-200 flex items-center gap-2 backdrop-blur-sm"
                         >
-                            <Icon icon="mdi:share-variant" width="18" height="18" />
+                            <Icon ssr={true} icon="mdi:share-variant" width="18" height="18" />
                             Share
                         </Button>
                     </div>

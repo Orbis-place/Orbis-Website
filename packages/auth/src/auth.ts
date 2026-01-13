@@ -6,6 +6,7 @@ import { sendResetPasswordEmail, sendVerificationEmail } from "./email";
 import { admin, apiKey } from "better-auth/plugins";
 import { createAccessControl } from "better-auth/plugins/access";
 import { defaultStatements, adminAc } from "better-auth/plugins/admin/access";
+import { redis } from "./redis";
 
 const statement = {
     ...defaultStatements,
@@ -206,7 +207,28 @@ export const getAuth = () => {
                     },
                     defaultRole: "USER",
                 })
-            ]
+            ],
+            secondaryStorage: {
+                get: async (key) => {
+                    return await redis.get(key);
+                },
+                set: async (key, value, ttl) => {
+                    if (ttl) await redis.set(key, value, 'EX', ttl)
+                    else await redis.set(key, value);
+                },
+                delete: async (key) => {
+                    await redis.del(key);
+                }
+            },
+            rateLimit: {
+                enabled: true,
+                storage: "secondary-storage",
+                window: 10,
+                max: 100,
+            },
+            session: {
+                storeSessionInDatabase: true,
+            }
         });
     }
     return authInstance;

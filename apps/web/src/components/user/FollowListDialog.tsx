@@ -227,11 +227,11 @@ export default function FollowListDialog({
             <div className="flex-1 overflow-y-auto min-h-[400px] max-h-[500px] -mx-6 px-6">
                 {isLoading ? (
                     <div className="flex items-center justify-center py-12">
-                        <Icon icon="mdi:loading" className="animate-spin text-primary w-8 h-8" />
+                        <Icon ssr={true} icon="mdi:loading" className="animate-spin text-primary w-8 h-8" />
                     </div>
                 ) : error ? (
                     <div className="flex flex-col items-center justify-center py-12 text-center">
-                        <Icon icon="mdi:lock" className="w-16 h-16 text-[#C7F4FA]/30 mb-4" />
+                        <Icon ssr={true} icon="mdi:lock" className="w-16 h-16 text-[#C7F4FA]/30 mb-4" />
                         <h3 className="font-hebden font-bold text-lg text-[#C7F4FA] mb-2">
                             {error}
                         </h3>
@@ -241,7 +241,7 @@ export default function FollowListDialog({
                     </div>
                 ) : users.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-12 text-center">
-                        <Icon icon="mdi:account-multiple-outline" className="w-16 h-16 text-[#C7F4FA]/30 mb-4" />
+                        <Icon ssr={true} icon="mdi:account-multiple-outline" className="w-16 h-16 text-[#C7F4FA]/30 mb-4" />
                         <h3 className="font-hebden font-bold text-lg text-[#C7F4FA] mb-2">
                             {activeTab === 'followers' ? 'No followers yet' : 'Not following anyone yet'}
                         </h3>

@@ -32,8 +32,7 @@ const AccordionTrigger = React.forwardRef<
             {...props}
         >
             {children}
-            <Icon
-                icon="mdi:chevron-down"
+            <Icon ssr={true} icon="mdi:chevron-down"
                 width="20"
                 height="20"
                 className="shrink-0 transition-transform duration-200"

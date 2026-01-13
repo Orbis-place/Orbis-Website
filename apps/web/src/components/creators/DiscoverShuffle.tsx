@@ -63,7 +63,7 @@ export default function DiscoverShuffle({ allCreators, initialCreators }: Discov
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
                 <div>
                     <div className="flex items-center gap-3 mb-2">
-                        <Icon icon="mdi:shuffle-variant" className="w-6 h-6 text-[#109EB1]" />
+                        <Icon ssr={true} icon="mdi:shuffle-variant" className="w-6 h-6 text-[#109EB1]" />
                         <h2 className="font-hebden text-2xl sm:text-3xl text-[#C7F4FA]">
                             Discover New Faces
                         </h2>
@@ -78,8 +78,7 @@ export default function DiscoverShuffle({ allCreators, initialCreators }: Discov
                     disabled={isShuffling}
                     className="group px-6 py-3 bg-[#109EB1] hover:bg-[#0d8a9a] disabled:bg-[#109EB1]/50 text-[#C7F4FA] font-hebden rounded-full transition-all flex items-center gap-3 shadow-lg shadow-[#109EB1]/30 hover:shadow-[#109EB1]/50 hover:scale-105 disabled:scale-100 self-start sm:self-auto"
                 >
-                    <Icon
-                        icon="mdi:shuffle"
+                    <Icon ssr={true} icon="mdi:shuffle"
                         className={`w-5 h-5 transition-transform ${isShuffling ? 'animate-spin' : 'group-hover:rotate-180'}`}
                     />
                     <span>SHUFFLE</span>

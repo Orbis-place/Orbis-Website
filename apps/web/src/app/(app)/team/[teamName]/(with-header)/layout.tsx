@@ -41,7 +41,7 @@ function TeamProfileLayoutContent({ children }: { children: ReactNode }) {
         return (
             <div className="max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-4 py-6 sm:py-8">
                 <div className="flex items-center justify-center min-h-screen">
-                    <Icon icon="mdi:loading" className="animate-spin text-primary" width="40" height="40" />
+                    <Icon ssr={true} icon="mdi:loading" className="animate-spin text-primary" width="40" height="40" />
                 </div>
             </div>
         );
@@ -52,7 +52,7 @@ function TeamProfileLayoutContent({ children }: { children: ReactNode }) {
             <div className="max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-4 py-6 sm:py-8">
                 <div className="flex items-center justify-center min-h-screen">
                     <div className="text-center">
-                        <Icon icon="mdi:account-group-outline" className="text-muted-foreground mx-auto mb-4" width="64" height="64" />
+                        <Icon ssr={true} icon="mdi:account-group-outline" className="text-muted-foreground mx-auto mb-4" width="64" height="64" />
                         <h1 className="font-hebden text-2xl font-bold mb-2">{error}</h1>
                         <p className="text-muted-foreground font-nunito mb-4">This team doesn't exist.</p>
                     </div>
@@ -115,7 +115,7 @@ function TeamProfileLayoutContent({ children }: { children: ReactNode }) {
                         {/* Metadata Row */}
                         <div className="flex flex-wrap items-center gap-4 text-sm text-[#C7F4FA]/60 font-nunito mb-4">
                             <span className="flex items-center gap-1.5">
-                                <Icon icon="mdi:calendar" className="w-4 h-4" />
+                                <Icon ssr={true} icon="mdi:calendar" className="w-4 h-4" />
                                 Created {formatDate(team.createdAt)}
                             </span>
                         </div>
@@ -212,15 +212,13 @@ function TeamProfileLayoutContent({ children }: { children: ReactNode }) {
                                             className="flex items-center gap-3 text-[#109EB1] hover:underline font-hebden font-semibold text-sm group"
                                         >
                                             <span className="text-[#109EB1]">
-                                                <Icon
-                                                    icon={getSocialIcon(link.type)}
+                                                <Icon ssr={true} icon={getSocialIcon(link.type)}
                                                     width="20"
                                                     height="20"
                                                 />
                                             </span>
                                             <span className="flex-1 truncate">{displayLabel}</span>
-                                            <Icon
-                                                icon="mdi:external-link"
+                                            <Icon ssr={true} icon="mdi:external-link"
                                                 width="16"
                                                 height="16"
                                                 className="text-[#C7F4FA]/50 group-hover:text-[#C7F4FA] flex-shrink-0"

@@ -99,7 +99,7 @@ export default function TeamServersPage() {
     if (loading) {
         return (
             <div className="flex items-center justify-center py-12">
-                <Icon icon="mdi:loading" className="animate-spin text-primary" width="48" height="48" />
+                <Icon ssr={true} icon="mdi:loading" className="animate-spin text-primary" width="48" height="48" />
             </div>
         );
     }
@@ -121,7 +121,7 @@ export default function TeamServersPage() {
                     onOpenChange={setIsCreateServerOpen}
                     trigger={
                         <Button className="font-hebden">
-                            <Icon icon="mdi:plus" width="20" height="20" />
+                            <Icon ssr={true} icon="mdi:plus" width="20" height="20" />
                             Create Server
                         </Button>
                     }
@@ -135,7 +135,7 @@ export default function TeamServersPage() {
                 <div className="bg-gradient-to-br from-primary/20 to-primary/5 rounded-lg p-6">
                     <div className="flex items-center gap-3">
                         <div className="flex flex-col items-center justify-center p-3 bg-primary/20 rounded-lg">
-                            <Icon icon="mdi:server" width="24" height="24" className="text-primary" />
+                            <Icon ssr={true} icon="mdi:server" width="24" height="24" className="text-primary" />
                         </div>
                         <div>
                             <p className="text-2xl font-bold font-hebden text-foreground">{totalServers}</p>
@@ -147,7 +147,7 @@ export default function TeamServersPage() {
                 <div className="bg-gradient-to-br from-secondary/40 to-secondary/10 rounded-lg p-6">
                     <div className="flex items-center gap-3">
                         <div className="flex flex-col items-center justify-center p-3 bg-primary/20 rounded-lg">
-                            <Icon icon="mdi:check-circle" width="24" height="24" className="text-primary" />
+                            <Icon ssr={true} icon="mdi:check-circle" width="24" height="24" className="text-primary" />
                         </div>
                         <div>
                             <p className="text-2xl font-bold font-hebden text-foreground">{onlineServers}</p>
@@ -159,7 +159,7 @@ export default function TeamServersPage() {
                 <div className="bg-gradient-to-br from-accent/80 to-accent/40 rounded-lg p-6">
                     <div className="flex items-center gap-3">
                         <div className="flex flex-col items-center justify-center p-3 bg-primary/20 rounded-lg">
-                            <Icon icon="mdi:account-group" width="24" height="24" className="text-primary" />
+                            <Icon ssr={true} icon="mdi:account-group" width="24" height="24" className="text-primary" />
                         </div>
                         <div>
                             <p className="text-2xl font-bold font-hebden text-foreground">{totalPlayers}</p>
@@ -181,7 +181,7 @@ export default function TeamServersPage() {
                                         {server.logo ? (
                                             <Image src={server.logo} alt={server.name} width={64} height="64" className="rounded-lg object-cover" />
                                         ) : (
-                                            <Icon icon="mdi:server" width="32" height="32" className="text-primary" />
+                                            <Icon ssr={true} icon="mdi:server" width="32" height="32" className="text-primary" />
                                         )}
                                     </div>
                                     <div className="flex-1 min-w-0">
@@ -197,7 +197,7 @@ export default function TeamServersPage() {
                                         )}
                                         <div className="flex items-center gap-4 text-sm text-muted-foreground font-nunito">
                                             <span className="flex items-center gap-1">
-                                                <Icon icon="mdi:account" width="16" height="16" />
+                                                <Icon ssr={true} icon="mdi:account" width="16" height="16" />
                                                 {server.currentPlayers}/{server.maxPlayers}
                                             </span>
                                             <span className={server.isOnline ? 'text-green-500' : 'text-red-500'}>
@@ -214,7 +214,7 @@ export default function TeamServersPage() {
                                         className="font-nunito text-sm"
                                         onClick={() => router.push(`/servers/${server.slug}`)}
                                     >
-                                        <Icon icon="mdi:eye" width="16" height="16" />
+                                        <Icon ssr={true} icon="mdi:eye" width="16" height="16" />
                                         View
                                     </Button>
                                     <Button
@@ -223,7 +223,7 @@ export default function TeamServersPage() {
                                         className="font-nunito text-sm"
                                         onClick={() => router.push(`/servers/${server.slug}/manage`)}
                                     >
-                                        <Icon icon="mdi:cog" width="16" height="16" />
+                                        <Icon ssr={true} icon="mdi:cog" width="16" height="16" />
                                         Manage
                                     </Button>
                                     <Button
@@ -232,7 +232,7 @@ export default function TeamServersPage() {
                                         className="font-nunito text-sm"
                                         onClick={() => setDeletingServerId(server.id)}
                                     >
-                                        <Icon icon="mdi:delete" width="16" height="16" />
+                                        <Icon ssr={true} icon="mdi:delete" width="16" height="16" />
                                         Delete
                                     </Button>
                                 </div>
@@ -242,14 +242,14 @@ export default function TeamServersPage() {
                 ) : (
                     <div className="flex flex-col items-center justify-center py-12">
                         <div className="p-4 bg-accent rounded-full mb-4">
-                            <Icon icon="mdi:server" width="48" height="48" className="text-muted-foreground" />
+                            <Icon ssr={true} icon="mdi:server" width="48" height="48" className="text-muted-foreground" />
                         </div>
                         <p className="text-foreground font-nunito text-lg mb-2">No servers yet</p>
                         <p className="text-muted-foreground font-nunito text-sm mb-6 text-center max-w-md">
                             This team doesn't have any servers yet. Create one to get started.
                         </p>
                         <Button className="font-hebden" onClick={() => setIsCreateServerOpen(true)}>
-                            <Icon icon="mdi:plus" width="20" height="20" />
+                            <Icon ssr={true} icon="mdi:plus" width="20" height="20" />
                             Create First Server
                         </Button>
                     </div>

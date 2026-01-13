@@ -25,6 +25,7 @@ interface OrbisDialogProps {
     showCloseButton?: boolean
     className?: string
     size?: "sm" | "md" | "lg" | "xl" | "full"
+    hideHeader?: boolean
 }
 
 /**
@@ -58,6 +59,7 @@ export function OrbisDialog({
     showCloseButton = true,
     className,
     size = "md",
+    hideHeader = false,
 }: OrbisDialogProps) {
     const sizeClasses = {
         sm: "sm:max-w-sm",
@@ -92,7 +94,7 @@ export function OrbisDialog({
                 )}
 
                 {/* Header with gradient accent */}
-                {(title || description) && (
+                {!hideHeader && (title || description) && (
                     <DialogHeader className="space-y-3 pb-4 border-b border-border/30">
                         {title && (
                             <DialogTitle className="font-hebden text-2xl font-bold text-foreground flex items-center gap-3">
@@ -106,6 +108,11 @@ export function OrbisDialog({
                             </DialogDescription>
                         )}
                     </DialogHeader>
+                )}
+
+                {/* Accessibility: Render hidden title if header is hidden */}
+                {hideHeader && title && (
+                    <DialogTitle className="sr-only">{title}</DialogTitle>
                 )}
 
                 {/* Content */}

@@ -20,7 +20,7 @@ export default function NotFound() {
                 {/* Icon */}
                 <div className="mb-6">
                     <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-[#06363D] to-[#084B54] border-2 border-[#109EB1]/30">
-                        <Icon icon="mdi:compass-off-outline" width="48" height="48" className="text-[#109EB1]" />
+                        <Icon ssr={true} icon="mdi:compass-off-outline" width="48" height="48" className="text-[#109EB1]" />
                     </div>
                 </div>
 
@@ -40,7 +40,7 @@ export default function NotFound() {
                         href="/"
                         className="flex items-center gap-2 px-6 py-3 bg-[#109EB1] hover:bg-[#0D8A9A] rounded-full font-hebden font-bold text-base text-[#C7F4FA] transition-all shadow-lg"
                     >
-                        <Icon icon="mdi:home" width="20" height="20" />
+                        <Icon ssr={true} icon="mdi:home" width="20" height="20" />
                         Back to Home
                     </Link>
 
@@ -48,7 +48,7 @@ export default function NotFound() {
                         href="/mods"
                         className="flex items-center gap-2 px-6 py-3 bg-[#06363D] hover:bg-[#084B54] border-2 border-[#109EB1]/30 rounded-full font-hebden font-bold text-base text-[#C7F4FA] transition-all"
                     >
-                        <Icon icon="mdi:package-variant" width="20" height="20" />
+                        <Icon ssr={true} icon="mdi:package-variant" width="20" height="20" />
                         Browse Marketplace
                     </Link>
                 </div>

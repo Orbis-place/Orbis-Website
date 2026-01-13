@@ -56,7 +56,7 @@ export default function TeamMembersPage() {
                 </div>
             ) : (
                 <div className="text-center py-16 border border-dashed border-[#084B54] rounded-[20px]">
-                    <Icon icon="mdi:account-group-outline" width="64" height="64" className="mx-auto mb-4 text-[#C7F4FA]/30" />
+                    <Icon ssr={true} icon="mdi:account-group-outline" width="64" height="64" className="mx-auto mb-4 text-[#C7F4FA]/30" />
                     <h3 className="font-hebden text-lg font-bold text-[#C7F4FA] mb-2">No members</h3>
                     <p className="text-sm text-[#C7F4FA]/60 font-nunito">
                         This team doesn't have any members yet.

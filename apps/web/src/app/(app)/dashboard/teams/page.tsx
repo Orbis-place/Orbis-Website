@@ -189,7 +189,7 @@ export default function TeamsPage() {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-center py-12">
-          <Icon icon="mdi:loading" width="48" height="48" className="text-primary animate-spin" />
+          <Icon ssr={true} icon="mdi:loading" width="48" height="48" className="text-primary animate-spin" />
         </div>
       </div>
     );
@@ -207,7 +207,7 @@ export default function TeamsPage() {
         </div>
         {/* Create Team Button */}
         <Button className="font-hebden" onClick={() => router.push('/teams/new')}>
-          <Icon icon="mdi:plus" width="20" height="20" />
+          <Icon ssr={true} icon="mdi:plus" width="20" height="20" />
           Create Team
         </Button>
       </div>
@@ -216,7 +216,7 @@ export default function TeamsPage() {
       {invitations.length > 0 && (
         <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-6">
           <div className="flex items-center gap-2 mb-4">
-            <Icon icon="mdi:email" width="24" height="24" className="text-yellow-500" />
+            <Icon ssr={true} icon="mdi:email" width="24" height="24" className="text-yellow-500" />
             <h2 className="font-hebden text-xl font-semibold text-foreground">Pending Invitations</h2>
             <span className="bg-yellow-500 text-background text-xs font-bold px-2 py-1 rounded-full">
               {invitations.length}
@@ -230,7 +230,7 @@ export default function TeamsPage() {
                     {invitation.team.logo ? (
                       <Image src={invitation.team.logo} alt={invitation.team.name} width={48} height={48} className="rounded-lg" />
                     ) : (
-                      <Icon icon="mdi:account-group" width="24" height="24" className="text-primary" />
+                      <Icon ssr={true} icon="mdi:account-group" width="24" height="24" className="text-primary" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -242,11 +242,11 @@ export default function TeamsPage() {
                     </p>
                     <div className="flex items-center gap-4 text-xs text-muted-foreground font-nunito">
                       <span className="flex items-center gap-1">
-                        <Icon icon="mdi:clock-outline" width="14" height="14" />
+                        <Icon ssr={true} icon="mdi:clock-outline" width="14" height="14" />
                         Invited {new Date(invitation.createdAt).toLocaleDateString()}
                       </span>
                       <span className="flex items-center gap-1">
-                        <Icon icon="mdi:calendar-clock" width="14" height="14" />
+                        <Icon ssr={true} icon="mdi:calendar-clock" width="14" height="14" />
                         Expires {new Date(invitation.expiresAt).toLocaleDateString()}
                       </span>
                     </div>
@@ -257,7 +257,7 @@ export default function TeamsPage() {
                       className="font-nunito text-sm bg-green-600 hover:bg-green-700"
                       onClick={() => handleAcceptInvitation(invitation.id)}
                     >
-                      <Icon icon="mdi:check" width="16" height="16" />
+                      <Icon ssr={true} icon="mdi:check" width="16" height="16" />
                       Accept
                     </Button>
                     <Button
@@ -266,7 +266,7 @@ export default function TeamsPage() {
                       className="font-nunito text-sm text-destructive border-destructive hover:bg-destructive/10"
                       onClick={() => handleDeclineInvitation(invitation.id)}
                     >
-                      <Icon icon="mdi:close" width="16" height="16" />
+                      <Icon ssr={true} icon="mdi:close" width="16" height="16" />
                       Decline
                     </Button>
                   </div>
@@ -289,7 +289,7 @@ export default function TeamsPage() {
                     {team.logo ? (
                       <Image src={team.logo} alt={team.name} width={64} height={64} className="rounded-lg" />
                     ) : (
-                      <Icon icon="mdi:account-group" width="32" height="32" className="text-primary" />
+                      <Icon ssr={true} icon="mdi:account-group" width="32" height="32" className="text-primary" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -300,12 +300,12 @@ export default function TeamsPage() {
                     )}
                     <div className="flex items-center gap-4 text-sm text-muted-foreground font-nunito">
                       <span className="flex items-center gap-1">
-                        <Icon icon="mdi:account-multiple" width="16" height="16" />
+                        <Icon ssr={true} icon="mdi:account-multiple" width="16" height="16" />
                         {team._count?.members || team.members.length} members
                       </span>
                       {team._count?.resources !== undefined && (
                         <span className="flex items-center gap-1">
-                          <Icon icon="mdi:package-variant" width="16" height="16" />
+                          <Icon ssr={true} icon="mdi:package-variant" width="16" height="16" />
                           {team._count.resources} resources
                         </span>
                       )}
@@ -314,11 +314,11 @@ export default function TeamsPage() {
                 </div>
                 <div className="flex gap-2 mt-4">
                   <Button size="sm" variant="outline" className="font-nunito text-sm" onClick={() => router.push(`/team/${team.name}/manage`)}>
-                    <Icon icon="mdi:cog" width="16" height="16" />
+                    <Icon ssr={true} icon="mdi:cog" width="16" height="16" />
                     Manage
                   </Button>
                   <Button size="sm" variant="destructive" className="font-nunito text-sm" onClick={() => setDeletingTeamId(team.id)}>
-                    <Icon icon="mdi:delete" width="16" height="16" />
+                    <Icon ssr={true} icon="mdi:delete" width="16" height="16" />
                     Delete
                   </Button>
                 </div>
@@ -340,7 +340,7 @@ export default function TeamsPage() {
                     {team.logo ? (
                       <Image src={team.logo} alt={team.name} width={64} height={64} className="rounded-lg" />
                     ) : (
-                      <Icon icon="mdi:account-group" width="32" height="32" className="text-primary" />
+                      <Icon ssr={true} icon="mdi:account-group" width="32" height="32" className="text-primary" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -353,12 +353,12 @@ export default function TeamsPage() {
                     )}
                     <div className="flex items-center gap-4 text-sm text-muted-foreground font-nunito">
                       <span className="flex items-center gap-1">
-                        <Icon icon="mdi:account-multiple" width="16" height="16" />
+                        <Icon ssr={true} icon="mdi:account-multiple" width="16" height="16" />
                         {team._count?.members || team.members.length} members
                       </span>
                       {team._count?.resources !== undefined && (
                         <span className="flex items-center gap-1">
-                          <Icon icon="mdi:package-variant" width="16" height="16" />
+                          <Icon ssr={true} icon="mdi:package-variant" width="16" height="16" />
                           {team._count.resources} resources
                         </span>
                       )}
@@ -367,15 +367,15 @@ export default function TeamsPage() {
                 </div>
                 <div className="flex gap-2 mt-4">
                   <Button size="sm" variant="outline" className="font-nunito text-sm" onClick={() => router.push(`/team/${team.slug}`)}>
-                    <Icon icon="mdi:eye" width="16" height="16" />
+                    <Icon ssr={true} icon="mdi:eye" width="16" height="16" />
                     View
                   </Button>
                   <Button size="sm" variant="outline" onClick={() => router.push(`/team/${team.slug}/manage`)}>
-                    <Icon icon="mdi:cog" width="16" height="16" />
+                    <Icon ssr={true} icon="mdi:cog" width="16" height="16" />
                     Manage
                   </Button>
                   <Button size="sm" variant="outline" className="font-nunito text-sm text-destructive" onClick={() => setLeavingTeamId(team.id)}>
-                    <Icon icon="mdi:logout" width="16" height="16" />
+                    <Icon ssr={true} icon="mdi:logout" width="16" height="16" />
                     Leave
                   </Button>
                 </div>
@@ -390,14 +390,14 @@ export default function TeamsPage() {
         <div className="bg-secondary/30 rounded-lg p-6">
           <div className="flex flex-col items-center justify-center py-12">
             <div className="p-4 bg-accent rounded-full mb-4">
-              <Icon icon="mdi:account-group" width="48" height="48" className="text-muted-foreground" />
+              <Icon ssr={true} icon="mdi:account-group" width="48" height="48" className="text-muted-foreground" />
             </div>
             <p className="text-foreground font-nunito text-lg mb-2">No teams yet</p>
             <p className="text-muted-foreground font-nunito text-sm mb-6 text-center max-w-md">
               Create or join teams to collaborate on projects, share resources, and work together with other creators.
             </p>
             <Button className="font-hebden" onClick={() => router.push('/teams/new')}>
-              <Icon icon="mdi:plus" width="20" height="20" />
+              <Icon ssr={true} icon="mdi:plus" width="20" height="20" />
               Create Your First Team
             </Button>
           </div>

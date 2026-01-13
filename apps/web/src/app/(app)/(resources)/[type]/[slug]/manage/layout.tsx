@@ -126,7 +126,7 @@ export default function ManageLayout({ children }: ManageLayoutProps) {
                         <nav className="bg-secondary/30 rounded-lg p-4 space-y-6">
                             <div className="space-y-3">
                                 <Badge variant="secondary" className="w-fit gap-1.5 font-nunito text-xs">
-                                    <Icon icon="mdi:cube" width="14" height="14" />
+                                    <Icon ssr={true} icon="mdi:cube" width="14" height="14" />
                                     Resource
                                 </Badge>
                                 <h2 className="font-hebden text-lg font-semibold text-foreground">
@@ -147,7 +147,7 @@ export default function ManageLayout({ children }: ManageLayoutProps) {
 
                                             const content = (
                                                 <>
-                                                    <Icon icon={item.icon} width="20" height="20" />
+                                                    <Icon ssr={true} icon={item.icon} width="20" height="20" />
                                                     <span className="flex-1">{item.label}</span>
                                                     {item.badge && (
                                                         <Badge variant="outline" className="text-xs">
