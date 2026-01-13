@@ -8,20 +8,65 @@
   import { modManager } from '$lib/services/mod-manager';
   import { onMount } from 'svelte';
   import { ModSource, type Mod } from '$lib/types/mod';
-  import { selectedSave } from '$lib/stores/saves';
+  import { saves, selectedSave } from '$lib/stores/saves';
+  import * as Select from '$lib/components/ui/select';
 
   let mods = $state<Mod[]>([]);
   let searchQuery = $state('');
   let loading = $state(true);
+  // Bind to the selected save path
+  let selectedSavePath = $state($selectedSave?.path || '');
 
+  // Derive the trigger content for the select
+  const triggerContent = $derived(
+    $saves.find((s) => s.path === selectedSavePath)?.name ?? 'Select a save...',
+  );
+
+  // Sync selectedSavePath with store changes
+  $effect(() => {
+    if (selectedSavePath) {
+      const save = $saves.find((s) => s.path === selectedSavePath);
+      if (save && save.path !== $selectedSave?.path) {
+        selectedSave.set(save);
+      }
+    }
+  });
+
+  // Sync when selectedSave changes externally
+  $effect(() => {
+    if ($selectedSave && $selectedSave.path !== selectedSavePath) {
+      selectedSavePath = $selectedSave.path;
+    }
+  });
+
+  let debounceTimer: ReturnType<typeof setTimeout>;
+
+  // Initial load
   onMount(async () => {
+    await fetchMods();
+  });
+
+  async function fetchMods() {
+    loading = true;
     try {
-      mods = await modManager.searchMods();
+      mods = await modManager.searchMods({ query: searchQuery });
     } catch (error) {
       console.error('Error loading mods:', error);
     } finally {
       loading = false;
     }
+  }
+
+  $effect(() => {
+    // React to search query changes with debounce
+    const query = searchQuery;
+
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      fetchMods();
+    }, 500);
+
+    return () => clearTimeout(debounceTimer);
   });
 
   async function handleInstall(
@@ -30,7 +75,7 @@
     version: string,
   ) {
     if (!$selectedSave) {
-      alert('Please select a save from the sidebar first.');
+      alert('Please select a save locally first.');
       return;
     }
 
@@ -67,6 +112,28 @@
 
         <!-- Search and Filters -->
         <div class="flex gap-4 items-center">
+          <!-- Save Selector -->
+          <div class="w-64">
+            <Select.Root type="single" bind:value={selectedSavePath}>
+              <Select.Trigger
+                class="h-11 w-full bg-white/5 border-white/10 text-white font-nunito hover:bg-white/10"
+              >
+                {triggerContent}
+              </Select.Trigger>
+              <Select.Content class="bg-[#06363d] border-[#084b54] text-white">
+                {#each $saves as save}
+                  <Select.Item
+                    value={save.path}
+                    label={save.name}
+                    class="hover:bg-[#109eb1]/20 focus:bg-[#109eb1]/20 cursor-pointer text-white data-[highlighted]:bg-[#109eb1]/20"
+                  >
+                    {save.name}
+                  </Select.Item>
+                {/each}
+              </Select.Content>
+            </Select.Root>
+          </div>
+
           <div class="relative w-80 group">
             <Search
               class="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors"
@@ -87,22 +154,6 @@
           </Button>
         </div>
       </div>
-
-      <!-- Current Context Banner -->
-      {#if $selectedSave}
-        <div
-          class="bg-[#109eb1]/10 border border-[#109eb1]/20 rounded-xl p-3 flex items-center gap-3"
-        >
-          <div
-            class="size-2 rounded-full bg-[#109eb1] animate-pulse ml-2"
-          ></div>
-          <p class="text-sm font-nunito text-[#c7f4fa]">
-            Installing to: <span class="font-bold text-[#109eb1]"
-              >{$selectedSave.name}</span
-            >
-          </p>
-        </div>
-      {/if}
 
       <!-- Mods Grid -->
       {#if loading}
@@ -154,13 +205,24 @@
                       >
                         {mod.name}
                       </h3>
-                      <!-- Source Badge -->
-                      <Badge
-                        variant="outline"
-                        class="text-[9px] h-4 px-1 border-white/10 text-muted-foreground"
-                      >
-                        {getRefUrl(mod.source)}
-                      </Badge>
+                      <!-- Source Badge/Icon -->
+                      <div class="flex items-center">
+                        {#if mod.source === ModSource.ORBIS}
+                          <img
+                            src="/orbis_icon.png"
+                            alt="Orbis"
+                            class="size-5 object-contain"
+                            title="Orbis"
+                          />
+                        {:else}
+                          <Badge
+                            variant="outline"
+                            class="text-[9px] h-4 px-1 border-white/10 text-muted-foreground"
+                          >
+                            {getRefUrl(mod.source)}
+                          </Badge>
+                        {/if}
+                      </div>
                     </div>
 
                     <p

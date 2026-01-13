@@ -133,9 +133,16 @@ export class OrbisModSource implements IModSource {
             if (!response.ok) return [];
 
             // API usually returns array of versions
-            const versions = await response.json();
+            const responseData = await response.json();
+            console.log(`[OrbisSource] Raw versions response for ${modId}:`, JSON.stringify(responseData));
 
-            if (!Array.isArray(versions)) return [];
+            // Handle possible { data: [...] } or { versions: [...] } wrapper
+            const versions = Array.isArray(responseData) ? responseData : (responseData.data || responseData.versions || []);
+
+            if (!Array.isArray(versions)) {
+                console.error('[OrbisSource] Versions response is not an array and has no data/versions property', responseData);
+                return [];
+            }
 
             return versions.map((v: OrbisVersion) => ({
                 version: v.versionNumber,
@@ -157,9 +164,15 @@ export class OrbisModSource implements IModSource {
     ): Promise<void> {
         try {
             const versions = await this.getModVersions(modId);
+            console.log(`[OrbisSource] Requested version: ${version}`);
+            console.log(`[OrbisSource] Available versions:`, versions.map(v => v.version));
+
             const targetVersion = versions.find(v => v.version === version);
 
-            if (!targetVersion) throw new Error('Version not found');
+            if (!targetVersion) {
+                console.error(`Version ${version} not found in available versions for mod ${modId}`);
+                throw new Error(`Version ${version} not found. Available: ${versions.map(v => v.version).join(', ')}`);
+            }
 
             console.log(`Downloading mod from: ${targetVersion.downloadUrl}`);
 

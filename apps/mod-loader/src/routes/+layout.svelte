@@ -25,6 +25,12 @@
   >
     <Sidebar />
     <div class="flex flex-1 flex-col overflow-hidden relative">
+      <!-- Drag Region -->
+      <div
+        data-tauri-drag-region
+        class="absolute top-0 left-0 right-0 h-8 z-[9999]"
+      ></div>
+
       <div
         class="absolute inset-0 bg-gradient-to-br from-[#109eb1]/5 via-transparent to-[#032125] pointer-events-none z-0"
       ></div>

@@ -129,6 +129,19 @@
           >
             Open Mod Folder
           </Button>
+          <Button
+            size="sm"
+            class="h-8 text-xs font-nunito bg-[#109eb1] hover:bg-[#109eb1]/90 text-white border-0 gap-2"
+            onclick={() => {
+              if (currentSave) {
+                selectSave(currentSave);
+                goto('/browse');
+              }
+            }}
+          >
+            <Package class="size-3.5" />
+            Add Mods
+          </Button>
         </div>
       </div>
 

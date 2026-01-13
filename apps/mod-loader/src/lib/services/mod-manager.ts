@@ -145,14 +145,47 @@ export class ModManager {
         const { join } = await import('@tauri-apps/api/path');
         const { exists, mkdir } = await import('@tauri-apps/plugin-fs');
 
-        const modsPath = await join(saveName, 'mods'); // saveName here is actually the full path based on my saves.ts change
+        const modsPath = await join(saveName, 'mods');
 
         if (!await exists(modsPath)) {
             await mkdir(modsPath, { recursive: true });
         }
 
-        // TODO: Get actual filename from content-disposition if possible, or use modId-version.jar
-        const fileName = `${modId}-${version}.jar`;
+        // Get the real filename by checking the headers
+        let fileName = `${modId}-${version}.jar`; // Fallback
+        try {
+            // We need to find the download URL first
+            const versions = await source.getModVersions(modId);
+            const targetVersion = versions.find(v => v.version === version);
+
+            if (targetVersion) {
+                const { fetch } = await import('@tauri-apps/plugin-http');
+                console.log(`[ModManager] Checking headers for ${targetVersion.downloadUrl}`);
+
+                const response = await fetch(targetVersion.downloadUrl, { method: 'HEAD' });
+
+                // Try to get from Content-Disposition
+                const disposition = response.headers.get('content-disposition');
+                if (disposition) {
+                    const match = disposition.match(/filename="?([^"]+)"?/);
+                    if (match && match[1]) {
+                        fileName = match[1];
+                        console.log(`[ModManager] Resolved filename from headers: ${fileName}`);
+                    }
+                } else if (response.url) {
+                    // Try to get from final URL (handling redirects)
+                    const urlParts = response.url.split('/');
+                    const lastPart = urlParts[urlParts.length - 1];
+                    if (lastPart && lastPart.endsWith('.jar')) {
+                        fileName = decodeURIComponent(lastPart);
+                        console.log(`[ModManager] Resolved filename from URL: ${fileName}`);
+                    }
+                }
+            }
+        } catch (error) {
+            console.warn('[ModManager] Failed to resolve real filename, using fallback:', error);
+        }
+
         const destination = await join(modsPath, fileName);
 
         await source.downloadMod(modId, version, destination);

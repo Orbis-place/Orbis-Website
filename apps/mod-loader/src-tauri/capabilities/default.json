@@ -7,6 +7,7 @@
   ],
   "permissions": [
     "core:default",
+    "core:window:allow-start-dragging",
     "opener:default",
     {
       "identifier": "http:default",
@@ -18,6 +19,28 @@
     },
     {
       "identifier": "fs:default",
+      "allow": [
+        {
+          "path": "$HOME/Library/Application Support/Hytale/UserData/Saves"
+        },
+        {
+          "path": "$HOME/Library/Application Support/Hytale/UserData/Saves/**"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:allow-write-file",
+      "allow": [
+        {
+          "path": "$HOME/Library/Application Support/Hytale/UserData/Saves"
+        },
+        {
+          "path": "$HOME/Library/Application Support/Hytale/UserData/Saves/**"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:allow-mkdir",
       "allow": [
         {
           "path": "$HOME/Library/Application Support/Hytale/UserData/Saves"
