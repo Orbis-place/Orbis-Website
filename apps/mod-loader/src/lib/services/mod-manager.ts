@@ -1,5 +1,6 @@
 import type { IModSource } from './mod-source.interface';
-import type { Mod, ModDetails, ModFilters, InstalledMod } from '../types/mod';
+import type { Mod, ModDetails, ModFilters } from '../types/mod';
+import type { InstalledMod } from '../types/installed-mod';
 import { OrbisModSource } from './sources/orbis-source';
 import { CurseForgeModSource } from './sources/curseforge-source';
 
@@ -134,7 +135,7 @@ export class ModManager {
         modId: string,
         sourceName: string,
         version: string,
-        saveName: string
+        savePath: string
     ): Promise<void> {
         const source = this.sources.get(sourceName);
         if (!source) {
@@ -144,8 +145,9 @@ export class ModManager {
         // Import necessary Tauri functions
         const { join } = await import('@tauri-apps/api/path');
         const { exists, mkdir } = await import('@tauri-apps/plugin-fs');
+        const { invoke } = await import('@tauri-apps/api/core');
 
-        const modsPath = await join(saveName, 'mods');
+        const modsPath = await join(savePath, 'mods');
 
         if (!await exists(modsPath)) {
             await mkdir(modsPath, { recursive: true });
@@ -190,25 +192,49 @@ export class ModManager {
 
         await source.downloadMod(modId, version, destination);
 
-        console.log(`Installed ${modId} version ${version} to ${destination}`);
-        // TODO: Update installed mods metadata in save config
+        // Extract manifest from the downloaded jar and add to config.json
+        try {
+            // Get all installed mods to find the one we just installed
+            const installedMods = await invoke<InstalledMod[]>('get_installed_mods', { savePath });
+            const installedMod = installedMods.find(mod => mod.jar_name === fileName);
 
+            if (installedMod) {
+                await invoke('add_mod_to_config', {
+                    savePath,
+                    group: installedMod.manifest.Group,
+                    name: installedMod.manifest.Name
+                });
+                console.log(`[ModManager] Added ${installedMod.manifest.Group}:${installedMod.manifest.Name} to config.json`);
+            }
+        } catch (error) {
+            console.error('[ModManager] Failed to add mod to config.json:', error);
+            // Don't fail the installation, just log the error
+        }
+
+        console.log(`Installed ${modId} version ${version} to ${destination}`);
     }
 
     /**
      * Remove a mod from a save
      */
-    async removeMod(modId: string, saveName: string): Promise<void> {
+    async removeMod(modId: string, savePath: string): Promise<void> {
         // TODO: Implement mod removal via Tauri backend
-        console.log(`Removing mod ${modId} from save ${saveName}`);
+        console.log(`Removing mod ${modId} from save ${savePath}`);
     }
 
     /**
      * Get installed mods for a specific save
      */
-    async getInstalledMods(saveName: string): Promise<InstalledMod[]> {
-        // TODO: Implement via Tauri backend
-        return [];
+    async getInstalledMods(savePath: string): Promise<InstalledMod[]> {
+        const { invoke } = await import('@tauri-apps/api/core');
+
+        try {
+            const mods = await invoke<InstalledMod[]>('get_installed_mods', { savePath });
+            return mods;
+        } catch (error) {
+            console.error('[ModManager] Failed to get installed mods:', error);
+            return [];
+        }
     }
 }
 

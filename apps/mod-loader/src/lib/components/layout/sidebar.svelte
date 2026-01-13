@@ -56,10 +56,10 @@
       </h3>
       <div class="space-y-1">
         <a
-          href="/browse"
+          href="/"
           class={cn(
             'group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all font-nunito',
-            isActive('/browse')
+            isActive('/')
               ? 'bg-[#109eb1]/10 text-[#109eb1] shadow-[0_0_20px_rgba(16,158,177,0.15)] border border-[#109eb1]/20'
               : 'text-muted-foreground hover:bg-white/5 hover:text-foreground border border-transparent',
           )}
@@ -67,13 +67,13 @@
           <Compass
             class={cn(
               'size-5 shrink-0 transition-transform group-hover:scale-110',
-              isActive('/browse')
+              isActive('/')
                 ? 'text-[#109eb1]'
                 : 'text-muted-foreground group-hover:text-foreground',
             )}
           />
           <span class="flex-1 text-left">Browse Mods</span>
-          {#if isActive('/browse')}
+          {#if isActive('/')}
             <ChevronRight class="size-4 opacity-50" />
           {/if}
         </a>

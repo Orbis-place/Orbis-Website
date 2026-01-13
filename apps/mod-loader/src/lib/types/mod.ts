@@ -53,13 +53,6 @@ export interface ModFilters {
     offset?: number;
 }
 
-export interface InstalledMod {
-    mod: Mod;
-    version: string;
-    installedAt: string;
-    saveName: string;
-}
-
 export interface HytaleSave {
     name: string;
     path: string;
