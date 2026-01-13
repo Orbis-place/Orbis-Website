@@ -13,27 +13,103 @@
     Trash2,
     RefreshCw,
   } from 'lucide-svelte';
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
   import { goto } from '$app/navigation';
+  import { modManager } from '$lib/services/mod-manager';
+  import type { InstalledMod } from '$lib/types/installed-mod';
+  import { invoke } from '@tauri-apps/api/core';
+  import { openPath, openUrl } from '@tauri-apps/plugin-opener';
+  import { toast } from '$lib/stores/toast';
 
-  $: saveName = $page.params.id; // Using name as ID for now
-  $: currentSave = $saves.find((s) => s.name === saveName);
+  const saveName = $derived($page.params.id);
+  const currentSave = $derived($saves.find((s) => s.name === saveName));
 
-  onMount(() => {
-    if (!currentSave) {
-      // Handle 404
-      goto('/');
-    } else {
+  let installedMods = $state<InstalledMod[]>([]);
+  let loading = $state(true);
+  let pollInterval: ReturnType<typeof setInterval>;
+  let lastSavePath = '';
+
+  $effect(() => {
+    if (currentSave && currentSave.path !== lastSavePath) {
+      lastSavePath = currentSave.path;
+      installedMods = [];
+      loading = true;
       selectSave(currentSave);
+      loadInstalledMods();
+    } else if (!currentSave && $saves.length > 0) {
+      // Only redirect if saves are loaded but this one isn't found
+      goto('/');
     }
   });
 
-  // Mock installed mods for this save
-  let installedMods = [
-    { name: 'Optifine', version: 'HD U G8', enabled: true },
-    { name: 'Just Enough Items', version: '1.18.2', enabled: true },
-    { name: 'JourneyMap', version: '5.8.5', enabled: false },
-  ];
+  onMount(() => {
+    // Poll for updates every 10 seconds
+    pollInterval = setInterval(loadInstalledMods, 10000);
+  });
+
+  onDestroy(() => {
+    if (pollInterval) {
+      clearInterval(pollInterval);
+    }
+  });
+
+  async function loadInstalledMods() {
+    if (!currentSave) return;
+
+    // Don't set loading=true for background polls to avoid flickering
+    // Only set it if we have no mods (initial load)
+    if (installedMods.length === 0) {
+      loading = true;
+    }
+
+    try {
+      const mods = await modManager.getInstalledMods(currentSave.path);
+      // Only update if changed to verify deep equality if needed,
+      // but for now replacing is fine as Svelte handles it reasonably well
+      installedMods = mods;
+    } catch (error) {
+      console.error('Failed to load installed mods:', error);
+    } finally {
+      loading = false;
+    }
+  }
+
+  async function toggleMod(mod: InstalledMod) {
+    if (!currentSave) return;
+
+    try {
+      await invoke('toggle_mod', {
+        savePath: currentSave.path,
+        group: mod.manifest.Group,
+        name: mod.manifest.Name,
+        enabled: !mod.enabled,
+      });
+
+      // Reload the mods list
+      await loadInstalledMods();
+    } catch (error) {
+      console.error('Failed to toggle mod:', error);
+      toast.error('Failed to toggle mod', String(error));
+    }
+  }
+
+  async function openSaveFolder() {
+    if (!currentSave) return;
+    try {
+      await openPath(currentSave.path);
+    } catch (error) {
+      console.error('Failed to open save folder:', error);
+    }
+  }
+
+  async function openModFolder() {
+    if (!currentSave) return;
+    try {
+      await openPath(currentSave.path + '/mods');
+    } catch (error) {
+      console.error('Failed to open mod folder:', error);
+    }
+  }
 </script>
 
 {#if currentSave}
@@ -95,6 +171,8 @@
             size="icon"
             variant="outline"
             class="border-[#084b54] hover:bg-[#109eb1]/10 text-[#c7f4fa] bg-[#032125]"
+            onclick={openSaveFolder}
+            title="Open Save Folder"
           >
             <FolderOpen class="size-5" />
           </Button>
@@ -119,13 +197,7 @@
             variant="outline"
             size="sm"
             class="h-8 text-xs font-nunito border-[#084b54] bg-[#032125] text-[#c7f4fa] hover:bg-[#109eb1]/10 hover:text-[#c7f4fa]"
-          >
-            Check for Updates
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            class="h-8 text-xs font-nunito border-[#084b54] bg-[#032125] text-[#c7f4fa] hover:bg-[#109eb1]/10 hover:text-[#c7f4fa]"
+            onclick={openModFolder}
           >
             Open Mod Folder
           </Button>
@@ -135,7 +207,7 @@
             onclick={() => {
               if (currentSave) {
                 selectSave(currentSave);
-                goto('/browse');
+                goto('/');
               }
             }}
           >
@@ -163,16 +235,25 @@
             {#each installedMods as mod}
               <tr class="group hover:bg-[#109eb1]/5 transition-colors">
                 <td class="px-6 py-4">
-                  <span class="font-bold text-[#c7f4fa]">{mod.name}</span>
+                  <div class="flex flex-col">
+                    <span class="font-bold text-[#c7f4fa]"
+                      >{mod.manifest.Name}</span
+                    >
+                    <span class="text-xs text-[#c7f4fa]/50"
+                      >by {mod.manifest.Authors.map((a) => a.Name).join(
+                        ', ',
+                      )}</span
+                    >
+                  </div>
                 </td>
                 <td class="px-6 py-4 text-sm text-[#c7f4fa]/70">
-                  {mod.version}
+                  {mod.manifest.Version}
                 </td>
                 <td class="px-6 py-4">
                   <Badge
                     variant={mod.enabled ? 'default' : 'secondary'}
                     class={mod.enabled
-                      ? 'bg-[#109eb1]/20 text-[#109eb1] hover:bg-[#109eb1]/30'
+                      ? 'bg-[#109eb1]/20 text-[#109eb1]'
                       : 'bg-[#032125] text-[#c7f4fa]/50'}
                   >
                     {mod.enabled ? 'Enabled' : 'Disabled'}
@@ -182,17 +263,30 @@
                   <div
                     class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity"
                   >
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      class="size-8 hover:bg-[#032125] text-[#c7f4fa]/70 hover:text-[#109eb1]"
-                    >
-                      <RefreshCw class="size-4" />
-                    </Button>
+                    {#if mod.enabled}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        class="h-8 text-xs border-[#084b54] bg-[#032125] text-[#c7f4fa] hover:bg-red-500/10 hover:text-red-400 hover:border-red-500"
+                        onclick={() => toggleMod(mod)}
+                      >
+                        Disable
+                      </Button>
+                    {:else}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        class="h-8 text-xs border-[#084b54] bg-[#032125] text-[#c7f4fa] hover:bg-[#10b981]/10 hover:text-[#10b981] hover:border-[#10b981]"
+                        onclick={() => toggleMod(mod)}
+                      >
+                        Enable
+                      </Button>
+                    {/if}
                     <Button
                       size="icon"
                       variant="ghost"
                       class="size-8 hover:bg-[#032125] text-[#c7f4fa]/70 hover:text-red-400"
+                      title="Remove mod"
                     >
                       <Trash2 class="size-4" />
                     </Button>

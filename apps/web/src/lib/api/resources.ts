@@ -13,8 +13,7 @@ export enum ResourceType {
     PREMADE_SERVER = 'PREMADE_SERVER',
     WORLD = 'WORLD',
     PREFAB = 'PREFAB',
-    DATA_PACK = 'DATA_PACK',
-    TOOLS_SCRIPTS = 'TOOLS_SCRIPTS',
+    DATA_PACK = 'DATA_PACK'
 }
 
 // Sort options enum
@@ -138,8 +137,6 @@ export function mapTypeToBackendEnum(type: string): ResourceType | undefined {
         'data-pack': ResourceType.DATA_PACK,
         'modpacks': ResourceType.MODPACK,
         'modpack': ResourceType.MODPACK,
-        'tools-scripts': ResourceType.TOOLS_SCRIPTS,
-        'tool': ResourceType.TOOLS_SCRIPTS,
     };
 
     return typeMapping[type.toLowerCase()];

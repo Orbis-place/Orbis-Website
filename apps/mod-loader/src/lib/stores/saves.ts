@@ -1,24 +1,33 @@
-import { writable } from 'svelte/store';
+import { writable, get } from 'svelte/store';
 import type { HytaleSave } from '$lib/types/mod';
 import { readDir, exists } from '@tauri-apps/plugin-fs';
-import { homeDir, join } from '@tauri-apps/api/path';
+import { join } from '@tauri-apps/api/path';
+import { settings } from './settings';
 
 function createSavesStore() {
     const { subscribe, set, update } = writable<HytaleSave[]>([]);
+
+    let pollInterval: ReturnType<typeof setInterval> | null = null;
 
     return {
         subscribe,
         load: async () => {
             try {
-                const home = await homeDir();
-                console.log('Home dir:', home);
+                // Ensure settings are loaded
+                let hytaleRoot = get(settings).hytaleRoot;
+                if (!hytaleRoot) {
+                    await settings.load();
+                    hytaleRoot = get(settings).hytaleRoot;
+                }
 
-                // TODO: Handle Windows path
-                const saveRoot = await join(home, 'Library', 'Application Support', 'Hytale', 'UserData', 'Saves');
-                console.log('Scanning saves at:', saveRoot);
+                // Construct UserData/Saves path from root
+                const userDataDir = await join(hytaleRoot, 'UserData');
+                const saveRoot = await join(userDataDir, 'Saves');
+
+                // console.log('Scanning saves at:', saveRoot);
 
                 const existsResult = await exists(saveRoot);
-                console.log('Save root exists:', existsResult);
+                // console.log('Save root exists:', existsResult);
 
                 if (!existsResult) {
                     console.warn('Saves directory not found:', saveRoot);
@@ -26,12 +35,12 @@ function createSavesStore() {
                 }
 
                 const entries = await readDir(saveRoot);
-                console.log(`Found ${entries.length} entries in saves dir`);
+                // console.log(`Found ${entries.length} entries in saves dir`);
 
                 const saves: HytaleSave[] = [];
 
                 for (const entry of entries) {
-                    console.log(`Entry: ${entry.name}, isDirectory: ${entry.isDirectory}`);
+                    // console.log(`Entry: ${entry.name}, isDirectory: ${entry.isDirectory}`);
                     if (entry.isDirectory) {
                         const fullPath = await join(saveRoot, entry.name);
                         // Basic info for now
@@ -43,10 +52,21 @@ function createSavesStore() {
                         });
                     }
                 }
-                console.log('Saves loaded:', saves);
+                // console.log('Saves loaded:', saves);
                 set(saves);
             } catch (e) {
                 console.error('Failed to load saves:', e);
+            }
+        },
+        startPolling: function () {
+            if (pollInterval) return;
+            this.load();
+            pollInterval = setInterval(() => this.load(), 10000);
+        },
+        stopPolling: function () {
+            if (pollInterval) {
+                clearInterval(pollInterval);
+                pollInterval = null;
             }
         },
         add: (save: HytaleSave) => update(saves => [...saves, save]),
@@ -62,7 +82,10 @@ export const selectedSave = writable<HytaleSave | null>(null);
 
 // Initialize saves on load
 setTimeout(() => {
-    saves.load();
+    // Initialize saves on load and start polling
+    setTimeout(() => {
+        saves.startPolling();
+    }, 100);
 }, 100);
 
 export function selectSave(save: HytaleSave) {

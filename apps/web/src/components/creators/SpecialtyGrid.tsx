@@ -13,8 +13,7 @@ const categoryIcons: Record<string, string> = {
     'plugins': 'mdi:power-plug',
     'asset-packs': 'mdi:palette',
     'prefabs': 'mdi:cube-outline',
-    'data-packs': 'mdi:database',
-    'tools-scripts': 'mdi:wrench',
+    'data-packs': 'mdi:database'
 };
 
 // Map category IDs to match API response
@@ -25,8 +24,7 @@ const categoryIdMap: Record<string, string> = {
     'plugins': 'plugin',
     'asset-packs': 'asset-pack',
     'prefabs': 'prefab',
-    'data-packs': 'data-pack',
-    'tools-scripts': 'tools-scripts',
+    'data-packs': 'data-pack'
 };
 
 interface SpecialtyCardProps {

@@ -161,8 +161,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         'plugins',
         'asset-packs',
         'prefabs',
-        'data-packs',
-        'tools-scripts',
+        'data-packs'
     ]
 
     const resourceTypeRoutes: MetadataRoute.Sitemap = resourceTypes.map((type) => ({

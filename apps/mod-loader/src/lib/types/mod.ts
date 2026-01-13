@@ -1,6 +1,5 @@
 export enum ModSource {
     ORBIS = 'orbis',
-    CURSEFORGE = 'curseforge',
 }
 
 export interface Mod {
@@ -51,13 +50,7 @@ export interface ModFilters {
     page?: number;
     limit?: number;
     offset?: number;
-}
-
-export interface InstalledMod {
-    mod: Mod;
-    version: string;
-    installedAt: string;
-    saveName: string;
+    type?: 'MOD' | 'WORLD' | 'PLUGIN';
 }
 
 export interface HytaleSave {

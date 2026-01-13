@@ -22,7 +22,7 @@ const tabs: TabConfig[] = [
     { id: 'asset-packs', label: 'Asset Packs', href: '/asset-packs', icon: <ImageIcon className="w-6 h-6" /> },
     { id: 'prefabs', label: 'Prefabs', href: '/prefabs', icon: <Boxes className="w-6 h-6" /> },
     { id: 'data-packs', label: 'Data Packs', href: '/data-packs', icon: <Database className="w-6 h-6" /> },
-    { id: 'tools-scripts', label: 'Tools & Scripts', href: '/tools-scripts', icon: <Wrench className="w-6 h-6" /> },
+
 ];
 
 export default function MarketplaceLayoutClient({ children }: { children: ReactNode }) {

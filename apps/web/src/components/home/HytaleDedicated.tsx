@@ -10,7 +10,7 @@ const contentTypes = [
     { name: 'Asset Packs', icon: 'mdi:palette' },
     { name: 'Prefabs', icon: 'mdi:cube-outline' },
     { name: 'Data Packs', icon: 'mdi:database' },
-    { name: 'Tools & Scripts', icon: 'mdi:wrench' },
+
 ];
 
 export function HytaleDedicated() {

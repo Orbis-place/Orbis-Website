@@ -60,8 +60,7 @@ function NewResourcePageContent() {
             [ResourceType.ASSET_PACK]: 'asset-pack',
             [ResourceType.DATA_PACK]: 'data-pack',
             [ResourceType.MODPACK]: 'modpack',
-            [ResourceType.PREMADE_SERVER]: 'premade-server',
-            [ResourceType.TOOLS_SCRIPTS]: 'tools-scripts',
+            [ResourceType.PREMADE_SERVER]: 'premade-server'
         };
         return pathMap[type];
     };
@@ -76,8 +75,7 @@ function NewResourcePageContent() {
             [ResourceType.ASSET_PACK]: 'asset-packs',
             [ResourceType.DATA_PACK]: 'data-packs',
             [ResourceType.MODPACK]: 'modpacks',
-            [ResourceType.PREMADE_SERVER]: 'premade-servers',
-            [ResourceType.TOOLS_SCRIPTS]: 'tools-scripts',
+            [ResourceType.PREMADE_SERVER]: 'premade-servers'
         };
         return `orbis.place/${pathMap[type]}/`;
     };

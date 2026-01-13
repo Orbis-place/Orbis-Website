@@ -36,7 +36,7 @@ const marketplaceCategories = [
     { name: 'Asset Packs', href: '/asset-packs', icon: 'mdi:image-multiple', description: '3D models, textures & sounds' },
     { name: 'Prefabs', href: '/prefabs', icon: 'mdi:cube-outline', description: 'Ready-to-use structures & builds' },
     { name: 'Data packs', href: '/data-packs', icon: 'mdi:database', description: 'Vanilla game modifications' },
-    { name: 'Tools & Scripts', href: '/tools-scripts', icon: 'mdi:tools', description: 'External utilities & automation' },
+
 ];
 
 interface NavbarProps {

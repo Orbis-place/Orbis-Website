@@ -71,8 +71,9 @@ export class OrbisModSource implements IModSource {
             const params = new URLSearchParams();
             params.append('limit', '50');
 
-            // Only fetch mods, exclude plugins etc.
-            params.append('type', 'MOD');
+            // Set resource type (default to PLUGIN for mods)
+            const type = filters?.type || 'PLUGIN';
+            params.append('type', type);
 
             if (filters?.query) {
                 params.append('search', filters.query);
