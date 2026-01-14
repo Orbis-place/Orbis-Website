@@ -16,7 +16,7 @@ import { MarketplaceItem } from '@/components/marketplace/MarketplaceCard';
 
 export const metadata: Metadata = {
     title: 'Discover Resources',
-    description: 'Discover mods, plugins, worlds and more created by the Hytale community on Orbis.',
+    description: 'Discover mods, prefabs, worlds and more created by the Hytale community on Orbis.',
 };
 
 export default async function ResourcesPage() {
@@ -262,7 +262,7 @@ export default async function ResourcesPage() {
                     </div>
                     <h2 className="font-hebden text-3xl text-[#C7F4FA] mb-4">Explore the Full Marketplace</h2>
                     <p className="text-[#C7F4FA]/60 max-w-lg mb-8">
-                        Dive into thousands of mods, plugins, and worlds created by the community.
+                        Dive into thousands of mods, prefabs, and worlds created by the community.
                     </p>
                     <Link
                         href="/mods"

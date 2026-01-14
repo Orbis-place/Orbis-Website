@@ -18,7 +18,6 @@ const tabs: TabConfig[] = [
     { id: 'mods', label: 'Mods', href: '/mods', icon: <Box className="w-6 h-6" /> },
     { id: 'modpacks', label: 'Modpacks', href: '/modpacks', icon: <Package className="w-6 h-6" /> },
     { id: 'worlds', label: 'Worlds', href: '/worlds', icon: <Globe className="w-6 h-6" /> },
-    { id: 'plugins', label: 'Plugins', href: '/plugins', icon: <Plug className="w-6 h-6" /> },
     { id: 'asset-packs', label: 'Asset Packs', href: '/asset-packs', icon: <ImageIcon className="w-6 h-6" /> },
     { id: 'prefabs', label: 'Prefabs', href: '/prefabs', icon: <Boxes className="w-6 h-6" /> },
     { id: 'data-packs', label: 'Data Packs', href: '/data-packs', icon: <Database className="w-6 h-6" /> },

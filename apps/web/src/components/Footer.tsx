@@ -82,11 +82,6 @@ export default function Footer() {
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/plugins" className="text-[#C7F4FA]/70 hover:text-[#109EB1] transition-colors">
-                                    Plugins
-                                </Link>
-                            </li>
-                            <li>
                                 <Link href="/asset-packs" className="text-[#C7F4FA]/70 hover:text-[#109EB1] transition-colors">
                                     Asset Packs
                                 </Link>

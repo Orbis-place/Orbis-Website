@@ -25,8 +25,8 @@ export const metadata: Metadata = {
         default: 'Orbis - Hytale Community Hub',
         template: '%s | Orbis.place'
     },
-    description: 'An Hytale community hub. Discover servers, browse marketplace for plugins & mods. Open-source platform for players and creators.',
-    keywords: ['Hytale', 'mods', 'plugins', 'servers', 'marketplace', 'community', 'modding', 'gaming', 'open-source'],
+    description: 'An Hytale community hub. Discover servers, browse marketplace for worlds & mods. Open-source platform for players and creators.',
+    keywords: ['Hytale', 'mods', 'prefabs', 'servers', 'marketplace', 'community', 'modding', 'gaming', 'open-source'],
     authors: [{ name: 'Orbis Team' }],
     creator: 'Orbis',
     publisher: 'Orbis',
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
         url: '/',
         siteName: 'Orbis',
         title: 'Orbis - Hytale Community Hub',
-        description: 'An Hytale community hub. Discover servers, browse marketplace for plugins & mods. Open-source platform for players and creators.',
+        description: 'An Hytale community hub. Discover servers, browse marketplace for worlds & mods. Open-source platform for players and creators.',
         images: [
             {
                 url: '/og-image.png',
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     twitter: {
         card: 'summary_large_image',
         title: 'Orbis - Hytale Community Hub',
-        description: 'An Hytale community hub. Discover servers, browse marketplace for plugins & mods.',
+        description: 'An Hytale community hub. Discover servers, browse marketplace for worlds & mods.',
         creator: '@OrbisPlace',
         images: ['/og-image.png'],
     },

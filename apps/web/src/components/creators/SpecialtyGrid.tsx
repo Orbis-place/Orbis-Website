@@ -10,7 +10,6 @@ const categoryIcons: Record<string, string> = {
     'mods': 'mdi:puzzle',
     'modpacks': 'mdi:package-variant',
     'worlds': 'mdi:earth',
-    'plugins': 'mdi:power-plug',
     'asset-packs': 'mdi:palette',
     'prefabs': 'mdi:cube-outline',
     'data-packs': 'mdi:database'
@@ -21,7 +20,6 @@ const categoryIdMap: Record<string, string> = {
     'mods': 'mod',
     'modpacks': 'modpack',
     'worlds': 'world',
-    'plugins': 'plugin',
     'asset-packs': 'asset-pack',
     'prefabs': 'prefab',
     'data-packs': 'data-pack'

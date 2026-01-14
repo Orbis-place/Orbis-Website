@@ -4,7 +4,6 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 
 // Map resource types to URL paths
 const resourceTypeToPath: Record<string, string> = {
-    'PLUGIN': 'plugin',
     'MOD': 'mod',
     'MODPACK': 'modpack',
     'WORLD': 'world',
@@ -158,7 +157,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         'mods',
         'modpacks',
         'worlds',
-        'plugins',
         'asset-packs',
         'prefabs',
         'data-packs'

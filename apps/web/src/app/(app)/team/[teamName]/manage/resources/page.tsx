@@ -14,7 +14,7 @@ interface Resource {
     id: string;
     name: string;
     slug: string;
-    type: 'PLUGIN' | 'MOD' | 'WORLD' | 'DATA_PACK' | 'ASSET_PACK' | 'PREFAB' | 'MODPACK' | 'TOOLS_SCRIPTS';
+    type: 'MOD' | 'WORLD' | 'DATA_PACK' | 'ASSET_PACK' | 'PREFAB' | 'MODPACK' | 'TOOLS_SCRIPTS';
     status: 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'SUSPENDED' | 'ARCHIVED';
     tagline?: string;
     iconUrl?: string;
@@ -116,7 +116,6 @@ export default function TeamResourcesPage() {
 
     const getTypeIcon = (type: Resource['type']) => {
         switch (type) {
-            case 'PLUGIN': return 'mdi:puzzle';
             case 'MOD': return 'mdi:package-variant';
             case 'WORLD': return 'mdi:earth';
             case 'DATA_PACK': return 'mdi:database';
@@ -276,7 +275,7 @@ export default function TeamResourcesPage() {
                         </div>
                         <p className="text-foreground font-nunito text-lg mb-2">No resources yet</p>
                         <p className="text-muted-foreground font-nunito text-sm mb-6 text-center max-w-md">
-                            Start creating resources for this team. Upload mods, plugins, worlds, and more.
+                            Start creating resources for this team. Upload mods, prefabs, worlds, and more.
                         </p>
                         <Button
                             className="font-hebden"

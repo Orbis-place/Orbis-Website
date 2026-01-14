@@ -26,7 +26,7 @@ export function CreateResourceDialog({ open, onOpenChange, trigger, onSuccess, d
         name: '',
         slug: '',
         tagline: '',
-        type: ResourceType.PLUGIN,
+        type: ResourceType.MOD,
         teamId: defaultTeamId, // Use default team if provided
     });
 
@@ -43,7 +43,6 @@ export function CreateResourceDialog({ open, onOpenChange, trigger, onSuccess, d
     // Map ResourceType to URL path
     const getResourcePath = (type: ResourceType): string => {
         const pathMap: Record<ResourceType, string> = {
-            [ResourceType.PLUGIN]: 'plugins',
             [ResourceType.MOD]: 'mods',
             [ResourceType.WORLD]: 'worlds',
             [ResourceType.PREFAB]: 'prefabs',
@@ -92,7 +91,7 @@ export function CreateResourceDialog({ open, onOpenChange, trigger, onSuccess, d
                 name: '',
                 slug: '',
                 tagline: '',
-                type: ResourceType.PLUGIN,
+                type: ResourceType.MOD,
                 teamId: undefined,
             });
             onOpenChange(false);
@@ -180,7 +179,7 @@ export function CreateResourceDialog({ open, onOpenChange, trigger, onSuccess, d
                         name="name"
                         value={formData.name}
                         onChange={handleInputChange}
-                        placeholder="My Awesome Plugin"
+                        placeholder="My Awesome Mod"
                         required
                     />
                 </div>
@@ -250,14 +249,12 @@ export function CreateResourceDialog({ open, onOpenChange, trigger, onSuccess, d
                             <SelectValue placeholder="Select a type" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value={ResourceType.PLUGIN}>Plugin</SelectItem>
                             <SelectItem value={ResourceType.MOD}>Mod</SelectItem>
                             <SelectItem value={ResourceType.WORLD}>World</SelectItem>
                             <SelectItem value={ResourceType.DATA_PACK}>Data Pack</SelectItem>
                             <SelectItem value={ResourceType.ASSET_PACK}>Asset Pack</SelectItem>
                             <SelectItem value={ResourceType.PREFAB}>Prefab</SelectItem>
                             <SelectItem value={ResourceType.MODPACK}>Modpack</SelectItem>
-                            <SelectItem value={ResourceType.TOOLS_SCRIPTS}>Tool / Script</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>

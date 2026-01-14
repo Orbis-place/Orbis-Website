@@ -32,7 +32,6 @@ const marketplaceCategories = [
     { name: 'Mods', href: '/mods', icon: 'mdi:puzzle', description: 'New gameplay mechanics & items' },
     { name: 'Modpacks', href: '/modpacks', icon: 'mdi:package-variant', description: 'Complete curated game experiences' },
     { name: 'Worlds', href: '/worlds', icon: 'mdi:earth', description: 'Custom maps, lobbies & spawns' },
-    { name: 'Plugins', href: '/plugins', icon: 'mdi:power-plug', description: 'Server management & features' },
     { name: 'Asset Packs', href: '/asset-packs', icon: 'mdi:image-multiple', description: '3D models, textures & sounds' },
     { name: 'Prefabs', href: '/prefabs', icon: 'mdi:cube-outline', description: 'Ready-to-use structures & builds' },
     { name: 'Data packs', href: '/data-packs', icon: 'mdi:database', description: 'Vanilla game modifications' },
@@ -126,7 +125,7 @@ export default function Navbar({ session }: NavbarProps) {
                                                     </div>
                                                     <div className="flex flex-col gap-0.5">
                                                         <span className="font-hebden font-semibold text-foreground text-sm">Resources</span>
-                                                        <span className="font-nunito text-xs text-foreground/60">Browse mods, plugins, and more</span>
+                                                        <span className="font-nunito text-xs text-foreground/60">Browse mods, worlds, and more</span>
                                                     </div>
                                                 </NavigationMenuLink>
                                             </li>
@@ -247,7 +246,7 @@ export default function Navbar({ session }: NavbarProps) {
                                             </div>
                                             <div className="flex flex-col">
                                                 <span className="font-semibold">New Resource</span>
-                                                <span className="text-xs text-foreground/60 font-nunito">Mod, plugin, world...</span>
+                                                <span className="text-xs text-foreground/60 font-nunito">Mod, prefab, world...</span>
                                             </div>
                                         </div>
                                     </DropdownMenuItem>
@@ -483,7 +482,7 @@ export default function Navbar({ session }: NavbarProps) {
                                                 </div>
                                                 <div className="flex flex-col">
                                                     <span className="font-semibold">New Resource</span>
-                                                    <span className="text-xs text-foreground/60 font-nunito">Mod, plugin, world...</span>
+                                                    <span className="text-xs text-foreground/60 font-nunito">Mod, prefab, world...</span>
                                                 </div>
                                             </div>
                                         </DropdownMenuItem>
@@ -589,7 +588,7 @@ export default function Navbar({ session }: NavbarProps) {
                                             Resources
                                         </span>
                                         <span className="font-nunito text-xs text-foreground/60">
-                                            Browse mods, plugins, and more
+                                            Browse mods, and more
                                         </span>
                                     </div>
                                     <Icon ssr={true} icon="mdi:chevron-right" width="20" height="20" className="text-foreground/40 group-hover:text-foreground/60" />

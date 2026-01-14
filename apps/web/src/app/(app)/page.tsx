@@ -20,16 +20,16 @@ import { formatRelativeTime } from '@/lib/utils/resourceConverters';
 
 export const metadata: Metadata = {
     title: 'Home',
-    description: 'Discover, create and connect with the best Hytale mods, worlds, plugins and servers. Join the Hytale community hub for players and creators.',
+    description: 'Discover, create and connect with the best Hytale mods, worlds, prefabs and servers. Join the Hytale community hub for players and creators.',
     openGraph: {
         title: 'Orbis - Your Hytale Modding & Server Hub',
-        description: 'Discover, create and connect with the best Hytale mods, worlds, plugins and servers.',
+        description: 'Discover, create and connect with the best Hytale mods, worlds, prefabs and servers.',
         type: 'website',
         url: '/',
     },
     twitter: {
         title: 'Orbis - Your Hytale Modding & Server Hub',
-        description: 'Discover, create and connect with the best Hytale mods, worlds, plugins and servers.',
+        description: 'Discover, create and connect with the best Hytale mods, worlds, prefabs and servers.',
     },
 };
 
@@ -184,7 +184,7 @@ export default async function Home() {
                         </Link>
 
                         <Link
-                            href="/plugins"
+                            href="/mods"
                             prefetch={false}
                             className="flex items-center justify-center px-[18px] py-[14px] md:py-[16px] gap-2.5 bg-[rgba(152,234,245,0.25)] border-2 border-[rgba(152,234,245,0.25)] rounded-full w-full sm:w-auto sm:min-w-[198px] h-[48px] md:h-[52px] hover:bg-[rgba(152,234,245,0.35)] transition-all cursor-pointer"
                         >

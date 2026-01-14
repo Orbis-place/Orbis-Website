@@ -27,7 +27,6 @@ const features = [
 const resourceTypes = [
     { label: 'Mods', type: ResourceType.MOD },
     { label: 'Worlds', type: ResourceType.WORLD },
-    { label: 'Plugins', type: ResourceType.PLUGIN },
     { label: 'Modpacks', type: ResourceType.MODPACK },
     { label: 'Assets', type: ResourceType.ASSET_PACK },
 ];
@@ -183,8 +182,8 @@ export function SmartDiscovery({ initialResources = [] }: SmartDiscoveryProps) {
                                     key={item.type}
                                     onClick={() => handleTypeClick(item.type)}
                                     className={`px-4 py-2 rounded-full font-nunito text-sm transition-colors ${selectedType === item.type
-                                            ? 'bg-[#109EB1] text-[#C7F4FA]'
-                                            : 'bg-[#032125] border border-[#084B54] text-[#C7F4FA]/70 hover:border-[#109EB1]'
+                                        ? 'bg-[#109EB1] text-[#C7F4FA]'
+                                        : 'bg-[#032125] border border-[#084B54] text-[#C7F4FA]/70 hover:border-[#109EB1]'
                                         }`}
                                 >
                                     {item.label}

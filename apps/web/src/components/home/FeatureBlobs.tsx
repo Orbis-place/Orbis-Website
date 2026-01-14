@@ -134,7 +134,7 @@ export function FeatureBlobs() {
                                 </p>
 
                                 <div className="flex flex-wrap justify-center gap-3">
-                                    {['Mods', 'Modpacks', 'Worlds', 'Plugins', 'Asset Packs', 'Prefab', 'Data Packs'].map((cat) => (
+                                    {['Mods', 'Modpacks', 'Worlds', 'Asset Packs', 'Prefab', 'Data Packs'].map((cat) => (
                                         <span
                                             key={cat}
                                             className="px-4 py-2 bg-[#109EB1]/20 border border-[#109EB1] rounded-full font-hebden text-sm text-[#C7F4FA] hover:bg-[#109EB1]/30 transition-colors"

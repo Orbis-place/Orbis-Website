@@ -6,7 +6,6 @@ const contentTypes = [
     { name: 'Mods', icon: 'mdi:puzzle' },
     { name: 'Modpacks', icon: 'mdi:package-variant' },
     { name: 'Worlds', icon: 'mdi:earth' },
-    { name: 'Plugins', icon: 'mdi:power-plug' },
     { name: 'Asset Packs', icon: 'mdi:palette' },
     { name: 'Prefabs', icon: 'mdi:cube-outline' },
     { name: 'Data Packs', icon: 'mdi:database' },

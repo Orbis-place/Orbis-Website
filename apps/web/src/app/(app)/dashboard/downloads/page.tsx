@@ -9,7 +9,6 @@ import Image from 'next/image';
 
 // Resource type to singular map
 const resourceTypeSingularMap: Record<string, string> = {
-    'PLUGIN': 'plugin',
     'MOD': 'mod',
     'WORLD': 'world',
     'PREFAB': 'prefab',

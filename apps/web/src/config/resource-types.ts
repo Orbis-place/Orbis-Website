@@ -7,14 +7,6 @@ export const RESOURCE_TYPES = {
         description: 'Game modifications',
         count: 245, // Mock count, will be from API later
     },
-    plugins: {
-        singular: 'plugin',
-        plural: 'plugins',
-        label: 'Plugins',
-        labelSingular: 'Plugin',
-        description: 'Server plugins',
-        count: 312,
-    },
     worlds: {
         singular: 'world',
         plural: 'worlds',

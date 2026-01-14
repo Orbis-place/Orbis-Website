@@ -6,7 +6,6 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 // Resource types enum matching backend
 export enum ResourceType {
-    PLUGIN = 'PLUGIN',
     ASSET_PACK = 'ASSET_PACK',
     MOD = 'MOD',
     MODPACK = 'MODPACK',
@@ -123,8 +122,6 @@ export interface PaginatedResourcesResponse {
  */
 export function mapTypeToBackendEnum(type: string): ResourceType | undefined {
     const typeMapping: Record<string, ResourceType> = {
-        'plugins': ResourceType.PLUGIN,
-        'plugin': ResourceType.PLUGIN,
         'mods': ResourceType.MOD,
         'mod': ResourceType.MOD,
         'worlds': ResourceType.WORLD,

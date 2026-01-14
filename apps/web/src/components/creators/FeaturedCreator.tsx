@@ -9,7 +9,6 @@ const CATEGORY_ICONS: Record<string, any> = {
     'mods': Box,
     'modpacks': Package,
     'worlds': Globe,
-    'plugins': Plug,
     'asset-packs': ImageIcon,
     'prefabs': Boxes,
     'data-packs': Database,

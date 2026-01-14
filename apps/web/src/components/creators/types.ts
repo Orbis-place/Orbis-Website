@@ -29,7 +29,6 @@ export const RESOURCE_CATEGORIES = [
     { id: 'mods', label: 'Mods' },
     { id: 'modpacks', label: 'Modpacks' },
     { id: 'worlds', label: 'Worlds' },
-    { id: 'plugins', label: 'Plugins' },
     { id: 'asset-packs', label: 'Asset Packs' },
     { id: 'prefabs', label: 'Prefabs' },
     { id: 'data-packs', label: 'Data Packs' },

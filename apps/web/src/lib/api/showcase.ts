@@ -62,7 +62,6 @@ export type ShowcaseCategory =
     | 'THREE_D_MODEL'
     | 'TEXTURE'
     | 'MAP'
-    | 'PLUGIN'
     | 'CONCEPT_ART'
     | 'ANIMATION'
     | 'MUSIC_SOUND'
@@ -100,7 +99,6 @@ export const SHOWCASE_CATEGORIES: Record<ShowcaseCategory, { label: string; icon
     THREE_D_MODEL: { label: '3D Models', icon: 'mdi:cube-outline', color: '#7EC8D3' },
     TEXTURE: { label: 'Textures', icon: 'mdi:texture', color: '#A8D5BA' },
     MAP: { label: 'Maps', icon: 'mdi:map-outline', color: '#B5D3E7' },
-    PLUGIN: { label: 'Plugins', icon: 'mdi:puzzle-outline', color: '#9ED9CC' },
     CONCEPT_ART: { label: 'Concept Art', icon: 'mdi:palette-outline', color: '#C5B8D9' },
     ANIMATION: { label: 'Animations', icon: 'mdi:animation-play-outline', color: '#A9C8E8' },
     MUSIC_SOUND: { label: 'Music & Sound', icon: 'mdi:music-note-outline', color: '#D4E0A8' },

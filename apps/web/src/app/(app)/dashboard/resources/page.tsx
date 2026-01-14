@@ -36,7 +36,7 @@ interface Resource {
   slug: string;
   tagline: string;
   description?: string;
-  type: 'PLUGIN' | 'MOD' | 'WORLD' | 'DATA_PACK' | 'ASSET_PACK' | 'PREFAB' | 'MODPACK' | 'TOOLS_SCRIPTS';
+  type: 'MOD' | 'WORLD' | 'DATA_PACK' | 'ASSET_PACK' | 'PREFAB' | 'MODPACK' | 'TOOLS_SCRIPTS';
   status: 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'SUSPENDED' | 'ARCHIVED';
   iconUrl?: string;
   bannerUrl?: string;
@@ -103,7 +103,6 @@ export default function ResourcesPage() {
 
   const getTypeIcon = (type: Resource['type']) => {
     switch (type) {
-      case 'PLUGIN': return 'mdi:puzzle';
       case 'MOD': return 'mdi:package-variant';
       case 'WORLD': return 'mdi:earth';
       case 'DATA_PACK': return 'mdi:database';
@@ -293,7 +292,7 @@ export default function ResourcesPage() {
         <div>
           <h1 className="font-hebden text-3xl font-bold text-foreground">My Resources</h1>
           <p className="text-muted-foreground mt-1 font-nunito">
-            Manage your mods, plugins, and other creations
+            Manage your mods, prefabs, and other creations
           </p>
         </div>
 
@@ -394,7 +393,7 @@ export default function ResourcesPage() {
             </div>
             <p className="text-foreground font-nunito text-lg mb-2">No resources yet</p>
             <p className="text-muted-foreground font-nunito text-sm mb-6 text-center max-w-md">
-              Start creating resources to share with the Orbis community. Upload mods, plugins, worlds, and more.
+              Start creating resources to share with the Orbis community. Upload mods, prefabs, worlds, and more.
             </p>
             <Button
               className="font-hebden"

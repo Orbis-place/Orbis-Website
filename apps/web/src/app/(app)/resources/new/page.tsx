@@ -13,14 +13,12 @@ import { useSessionStore } from '@/stores/useSessionStore';
 import { toast } from 'sonner';
 
 const RESOURCE_TYPES = [
-    { value: ResourceType.PLUGIN, label: 'Plugin', icon: 'mdi:power-plug', description: 'Server-side functionality' },
     { value: ResourceType.MOD, label: 'Mod', icon: 'mdi:puzzle', description: 'Gameplay modifications' },
     { value: ResourceType.WORLD, label: 'World', icon: 'mdi:earth', description: 'Maps & environments' },
     { value: ResourceType.DATA_PACK, label: 'Data Pack', icon: 'mdi:database', description: 'Vanilla modifications' },
     { value: ResourceType.ASSET_PACK, label: 'Asset Pack', icon: 'mdi:image-multiple', description: 'Models, textures, sounds' },
     { value: ResourceType.PREFAB, label: 'Prefab', icon: 'mdi:cube-outline', description: 'Pre-built structures' },
     { value: ResourceType.MODPACK, label: 'Modpack', icon: 'mdi:package-variant', description: 'Curated mod collections' },
-    { value: ResourceType.TOOLS_SCRIPTS, label: 'Tool / Script', icon: 'mdi:tools', description: 'External utilities' },
 ];
 
 function NewResourcePageContent() {
@@ -36,7 +34,7 @@ function NewResourcePageContent() {
         name: '',
         slug: '',
         tagline: '',
-        type: ResourceType.PLUGIN,
+        type: ResourceType.MOD,
         teamId: defaultTeamId || undefined,
     });
 
@@ -53,7 +51,6 @@ function NewResourcePageContent() {
     // Map ResourceType to URL path segment
     const getResourceTypePath = (type: ResourceType): string => {
         const pathMap: Record<ResourceType, string> = {
-            [ResourceType.PLUGIN]: 'plugin',
             [ResourceType.MOD]: 'mod',
             [ResourceType.WORLD]: 'world',
             [ResourceType.PREFAB]: 'prefab',
@@ -68,7 +65,6 @@ function NewResourcePageContent() {
     // Map ResourceType to URL path for display
     const getResourcePath = (type: ResourceType): string => {
         const pathMap: Record<ResourceType, string> = {
-            [ResourceType.PLUGIN]: 'plugins',
             [ResourceType.MOD]: 'mods',
             [ResourceType.WORLD]: 'worlds',
             [ResourceType.PREFAB]: 'prefabs',
@@ -260,7 +256,7 @@ function NewResourcePageContent() {
                             name="name"
                             value={formData.name}
                             onChange={handleInputChange}
-                            placeholder="My Awesome Plugin"
+                            placeholder="My Awesome Mod"
                             required
                         />
                     </div>

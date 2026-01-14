@@ -62,7 +62,7 @@ export default function ManageGeneralPage() {
     const [formData, setFormData] = useState({
         name: '',
         tagline: '',
-        type: 'PLUGIN',
+        type: 'MOD',
         priceType: 'FREE',
     });
 
@@ -442,7 +442,7 @@ export default function ManageGeneralPage() {
                             id="name"
                             value={formData.name}
                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                            placeholder="My Awesome Plugin"
+                            placeholder="My Awesome Mod"
                             className={cn(
                                 "bg-[#032125] border-[#084B54] text-[#C7F4FA] placeholder:text-[#C7F4FA]/30 focus:border-[#109EB1]",
                                 errors.name ? 'border-red-500' : ''
@@ -482,7 +482,6 @@ export default function ManageGeneralPage() {
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent className="bg-[#032125] border-[#084B54] text-[#C7F4FA]">
-                                    <SelectItem value="PLUGIN">Plugin</SelectItem>
                                     <SelectItem value="MOD">Mod</SelectItem>
                                     <SelectItem value="WORLD">World</SelectItem>
                                     <SelectItem value="DATA_PACK">Data Pack</SelectItem>

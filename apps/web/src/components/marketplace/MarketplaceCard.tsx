@@ -23,7 +23,7 @@ export interface MarketplaceItem {
     tags: string[];
     categories: string[];
     remainingCount?: number; // Number of remaining tags/categories not shown
-    type?: string; // 'Mod', 'Plugin', 'World', etc.
+    type?: string; // 'Mod', 'World', etc.
 }
 
 interface MarketplaceCardProps {

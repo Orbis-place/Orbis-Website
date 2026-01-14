@@ -71,7 +71,7 @@ export default function TermsOfService() {
                             3. Content Submission and Licensing
                         </h2>
                         <p className="font-nunito text-base text-[#C7F4FA]/80 leading-relaxed mb-4">
-                            When you upload content to Orbis (including but not limited to mods, modpacks, worlds, plugins, asset packs, and server listings), you grant Orbis a worldwide, non-exclusive, royalty-free license to use, reproduce, adapt, publish, and distribute such content on the Platform.
+                            When you upload content to Orbis (including but not limited to mods, modpacks, worlds, prefabs, asset packs, and server listings), you grant Orbis a worldwide, non-exclusive, royalty-free license to use, reproduce, adapt, publish, and distribute such content on the Platform.
                         </p>
                         <p className="font-nunito text-base text-[#C7F4FA]/80 leading-relaxed mb-4">
                             You represent and warrant that:

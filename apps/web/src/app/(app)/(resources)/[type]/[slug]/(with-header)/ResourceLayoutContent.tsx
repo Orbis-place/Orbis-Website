@@ -177,7 +177,7 @@ export default function ResourceLayoutContent({ children }: { children: ReactNod
                 likes={likeCount}
                 tags={tags}
                 categories={categories}
-                type={type! as 'mod' | 'plugin' | 'world' | 'prefab' | 'asset-pack' | 'data-pack' | 'modpack' | 'tool'}
+                type={type! as 'mod' | 'world' | 'prefab' | 'asset-pack' | 'data-pack' | 'modpack'}
                 slug={resource.slug}
                 author={author}
                 team={resource.ownerTeam}

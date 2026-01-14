@@ -7,7 +7,7 @@ const features = [
     {
         icon: 'mdi:gamepad-variant',
         title: '100% Free Downloads',
-        description: 'Every mod, plugin, world, and server listing. No "premium" content. No early access paywalls. If it\'s on Orbis, it\'s free.',
+        description: 'Every mod, world, and server listing. No "premium" content. No early access paywalls. If it\'s on Orbis, it\'s free.',
     },
     {
         icon: 'mdi:heart',
