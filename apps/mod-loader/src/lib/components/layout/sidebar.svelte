@@ -147,12 +147,6 @@
                   >{save.installedModsCount} mods</span
                 >
               </div>
-
-              {#if isSelected}
-                <div
-                  class="size-1.5 rounded-full bg-[#109eb1] animate-pulse"
-                ></div>
-              {/if}
             </a>
           {/each}
 

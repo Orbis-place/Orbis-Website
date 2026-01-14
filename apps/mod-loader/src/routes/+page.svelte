@@ -217,13 +217,6 @@
                 class="pl-11 h-11 bg-white/5 border-white/10 rounded-full text-foreground placeholder:text-muted-foreground/70 focus-visible:ring-primary/50 font-nunito"
               />
             </div>
-            <Button
-              variant="outline"
-              class="h-11 rounded-1xl border-white/10 bg-white/5 hover:bg-white/10 hover:text-primary gap-2 font-hebden text-xs uppercase tracking-wider"
-            >
-              <Filter class="size-4" />
-              Filters
-            </Button>
           </div>
 
           <!-- Mods Grid -->
@@ -371,13 +364,6 @@
                 class="pl-11 h-11 bg-white/5 border-white/10 rounded-full text-foreground placeholder:text-muted-foreground/70 focus-visible:ring-primary/50 font-nunito"
               />
             </div>
-            <Button
-              variant="outline"
-              class="h-11 rounded-1xl border-white/10 bg-white/5 hover:bg-white/10 hover:text-primary gap-2 font-hebden text-xs uppercase tracking-wider"
-            >
-              <Filter class="size-4" />
-              Filters
-            </Button>
           </div>
 
           <!-- Worlds Grid -->

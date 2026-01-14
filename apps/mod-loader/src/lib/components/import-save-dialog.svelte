@@ -6,6 +6,8 @@
   import { invoke } from '@tauri-apps/api/core';
   import { toast } from '$lib/stores/toast';
   import { saves } from '$lib/stores/saves';
+  import { settings } from '$lib/stores/settings';
+  import { get } from 'svelte/store';
 
   let { isOpen = $bindable(false) } = $props();
 
@@ -36,7 +38,10 @@
   async function importSave(filePath: string) {
     isImporting = true;
     try {
-      await invoke('import_save', { zipPath: filePath });
+      await invoke('import_save', {
+        zipPath: filePath,
+        hytalePath: get(settings).hytaleRoot,
+      });
       toast.success('Save imported successfully');
       saves.load(); // Reload saves list
       isOpen = false;

@@ -20,6 +20,7 @@
   import { invoke } from '@tauri-apps/api/core';
   import { openPath, openUrl } from '@tauri-apps/plugin-opener';
   import { toast } from '$lib/stores/toast';
+  import DeleteModDialog from '$lib/components/delete-mod-dialog.svelte';
 
   const saveName = $derived($page.params.id);
   const currentSave = $derived($saves.find((s) => s.name === saveName));
@@ -28,6 +29,10 @@
   let loading = $state(true);
   let pollInterval: ReturnType<typeof setInterval>;
   let lastSavePath = '';
+
+  // Delete dialog state
+  let deleteDialogOpen = $state(false);
+  let modToDelete = $state<InstalledMod | null>(null);
 
   $effect(() => {
     if (currentSave && currentSave.path !== lastSavePath) {
@@ -90,6 +95,34 @@
     } catch (error) {
       console.error('Failed to toggle mod:', error);
       toast.error('Failed to toggle mod', String(error));
+    }
+  }
+
+  function openDeleteDialog(mod: InstalledMod) {
+    modToDelete = mod;
+    deleteDialogOpen = true;
+  }
+
+  async function handleDeleteMod() {
+    if (!currentSave || !modToDelete) return;
+
+    try {
+      await invoke('delete_mod', {
+        savePath: currentSave.path,
+        group: modToDelete.manifest.Group,
+        name: modToDelete.manifest.Name,
+        jarFilename: modToDelete.jar_name,
+      });
+
+      toast.success('Mod deleted successfully');
+      await loadInstalledMods();
+
+      // Update the saves store to refresh mod count
+      saves.load();
+    } catch (error) {
+      console.error('Failed to delete mod:', error);
+      toast.error('Failed to delete mod', String(error));
+      throw error; // Re-throw to let dialog handle loading state
     }
   }
 
@@ -160,13 +193,13 @@
         </div>
 
         <div class="flex gap-3">
-          <Button
+          <!-- <Button
             size="icon"
             variant="outline"
             class="border-[#084b54] hover:bg-[#109eb1]/10 text-[#c7f4fa] bg-[#032125]"
           >
             <Settings class="size-5" />
-          </Button>
+          </Button> -->
           <Button
             size="icon"
             variant="outline"
@@ -287,6 +320,7 @@
                       variant="ghost"
                       class="size-8 hover:bg-[#032125] text-[#c7f4fa]/70 hover:text-red-400"
                       title="Remove mod"
+                      onclick={() => openDeleteDialog(mod)}
                     >
                       <Trash2 class="size-4" />
                     </Button>
@@ -299,6 +333,13 @@
       </div>
     </div>
   </div>
+
+  <!-- Delete Confirmation Dialog -->
+  <DeleteModDialog
+    bind:open={deleteDialogOpen}
+    mod={modToDelete}
+    onConfirm={handleDeleteMod}
+  />
 {:else}
   <div class="flex items-center justify-center h-full text-muted-foreground">
     Save not found

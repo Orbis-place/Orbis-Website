@@ -1,10 +1,43 @@
 <script lang="ts">
   import * as Card from '$lib/components/ui/card';
   import { Button } from '$lib/components/ui/button';
-  import { FolderOpen } from 'lucide-svelte';
+  import { FolderOpen, AlertTriangle } from 'lucide-svelte';
+  import { settings } from '$lib/stores/settings';
+  import { open } from '@tauri-apps/plugin-dialog';
+  import { exists } from '@tauri-apps/plugin-fs';
+
+  let isValidPath = $state(true);
+
+  $effect(() => {
+    validatePath($settings.hytaleRoot);
+  });
+
+  async function validatePath(path: string) {
+    if (!path) {
+      isValidPath = false;
+      return;
+    }
+    try {
+      isValidPath = await exists(path);
+    } catch (e) {
+      isValidPath = false;
+    }
+  }
+
+  async function handleBrowse() {
+    const selected = await open({
+      directory: true,
+      multiple: false,
+      defaultPath: $settings.hytaleRoot,
+    });
+
+    if (selected && typeof selected === 'string') {
+      settings.updateHytaleRoot(selected);
+    }
+  }
 </script>
 
-<main class="flex-1 overflow-y-auto p-6">
+<main class="flex-1 overflow-y-auto p-6 pb-24 relative">
   <div class="mx-auto max-w-4xl space-y-6">
     <!-- Header -->
     <div>
@@ -17,31 +50,50 @@
     <!-- Settings Sections -->
     <div class="space-y-4">
       <!-- Paths -->
-      <Card.Root>
+      <Card.Root class={!isValidPath ? 'border-destructive/50' : ''}>
         <Card.Header>
-          <Card.Title>Paths</Card.Title>
+          <Card.Title class="flex items-center justify-between">
+            Paths
+            {#if !isValidPath}
+              <div
+                class="flex items-center text-destructive text-sm font-normal"
+              >
+                <AlertTriangle class="size-4 mr-2" />
+                Invalid Directory
+              </div>
+            {/if}
+          </Card.Title>
           <Card.Description>
-            Configure where the mod loader looks for saves and mods
+            Configure where the mod loader looks for Hytale data
           </Card.Description>
         </Card.Header>
         <Card.Content class="space-y-4">
           <div>
-            <label for="saves-path" class="mb-2 block text-sm font-medium">
-              Hytale Saves Directory
+            <label for="hytale-path" class="mb-2 block text-sm font-medium">
+              Hytale Directory (containing UserData)
             </label>
             <div class="flex gap-2">
               <input
-                id="saves-path"
+                id="hytale-path"
                 type="text"
-                value="~/Library/Application Support/Hytale/UserData/Saves"
-                readonly
-                class="flex-1 rounded-lg border border-input bg-muted px-3 py-2 text-sm"
+                value={$settings.hytaleRoot}
+                oninput={(e) =>
+                  settings.updateHytaleRoot(e.currentTarget.value)}
+                class="flex-1 rounded-lg border bg-muted px-3 py-2 text-sm text-foreground {!isValidPath
+                  ? 'border-destructive focus-visible:ring-destructive'
+                  : 'border-input'}"
               />
-              <Button variant="outline">
-                <FolderOpen class="size-4" />
+              <Button variant="outline" onclick={handleBrowse}>
+                <FolderOpen class="mr-2 size-4" />
                 Browse
               </Button>
             </div>
+            {#if !isValidPath}
+              <p class="text-xs text-destructive mt-2">
+                The specified directory does not exist or is not essential.
+                Please select a valid Hytale installation folder.
+              </p>
+            {/if}
           </div>
         </Card.Content>
       </Card.Root>
@@ -80,7 +132,7 @@
         </Card.Header>
         <Card.Content>
           <div class="space-y-2 text-sm">
-            <p><strong>Version:</strong> 0.1.0</p>
+            <p><strong>Version:</strong> 0.0.3</p>
             <p><strong>Built with:</strong> Tauri + SvelteKit</p>
             <p><strong>Design:</strong> Orbis Theme</p>
           </div>

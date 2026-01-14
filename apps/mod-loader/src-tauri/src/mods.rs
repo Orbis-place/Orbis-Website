@@ -258,3 +258,27 @@ pub fn register_jar_in_config(save_path: String, jar_filename: String) -> Result
     
     Ok(manifest)
 }
+
+#[tauri::command]
+pub fn delete_mod(save_path: String, group: String, name: String, jar_filename: String) -> Result<(), String> {
+    let save_path = Path::new(&save_path);
+    
+    // 1. Remove from config
+    let mut config = read_mod_config(save_path)?;
+    let mod_key = format!("{}:{}", group, name);
+    
+    if config.mods.remove(&mod_key).is_some() {
+        write_mod_config(save_path, &config)?;
+    }
+    
+    // 2. Delete jar file
+    let mods_dir = save_path.join("mods");
+    let jar_path = mods_dir.join(&jar_filename);
+    
+    if jar_path.exists() {
+        fs::remove_file(&jar_path)
+            .map_err(|e| format!("Failed to delete mod file: {}", e))?;
+    }
+    
+    Ok(())
+}

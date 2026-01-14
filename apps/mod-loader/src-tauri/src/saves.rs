@@ -1,17 +1,13 @@
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use zip::ZipArchive;
 
 #[tauri::command]
-pub fn import_save(zip_path: String) -> Result<String, String> {
-    println!("import_save called with path: {}", zip_path);
+pub fn import_save(zip_path: String, hytale_path: String) -> Result<String, String> {
+    println!("import_save called with zip_path: {} and hytale_path: {}", zip_path, hytale_path);
     
-    // Get the Hytale saves directory
-    let home_dir = dirs::home_dir().ok_or("Failed to get home directory")?;
-    let saves_dir = home_dir
-        .join("Library")
-        .join("Application Support")
-        .join("Hytale")
+    // Construct the saves directory path from the provided Hytale root
+    let saves_dir = PathBuf::from(hytale_path)
         .join("UserData")
         .join("Saves");
     

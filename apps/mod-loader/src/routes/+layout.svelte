@@ -4,6 +4,8 @@
   import Sidebar from '$lib/components/layout/sidebar.svelte';
   import Toaster from '$lib/components/ui/sonner.svelte';
 
+  import PathWarningBanner from '$lib/components/layout/path-warning-banner.svelte';
+
   let { children } = $props();
 </script>
 
@@ -37,6 +39,7 @@
         class="absolute inset-0 bg-gradient-to-br from-[#109eb1]/5 via-transparent to-[#032125] pointer-events-none z-0"
       ></div>
       {@render children?.()}
+      <PathWarningBanner />
     </div>
   </div>
 </Tooltip.Provider>
