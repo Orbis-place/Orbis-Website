@@ -334,7 +334,7 @@ export default function LauncherPage() {
                             <div key={step.number} className="relative">
                                 {/* Connector line */}
                                 {index < steps.length - 1 && (
-                                    <div className="hidden lg:block absolute top-8 left-[60%] w-full h-0.5 bg-gradient-to-r from-[#109eb1]/50 to-transparent" />
+                                    <div className="hidden lg:block absolute top-8 left-1/2 ml-8 w-[calc(100%+2rem-4rem)] h-0.5 bg-[#109eb1]/50" />
                                 )}
 
                                 <div className="text-center">
