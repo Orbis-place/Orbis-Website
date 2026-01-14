@@ -48,10 +48,24 @@ pub struct ModAuthor {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct OrbisMetadataEntry {
+    pub id: String,
+    pub slug: Option<String>,
+    pub name: String,
+    pub author: String,
+    #[serde(rename = "iconUrl")]
+    pub icon_url: Option<String>,
+    pub version: String,
+    #[serde(rename = "installedAt")]
+    pub installed_at: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct InstalledMod {
     pub jar_name: String,
     pub manifest: ModManifest,
     pub enabled: bool,
+    pub orbis_metadata: Option<OrbisMetadataEntry>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -64,6 +78,31 @@ pub struct ModConfig {
 pub struct ModConfigEntry {
     #[serde(rename = "Enabled")]
     pub enabled: bool,
+}
+
+/// Read orbis-metadata.json from mods directory
+fn read_orbis_metadata(mods_dir: &Path) -> HashMap<String, OrbisMetadataEntry> {
+    let metadata_path = mods_dir.join("orbis-metadata.json");
+    
+    if !metadata_path.exists() {
+        return HashMap::new();
+    }
+    
+    match fs::read_to_string(&metadata_path) {
+        Ok(contents) => {
+            match serde_json::from_str(&contents) {
+                Ok(metadata) => metadata,
+                Err(e) => {
+                    eprintln!("Failed to parse orbis-metadata.json: {}", e);
+                    HashMap::new()
+                }
+            }
+        }
+        Err(e) => {
+            eprintln!("Failed to read orbis-metadata.json: {}", e);
+            HashMap::new()
+        }
+    }
 }
 
 /// Extract manifest from the downloaded jar and add to config.json from a .jar file
@@ -135,6 +174,9 @@ pub fn get_installed_mods(save_path: String) -> Result<Vec<InstalledMod>, String
     // Read config to get enabled/disabled state
     let config = read_mod_config(save_path)?;
     
+    // Read orbis metadata
+    let orbis_metadata = read_orbis_metadata(&mods_dir);
+    
     let mut installed_mods = Vec::new();
     
     // Read all .jar files in mods directory
@@ -159,14 +201,20 @@ pub fn get_installed_mods(save_path: String) -> Result<Vec<InstalledMod>, String
                         .map(|entry| entry.enabled)
                         .unwrap_or(!manifest.disabled_by_default);
                     
+                    let jar_name = path
+                        .file_name()
+                        .and_then(|s| s.to_str())
+                        .unwrap_or("unknown")
+                        .to_string();
+                    
+                    // Get orbis metadata if available
+                    let orbis_meta = orbis_metadata.get(&jar_name).cloned();
+                    
                     installed_mods.push(InstalledMod {
-                        jar_name: path
-                            .file_name()
-                            .and_then(|s| s.to_str())
-                            .unwrap_or("unknown")
-                            .to_string(),
+                        jar_name,
                         manifest,
                         enabled,
+                        orbis_metadata: orbis_meta,
                     });
                 }
                 Err(e) => {
@@ -278,6 +326,81 @@ pub fn delete_mod(save_path: String, group: String, name: String, jar_filename: 
     if jar_path.exists() {
         fs::remove_file(&jar_path)
             .map_err(|e| format!("Failed to delete mod file: {}", e))?;
+    }
+    
+    Ok(())
+}
+
+/// Represents a global mod (no config.json, so no enabled state)
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct GlobalMod {
+    pub jar_name: String,
+    pub manifest: ModManifest,
+    pub orbis_metadata: Option<OrbisMetadataEntry>,
+}
+
+#[tauri::command]
+pub fn get_global_mods(hytale_root: String) -> Result<Vec<GlobalMod>, String> {
+    let hytale_path = Path::new(&hytale_root);
+    let global_mods_dir = hytale_path.join("UserData").join("Mods");
+    
+    println!("get_global_mods: Scanning {:?}", global_mods_dir);
+    
+    if !global_mods_dir.exists() {
+        println!("Global mods directory does not exist: {:?}", global_mods_dir);
+        return Ok(Vec::new());
+    }
+    
+    // Read orbis metadata
+    let orbis_metadata = read_orbis_metadata(&global_mods_dir);
+    
+    let mut global_mods = Vec::new();
+    
+    let entries = fs::read_dir(&global_mods_dir)
+        .map_err(|e| format!("Failed to read global mods directory: {}", e))?;
+    
+    for entry in entries {
+        let entry = entry.map_err(|e| format!("Failed to read directory entry: {}", e))?;
+        let path = entry.path();
+        
+        if path.extension().and_then(|s| s.to_str()) == Some("jar") {
+            match extract_manifest_from_jar(&path) {
+                Ok(manifest) => {
+                    println!("Found global mod: {}", manifest.name);
+                    let jar_name = path
+                        .file_name()
+                        .and_then(|s| s.to_str())
+                        .unwrap_or("unknown")
+                        .to_string();
+                    
+                    let orbis_meta = orbis_metadata.get(&jar_name).cloned();
+                    
+                    global_mods.push(GlobalMod {
+                        jar_name,
+                        manifest,
+                        orbis_metadata: orbis_meta,
+                    });
+                }
+                Err(e) => {
+                    eprintln!("Failed to extract manifest from {:?}: {}", path, e);
+                }
+            }
+        }
+    }
+    
+    println!("Found {} global mods", global_mods.len());
+    Ok(global_mods)
+}
+
+#[tauri::command]
+pub fn delete_global_mod(hytale_root: String, jar_filename: String) -> Result<(), String> {
+    let hytale_path = Path::new(&hytale_root);
+    let global_mods_dir = hytale_path.join("UserData").join("Mods");
+    let jar_path = global_mods_dir.join(&jar_filename);
+    
+    if jar_path.exists() {
+        fs::remove_file(&jar_path)
+            .map_err(|e| format!("Failed to delete global mod file: {}", e))?;
     }
     
     Ok(())

@@ -4,14 +4,24 @@
   import { Badge } from '$lib/components/ui/badge';
   import { Input } from '$lib/components/ui/input';
   import { Spinner } from '$lib/components/ui/spinner';
-  import { Package, Search, Filter, Download, Globe } from 'lucide-svelte';
+  import {
+    Package,
+    Search,
+    Filter,
+    Download,
+    Globe,
+    Check,
+    ChevronsUpDown,
+  } from 'lucide-svelte';
   import { modManager } from '$lib/services/mod-manager';
-  import { onMount } from 'svelte';
+  import { onMount, tick } from 'svelte';
   import { ModSource, type Mod } from '$lib/types/mod';
   import { saves, selectedSave } from '$lib/stores/saves';
-  import * as Select from '$lib/components/ui/select';
+  import * as Popover from '$lib/components/ui/popover';
+  import * as Command from '$lib/components/ui/command';
   import * as Tabs from '$lib/components/ui/tabs';
   import { toast } from '$lib/stores/toast';
+  import { cn } from '$lib/utils';
 
   let mods = $state<Mod[]>([]);
   let worlds = $state<Mod[]>([]);
@@ -21,30 +31,35 @@
   let worldsLoading = $state(false);
   let activeTab = $state('mods');
 
-  // Bind to the selected save path
-  let selectedSavePath = $state($selectedSave?.path || '');
+  // Combobox state - can be 'global' or a save path
+  let comboOpen = $state(false);
+  let installTarget = $state<string>($selectedSave?.path || 'global');
+  let triggerRef = $state<HTMLButtonElement>(null!);
 
-  // Derive the trigger content for the select
-  const triggerContent = $derived(
-    $saves.find((s) => s.path === selectedSavePath)?.name ?? 'Select a save...',
-  );
+  // Derive the display text for the combobox
+  const selectedLabel = $derived(() => {
+    if (installTarget === 'global') return 'Global Mods';
+    return (
+      $saves.find((s) => s.path === installTarget)?.name ?? 'Select target...'
+    );
+  });
 
-  // Sync selectedSavePath with store changes
+  // Sync installTarget with selectedSave store
   $effect(() => {
-    if (selectedSavePath) {
-      const save = $saves.find((s) => s.path === selectedSavePath);
+    if (installTarget && installTarget !== 'global') {
+      const save = $saves.find((s) => s.path === installTarget);
       if (save && save.path !== $selectedSave?.path) {
         selectedSave.set(save);
       }
     }
   });
 
-  // Sync when selectedSave changes externally
-  $effect(() => {
-    if ($selectedSave && $selectedSave.path !== selectedSavePath) {
-      selectedSavePath = $selectedSave.path;
-    }
-  });
+  function closeAndFocusTrigger() {
+    comboOpen = false;
+    tick().then(() => {
+      triggerRef?.focus();
+    });
+  }
 
   let debounceTimer: ReturnType<typeof setTimeout>;
   let worldDebounceTimer: ReturnType<typeof setTimeout>;
@@ -115,23 +130,30 @@
     return () => clearTimeout(worldDebounceTimer);
   });
 
-  async function handleInstall(
-    modId: string,
-    source: ModSource,
-    version: string,
-  ) {
-    if (!$selectedSave) {
-      toast.warning('Please select a save first');
+  async function handleInstall(mod: Mod) {
+    if (!installTarget) {
+      toast.warning('Please select an install target');
       return;
     }
 
     try {
-      // Use modManager to install
-      await modManager.installMod(modId, source, version, $selectedSave.path);
-      toast.success(
-        'Item installed',
-        `Successfully installed to ${$selectedSave.name}`,
-      );
+      if (installTarget === 'global') {
+        // Install to global mods only
+        await modManager.installModGlobal(mod);
+        toast.success(
+          'Item installed',
+          'Successfully installed to Global Mods',
+        );
+      } else {
+        // Install to specific save (also copies to global)
+        await modManager.installMod(mod, installTarget);
+        const saveName =
+          $saves.find((s) => s.path === installTarget)?.name ?? 'save';
+        toast.success(
+          'Item installed',
+          `Successfully installed to ${saveName}`,
+        );
+      }
     } catch (e) {
       console.error('Install failed:', e);
       toast.error('Installation failed', String(e));
@@ -156,32 +178,98 @@
           </p>
         </div>
 
-        <!-- Save Selector (Global) -->
+        <!-- Install Target Selector (Combobox) -->
         <div class="flex items-center gap-3">
           <span
             class="text-xs font-hebden text-[#c7f4fa]/50 uppercase tracking-wider"
             >Install to:</span
           >
-          <div class="w-64">
-            <Select.Root type="single" bind:value={selectedSavePath}>
-              <Select.Trigger
-                class="h-11 w-full bg-white/5 border-white/10 text-white font-nunito hover:bg-white/10"
-              >
-                {triggerContent}
-              </Select.Trigger>
-              <Select.Content class="bg-[#06363d] border-[#084b54] text-white">
-                {#each $saves as save}
-                  <Select.Item
-                    value={save.path}
-                    label={save.name}
-                    class="hover:bg-[#109eb1]/20 focus:bg-[#109eb1]/20 cursor-pointer text-white data-[highlighted]:bg-[#109eb1]/20"
+          <Popover.Root bind:open={comboOpen}>
+            <Popover.Trigger bind:ref={triggerRef}>
+              {#snippet child({ props })}
+                <Button
+                  variant="secondary"
+                  class="w-64 justify-between h-11 border border-[#084b54] text-[#c7f4fa]  font-nunito hover:bg-[#06363d]/80 hover:border-[#109eb1]/50 rounded-xl"
+                  {...props}
+                  role="combobox"
+                  aria-expanded={comboOpen}
+                >
+                  <span class="flex items-center gap-2">
+                    {#if installTarget === 'global'}
+                      <Globe class="size-4 text-[#109eb1]" />
+                    {/if}
+                    {selectedLabel()}
+                  </span>
+                  <ChevronsUpDown class="ml-2 size-4 shrink-0 opacity-50" />
+                </Button>
+              {/snippet}
+            </Popover.Trigger>
+            <Popover.Content
+              class="w-64 p-1 bg-[#06363d] border border-[#084b54] rounded-xl shadow-md"
+            >
+              <Command.Root class="bg-transparent">
+                <Command.Input
+                  placeholder="Search..."
+                  class="h-9 text-[#c7f4fa] bg-transparent border-0 focus:ring-0"
+                />
+                <Command.List class="max-h-64">
+                  <Command.Empty class="text-white/50 py-4 text-center text-sm"
+                    >No results found.</Command.Empty
                   >
-                    {save.name}
-                  </Select.Item>
-                {/each}
-              </Select.Content>
-            </Select.Root>
-          </div>
+                  <Command.Group>
+                    <div
+                      class="px-2 py-1.5 text-xs font-semibold text-[#c7f4fa]/50 uppercase tracking-wider"
+                    >
+                      Global
+                    </div>
+                    <Command.Item
+                      value="global"
+                      onSelect={() => {
+                        installTarget = 'global';
+                        closeAndFocusTrigger();
+                      }}
+                      class="text-[#c7f4fa] cursor-pointer rounded-sm px-2 py-1.5 data-[selected]:bg-[#109eb1]/20 hover:bg-[#109eb1]/10"
+                    >
+                      <Check
+                        class={cn(
+                          'mr-2 size-4',
+                          installTarget !== 'global' && 'text-transparent',
+                        )}
+                      />
+                      <Globe class="mr-2 size-4 text-[#109eb1]" />
+                      Global Mods
+                    </Command.Item>
+                  </Command.Group>
+                  <div class="h-px bg-[#084b54] mx-1 my-1"></div>
+                  <Command.Group>
+                    <div
+                      class="px-2 py-1.5 text-xs font-semibold text-[#c7f4fa]/50 uppercase tracking-wider"
+                    >
+                      Saves
+                    </div>
+                    {#each $saves as save}
+                      <Command.Item
+                        value={save.path}
+                        onSelect={() => {
+                          installTarget = save.path;
+                          closeAndFocusTrigger();
+                        }}
+                        class="text-[#c7f4fa] cursor-pointer rounded-sm px-2 py-1.5 data-[selected]:bg-[#109eb1]/20 hover:bg-[#109eb1]/10"
+                      >
+                        <Check
+                          class={cn(
+                            'mr-2 size-4',
+                            installTarget !== save.path && 'text-transparent',
+                          )}
+                        />
+                        {save.name}
+                      </Command.Item>
+                    {/each}
+                  </Command.Group>
+                </Command.List>
+              </Command.Root>
+            </Popover.Content>
+          </Popover.Root>
         </div>
       </div>
 
@@ -337,8 +425,7 @@
                     <Button
                       size="sm"
                       variant="default"
-                      onclick={() =>
-                        handleInstall(mod.id, mod.source, mod.version)}
+                      onclick={() => handleInstall(mod)}
                     >
                       <Download class="mr-2 size-4" />
                       Add Mod
@@ -473,8 +560,7 @@
                     <Button
                       size="sm"
                       variant="default"
-                      onclick={() =>
-                        handleInstall(world.id, world.source, world.version)}
+                      onclick={() => handleInstall(world)}
                     >
                       <Download class="mr-2 size-4" />
                       Add World

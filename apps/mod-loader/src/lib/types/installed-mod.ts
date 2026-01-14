@@ -23,6 +23,15 @@ export interface InstalledMod {
     jar_name: string;
     manifest: ModManifest;
     enabled: boolean;
+    orbis_metadata?: {
+        id: string;
+        slug?: string;
+        name: string;
+        author: string;
+        iconUrl?: string;
+        version: string;
+        installedAt: string;
+    };
 }
 
 export interface ModConfigEntry {

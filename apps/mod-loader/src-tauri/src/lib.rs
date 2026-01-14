@@ -1,3 +1,4 @@
+mod launcher;
 mod mods;
 mod saves;
 
@@ -22,7 +23,10 @@ pub fn run() {
             mods::add_mod_to_config,
             mods::register_jar_in_config,
             mods::delete_mod,
-            saves::import_save
+            mods::get_global_mods,
+            mods::delete_global_mod,
+            saves::import_save,
+            launcher::launch_hytale
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

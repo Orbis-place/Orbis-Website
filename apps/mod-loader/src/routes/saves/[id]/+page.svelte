@@ -22,6 +22,16 @@
   import { toast } from '$lib/stores/toast';
   import DeleteModDialog from '$lib/components/delete-mod-dialog.svelte';
 
+  async function launchHytale() {
+    try {
+      await invoke('launch_hytale');
+      toast.success('Hytale launcher started');
+    } catch (error) {
+      console.error('Failed to launch Hytale:', error);
+      toast.error('Failed to launch Hytale', String(error));
+    }
+  }
+
   const saveName = $derived($page.params.id);
   const currentSave = $derived($saves.find((s) => s.name === saveName));
 
@@ -209,12 +219,13 @@
           >
             <FolderOpen class="size-5" />
           </Button>
-          <!-- <Button
+          <Button
             class="bg-[#109eb1] hover:bg-[#109eb1]/90 text-white font-hebden tracking-wider gap-2 px-6 shadow-[0_0_20px_rgba(16,158,177,0.2)]"
+            onclick={launchHytale}
           >
             <Play class="size-5 fill-current" />
             Launch
-          </Button> -->
+          </Button>
         </div>
       </div>
     </div>
@@ -268,15 +279,31 @@
             {#each installedMods as mod}
               <tr class="group hover:bg-[#109eb1]/5 transition-colors">
                 <td class="px-6 py-4">
-                  <div class="flex flex-col">
-                    <span class="font-bold text-[#c7f4fa]"
-                      >{mod.manifest.Name}</span
-                    >
-                    <span class="text-xs text-[#c7f4fa]/50"
-                      >by {mod.manifest.Authors.map((a) => a.Name).join(
-                        ', ',
-                      )}</span
-                    >
+                  <div class="flex items-center gap-3">
+                    {#if mod.orbis_metadata?.iconUrl}
+                      <img
+                        src={mod.orbis_metadata.iconUrl}
+                        alt={mod.manifest.Name}
+                        class="size-10 rounded-lg object-cover border border-[#084b54]"
+                      />
+                    {:else}
+                      <div
+                        class="size-10 rounded-lg bg-[#06363d] border border-[#084b54] flex items-center justify-center"
+                      >
+                        <Package class="size-5 text-[#c7f4fa]/30" />
+                      </div>
+                    {/if}
+                    <div class="flex flex-col">
+                      <span class="font-bold text-[#c7f4fa]"
+                        >{mod.manifest.Name}</span
+                      >
+                      <span class="text-xs text-[#c7f4fa]/50"
+                        >by {mod.orbis_metadata?.author ||
+                          mod.manifest.Authors.map((a) => a.Name).join(
+                            ', ',
+                          )}</span
+                      >
+                    </div>
                   </div>
                 </td>
                 <td class="px-6 py-4 text-sm text-[#c7f4fa]/70">

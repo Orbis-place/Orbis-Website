@@ -1,7 +1,58 @@
 import type { IModSource } from './mod-source.interface';
-import type { Mod, ModDetails, ModFilters } from '../types/mod';
+import type { Mod, ModDetails, ModFilters, OrbisMetadataFile, OrbisModMetadata } from '../types/mod';
 import type { InstalledMod } from '../types/installed-mod';
 import { OrbisModSource } from './sources/orbis-source';
+
+/**
+ * Save Orbis metadata for an installed mod
+ */
+async function saveOrbisMetadata(
+    modsPath: string,
+    fileName: string,
+    mod: Mod,
+    version: string
+): Promise<void> {
+    const { join } = await import('@tauri-apps/api/path');
+    const { exists, readTextFile, writeTextFile } = await import('@tauri-apps/plugin-fs');
+
+    const metadataPath = await join(modsPath, 'orbis-metadata.json');
+
+    let metadata: OrbisMetadataFile = {};
+
+    // Read existing metadata if exists
+    if (await exists(metadataPath)) {
+        try {
+            const content = await readTextFile(metadataPath);
+            metadata = JSON.parse(content);
+        } catch (error) {
+            console.warn('[ModManager] Failed to read existing orbis-metadata.json:', error);
+        }
+    }
+
+    // Add/update entry for this mod
+    const entry: OrbisModMetadata = {
+        id: mod.id,
+        name: mod.name,
+        author: mod.author,
+        iconUrl: mod.icon,
+        version: version,
+        installedAt: new Date().toISOString(),
+    };
+
+    console.log(`[ModManager] Saving metadata for ${fileName}:`, {
+        id: mod.id,
+        name: mod.name,
+        author: mod.author,
+        icon: mod.icon,
+        version: version
+    });
+
+    metadata[fileName] = entry;
+
+    // Write back
+    await writeTextFile(metadataPath, JSON.stringify(metadata, null, 2));
+    console.log(`[ModManager] ✅ Saved Orbis metadata to: ${metadataPath}`);
+}
 
 /**
  * Central mod manager service
@@ -130,14 +181,12 @@ export class ModManager {
      * Download and install a mod to a specific save
      */
     async installMod(
-        modId: string,
-        sourceName: string,
-        version: string,
+        mod: Mod,
         savePath: string
     ): Promise<void> {
-        const source = this.sources.get(sourceName);
+        const source = this.sources.get(mod.source);
         if (!source) {
-            throw new Error(`Mod source '${sourceName}' not found`);
+            throw new Error(`Mod source '${mod.source}' not found`);
         }
 
         // Import necessary Tauri functions
@@ -152,11 +201,11 @@ export class ModManager {
         }
 
         // Get the real filename by checking the headers
-        let fileName = `${modId}-${version}.jar`; // Fallback
+        let fileName = `${mod.id}-${mod.version}.jar`; // Fallback
         try {
             // We need to find the download URL first
-            const versions = await source.getModVersions(modId);
-            const targetVersion = versions.find(v => v.version === version);
+            const versions = await source.getModVersions(mod.id);
+            const targetVersion = versions.find(v => v.version === mod.version);
 
             if (targetVersion) {
                 const { fetch } = await import('@tauri-apps/plugin-http');
@@ -188,7 +237,7 @@ export class ModManager {
 
         const destination = await join(modsPath, fileName);
 
-        await source.downloadMod(modId, version, destination);
+        await source.downloadMod(mod.id, mod.version, destination);
 
         // Also copy to global mods folder (UserData/Mods)
         console.log('[ModManager] === Starting global mods folder copy ===');
@@ -239,6 +288,16 @@ export class ModManager {
 
             await copyFile(destination, globalDestination);
             console.log('[ModManager] ✅ File copied successfully to global Mods folder!');
+
+            // Save Orbis metadata to global mods folder as well
+            if (mod.source === 'orbis') {
+                try {
+                    await saveOrbisMetadata(globalModsDir, fileName, mod, mod.version);
+                    console.log('[ModManager] ✅ Saved Orbis metadata to global Mods folder');
+                } catch (metaError) {
+                    console.warn('[ModManager] Failed to save global Orbis metadata:', metaError);
+                }
+            }
         } catch (error) {
             console.error('[ModManager] ❌ Failed to copy mod to global Mods folder:', error);
             console.error('[ModManager] Error details:', {
@@ -249,6 +308,16 @@ export class ModManager {
             // Don't fail the whole installation, just log
         }
         console.log('[ModManager] === End global mods folder copy ===');
+
+        // Save Orbis metadata for the save-level mods folder
+        if (mod.source === 'orbis') {
+            try {
+                await saveOrbisMetadata(modsPath, fileName, mod, mod.version);
+                console.log('[ModManager] ✅ Saved Orbis metadata to save mods folder');
+            } catch (error) {
+                console.warn('[ModManager] Failed to save Orbis metadata:', error);
+            }
+        }
 
         // Extract manifest from the downloaded jar and add to config.json
         try {
@@ -263,7 +332,82 @@ export class ModManager {
             // Don't fail the installation, just log the error
         }
 
-        console.log(`Installed ${modId} version ${version} to ${destination}`);
+        console.log(`Installed ${mod.id} version ${mod.version} to ${destination}`);
+    }
+
+    /**
+     * Install a mod to global mods folder only (not to a specific save)
+     */
+    async installModGlobal(mod: Mod): Promise<void> {
+        const source = this.sources.get(mod.source);
+        if (!source) {
+            throw new Error(`Mod source '${mod.source}' not found`);
+        }
+
+        const { join } = await import('@tauri-apps/api/path');
+        const { exists, mkdir } = await import('@tauri-apps/plugin-fs');
+        const { get } = await import('svelte/store');
+        const { settings } = await import('../stores/settings');
+
+        // Get hytale root
+        let hytaleRoot = get(settings).hytaleRoot;
+        if (!hytaleRoot) {
+            await settings.load();
+            hytaleRoot = get(settings).hytaleRoot;
+        }
+        if (!hytaleRoot) {
+            throw new Error('Hytale root not configured');
+        }
+
+        const globalModsDir = await join(hytaleRoot, 'UserData', 'Mods');
+
+        if (!await exists(globalModsDir)) {
+            await mkdir(globalModsDir, { recursive: true });
+        }
+
+        // Get the real filename by checking the headers
+        let fileName = `${mod.id}-${mod.version}.jar`;
+        try {
+            const versions = await source.getModVersions(mod.id);
+            const targetVersion = versions.find(v => v.version === mod.version);
+
+            if (targetVersion) {
+                const { fetch } = await import('@tauri-apps/plugin-http');
+                const response = await fetch(targetVersion.downloadUrl, { method: 'HEAD' });
+
+                const disposition = response.headers.get('content-disposition');
+                if (disposition) {
+                    const match = disposition.match(/filename="?([^"]+)"?/);
+                    if (match && match[1]) {
+                        fileName = match[1];
+                    }
+                } else if (response.url) {
+                    const urlParts = response.url.split('/');
+                    const lastPart = urlParts[urlParts.length - 1];
+                    if (lastPart && lastPart.endsWith('.jar')) {
+                        fileName = decodeURIComponent(lastPart);
+                    }
+                }
+            }
+        } catch (error) {
+            console.warn('[ModManager] Failed to resolve real filename, using fallback:', error);
+        }
+
+        const destination = await join(globalModsDir, fileName);
+
+        await source.downloadMod(mod.id, mod.version, destination);
+
+        // Save Orbis metadata
+        if (mod.source === 'orbis') {
+            try {
+                await saveOrbisMetadata(globalModsDir, fileName, mod, mod.version);
+                console.log('[ModManager] ✅ Saved Orbis metadata to global Mods folder');
+            } catch (error) {
+                console.warn('[ModManager] Failed to save Orbis metadata:', error);
+            }
+        }
+
+        console.log(`Installed ${mod.id} version ${mod.version} to global mods: ${destination}`);
     }
 
     /**

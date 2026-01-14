@@ -10,6 +10,7 @@
     FolderOpen,
     Plus,
     ChevronDown,
+    Globe,
   } from 'lucide-svelte';
   import { slide } from 'svelte/transition';
   import ImportSaveDialog from '$lib/components/import-save-dialog.svelte';
@@ -80,6 +81,28 @@
           />
           <span class="flex-1 text-left">Browse</span>
           {#if isActive('/')}
+            <ChevronRight class="size-4 opacity-50" />
+          {/if}
+        </a>
+        <a
+          href="/global-mods"
+          class={cn(
+            'group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all font-nunito',
+            isActive('/global-mods')
+              ? 'bg-[#06363d] text-[#c7f4fa] border border-[#084b54]'
+              : 'text-[#c7f4fa]/70 hover:bg-[#06363d]/50 hover:text-[#c7f4fa] border border-transparent',
+          )}
+        >
+          <Globe
+            class={cn(
+              'size-5 shrink-0 transition-transform group-hover:scale-110',
+              isActive('/global-mods')
+                ? 'text-[#109eb1]'
+                : 'text-[#c7f4fa]/70 group-hover:text-[#c7f4fa]',
+            )}
+          />
+          <span class="flex-1 text-left">Global Mods</span>
+          {#if isActive('/global-mods')}
             <ChevronRight class="size-4 opacity-50" />
           {/if}
         </a>

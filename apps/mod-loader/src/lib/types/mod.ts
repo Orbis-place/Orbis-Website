@@ -60,3 +60,16 @@ export interface HytaleSave {
     lastPlayed?: string;
     installedModsCount: number;
 }
+
+export interface OrbisModMetadata {
+    id: string;
+    slug?: string;
+    name: string;
+    author: string;
+    iconUrl?: string;
+    version: string;
+    installedAt: string;
+}
+
+export type OrbisMetadataFile = Record<string, OrbisModMetadata>;
+

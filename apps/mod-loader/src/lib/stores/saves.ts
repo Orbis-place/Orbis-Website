@@ -43,11 +43,26 @@ function createSavesStore() {
                     // console.log(`Entry: ${entry.name}, isDirectory: ${entry.isDirectory}`);
                     if (entry.isDirectory) {
                         const fullPath = await join(saveRoot, entry.name);
-                        // Basic info for now
+
+                        // Count mods in the mods folder
+                        let modCount = 0;
+                        try {
+                            const modsPath = await join(fullPath, 'mods');
+                            const modsExist = await exists(modsPath);
+                            if (modsExist) {
+                                const modEntries = await readDir(modsPath);
+                                modCount = modEntries.filter(e =>
+                                    !e.isDirectory && e.name.endsWith('.jar')
+                                ).length;
+                            }
+                        } catch (e) {
+                            // Mods folder doesn't exist or can't be read
+                        }
+
                         saves.push({
                             name: entry.name,
                             path: fullPath,
-                            installedModsCount: 0, // TODO: Scan mods folder
+                            installedModsCount: modCount,
                             lastPlayed: new Date().toISOString() // Placeholder
                         });
                     }
