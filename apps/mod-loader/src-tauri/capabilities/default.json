@@ -33,6 +33,8 @@
         }
       ]
     },
+    "fs:allow-home-read-recursive",
+    "fs:allow-home-write-recursive",
     {
       "identifier": "fs:allow-write-file",
       "allow": [
