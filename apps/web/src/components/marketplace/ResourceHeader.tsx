@@ -238,8 +238,8 @@ export default function ResourceHeader({
 
                     {/* Tags and Categories */}
                     {(tags.length > 0 || categories.length > 0) && (
-                        <div className="flex items-center gap-2 flex-1">
-                            <Tag className="w-5 h-5 text-[#C7F4FA]/50" />
+                        <div className="flex items-center gap-2 w-full sm:w-auto sm:flex-1">
+                            <Tag className="w-5 h-5 text-[#C7F4FA]/50 flex-shrink-0" />
                             <div className="flex flex-wrap gap-2">
                                 {/* Categories - displayed with cyan accent */}
                                 {categories.slice(0, 5).map((category, i) => {
