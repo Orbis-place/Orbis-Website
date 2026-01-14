@@ -10,8 +10,8 @@ export interface UpdateStatus {
 }
 
 /**
- * Vérifie si une mise à jour est disponible
- * @returns Statut de la mise à jour
+ * Check if an update is available
+ * @returns Update status
  */
 export async function checkForUpdates(): Promise<UpdateStatus> {
     try {
@@ -29,15 +29,15 @@ export async function checkForUpdates(): Promise<UpdateStatus> {
 
         return { available: false };
     } catch (error) {
-        console.error('Erreur lors de la vérification des mises à jour:', error);
+        console.error('Error checking for updates:', error);
         return { available: false };
     }
 }
 
 /**
- * Télécharge et installe une mise à jour
- * @param onProgress Callback pour suivre la progression du téléchargement
- * @returns true si la mise à jour a été installée avec succès
+ * Download and install an update
+ * @param onProgress Callback to track download progress
+ * @returns true if the update was successfully installed
  */
 export async function downloadAndInstallUpdate(
     onProgress?: (downloaded: number, total: number) => void
@@ -56,27 +56,27 @@ export async function downloadAndInstallUpdate(
             switch (event.event) {
                 case 'Started':
                     contentLength = event.data.contentLength;
-                    console.log(`Téléchargement démarré: ${contentLength} bytes`);
+                    console.log(`Download started: ${contentLength} bytes`);
                     break;
                 case 'Progress':
                     downloaded += event.data.chunkLength;
                     onProgress?.(downloaded, contentLength);
-                    console.log(`Téléchargé: ${downloaded}/${contentLength} bytes`);
+                    console.log(`Downloaded: ${downloaded}/${contentLength} bytes`);
                     break;
                 case 'Finished':
-                    console.log('Téléchargement terminé');
+                    console.log('Download completed');
                     break;
             }
         });
 
-        console.log('Mise à jour installée avec succès');
+        console.log('Update installed successfully');
 
-        // Redémarrer l'application
+        // Restart the application
         await relaunch();
 
         return true;
     } catch (error) {
-        console.error('Erreur lors de l\'installation de la mise à jour:', error);
+        console.error('Error installing update:', error);
         return false;
     }
 }

@@ -16,7 +16,7 @@
       downloadTotal = total;
     });
 
-    // L'app redémarre automatiquement après l'installation
+    // The app will automatically restart after installation
   }
 
   $: progressPercent =
@@ -31,12 +31,10 @@
   <div
     class="bg-[#06363d] border border-[#109eb1]/30 rounded-2xl p-6 max-w-md w-full"
   >
-    <h2 class="text-2xl font-bold text-[#c7f4fa] mb-2">
-      Mise à jour disponible
-    </h2>
+    <h2 class="text-2xl font-bold text-[#c7f4fa] mb-2">Update Available</h2>
 
     <p class="text-[#c7f4fa]/80 mb-4">
-      Version {updateInfo.version} est disponible !
+      Version {updateInfo.version} is available!
     </p>
 
     {#if updateInfo.notes}
@@ -50,7 +48,7 @@
     {#if isDownloading}
       <div class="mb-4">
         <div class="flex justify-between text-sm text-[#c7f4fa]/60 mb-2">
-          <span>Téléchargement...</span>
+          <span>Downloading...</span>
           <span>{progressPercent}%</span>
         </div>
         <div class="w-full bg-[#032125] rounded-full h-2">
@@ -68,7 +66,7 @@
         disabled={isDownloading}
         class="flex-1 px-4 py-2 rounded-lg border border-[#c7f4fa]/20 text-[#c7f4fa] hover:bg-[#c7f4fa]/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        Plus tard
+        Later
       </button>
 
       <button
@@ -76,7 +74,7 @@
         disabled={isDownloading}
         class="flex-1 px-4 py-2 rounded-lg bg-[#109eb1] text-white hover:bg-[#109eb1]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {isDownloading ? 'Installation...' : 'Mettre à jour'}
+        {isDownloading ? 'Installing...' : 'Update'}
       </button>
     </div>
   </div>
