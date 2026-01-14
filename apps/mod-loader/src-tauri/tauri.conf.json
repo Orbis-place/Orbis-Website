@@ -40,7 +40,7 @@
   },
   "plugins": {
     "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDRERTBFM0U2MEE2QjFFNUQKUldSZEhtc0s1dVBnVGRaaG9SS0M3RkRQMEZLRXBxbVk4WWlucW5QVDRxTVB6Ym1sVndIUFhxQncK",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDc1ODkwN0E3QTVDMTBDQ0EKUldUS0RNR2xwd2VKZGMyLzlIemd6VnZ5Wm1zUUZ6ZUZHZVVCRC83bkJQSmE0RW4wdW41bGhJemUK",
       "endpoints": [
         "https://github.com/Orbis-place/Orbis-Website/releases/latest/download/latest.json"
       ],
