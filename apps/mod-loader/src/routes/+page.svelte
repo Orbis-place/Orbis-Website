@@ -66,7 +66,7 @@
       // Default to PLUGIN type for mods
       mods = await modManager.searchMods({
         query: searchQuery,
-        type: 'PLUGIN',
+        type: 'MOD',
       });
     } catch (error) {
       console.error('Error loading mods:', error);
