@@ -1,21 +1,24 @@
-use std::process::Command;
 use std::path::PathBuf;
+use std::process::Command;
 
 #[cfg(target_os = "macos")]
-const HYTALE_LAUNCHER_PATH: &str = "/Applications/Hytale Launcher.app/Contents/MacOS/hytale-launcher";
+const HYTALE_LAUNCHER_PATH: &str =
+    "/Applications/Hytale Launcher.app/Contents/MacOS/hytale-launcher";
 
 #[cfg(target_os = "windows")]
-const HYTALE_LAUNCHER_PATH: &str = "C:\\Program Files\\Hypixel Studios\\Hytale Launcher\\hytale-launcher.exe";
+const HYTALE_LAUNCHER_PATH: &str =
+    "C:\\Program Files\\Hypixel Studios\\Hytale Launcher\\hytale-launcher.exe";
 
 #[cfg(target_os = "linux")]
-const HYTALE_LAUNCHER_RELATIVE_PATH: &str = ".var/app/com.hypixel.HytaleLauncher/data/Hytale/hytale-launcher";
+const HYTALE_LAUNCHER_RELATIVE_PATH: &str =
+    ".var/app/com.hypixel.HytaleLauncher/data/Hytale/hytale-launcher";
 
 /// Get the Hytale launcher path, expanding ~ for Linux
 fn get_launcher_path() -> Result<PathBuf, String> {
     #[cfg(target_os = "linux")]
     {
-        let home = dirs::home_dir()
-            .ok_or_else(|| "Could not determine home directory".to_string())?;
+        let home =
+            dirs::home_dir().ok_or_else(|| "Could not determine home directory".to_string())?;
         Ok(home.join(HYTALE_LAUNCHER_RELATIVE_PATH))
     }
 

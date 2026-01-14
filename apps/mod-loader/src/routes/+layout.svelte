@@ -5,8 +5,37 @@
   import Toaster from '$lib/components/ui/sonner.svelte';
 
   import PathWarningBanner from '$lib/components/layout/path-warning-banner.svelte';
+  import UpdateDialog from '$lib/components/UpdateDialog.svelte';
+  import { checkForUpdates, type UpdateStatus } from '$lib/updater';
+  import { onMount } from 'svelte';
 
   let { children } = $props();
+
+  let updateAvailable: UpdateStatus | null = $state(null);
+  let showUpdateDialog = $state(false);
+
+  onMount(async () => {
+    // Vérifier les mises à jour au démarrage (après 3 secondes)
+    setTimeout(async () => {
+      const update = await checkForUpdates();
+      if (update.available) {
+        updateAvailable = update;
+        showUpdateDialog = true;
+      }
+    }, 3000);
+
+    // Vérifier périodiquement (toutes les heures)
+    setInterval(
+      async () => {
+        const update = await checkForUpdates();
+        if (update.available) {
+          updateAvailable = update;
+          showUpdateDialog = true;
+        }
+      },
+      60 * 60 * 1000,
+    );
+  });
 </script>
 
 <svelte:head>
@@ -24,6 +53,13 @@
 
 <Toaster />
 <Tooltip.Provider>
+  {#if showUpdateDialog && updateAvailable}
+    <UpdateDialog
+      updateInfo={updateAvailable}
+      onClose={() => (showUpdateDialog = false)}
+    />
+  {/if}
+
   <div
     class="flex h-screen w-screen overflow-hidden bg-background text-foreground"
   >

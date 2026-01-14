@@ -83,21 +83,19 @@ pub struct ModConfigEntry {
 /// Read orbis-metadata.json from mods directory
 fn read_orbis_metadata(mods_dir: &Path) -> HashMap<String, OrbisMetadataEntry> {
     let metadata_path = mods_dir.join("orbis-metadata.json");
-    
+
     if !metadata_path.exists() {
         return HashMap::new();
     }
-    
+
     match fs::read_to_string(&metadata_path) {
-        Ok(contents) => {
-            match serde_json::from_str(&contents) {
-                Ok(metadata) => metadata,
-                Err(e) => {
-                    eprintln!("Failed to parse orbis-metadata.json: {}", e);
-                    HashMap::new()
-                }
+        Ok(contents) => match serde_json::from_str(&contents) {
+            Ok(metadata) => metadata,
+            Err(e) => {
+                eprintln!("Failed to parse orbis-metadata.json: {}", e);
+                HashMap::new()
             }
-        }
+        },
         Err(e) => {
             eprintln!("Failed to read orbis-metadata.json: {}", e);
             HashMap::new()
@@ -108,55 +106,51 @@ fn read_orbis_metadata(mods_dir: &Path) -> HashMap<String, OrbisMetadataEntry> {
 /// Extract manifest from the downloaded jar and add to config.json from a .jar file
 fn extract_manifest_from_jar(jar_path: &Path) -> Result<ModManifest, String> {
     println!("extract_manifest_from_jar: Opening {:?}", jar_path);
-    let file = File::open(jar_path)
-        .map_err(|e| format!("Failed to open jar file: {}", e))?;
-    
+    let file = File::open(jar_path).map_err(|e| format!("Failed to open jar file: {}", e))?;
+
     println!("extract_manifest_from_jar: Reading zip archive");
-    let mut archive = ZipArchive::new(file)
-        .map_err(|e| format!("Failed to read jar archive: {}", e))?;
-    
+    let mut archive =
+        ZipArchive::new(file).map_err(|e| format!("Failed to read jar archive: {}", e))?;
+
     println!("extract_manifest_from_jar: Looking for manifest.json");
     let mut manifest_file = archive
         .by_name("manifest.json")
         .map_err(|e| format!("manifest.json not found in jar: {}", e))?;
-    
+
     let mut contents = String::new();
     manifest_file
         .read_to_string(&mut contents)
         .map_err(|e| format!("Failed to read manifest.json: {}", e))?;
-    
+
     println!("extract_manifest_from_jar: Parsing manifest");
-    serde_json::from_str(&contents)
-        .map_err(|e| format!("Failed to parse manifest.json: {}", e))
+    serde_json::from_str(&contents).map_err(|e| format!("Failed to parse manifest.json: {}", e))
 }
 
 /// Read config.json from save directory
 fn read_mod_config(save_path: &Path) -> Result<ModConfig, String> {
     let config_path = save_path.join("config.json");
-    
+
     if !config_path.exists() {
         // Return empty config if file doesn't exist
         return Ok(ModConfig {
             mods: HashMap::new(),
         });
     }
-    
+
     let contents = fs::read_to_string(&config_path)
         .map_err(|e| format!("Failed to read config.json: {}", e))?;
-    
-    serde_json::from_str(&contents)
-        .map_err(|e| format!("Failed to parse config.json: {}", e))
+
+    serde_json::from_str(&contents).map_err(|e| format!("Failed to parse config.json: {}", e))
 }
 
 /// Write config.json to save directory
 fn write_mod_config(save_path: &Path, config: &ModConfig) -> Result<(), String> {
     let config_path = save_path.join("config.json");
-    
+
     let contents = serde_json::to_string_pretty(config)
         .map_err(|e| format!("Failed to serialize config: {}", e))?;
-    
-    fs::write(&config_path, contents)
-        .map_err(|e| format!("Failed to write config.json: {}", e))
+
+    fs::write(&config_path, contents).map_err(|e| format!("Failed to write config.json: {}", e))
 }
 
 #[tauri::command]
@@ -165,29 +159,29 @@ pub fn get_installed_mods(save_path: String) -> Result<Vec<InstalledMod>, String
     let save_path = Path::new(&save_path);
     let mods_dir = save_path.join("mods");
     println!("Looking for mods in: {:?}", mods_dir);
-    
+
     if !mods_dir.exists() {
         println!("Mods directory does not exist: {:?}", mods_dir);
         return Ok(Vec::new());
     }
-    
+
     // Read config to get enabled/disabled state
     let config = read_mod_config(save_path)?;
-    
+
     // Read orbis metadata
     let orbis_metadata = read_orbis_metadata(&mods_dir);
-    
+
     let mut installed_mods = Vec::new();
-    
+
     // Read all .jar files in mods directory
-    let entries = fs::read_dir(&mods_dir)
-        .map_err(|e| format!("Failed to read mods directory: {}", e))?;
-    
+    let entries =
+        fs::read_dir(&mods_dir).map_err(|e| format!("Failed to read mods directory: {}", e))?;
+
     for entry in entries {
         let entry = entry.map_err(|e| format!("Failed to read directory entry: {}", e))?;
         let path = entry.path();
         println!("Checking file: {:?}", path);
-        
+
         // Check if it's a .jar file
         if path.extension().and_then(|s| s.to_str()) == Some("jar") {
             println!("Found jar file, extracting manifest...");
@@ -200,16 +194,16 @@ pub fn get_installed_mods(save_path: String) -> Result<Vec<InstalledMod>, String
                         .get(&mod_key)
                         .map(|entry| entry.enabled)
                         .unwrap_or(!manifest.disabled_by_default);
-                    
+
                     let jar_name = path
                         .file_name()
                         .and_then(|s| s.to_str())
                         .unwrap_or("unknown")
                         .to_string();
-                    
+
                     // Get orbis metadata if available
                     let orbis_meta = orbis_metadata.get(&jar_name).cloned();
-                    
+
                     installed_mods.push(InstalledMod {
                         jar_name,
                         manifest,
@@ -224,22 +218,24 @@ pub fn get_installed_mods(save_path: String) -> Result<Vec<InstalledMod>, String
             }
         }
     }
-    
+
     println!("Found {} installed mods", installed_mods.len());
     Ok(installed_mods)
 }
 
 #[tauri::command]
-pub fn toggle_mod(save_path: String, group: String, name: String, enabled: bool) -> Result<(), String> {
+pub fn toggle_mod(
+    save_path: String,
+    group: String,
+    name: String,
+    enabled: bool,
+) -> Result<(), String> {
     let save_path = Path::new(&save_path);
     let mut config = read_mod_config(save_path)?;
-    
+
     let mod_key = format!("{}:{}", group, name);
-    config.mods.insert(
-        mod_key,
-        ModConfigEntry { enabled },
-    );
-    
+    config.mods.insert(mod_key, ModConfigEntry { enabled });
+
     write_mod_config(save_path, &config)
 }
 
@@ -247,36 +243,38 @@ pub fn toggle_mod(save_path: String, group: String, name: String, enabled: bool)
 pub fn add_mod_to_config(save_path: String, group: String, name: String) -> Result<(), String> {
     let save_path = Path::new(&save_path);
     let mut config = read_mod_config(save_path)?;
-    
+
     let mod_key = format!("{}:{}", group, name);
-    
+
     // Only add if not already present
     if !config.mods.contains_key(&mod_key) {
-        config.mods.insert(
-            mod_key,
-            ModConfigEntry { enabled: true },
-        );
-        
+        config
+            .mods
+            .insert(mod_key, ModConfigEntry { enabled: true });
+
         write_mod_config(save_path, &config)?;
     }
-    
+
     Ok(())
 }
 
 #[tauri::command]
-pub fn register_jar_in_config(save_path: String, jar_filename: String) -> Result<ModManifest, String> {
+pub fn register_jar_in_config(
+    save_path: String,
+    jar_filename: String,
+) -> Result<ModManifest, String> {
     let save_path = Path::new(&save_path);
     let mods_dir = save_path.join("mods");
     let jar_path = mods_dir.join(&jar_filename);
-    
+
     println!("Registering jar: {:?}", jar_path);
-    
+
     if !jar_path.exists() {
         let err = format!("Jar file not found: {:?}", jar_path);
         println!("{}", err);
         return Err(err);
     }
-    
+
     let manifest = match extract_manifest_from_jar(&jar_path) {
         Ok(m) => m,
         Err(e) => {
@@ -285,16 +283,15 @@ pub fn register_jar_in_config(save_path: String, jar_filename: String) -> Result
             return Err(err);
         }
     };
-    
+
     let mut config = read_mod_config(save_path)?;
     let mod_key = format!("{}:{}", manifest.group, manifest.name);
-    
+
     if !config.mods.contains_key(&mod_key) {
         println!("Adding {} to config", mod_key);
-        config.mods.insert(
-            mod_key,
-            ModConfigEntry { enabled: true },
-        );
+        config
+            .mods
+            .insert(mod_key, ModConfigEntry { enabled: true });
         if let Err(e) = write_mod_config(save_path, &config) {
             let err = format!("Failed to write config: {}", e);
             println!("{}", err);
@@ -303,31 +300,35 @@ pub fn register_jar_in_config(save_path: String, jar_filename: String) -> Result
     } else {
         println!("{} already in config", mod_key);
     }
-    
+
     Ok(manifest)
 }
 
 #[tauri::command]
-pub fn delete_mod(save_path: String, group: String, name: String, jar_filename: String) -> Result<(), String> {
+pub fn delete_mod(
+    save_path: String,
+    group: String,
+    name: String,
+    jar_filename: String,
+) -> Result<(), String> {
     let save_path = Path::new(&save_path);
-    
+
     // 1. Remove from config
     let mut config = read_mod_config(save_path)?;
     let mod_key = format!("{}:{}", group, name);
-    
+
     if config.mods.remove(&mod_key).is_some() {
         write_mod_config(save_path, &config)?;
     }
-    
+
     // 2. Delete jar file
     let mods_dir = save_path.join("mods");
     let jar_path = mods_dir.join(&jar_filename);
-    
+
     if jar_path.exists() {
-        fs::remove_file(&jar_path)
-            .map_err(|e| format!("Failed to delete mod file: {}", e))?;
+        fs::remove_file(&jar_path).map_err(|e| format!("Failed to delete mod file: {}", e))?;
     }
-    
+
     Ok(())
 }
 
@@ -343,26 +344,29 @@ pub struct GlobalMod {
 pub fn get_global_mods(hytale_root: String) -> Result<Vec<GlobalMod>, String> {
     let hytale_path = Path::new(&hytale_root);
     let global_mods_dir = hytale_path.join("UserData").join("Mods");
-    
+
     println!("get_global_mods: Scanning {:?}", global_mods_dir);
-    
+
     if !global_mods_dir.exists() {
-        println!("Global mods directory does not exist: {:?}", global_mods_dir);
+        println!(
+            "Global mods directory does not exist: {:?}",
+            global_mods_dir
+        );
         return Ok(Vec::new());
     }
-    
+
     // Read orbis metadata
     let orbis_metadata = read_orbis_metadata(&global_mods_dir);
-    
+
     let mut global_mods = Vec::new();
-    
+
     let entries = fs::read_dir(&global_mods_dir)
         .map_err(|e| format!("Failed to read global mods directory: {}", e))?;
-    
+
     for entry in entries {
         let entry = entry.map_err(|e| format!("Failed to read directory entry: {}", e))?;
         let path = entry.path();
-        
+
         if path.extension().and_then(|s| s.to_str()) == Some("jar") {
             match extract_manifest_from_jar(&path) {
                 Ok(manifest) => {
@@ -372,9 +376,9 @@ pub fn get_global_mods(hytale_root: String) -> Result<Vec<GlobalMod>, String> {
                         .and_then(|s| s.to_str())
                         .unwrap_or("unknown")
                         .to_string();
-                    
+
                     let orbis_meta = orbis_metadata.get(&jar_name).cloned();
-                    
+
                     global_mods.push(GlobalMod {
                         jar_name,
                         manifest,
@@ -387,7 +391,7 @@ pub fn get_global_mods(hytale_root: String) -> Result<Vec<GlobalMod>, String> {
             }
         }
     }
-    
+
     println!("Found {} global mods", global_mods.len());
     Ok(global_mods)
 }
@@ -397,11 +401,11 @@ pub fn delete_global_mod(hytale_root: String, jar_filename: String) -> Result<()
     let hytale_path = Path::new(&hytale_root);
     let global_mods_dir = hytale_path.join("UserData").join("Mods");
     let jar_path = global_mods_dir.join(&jar_filename);
-    
+
     if jar_path.exists() {
         fs::remove_file(&jar_path)
             .map_err(|e| format!("Failed to delete global mod file: {}", e))?;
     }
-    
+
     Ok(())
 }

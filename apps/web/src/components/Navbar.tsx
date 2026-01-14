@@ -212,9 +212,10 @@ export default function Navbar({ session }: NavbarProps) {
                             </NavigationMenuList>
                         </NavigationMenu>
 
-                        <Button variant="ghost">
-                            <Link href="https://www.g-portal.com/en/gameserver/hytale-server-hosting?ref=orbisplace" className="font-hebden font-semibold text-base leading-none">
-                                Server Hosting
+                        <Button variant="ghost" asChild>
+                            <Link href="/launcher" className="flex items-center gap-2 font-hebden font-semibold text-base leading-none">
+                                <Icon ssr={true} icon="mdi:download" width="18" height="18" className="text-primary" />
+                                Get Launcher
                             </Link>
                         </Button>
                     </div>
@@ -677,25 +678,31 @@ export default function Navbar({ session }: NavbarProps) {
                                 </div>
                             </div>
 
-                            {/* Server Hosting */}
+
+                            {/* Get Launcher */}
                             <div className="space-y-1">
                                 <h3 className="font-hebden font-semibold text-sm text-foreground/60 uppercase tracking-wider mb-3">
-                                    Hosting
+                                    Download
                                 </h3>
                                 <Link
-                                    href="https://g-portal.com/?ref=orbisplace"
+                                    href="/launcher"
                                     onClick={closeMobileNav}
-                                    className="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-accent transition-colors group"
+                                    className="flex items-center justify-between px-4 py-3 rounded-xl bg-primary/10 hover:bg-primary/20 border border-primary/30 transition-colors group"
                                 >
                                     <div className="flex items-center gap-3">
-                                        <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
-                                            <Icon ssr={true} icon="mdi:server-network" width="18" height="18" />
+                                        <div className="p-1.5 rounded-lg bg-primary/20 text-primary">
+                                            <Icon ssr={true} icon="mdi:download" width="18" height="18" />
                                         </div>
-                                        <span className="font-hebden font-semibold text-sm text-foreground">
-                                            Server Hosting
-                                        </span>
+                                        <div className="flex flex-col">
+                                            <span className="font-hebden font-semibold text-sm text-foreground">
+                                                Get Launcher
+                                            </span>
+                                            <span className="font-nunito text-xs text-foreground/60">
+                                                Manage & install mods easily
+                                            </span>
+                                        </div>
                                     </div>
-                                    <Icon ssr={true} icon="mdi:open-in-new" width="18" height="18" className="text-foreground/40 group-hover:text-foreground/60" />
+                                    <Icon ssr={true} icon="mdi:chevron-right" width="20" height="20" className="text-foreground/40 group-hover:text-foreground/60" />
                                 </Link>
                             </div>
                         </div>

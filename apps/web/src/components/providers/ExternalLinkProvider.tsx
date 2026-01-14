@@ -24,7 +24,8 @@ const INTERNAL_DOMAINS = [
     'www.orbis.place',
     'localhost',
     '127.0.0.1',
-    'www.g-portal.com'
+    'www.g-portal.com',
+    'github.com'
 ];
 
 function isExternalUrl(url: string): boolean {
