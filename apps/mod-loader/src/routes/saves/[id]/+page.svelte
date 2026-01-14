@@ -209,12 +209,12 @@
           >
             <FolderOpen class="size-5" />
           </Button>
-          <Button
+          <!-- <Button
             class="bg-[#109eb1] hover:bg-[#109eb1]/90 text-white font-hebden tracking-wider gap-2 px-6 shadow-[0_0_20px_rgba(16,158,177,0.2)]"
           >
             <Play class="size-5 fill-current" />
             Launch
-          </Button>
+          </Button> -->
         </div>
       </div>
     </div>
