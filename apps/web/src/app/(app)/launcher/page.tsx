@@ -368,7 +368,7 @@ export default function LauncherPage() {
                                 Ready to enhance your Hytale?
                             </h2>
                             <p className="font-nunito text-lg text-[#c7f4fa]/70 max-w-xl mx-auto mb-8">
-                                Download the Orbis Mod Loader and start exploring thousands of mods, worlds, and more.
+                                Download the Orbis Mod Loader and start exploring hundreds of mods, worlds, and more.
                             </p>
 
                             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

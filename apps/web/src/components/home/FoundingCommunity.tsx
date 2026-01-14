@@ -7,7 +7,7 @@ const valueProps = [
     {
         icon: 'mdi:rocket-launch',
         title: 'Early Adopter Advantage',
-        description: 'Creators who join now get prime visibility when thousands of players arrive on launch day.',
+        description: 'Creators who join now get prime visibility when hundreds of players arrive on launch day.',
     },
     {
         icon: 'mdi:hammer-wrench',
