@@ -264,6 +264,11 @@ export class ResourceService {
                         channel: true,
                         createdAt: true,
                         publishedAt: true,
+                        _count: {
+                            select: {
+                                dependencies: true,
+                            },
+                        },
                     },
                 },
                 contributors: {

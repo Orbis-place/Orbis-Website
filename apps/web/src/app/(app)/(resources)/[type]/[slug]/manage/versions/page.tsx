@@ -19,6 +19,7 @@ import { OrbisConfirmDialog, OrbisFormDialog } from '@/components/OrbisDialog';
 import { Trash2, Upload, FileIcon, Check, X, Send, RefreshCw } from 'lucide-react';
 import { TiptapEditor } from '@/components/TiptapEditor';
 import { TiptapViewer } from '@/components/TiptapViewer';
+import VersionDependencies from '@/components/resources/dependencies/VersionDependencies';
 
 // ============================================
 // TYPES
@@ -835,6 +836,14 @@ export default function ManageVersionsPage() {
                                             </div>
                                         )}
                                     </div>
+
+                                    {/* Dependencies */}
+                                    <VersionDependencies
+                                        resourceId={resourceId}
+                                        versionId={version.id}
+                                        versionStatus={version.status}
+                                        canEdit={canEditChangelogAndFiles(version)}
+                                    />
                                 </div>
                             )}
                         </div>

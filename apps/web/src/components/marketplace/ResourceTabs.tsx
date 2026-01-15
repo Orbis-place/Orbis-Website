@@ -14,6 +14,7 @@ export interface ResourceTabsProps {
     basePath: string;
     tabs?: Tab[];
     commentCount?: number;
+    dependencyCount?: number;
 }
 
 const defaultTabs: Tab[] = [
@@ -21,9 +22,10 @@ const defaultTabs: Tab[] = [
     { id: 'comments', label: 'Comments', href: '/comments' },
     { id: 'gallery', label: 'Gallery', href: '/gallery' },
     { id: 'versions', label: 'Versions', href: '/versions' },
+    { id: 'dependencies', label: 'Dependencies', href: '/dependencies' },
 ];
 
-export default function ResourceTabs({ basePath, tabs = defaultTabs, commentCount }: ResourceTabsProps) {
+export default function ResourceTabs({ basePath, tabs = defaultTabs, commentCount, dependencyCount }: ResourceTabsProps) {
     const pathname = usePathname();
 
     const isActive = (tab: Tab) => {
@@ -33,18 +35,26 @@ export default function ResourceTabs({ basePath, tabs = defaultTabs, commentCoun
         return pathname === `${basePath}${tab.href}`;
     };
 
-    // Add comment count to the comments tab
-    const tabsWithCount = tabs.map(tab => {
-        if (tab.id === 'comments' && commentCount !== undefined) {
-            return { ...tab, count: commentCount };
-        }
-        return tab;
-    });
+    // Filter tabs based on counts and add counts
+    const filteredTabs = tabs
+        .filter(tab => {
+            // Hide dependencies tab if explicitly 0 dependencies
+            if (tab.id === 'dependencies' && dependencyCount === 0) {
+                return false;
+            }
+            return true;
+        })
+        .map(tab => {
+            if (tab.id === 'comments' && commentCount !== undefined) {
+                return { ...tab, count: commentCount };
+            }
+            return tab;
+        });
 
     return (
         <div className="border-b border-[#084B54] mb-8">
             <nav className="flex gap-8 overflow-x-auto scrollbar-hide">
-                {tabsWithCount.map((tab) => {
+                {filteredTabs.map((tab) => {
                     const active = isActive(tab);
 
                     return (

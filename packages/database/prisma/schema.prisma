@@ -1176,12 +1176,13 @@ model ResourceVersion {
   updatedAt   DateTime  @updatedAt
 
   // Relations
-  resource          Resource                    @relation(fields: [resourceId], references: [id], onDelete: Cascade)
-  latestFor         Resource[]                  @relation("LatestVersion")
-  dependencies      ResourceVersionDependency[]
-  commentsAtVersion ResourceComment[]           @relation("CommentAtVersion")
-  downloadCount     Int                         @default(0)
-  reports           Report[]                    @relation("ReportedResourceVersion")
+  resource              Resource                    @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  latestFor             Resource[]                  @relation("LatestVersion")
+  dependencies          ResourceVersionDependency[]
+  dependencyMinVersions ResourceVersionDependency[] @relation("DependencyMinVersion")
+  commentsAtVersion     ResourceComment[]           @relation("CommentAtVersion")
+  downloadCount         Int                         @default(0)
+  reports               Report[]                    @relation("ReportedResourceVersion")
 
   @@unique([resourceId, versionNumber])
   @@index([resourceId, channel])
@@ -1322,27 +1323,40 @@ enum FileType {
   OTHER
 }
 
-// Dependencies between versions
+// Dependencies between versions (supports internal and external dependencies)
 model ResourceVersionDependency {
-  id                 String         @id @default(cuid())
-  versionId          String
-  dependencyId       String // ID of the dependent resource
-  dependencyType     DependencyType
-  versionRequirement String? // ">=1.0.0", "^2.1.0", etc.
+  id             String         @id @default(cuid())
+  versionId      String
+  dependencyType DependencyType
 
-  version    ResourceVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
-  dependency Resource        @relation("ResourceDependencies", fields: [dependencyId], references: [id], onDelete: Cascade)
+  // For INTERNAL dependencies (resource on marketplace)
+  dependencyResourceId String? // NULL if external dependency
+  minVersionId         String? // Reference to a specific ResourceVersion (for internal deps)
 
-  @@unique([versionId, dependencyId])
-  @@index([dependencyId])
+  // For EXTERNAL dependencies (resource not on marketplace)
+  externalName       String? // Name of the external dependency
+  externalUrl        String? // URL to find/download the external dependency
+  externalMinVersion String? // Minimum version as free text (for external deps)
+
+  createdAt DateTime @default(now())
+
+  version            ResourceVersion  @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  dependencyResource Resource?        @relation("ResourceDependencies", fields: [dependencyResourceId], references: [id], onDelete: Cascade)
+  minVersionRef      ResourceVersion? @relation("DependencyMinVersion", fields: [minVersionId], references: [id], onDelete: SetNull)
+
+  @@unique([versionId, dependencyResourceId])
+  @@index([dependencyResourceId])
+  @@index([minVersionId])
   @@map("resource_version_dependencies")
 }
 
 enum DependencyType {
-  REQUIRED // Required
-  OPTIONAL // Optional but recommended
+  REQUIRED     // Required
+  OPTIONAL     // Optional but recommended
   INCOMPATIBLE // Doesn't work with
+  EMBEDDED     // Library bundled inside
 }
+
 
 // ============================================================================
 // CONTRIBUTORS

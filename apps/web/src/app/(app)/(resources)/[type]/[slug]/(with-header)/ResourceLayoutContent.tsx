@@ -197,7 +197,11 @@ export default function ResourceLayoutContent({ children }: { children: ReactNod
             <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
                 {/* Main Content */}
                 <div className="flex-1 min-w-0">
-                    <ResourceTabs basePath={`/${type}/${resource.slug}`} commentCount={(resource as any).commentCount || 0} />
+                    <ResourceTabs
+                        basePath={`/${type}/${resource.slug}`}
+                        commentCount={(resource as any).commentCount || 0}
+                        dependencyCount={(resource.latestVersion as any)?._count?.dependencies}
+                    />
                     {children}
                 </div>
 

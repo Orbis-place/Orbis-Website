@@ -22,6 +22,8 @@ import { CollectionController } from './collection.controller';
 import { CollectionService } from './collection.service';
 import { CommentController } from './comment.controller';
 import { CommentService } from './comment.service';
+import { ResourceDependencyController } from './resource-dependency.controller';
+import { ResourceDependencyService } from './resource-dependency.service';
 import { StorageModule } from '../storage/storage.module';
 import { RedisModule } from '../../common/redis.module';
 import { NotificationModule } from '../notification/notification.module';
@@ -41,6 +43,7 @@ import { NotificationModule } from '../notification/notification.module';
         VersionChangelogImageController,
         CollectionController,
         CommentController,
+        ResourceDependencyController,
     ],
     providers: [
         ResourceService,
@@ -54,6 +57,7 @@ import { NotificationModule } from '../notification/notification.module';
         VersionChangelogImageService,
         CollectionService,
         CommentService,
+        ResourceDependencyService,
     ],
     exports: [
         ResourceService,
@@ -67,6 +71,7 @@ import { NotificationModule } from '../notification/notification.module';
         VersionChangelogImageService,
         CollectionService,
         CommentService,
+        ResourceDependencyService,
     ],
 })
 export class ResourceModule { }
