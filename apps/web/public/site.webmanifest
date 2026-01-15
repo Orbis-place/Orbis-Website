@@ -1,0 +1,22 @@
+{
+  "name": "Orbis - Hytale Community Hub",
+  "short_name": "Orbis",
+  "description": "An Hytale community hub. Discover servers, browse marketplace for worlds & mods.",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#109eb1",
+  "background_color": "#032125",
+  "display": "standalone",
+  "start_url": "/",
+  "scope": "/"
+}
