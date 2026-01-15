@@ -1352,7 +1352,7 @@ export class ResourceService {
                 orderBy = { likeCount: 'desc' };
                 break;
             case ResourceSortOption.UPDATED:
-                orderBy = { updatedAt: 'desc' };
+                orderBy = { latestVersion: { publishedAt: 'desc' } };
                 break;
             case ResourceSortOption.NAME:
                 orderBy = { name: 'asc' };

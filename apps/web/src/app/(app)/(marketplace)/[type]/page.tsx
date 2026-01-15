@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect, use, useMemo } from 'react';
+import { useState, useEffect, use, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { Icon } from '@iconify/react';
 import { notFound, useSearchParams, useRouter } from 'next/navigation';
+import { useSession } from '@repo/auth/client';
 import type { FilterOption, ViewMode, MarketplaceItem } from '@/components/marketplace';
 import {
     FilterSidebar,
@@ -20,12 +21,15 @@ import {
     VersionFilter,
 } from '@/components/marketplace';
 import { getResourceType, isValidResourceType } from '@/config/resource-types';
-import { fetchResources, mapTypeToBackendEnum, ResourceSortOption, type Resource } from '@/lib/api/resources';
+import { fetchResources, getUserFavorites, mapTypeToBackendEnum, ResourceSortOption, type Resource } from '@/lib/api/resources';
 import { useDebounce } from '@/hooks/useDebounce';
 
 export default function MarketplacePage({ params }: { params: Promise<{ type: string }> }) {
     // Unwrap params using React.use()
     const { type } = use(params);
+
+    // Get session for favorites filter
+    const { data: session } = useSession();
 
     const [activeFilter, setActiveFilter] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
@@ -111,7 +115,7 @@ export default function MarketplacePage({ params }: { params: Promise<{ type: st
     // Reset to page 1 when filters change
     useEffect(() => {
         setCurrentPage(1);
-    }, [urlTags, urlCategories, urlVersions, debouncedSearchQuery, sortBy]);
+    }, [urlTags, urlCategories, urlVersions, debouncedSearchQuery, sortBy, activeFilter]);
 
     // Validate resource type
     if (!isValidResourceType(type)) {
@@ -123,12 +127,25 @@ export default function MarketplacePage({ params }: { params: Promise<{ type: st
 
     const filterOptions: FilterOption[] = [
         { id: 'all', label: 'All' },
-        { id: 'favorites', label: 'Favorites' },
-        { id: 'featured', label: 'Featured' },
-        { id: 'trending', label: 'Trending' },
+        { id: 'popular', label: 'Popular' },
         { id: 'newest', label: 'Newest' },
         { id: 'last-updated', label: 'Last Updated' },
+        { id: 'favorites', label: 'Favorites' },
     ];
+
+    // Determine the sort option based on active filter
+    const getEffectiveSortBy = useCallback((): ResourceSortOption => {
+        switch (activeFilter) {
+            case 'popular':
+                return ResourceSortOption.DOWNLOADS;
+            case 'newest':
+                return ResourceSortOption.DATE;
+            case 'last-updated':
+                return ResourceSortOption.UPDATED;
+            default:
+                return sortBy;
+        }
+    }, [activeFilter, sortBy]);
 
     // Fetch resources from API - use URL values directly for consistent behavior
     useEffect(() => {
@@ -137,10 +154,52 @@ export default function MarketplacePage({ params }: { params: Promise<{ type: st
             setError(null);
 
             try {
+                // Special handling for favorites filter
+                if (activeFilter === 'favorites') {
+                    if (!session?.user) {
+                        setResources([]);
+                        setTotalPages(1);
+                        setTotalCount(0);
+                        setError('Please sign in to view your favorites');
+                        setIsLoading(false);
+                        return;
+                    }
+
+                    const favoritesResponse = await getUserFavorites();
+                    // Filter favorites by resource type
+                    const filteredFavorites = favoritesResponse.favorites
+                        .filter(fav => fav.resource.type === backendType)
+                        .map(fav => fav.resource);
+
+                    // Apply search filter locally if needed
+                    let filtered = filteredFavorites;
+                    if (debouncedSearchQuery) {
+                        const query = debouncedSearchQuery.toLowerCase();
+                        filtered = filtered.filter(r =>
+                            r.name.toLowerCase().includes(query) ||
+                            r.tagline?.toLowerCase().includes(query) ||
+                            r.description?.toLowerCase().includes(query)
+                        );
+                    }
+
+                    // Apply local pagination
+                    const pageSize = 12;
+                    const startIndex = (currentPage - 1) * pageSize;
+                    const paginatedResources = filtered.slice(startIndex, startIndex + pageSize);
+
+                    setResources(paginatedResources);
+                    setTotalPages(Math.ceil(filtered.length / pageSize) || 1);
+                    setTotalCount(filtered.length);
+                    setIsLoading(false);
+                    return;
+                }
+
+                // Normal fetch for other filters
+                const effectiveSortBy = getEffectiveSortBy();
                 const response = await fetchResources({
                     type: backendType,
                     search: debouncedSearchQuery || undefined,
-                    sortBy,
+                    sortBy: effectiveSortBy,
                     page: currentPage,
                     limit: 12,
                     tags: urlTags.length > 0 ? urlTags.map(t => t.toLowerCase()) : undefined,
@@ -161,7 +220,7 @@ export default function MarketplacePage({ params }: { params: Promise<{ type: st
         };
 
         loadResources();
-    }, [backendType, debouncedSearchQuery, sortBy, currentPage, urlTags, urlCategories, urlVersions]);
+    }, [backendType, debouncedSearchQuery, sortBy, currentPage, urlTags, urlCategories, urlVersions, activeFilter, session, getEffectiveSortBy]);
 
     // Map backend resource to MarketplaceItem
     const mapToMarketplaceItem = (resource: Resource): MarketplaceItem => {
