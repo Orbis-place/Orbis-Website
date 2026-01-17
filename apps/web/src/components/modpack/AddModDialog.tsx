@@ -160,10 +160,6 @@ export default function AddModDialog({
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            if (!file.name.endsWith('.jar')) {
-                toast.error('Only JAR files are allowed');
-                return;
-            }
             if (file.size > 100 * 1024 * 1024) {
                 toast.error('File too large. Maximum size is 100MB');
                 return;
@@ -171,7 +167,7 @@ export default function AddModDialog({
             setCustomFile(file);
             // Auto-fill name from filename
             if (!customModName) {
-                const name = file.name.replace('.jar', '').replace(/-/g, ' ');
+                const name = file.name.replace(/\.[^/.]+$/, '').replace(/-/g, ' ');
                 setCustomModName(name);
             }
         }
@@ -256,7 +252,7 @@ export default function AddModDialog({
                         className="flex-1 gap-2 data-[state=active]:bg-[#109EB1] data-[state=active]:text-[#C7F4FA] text-[#C7F4FA]/60 font-hebden rounded-[8px] transition-all"
                     >
                         <Icon ssr={true} icon="mdi:upload" width="16" height="16" />
-                        Custom JAR
+                        Custom File
                     </TabsTrigger>
                 </TabsList>
 
@@ -356,11 +352,10 @@ export default function AddModDialog({
                 <TabsContent value="custom" className="space-y-4">
                     {/* File Upload */}
                     <div className="space-y-2">
-                        <Label className="font-nunito">Mod File (JAR) *</Label>
+                        <Label className="font-nunito">Mod File *</Label>
                         <div className="border-2 border-dashed border-[#084B54] rounded-lg p-6 text-center hover:border-primary/50 transition-colors">
                             <input
                                 type="file"
-                                accept=".jar"
                                 onChange={handleFileChange}
                                 className="hidden"
                                 id="custom-mod-file"
@@ -378,7 +373,7 @@ export default function AddModDialog({
                                     <div className="space-y-2">
                                         <Upload className="w-8 h-8 mx-auto text-muted-foreground" />
                                         <p className="font-nunito text-muted-foreground">
-                                            Click to upload a JAR file
+                                            Click to upload a file
                                         </p>
                                         <p className="text-xs text-muted-foreground">Max 100MB</p>
                                     </div>
