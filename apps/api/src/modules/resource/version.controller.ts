@@ -23,6 +23,7 @@ import {
     RejectVersionDto,
     UploadVersionFileDto,
     SetPrimaryFileDto,
+    UpdateBuildStrategyDto,
 } from './dtos/version.dto';
 import { Request, Response } from 'express';
 
@@ -272,5 +273,59 @@ export class VersionController {
         @Session() session: UserSession,
     ) {
         return this.versionService.setAsLatest(resourceId, versionId, session.user.id);
+    }
+
+    // ============================================
+    // MODPACK BUILD STRATEGY
+    // ============================================
+
+    @Patch(':versionId/build-strategy')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Update build strategy for a modpack version' })
+    async updateBuildStrategy(
+        @Param('resourceId') resourceId: string,
+        @Param('versionId') versionId: string,
+        @Session() session: UserSession,
+        @Body() dto: UpdateBuildStrategyDto,
+    ) {
+        return this.versionService.updateBuildStrategy(
+            resourceId,
+            versionId,
+            session.user.id,
+            dto.buildStrategy,
+        );
+    }
+
+    @Post(':versionId/complete-zip')
+    @ApiBearerAuth()
+    @UseInterceptors(FileInterceptor('file'))
+    @ApiConsumes('multipart/form-data')
+    @ApiOperation({ summary: 'Upload complete zip for a modpack version' })
+    @ApiBody({
+        description: 'Complete modpack ZIP file',
+        schema: {
+            type: 'object',
+            properties: {
+                file: {
+                    type: 'string',
+                    format: 'binary',
+                    description: 'The complete modpack ZIP file',
+                },
+            },
+            required: ['file'],
+        },
+    })
+    async uploadCompleteZip(
+        @Param('resourceId') resourceId: string,
+        @Param('versionId') versionId: string,
+        @Session() session: UserSession,
+        @UploadedFile() file: Express.Multer.File,
+    ) {
+        return this.versionService.uploadCompleteZip(
+            resourceId,
+            versionId,
+            session.user.id,
+            file,
+        );
     }
 }

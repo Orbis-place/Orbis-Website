@@ -201,6 +201,9 @@ export default function ResourceLayoutContent({ children }: { children: ReactNod
                         basePath={`/${type}/${resource.slug}`}
                         commentCount={(resource as any).commentCount || 0}
                         dependencyCount={(resource.latestVersion as any)?._count?.dependencies}
+                        galleryCount={(resource as any)._count?.galleryImages}
+                        isModpack={resource.type === 'MODPACK'}
+                        modCount={(resource as any).modpack?._count?.modEntries}
                     />
                     {children}
                 </div>

@@ -97,6 +97,15 @@ export class ResourceService {
             },
         });
 
+        // Create Modpack extension for MODPACK type resources
+        if (createDto.type === ResourceType.MODPACK) {
+            await prisma.modpack.create({
+                data: {
+                    resourceId: resource.id,
+                },
+            });
+        }
+
         return {
             message: 'Resource created successfully',
             resource,
@@ -279,6 +288,23 @@ export class ResourceService {
                                 username: true,
                                 displayName: true,
                                 image: true,
+                            },
+                        },
+                    },
+                },
+                // Include gallery images count
+                _count: {
+                    select: {
+                        galleryImages: true,
+                    },
+                },
+                // Include modpack data for modpacks
+                modpack: {
+                    select: {
+                        id: true,
+                        _count: {
+                            select: {
+                                forks: true,
                             },
                         },
                     },

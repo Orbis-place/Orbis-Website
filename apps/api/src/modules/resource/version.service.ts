@@ -3,6 +3,8 @@ import {
     NotFoundException,
     ForbiddenException,
     BadRequestException,
+    forwardRef,
+    Inject,
 } from '@nestjs/common';
 
 import { StorageService } from '../storage/storage.service';
@@ -14,8 +16,9 @@ import {
     UpdateChangelogDto,
     RejectVersionDto,
 } from './dtos/version.dto';
-import { prisma, VersionStatus, FileType, UserRole, NotificationType, ResourceStatus } from '@repo/db';
+import { prisma, VersionStatus, FileType, UserRole, NotificationType, ResourceStatus, ResourceType } from '@repo/db';
 import { NotificationService } from '../notification/notification.service';
+import { ModpackService } from './modpack.service';
 import * as crypto from 'crypto';
 import archiver from 'archiver';
 import { Response } from 'express';
@@ -27,6 +30,8 @@ export class VersionService {
         private readonly redisService: RedisService,
         private readonly changelogImageService: VersionChangelogImageService,
         private readonly notificationService: NotificationService,
+        @Inject(forwardRef(() => ModpackService))
+        private readonly modpackService: ModpackService,
     ) { }
 
     // ============================================
@@ -437,14 +442,33 @@ export class VersionService {
             throw new BadRequestException('Only DRAFT versions can be submitted for review');
         }
 
-        // Validate that at least one file is uploaded
-        if (version.files.length === 0) {
-            throw new BadRequestException('At least one file must be uploaded before submitting');
-        }
+        // For modpacks in CONFIGURATOR mode, files are not required (mods are in modEntries)
+        const isConfiguratorModpack = version.resource.type === ResourceType.MODPACK &&
+            version.buildStrategy === 'CONFIGURATOR';
 
-        // Validate that a primary file is set
-        if (!version.primaryFileId) {
-            throw new BadRequestException('A primary file must be set before submitting');
+        if (!isConfiguratorModpack) {
+            // Validate that at least one file is uploaded
+            if (version.files.length === 0) {
+                throw new BadRequestException('At least one file must be uploaded before submitting');
+            }
+
+            // Validate that a primary file is set
+            if (!version.primaryFileId) {
+                throw new BadRequestException('A primary file must be set before submitting');
+            }
+        } else {
+            // For CONFIGURATOR modpacks, validate that mod entries exist
+            const entriesCount = await prisma.modpackModEntry.count({
+                where: { resourceVersionId: versionId },
+            });
+
+            if (entriesCount === 0) {
+                throw new BadRequestException('At least one mod must be added to the modpack before submitting');
+            }
+
+            // Build the modpack archive from mod entries
+            console.log(`[Version Submit] Building modpack archive for version ${versionId}`);
+            await this.modpackService.buildModpackArchive(resourceId, versionId);
         }
 
         // Check if this is the first version being submitted
@@ -495,14 +519,33 @@ export class VersionService {
             throw new BadRequestException('Only REJECTED versions can be resubmitted');
         }
 
-        // Validate that at least one file is uploaded
-        if (version.files.length === 0) {
-            throw new BadRequestException('At least one file must be uploaded before resubmitting');
-        }
+        // For modpacks in CONFIGURATOR mode, files are not required (mods are in modEntries)
+        const isConfiguratorModpack = version.resource.type === ResourceType.MODPACK &&
+            version.buildStrategy === 'CONFIGURATOR';
 
-        // Validate that a primary file is set
-        if (!version.primaryFileId) {
-            throw new BadRequestException('A primary file must be set before resubmitting');
+        if (!isConfiguratorModpack) {
+            // Validate that at least one file is uploaded
+            if (version.files.length === 0) {
+                throw new BadRequestException('At least one file must be uploaded before resubmitting');
+            }
+
+            // Validate that a primary file is set
+            if (!version.primaryFileId) {
+                throw new BadRequestException('A primary file must be set before resubmitting');
+            }
+        } else {
+            // For CONFIGURATOR modpacks, validate that mod entries exist
+            const entriesCount = await prisma.modpackModEntry.count({
+                where: { resourceVersionId: versionId },
+            });
+
+            if (entriesCount === 0) {
+                throw new BadRequestException('At least one mod must be added to the modpack before resubmitting');
+            }
+
+            // Rebuild the modpack archive from mod entries
+            console.log(`[Version Resubmit] Rebuilding modpack archive for version ${versionId}`);
+            await this.modpackService.buildModpackArchive(resourceId, versionId);
         }
 
         // Check if this is the first version being resubmitted
@@ -1146,6 +1189,115 @@ export class VersionService {
 
         return {
             message: 'Version set as latest successfully',
+        };
+    }
+
+    // ============================================
+    // MODPACK BUILD STRATEGY
+    // ============================================
+
+    /**
+     * Update build strategy for a modpack version
+     */
+    async updateBuildStrategy(
+        resourceId: string,
+        versionId: string,
+        userId: string,
+        buildStrategy: 'COMPLETE_ZIP' | 'CONFIGURATOR',
+    ) {
+        const version = await this.getVersionWithPermission(resourceId, versionId, userId);
+
+        // Cannot modify on archived versions
+        if (version.status === VersionStatus.ARCHIVED) {
+            throw new BadRequestException('Cannot modify archived versions');
+        }
+
+        // Verify resource is a modpack
+        if (version.resource.type !== ResourceType.MODPACK) {
+            throw new BadRequestException('Build strategy can only be set for modpacks');
+        }
+
+        // Update build strategy
+        const updatedVersion = await prisma.resourceVersion.update({
+            where: { id: versionId },
+            data: { buildStrategy: buildStrategy as any },
+            include: {
+                compatibleVersions: {
+                    include: {
+                        hytaleVersion: true,
+                    },
+                },
+                files: true,
+                primaryFile: true,
+            },
+        });
+
+        return {
+            message: 'Build strategy updated successfully',
+            version: updatedVersion,
+        };
+    }
+
+    /**
+     * Upload complete zip for a modpack version (when using COMPLETE_ZIP strategy)
+     */
+    async uploadCompleteZip(
+        resourceId: string,
+        versionId: string,
+        userId: string,
+        file: Express.Multer.File,
+    ) {
+        const version = await this.getVersionWithPermission(resourceId, versionId, userId);
+
+        // Cannot modify files on pending, approved or archived versions
+        if (version.status === VersionStatus.PENDING || version.status === VersionStatus.APPROVED || version.status === VersionStatus.ARCHIVED) {
+            throw new BadRequestException(
+                'Cannot upload files to pending, approved or archived versions. Only DRAFT and REJECTED versions can be modified.',
+            );
+        }
+
+        // Verify resource is a modpack
+        if (version.resource.type !== ResourceType.MODPACK) {
+            throw new BadRequestException('Complete zip can only be uploaded for modpacks');
+        }
+
+        // Validate file is a ZIP
+        if (!file.originalname.endsWith('.zip')) {
+            throw new BadRequestException('Only ZIP files are allowed');
+        }
+
+        // Calculate file hash
+        const hash = crypto.createHash('sha256').update(file.buffer).digest('hex');
+
+        // Upload file to storage
+        const fileUrl = await this.storageService.uploadFile(file, `versions/${resourceId}`);
+
+        // Extract storage key from URL
+        const storageKey = fileUrl.split('media.orbis.place/')[1] || fileUrl;
+
+        // Create file record
+        const versionFile = await prisma.resourceVersionFile.create({
+            data: {
+                versionId,
+                filename: file.originalname,
+                displayName: file.originalname,
+                fileType: FileType.ZIP,
+                storageKey,
+                url: fileUrl,
+                size: file.size,
+                hash,
+            },
+        });
+
+        // Set as primary file
+        await prisma.resourceVersion.update({
+            where: { id: versionId },
+            data: { primaryFileId: versionFile.id },
+        });
+
+        return {
+            message: 'Complete zip uploaded successfully',
+            file: versionFile,
         };
     }
 }

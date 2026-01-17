@@ -24,6 +24,8 @@ import { CommentController } from './comment.controller';
 import { CommentService } from './comment.service';
 import { ResourceDependencyController } from './resource-dependency.controller';
 import { ResourceDependencyService } from './resource-dependency.service';
+import { ModpackController } from './modpack.controller';
+import { ModpackService } from './modpack.service';
 import { StorageModule } from '../storage/storage.module';
 import { RedisModule } from '../../common/redis.module';
 import { NotificationModule } from '../notification/notification.module';
@@ -44,6 +46,7 @@ import { NotificationModule } from '../notification/notification.module';
         CollectionController,
         CommentController,
         ResourceDependencyController,
+        ModpackController,
     ],
     providers: [
         ResourceService,
@@ -58,6 +61,7 @@ import { NotificationModule } from '../notification/notification.module';
         CollectionService,
         CommentService,
         ResourceDependencyService,
+        ModpackService,
     ],
     exports: [
         ResourceService,
@@ -72,6 +76,7 @@ import { NotificationModule } from '../notification/notification.module';
         CollectionService,
         CommentService,
         ResourceDependencyService,
+        ModpackService,
     ],
 })
 export class ResourceModule { }

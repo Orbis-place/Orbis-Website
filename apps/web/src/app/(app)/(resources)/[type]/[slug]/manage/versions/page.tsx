@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
+import Link from 'next/link';
 import { Icon } from '@iconify/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,10 +17,11 @@ import {
 } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { OrbisConfirmDialog, OrbisFormDialog } from '@/components/OrbisDialog';
-import { Trash2, Upload, FileIcon, Check, X, Send, RefreshCw } from 'lucide-react';
+import { Trash2, Upload, FileIcon, Check, X, Send, RefreshCw, Settings } from 'lucide-react';
 import { TiptapEditor } from '@/components/TiptapEditor';
 import { TiptapViewer } from '@/components/TiptapViewer';
 import VersionDependencies from '@/components/resources/dependencies/VersionDependencies';
+
 
 // ============================================
 // TYPES
@@ -55,6 +57,7 @@ interface ResourceVersion {
     primaryFileId?: string;
     primaryFile?: VersionFile;
     files: VersionFile[];
+    buildStrategy?: 'COMPLETE_ZIP' | 'CONFIGURATOR';
     compatibleVersions: Array<{
         hytaleVersion: HytaleVersion;
     }>;
@@ -123,6 +126,7 @@ export default function ManageVersionsPage() {
     // State
     const [loading, setLoading] = useState(true);
     const [resourceId, setResourceId] = useState<string>('');
+    const [resourceType, setResourceType] = useState<string>('');
     const [versions, setVersions] = useState<ResourceVersion[]>([]);
     const [hytaleVersions, setHytaleVersions] = useState<HytaleVersion[]>([]);
 
@@ -173,6 +177,7 @@ export default function ManageVersionsPage() {
             if (response.ok) {
                 const data = await response.json();
                 setResourceId(data.resource.id);
+                setResourceType(data.resource.type);
             }
         } catch (error) {
             console.error('Failed to fetch resource:', error);
@@ -493,10 +498,26 @@ export default function ManageVersionsPage() {
     };
 
     const canSubmit = (version: ResourceVersion) => {
+        if (resourceType === 'MODPACK') {
+            // COMPLETE_ZIP mode requires a file
+            if (version.buildStrategy === 'COMPLETE_ZIP') {
+                return version.status === 'DRAFT' && version.files.length > 0 && version.primaryFileId;
+            }
+            // CONFIGURATOR mode only needs status (mod entries checked by backend)
+            return version.status === 'DRAFT';
+        }
         return version.status === 'DRAFT' && version.files.length > 0 && version.primaryFileId;
     };
 
     const canResubmit = (version: ResourceVersion) => {
+        if (resourceType === 'MODPACK') {
+            // COMPLETE_ZIP mode requires a file
+            if (version.buildStrategy === 'COMPLETE_ZIP') {
+                return version.status === 'REJECTED' && version.files.length > 0 && version.primaryFileId;
+            }
+            // CONFIGURATOR mode only needs status (mod entries checked by backend)
+            return version.status === 'REJECTED';
+        }
         return version.status === 'REJECTED' && version.files.length > 0 && version.primaryFileId;
     };
 
@@ -739,111 +760,154 @@ export default function ManageVersionsPage() {
                                         )}
                                     </div>
 
-                                    {/* Files */}
-                                    <div>
-                                        <div className="flex items-center justify-between mb-2">
-                                            <h4 className="font-nunito font-semibold text-sm text-foreground">
-                                                Files
-                                            </h4>
-                                            {canEditChangelogAndFiles(version) && (
-                                                <div>
-                                                    <input
-                                                        type="file"
-                                                        id={`file-upload-${version.id}`}
-                                                        className="hidden"
-                                                        onChange={(e) => {
-                                                            const file = e.target.files?.[0];
-                                                            if (file) {
-                                                                handleFileUpload(version.id, file);
-                                                            }
-                                                            e.target.value = '';
-                                                        }}
-                                                    />
-                                                    <Button
-                                                        size="sm"
-                                                        variant="outline"
-                                                        onClick={() => document.getElementById(`file-upload-${version.id}`)?.click()}
-                                                        disabled={uploading}
-                                                    >
-                                                        {uploading ? (
-                                                            <Icon ssr={true} icon="mdi:loading" width="14" height="14" className="animate-spin mr-1" />
-                                                        ) : (
-                                                            <Upload className="w-4 h-4 mr-1" />
-                                                        )}
-                                                        Upload File
-                                                    </Button>
+                                    {/* Files - Hidden for modpacks */}
+                                    {resourceType !== 'MODPACK' && (
+                                        <div>
+                                            <div className="flex items-center justify-between mb-2">
+                                                <h4 className="font-nunito font-semibold text-sm text-foreground">
+                                                    Files
+                                                </h4>
+                                                {canEditChangelogAndFiles(version) && (
+                                                    <div>
+                                                        <input
+                                                            type="file"
+                                                            id={`file-upload-${version.id}`}
+                                                            className="hidden"
+                                                            onChange={(e) => {
+                                                                const file = e.target.files?.[0];
+                                                                if (file) {
+                                                                    handleFileUpload(version.id, file);
+                                                                }
+                                                                e.target.value = '';
+                                                            }}
+                                                        />
+                                                        <Button
+                                                            size="sm"
+                                                            variant="outline"
+                                                            onClick={() => document.getElementById(`file-upload-${version.id}`)?.click()}
+                                                            disabled={uploading}
+                                                        >
+                                                            {uploading ? (
+                                                                <Icon ssr={true} icon="mdi:loading" width="14" height="14" className="animate-spin mr-1" />
+                                                            ) : (
+                                                                <Upload className="w-4 h-4 mr-1" />
+                                                            )}
+                                                            Upload File
+                                                        </Button>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {version.files.length === 0 ? (
+                                                <div className="bg-secondary/50 rounded-lg p-8 text-center">
+                                                    <FileIcon className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
+                                                    <p className="text-sm text-muted-foreground">No files uploaded yet</p>
+                                                </div>
+                                            ) : (
+                                                <div className="space-y-2">
+                                                    {version.files.map((file) => (
+                                                        <div
+                                                            key={file.id}
+                                                            className={`flex items-center gap-3 p-3 rounded-lg border ${file.id === version.primaryFileId
+                                                                ? 'border-primary/50 bg-primary/5'
+                                                                : 'border-border bg-secondary/50'
+                                                                }`}
+                                                        >
+                                                            <FileIcon className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="font-nunito font-semibold text-foreground truncate">
+                                                                        {file.displayName || file.filename}
+                                                                    </span>
+                                                                    {file.id === version.primaryFileId && (
+                                                                        <Badge variant="default" className="text-xs">
+                                                                            Primary
+                                                                        </Badge>
+                                                                    )}
+                                                                </div>
+                                                                <div className="text-xs text-muted-foreground font-nunito">
+                                                                    {formatFileSize(file.size)} • {file.fileType}
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="flex items-center gap-1">
+                                                                {file.id !== version.primaryFileId && canEditChangelogAndFiles(version) && (
+                                                                    <Button
+                                                                        size="sm"
+                                                                        variant="ghost"
+                                                                        onClick={() => handleSetPrimaryFile(version.id, file.id)}
+                                                                        title="Set as primary"
+                                                                    >
+                                                                        <Check className="w-4 h-4" />
+                                                                    </Button>
+                                                                )}
+                                                                {canEditChangelogAndFiles(version) && (
+                                                                    <Button
+                                                                        size="sm"
+                                                                        variant="ghost"
+                                                                        className="text-destructive hover:text-destructive"
+                                                                        onClick={() => setDeletingFile({ versionId: version.id, file })}
+                                                                    >
+                                                                        <Trash2 className="w-4 h-4" />
+                                                                    </Button>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    ))}
                                                 </div>
                                             )}
                                         </div>
+                                    )}
 
-                                        {version.files.length === 0 ? (
-                                            <div className="bg-secondary/50 rounded-lg p-8 text-center">
-                                                <FileIcon className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
-                                                <p className="text-sm text-muted-foreground">No files uploaded yet</p>
+                                    {/* Modpack Contents - Only for modpacks */}
+                                    {resourceType === 'MODPACK' && (
+                                        <div>
+                                            <div className="flex items-center justify-between mb-2">
+                                                <h4 className="font-nunito font-semibold text-sm text-foreground">
+                                                    Mods
+                                                </h4>
+                                                <Badge variant="secondary" className="font-nunito">
+                                                    View in configuration
+                                                </Badge>
                                             </div>
-                                        ) : (
-                                            <div className="space-y-2">
-                                                {version.files.map((file) => (
-                                                    <div
-                                                        key={file.id}
-                                                        className={`flex items-center gap-3 p-3 rounded-lg border ${file.id === version.primaryFileId
-                                                            ? 'border-primary/50 bg-primary/5'
-                                                            : 'border-border bg-secondary/50'
-                                                            }`}
-                                                    >
-                                                        <FileIcon className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-
-                                                        <div className="flex-1 min-w-0">
-                                                            <div className="flex items-center gap-2">
-                                                                <span className="font-nunito font-semibold text-foreground truncate">
-                                                                    {file.displayName || file.filename}
-                                                                </span>
-                                                                {file.id === version.primaryFileId && (
-                                                                    <Badge variant="default" className="text-xs">
-                                                                        Primary
-                                                                    </Badge>
-                                                                )}
-                                                            </div>
-                                                            <div className="text-xs text-muted-foreground font-nunito">
-                                                                {formatFileSize(file.size)} • {file.fileType}
-                                                            </div>
-                                                        </div>
-
-                                                        <div className="flex items-center gap-1">
-                                                            {file.id !== version.primaryFileId && canEditChangelogAndFiles(version) && (
-                                                                <Button
-                                                                    size="sm"
-                                                                    variant="ghost"
-                                                                    onClick={() => handleSetPrimaryFile(version.id, file.id)}
-                                                                    title="Set as primary"
-                                                                >
-                                                                    <Check className="w-4 h-4" />
-                                                                </Button>
-                                                            )}
-                                                            {canEditChangelogAndFiles(version) && (
-                                                                <Button
-                                                                    size="sm"
-                                                                    variant="ghost"
-                                                                    className="text-destructive hover:text-destructive"
-                                                                    onClick={() => setDeletingFile({ versionId: version.id, file })}
-                                                                >
-                                                                    <Trash2 className="w-4 h-4" />
-                                                                </Button>
-                                                            )}
-                                                        </div>
+                                            <div className="bg-secondary/50 rounded-lg p-4 flex items-center justify-between">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                                                        <Icon ssr={true} icon="mdi:package-variant" width="20" height="20" className="text-primary" />
                                                     </div>
-                                                ))}
+                                                    <div>
+                                                        <p className="font-nunito font-semibold text-sm text-foreground">
+                                                            Configure modpack content
+                                                        </p>
+                                                        <p className="text-xs text-muted-foreground">
+                                                            Add mods, manage configs, and organize your modpack
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                {canEditChangelogAndFiles(version) && (
+                                                    <Link
+                                                        href={`/${params.type}/${resourceSlug}/manage/versions/${version.id}/modpack`}
+                                                    >
+                                                        <Button size="sm" className="gap-2">
+                                                            <Settings className="w-4 h-4" />
+                                                            Configure Content
+                                                        </Button>
+                                                    </Link>
+                                                )}
                                             </div>
-                                        )}
-                                    </div>
+                                        </div>
+                                    )}
 
-                                    {/* Dependencies */}
-                                    <VersionDependencies
-                                        resourceId={resourceId}
-                                        versionId={version.id}
-                                        versionStatus={version.status}
-                                        canEdit={canEditChangelogAndFiles(version)}
-                                    />
+                                    {/* Dependencies - Hidden for modpacks */}
+                                    {resourceType !== 'MODPACK' && (
+                                        <VersionDependencies
+                                            resourceId={resourceId}
+                                            versionId={version.id}
+                                            versionStatus={version.status}
+                                            canEdit={canEditChangelogAndFiles(version)}
+                                        />
+                                    )}
                                 </div>
                             )}
                         </div>

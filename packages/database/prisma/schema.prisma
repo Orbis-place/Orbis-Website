@@ -105,20 +105,20 @@ enum DiscoveryResourceCollectionType {
 // ============================================
 
 enum ShowcaseCategory {
-  THREE_D_MODEL    // 3D Models, characters, props
-  TEXTURE          // Textures, materials
-  MAP              // Maps, worlds, terrain
-  PLUGIN           // Plugin previews
-  CONCEPT_ART      // Concept art, sketches
-  ANIMATION        // Animations, VFX
-  MUSIC_SOUND      // Music, sound effects
-  OTHER            // Other creations
+  THREE_D_MODEL // 3D Models, characters, props
+  TEXTURE // Textures, materials
+  MAP // Maps, worlds, terrain
+  PLUGIN // Plugin previews
+  CONCEPT_ART // Concept art, sketches
+  ANIMATION // Animations, VFX
+  MUSIC_SOUND // Music, sound effects
+  OTHER // Other creations
 }
 
 enum ShowcasePostStatus {
-  DRAFT     // Not visible
+  DRAFT // Not visible
   PUBLISHED // Visible to everyone
-  ARCHIVED  // Hidden by user
+  ARCHIVED // Hidden by user
 }
 
 enum ShowcaseMediaType {
@@ -127,14 +127,14 @@ enum ShowcaseMediaType {
 }
 
 enum NotificationType {
-  LIKED_PROJECT_UPDATE    // Resource you liked got updated
-  NEW_CREATOR_UPLOAD      // Creator you follow uploaded new resource
-  NEW_FOLLOWER            // Someone followed you
-  VERSION_APPROVED        // Resource version approved
-  VERSION_REJECTED        // Resource version rejected
-  COLLECTION_ADDITION     // Resource added to collection
-  SHOWCASE_LIKE           // Someone liked your showcase post
-  SHOWCASE_COMMENT        // Someone commented on showcase post
+  LIKED_PROJECT_UPDATE // Resource you liked got updated
+  NEW_CREATOR_UPLOAD // Creator you follow uploaded new resource
+  NEW_FOLLOWER // Someone followed you
+  VERSION_APPROVED // Resource version approved
+  VERSION_REJECTED // Resource version rejected
+  COLLECTION_ADDITION // Resource added to collection
+  SHOWCASE_LIKE // Someone liked your showcase post
+  SHOWCASE_COMMENT // Someone commented on showcase post
 }
 
 // ============================================
@@ -175,16 +175,16 @@ model User {
   reputation Int @default(0)
 
   // Preferences
-  emailNotifications Boolean @default(true)
-  marketingEmails    Boolean @default(false)
-  showEmail          Boolean @default(false)
-  showLocation       Boolean @default(true)
+  emailNotifications   Boolean @default(true)
+  marketingEmails      Boolean @default(false)
+  showEmail            Boolean @default(false)
+  showLocation         Boolean @default(true)
   showOnlineStatus     Boolean @default(true)
   showFollowers        Boolean @default(true)
   showFollowing        Boolean @default(true)
   allowTeamInvitations Boolean @default(true)
   theme                String  @default("dark")
-  language           String  @default("en")
+  language             String  @default("en")
 
   // Notification preferences
   notifLikedProjectUpdates  Boolean @default(true)
@@ -245,16 +245,16 @@ model User {
   socialLinks UserSocialLink[] @relation("UserSocialLinks")
 
   // Showcase
-  showcasePosts        ShowcasePost[]        @relation("ShowcasePosts")
-  ownedShowcasePosts   ShowcasePost[]        @relation("OwnedShowcasePosts")
-  showcaseLikes        ShowcasePostLike[]    @relation("ShowcaseLikes")
-  showcaseComments     ShowcasePostComment[] @relation("ShowcaseComments")
+  showcasePosts      ShowcasePost[]        @relation("ShowcasePosts")
+  ownedShowcasePosts ShowcasePost[]        @relation("OwnedShowcasePosts")
+  showcaseLikes      ShowcasePostLike[]    @relation("ShowcaseLikes")
+  showcaseComments   ShowcasePostComment[] @relation("ShowcaseComments")
 
   // Resource Comments
-  resourceComments     ResourceComment[] @relation("ResourceComments")
+  resourceComments ResourceComment[] @relation("ResourceComments")
 
   // Resource Collections
-  resourceCollections  UserResourceCollection[] @relation("UserCollections")
+  resourceCollections UserResourceCollection[] @relation("UserCollections")
 
   // Notifications
   notifications Notification[] @relation("UserNotifications")
@@ -366,7 +366,6 @@ model Team {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-
   // Ownership
   ownerId String
   owner   User   @relation("TeamOwner", fields: [ownerId], references: [id], onDelete: Cascade)
@@ -376,8 +375,8 @@ model Team {
   invitations   TeamInvitation[]
   servers       Server[]
   resources     Resource[]
-  socialLinks   TeamSocialLink[]  @relation("TeamSocialLinks")
-  showcasePosts ShowcasePost[]    @relation("TeamShowcasePosts")
+  socialLinks   TeamSocialLink[] @relation("TeamSocialLinks")
+  showcasePosts ShowcasePost[]   @relation("TeamShowcasePosts")
 
   @@index([ownerId])
   @@map("teams")
@@ -456,7 +455,7 @@ model Server {
   slug          String       @unique
   description   String       @db.Text
   shortDesc     String?      @db.VarChar(200)
-  serverAddress String       // Format: "ip:port" or just "ip" (default port 5520)
+  serverAddress String // Format: "ip:port" or just "ip" (default port 5520)
   status        ServerStatus @default(PENDING)
 
   // Media
@@ -503,9 +502,9 @@ model Server {
   tags              ServerTagRelation[]
   categories        ServerCategoryRelation[]
   statusHistory     ServerStatusHistory[]
-  socialLinks       ServerSocialLink[]           @relation("ServerSocialLinks")
+  socialLinks       ServerSocialLink[]       @relation("ServerSocialLinks")
   descriptionImages ServerDescriptionImage[] // Inline images in description
-  reports           Report[]                     @relation("ReportedServer")
+  reports           Report[]                 @relation("ReportedServer")
 
   @@index([slug])
   @@index([status])
@@ -668,7 +667,6 @@ model ServerDescriptionImage {
   @@map("server_description_images")
 }
 
-
 // ============================================
 // REPORT SYSTEM
 // ============================================
@@ -685,26 +683,26 @@ model Report {
   status       ReportStatus       @default(PENDING)
 
   // Polymorphic relations (only one should be set based on resourceType)
-  reportedUserId             String?
-  reportedUser               User?                @relation("ReportedUser", fields: [reportedUserId], references: [id], onDelete: Cascade)
+  reportedUserId String?
+  reportedUser   User?   @relation("ReportedUser", fields: [reportedUserId], references: [id], onDelete: Cascade)
 
-  reportedResourceId         String?
-  reportedResource           Resource?            @relation("ReportedResource", fields: [reportedResourceId], references: [id], onDelete: Cascade)
+  reportedResourceId String?
+  reportedResource   Resource? @relation("ReportedResource", fields: [reportedResourceId], references: [id], onDelete: Cascade)
 
-  reportedResourceVersionId  String?
-  reportedResourceVersion    ResourceVersion?     @relation("ReportedResourceVersion", fields: [reportedResourceVersionId], references: [id], onDelete: Cascade)
+  reportedResourceVersionId String?
+  reportedResourceVersion   ResourceVersion? @relation("ReportedResourceVersion", fields: [reportedResourceVersionId], references: [id], onDelete: Cascade)
 
-  reportedResourceCommentId  String?
-  reportedResourceComment    ResourceComment?     @relation("ReportedResourceComment", fields: [reportedResourceCommentId], references: [id], onDelete: Cascade)
+  reportedResourceCommentId String?
+  reportedResourceComment   ResourceComment? @relation("ReportedResourceComment", fields: [reportedResourceCommentId], references: [id], onDelete: Cascade)
 
-  reportedShowcasePostId     String?
-  reportedShowcasePost       ShowcasePost?        @relation("ReportedShowcasePost", fields: [reportedShowcasePostId], references: [id], onDelete: Cascade)
+  reportedShowcasePostId String?
+  reportedShowcasePost   ShowcasePost? @relation("ReportedShowcasePost", fields: [reportedShowcasePostId], references: [id], onDelete: Cascade)
 
-  reportedShowcaseCommentId  String?
-  reportedShowcaseComment    ShowcasePostComment? @relation("ReportedShowcaseComment", fields: [reportedShowcaseCommentId], references: [id], onDelete: Cascade)
+  reportedShowcaseCommentId String?
+  reportedShowcaseComment   ShowcasePostComment? @relation("ReportedShowcaseComment", fields: [reportedShowcaseCommentId], references: [id], onDelete: Cascade)
 
-  reportedServerId           String?
-  reportedServer             Server?              @relation("ReportedServer", fields: [reportedServerId], references: [id], onDelete: Cascade)
+  reportedServerId String?
+  reportedServer   Server? @relation("ReportedServer", fields: [reportedServerId], references: [id], onDelete: Cascade)
 
   // Reporter
   reporterId String
@@ -781,11 +779,11 @@ model Resource {
 
   // Basic Info
   name        String
-  slug        String             @unique
-  tagline     String             @db.VarChar(200) // Short description
-  description String?            @db.Text // Full description (Markdown/HTML with images)
+  slug        String         @unique
+  tagline     String         @db.VarChar(200) // Short description
+  description String?        @db.Text // Full description (Markdown/HTML with images)
   type        ResourceType
-  status      ResourceStatus     @default(DRAFT)
+  status      ResourceStatus @default(DRAFT)
 
   // Media
   iconUrl           String?
@@ -851,11 +849,14 @@ model Resource {
   collectionItems UserResourceCollectionItem[]
 
   // Comments
-  comments      ResourceComment[]
-  commentCount  Int @default(0)
+  comments     ResourceComment[]
+  commentCount Int               @default(0)
 
   // Reports
-  reports       Report[] @relation("ReportedResource")
+  reports Report[] @relation("ReportedResource")
+
+  // Modpack extension (only for type=MODPACK)
+  modpack Modpack?
 
   // Moderation
   moderationNotes String? // Internal staff notes
@@ -880,6 +881,99 @@ model Resource {
   @@index([lastActivityAt])
   @@index([slug])
   @@map("resources")
+}
+
+// ============================================================================
+// MODPACK SYSTEM
+// ============================================================================
+
+// Extension table for resources of type MODPACK
+model Modpack {
+  id         String @id @default(cuid())
+  resourceId String @unique
+
+  // Fork functionality
+  forkedFromId String?
+  forkedFrom   Modpack?  @relation("ModpackForks", fields: [forkedFromId], references: [id], onDelete: SetNull)
+  forks        Modpack[] @relation("ModpackForks")
+  forkedAt     DateTime?
+  forkCount    Int       @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  resource   Resource          @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  // modEntries removed, now on ResourceVersion
+
+  @@index([forkedFromId])
+  @@index([forkCount])
+  @@map("modpacks")
+}
+
+// Mod entry in a modpack (current state)
+model ModpackModEntry {
+  id                String @id @default(cuid())
+  resourceVersionId String
+
+  // Platform mod (if on Orbis marketplace)
+  modVersionId String?
+
+  // Custom mod (if JAR uploaded directly)
+  customModName    String?
+  customModVersion String?
+  customModFile    ModpackCustomModFile?
+
+  // Options
+  notes      String? @db.Text
+  order      Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  resourceVersion ResourceVersion  @relation("ModpackVersionEntries", fields: [resourceVersionId], references: [id], onDelete: Cascade)
+  modVersion      ResourceVersion? @relation("ModVersionInModpack", fields: [modVersionId], references: [id], onDelete: Cascade)
+  config          ModpackModConfig?
+
+  @@unique([resourceVersionId, modVersionId])
+  @@index([resourceVersionId])
+  @@index([modVersionId])
+  @@map("modpack_mod_entries")
+}
+
+// Custom mod file (JAR uploaded for mods not on the platform)
+model ModpackCustomModFile {
+  id         String @id @default(cuid())
+  modEntryId String @unique
+
+  fileName   String
+  storageKey String
+  url        String
+  size       Int
+  hash       String
+
+  createdAt DateTime @default(now())
+
+  modEntry ModpackModEntry @relation(fields: [modEntryId], references: [id], onDelete: Cascade)
+
+  @@map("modpack_custom_mod_files")
+}
+
+// Configuration file (ZIP) for a mod in the modpack
+model ModpackModConfig {
+  id         String @id @default(cuid())
+  modEntryId String @unique
+
+  fileName   String
+  storageKey String
+  url        String
+  size       Int
+  hash       String
+
+  createdAt DateTime @default(now())
+
+  modEntry ModpackModEntry @relation(fields: [modEntryId], references: [id], onDelete: Cascade)
+
+  @@map("modpack_mod_configs")
 }
 
 // ============================================================================
@@ -1139,6 +1233,15 @@ model ResourceTagUsageByType {
 }
 
 // ============================================================================
+// MODPACK BUILD STRATEGY
+// ============================================================================
+
+enum ModpackBuildStrategy {
+  COMPLETE_ZIP // User provides a pre-built zip file
+  CONFIGURATOR // Build zip from individual mods using our configurator
+}
+
+// ============================================================================
 // VERSIONS
 // ============================================================================
 
@@ -1150,6 +1253,9 @@ model ResourceVersion {
   versionNumber String // "1.2.3"
   name          String? // "The Big Update"
   channel       ReleaseChannel @default(RELEASE)
+
+  // Modpack build strategy (only for modpacks)
+  buildStrategy ModpackBuildStrategy?
 
   // Compatibility
   compatibleVersions ResourceVersionToHytaleVersion[]
@@ -1164,8 +1270,8 @@ model ResourceVersion {
   primaryFile   ResourceVersionFile?  @relation("PrimaryFile", fields: [primaryFileId], references: [id], onDelete: SetNull)
 
   // Status
-  status VersionStatus @default(DRAFT)
-  rejectionReason String? @db.Text // Reason for rejection by moderator
+  status          VersionStatus @default(DRAFT)
+  rejectionReason String?       @db.Text // Reason for rejection by moderator
 
   // Images in changelog
   changelogImages ResourceVersionChangelogImage[]
@@ -1184,6 +1290,12 @@ model ResourceVersion {
   downloadCount         Int                         @default(0)
   reports               Report[]                    @relation("ReportedResourceVersion")
 
+  // Modpacks that include this version (for mods)
+  includedInModpacks ModpackModEntry[] @relation("ModVersionInModpack")
+
+  // Modpack entries (if this version serves as a modpack version)
+  modpackModEntries ModpackModEntry[] @relation("ModpackVersionEntries")
+
   @@unique([resourceId, versionNumber])
   @@index([resourceId, channel])
   @@index([publishedAt])
@@ -1196,17 +1308,17 @@ model ResourceVersion {
 // ============================================================================
 
 model HytaleVersion {
-  id            String   @id @default(cuid())
-  hytaleVersion String   @unique // "1.0", "1.1", etc.
+  id            String    @id @default(cuid())
+  hytaleVersion String    @unique // "1.0", "1.1", etc.
   name          String? // Optional display name
   releaseDate   DateTime?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   // Relations
-  resourceVersions       ResourceVersionToHytaleVersion[]
-  servers                Server[]                        @relation("ServerGameVersion")
-  supportedByServers     ServerSupportedVersion[]
+  resourceVersions   ResourceVersionToHytaleVersion[]
+  servers            Server[]                         @relation("ServerGameVersion")
+  supportedByServers ServerSupportedVersion[]
 
   @@index([hytaleVersion])
   @@map("hytale_versions")
@@ -1298,6 +1410,7 @@ model ResourceVersionFile {
   displayName String? // Display name (optional)
   fileType    FileType
 
+
   // Storage
   storageKey String // R2 key
   url        String // Download URL
@@ -1351,12 +1464,11 @@ model ResourceVersionDependency {
 }
 
 enum DependencyType {
-  REQUIRED     // Required
-  OPTIONAL     // Optional but recommended
+  REQUIRED // Required
+  OPTIONAL // Optional but recommended
   INCOMPATIBLE // Doesn't work with
-  EMBEDDED     // Library bundled inside
+  EMBEDDED // Library bundled inside
 }
-
 
 // ============================================================================
 // CONTRIBUTORS
@@ -1425,7 +1537,7 @@ model UserResourceCollection {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  user  User                          @relation("UserCollections", fields: [userId], references: [id], onDelete: Cascade)
+  user  User                         @relation("UserCollections", fields: [userId], references: [id], onDelete: Cascade)
   items UserResourceCollectionItem[]
 
   @@unique([userId, name]) // Each user can have unique collection names
@@ -1460,10 +1572,10 @@ model Notification {
   type      NotificationType
   title     String
   message   String           @db.Text
-  data      Json?            // Additional data (resource ID, user ID, etc.)
+  data      Json? // Additional data (resource ID, user ID, etc.)
   read      Boolean          @default(false)
   createdAt DateTime         @default(now())
-  
+
   user User @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, read])
@@ -1549,14 +1661,14 @@ model Apikey {
 // ============================================
 
 model DiscoveryResourceCollection {
-  id          String                         @id @default(cuid())
+  id          String                          @id @default(cuid())
   type        DiscoveryResourceCollectionType @unique
-  title       String                         // e.g., "Selection of the Week", "Medieval Era"
-  description String?                        @db.Text
-  metadata    Json?                          // For theme info, dates, background image URL, etc.
-  isActive    Boolean                        @default(true)
-  createdAt   DateTime                       @default(now())
-  updatedAt   DateTime                       @updatedAt
+  title       String // e.g., "Selection of the Week", "Medieval Era"
+  description String?                         @db.Text
+  metadata    Json? // For theme info, dates, background image URL, etc.
+  isActive    Boolean                         @default(true)
+  createdAt   DateTime                        @default(now())
+  updatedAt   DateTime                        @updatedAt
 
   items DiscoveryResourceCollectionItem[]
 
@@ -1564,20 +1676,20 @@ model DiscoveryResourceCollection {
 }
 
 model DiscoveryResourceCollectionItem {
-  id           String                      @id @default(cuid())
+  id           String    @id @default(cuid())
   collectionId String
   resourceId   String
-  order        Int                         @default(0)
-  startDate    DateTime                    @default(now())  // When it becomes active
-  endDate      DateTime?                   // When it ends (null = current)
-  addedAt      DateTime                    @default(now())
+  order        Int       @default(0)
+  startDate    DateTime  @default(now()) // When it becomes active
+  endDate      DateTime? // When it ends (null = current)
+  addedAt      DateTime  @default(now())
 
   collection DiscoveryResourceCollection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
   resource   Resource                    @relation(fields: [resourceId], references: [id], onDelete: Cascade)
 
   @@unique([collectionId, resourceId])
   @@index([collectionId, order])
-  @@index([collectionId, endDate])  // Critical for performance when querying current items
+  @@index([collectionId, endDate]) // Critical for performance when querying current items
   @@map("discovery_resource_collection_items")
 }
 
@@ -1586,47 +1698,47 @@ model DiscoveryResourceCollectionItem {
 // ============================================
 
 model ShowcasePost {
-  id          String   @id @default(cuid())
-  title       String   @db.VarChar(200)
-  description String?  @db.Text
+  id          String             @id @default(cuid())
+  title       String             @db.VarChar(200)
+  description String?            @db.Text
   category    ShowcaseCategory
   status      ShowcasePostStatus @default(DRAFT)
-  
+
   // Media
   media        ShowcasePostMedia[]
   thumbnailUrl String? // Primary thumbnail
-  
+
   // Stats
   likeCount    Int @default(0)
   commentCount Int @default(0)
   viewCount    Int @default(0)
-  
+
   // Featured
   featured Boolean @default(false)
-  
+
   // Ownership
-  authorId     String  // User who created the post
-  author       User    @relation("ShowcasePosts", fields: [authorId], references: [id], onDelete: Cascade)
-  ownerUserId  String? // Owner if user (exclusive with ownerTeamId)
-  ownerUser    User?   @relation("OwnedShowcasePosts", fields: [ownerUserId], references: [id], onDelete: Cascade)
-  ownerTeamId  String? // Owner if team (exclusive with ownerUserId)
-  ownerTeam    Team?   @relation("TeamShowcasePosts", fields: [ownerTeamId], references: [id], onDelete: SetNull)
-  
+  authorId    String // User who created the post
+  author      User    @relation("ShowcasePosts", fields: [authorId], references: [id], onDelete: Cascade)
+  ownerUserId String? // Owner if user (exclusive with ownerTeamId)
+  ownerUser   User?   @relation("OwnedShowcasePosts", fields: [ownerUserId], references: [id], onDelete: Cascade)
+  ownerTeamId String? // Owner if team (exclusive with ownerUserId)
+  ownerTeam   Team?   @relation("TeamShowcasePosts", fields: [ownerTeamId], references: [id], onDelete: SetNull)
+
   // Relations
   likes    ShowcasePostLike[]
   comments ShowcasePostComment[]
-  
+
   // Optional link to published resource
   linkedResourceId String?
   linkedResource   Resource? @relation("LinkedShowcase", fields: [linkedResourceId], references: [id], onDelete: SetNull)
 
   // Reports
   reports Report[] @relation("ReportedShowcasePost")
-  
+
   // Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@index([authorId])
   @@index([ownerUserId])
   @@index([ownerTeamId])
@@ -1645,12 +1757,12 @@ model ShowcasePostMedia {
   type       ShowcaseMediaType @default(IMAGE)
   order      Int               @default(0)
   caption    String?
-  size       Int?              // Bytes
-  
+  size       Int? // Bytes
+
   createdAt DateTime @default(now())
-  
+
   post ShowcasePost @relation(fields: [postId], references: [id], onDelete: Cascade)
-  
+
   @@index([postId, order])
   @@map("showcase_post_media")
 }
@@ -1660,10 +1772,10 @@ model ShowcasePostLike {
   userId    String
   postId    String
   createdAt DateTime @default(now())
-  
+
   user User         @relation("ShowcaseLikes", fields: [userId], references: [id], onDelete: Cascade)
   post ShowcasePost @relation(fields: [postId], references: [id], onDelete: Cascade)
-  
+
   @@unique([userId, postId])
   @@index([userId])
   @@index([postId])
@@ -1678,13 +1790,13 @@ model ShowcasePostComment {
   parentId  String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   user    User                  @relation("ShowcaseComments", fields: [userId], references: [id], onDelete: Cascade)
   post    ShowcasePost          @relation(fields: [postId], references: [id], onDelete: Cascade)
   parent  ShowcasePostComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
   replies ShowcasePostComment[] @relation("CommentReplies")
   reports Report[]              @relation("ReportedShowcaseComment")
-  
+
   @@index([postId, createdAt])
   @@index([userId])
   @@index([parentId])
@@ -1700,17 +1812,17 @@ model ResourceComment {
   content    String   @db.Text
   userId     String
   resourceId String
-  versionId  String?  // The version at time of comment (only for main comments, NULL for replies)
+  versionId  String? // The version at time of comment (only for main comments, NULL for replies)
   parentId   String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  user     User               @relation("ResourceComments", fields: [userId], references: [id], onDelete: Cascade)
-  resource Resource           @relation(fields: [resourceId], references: [id], onDelete: Cascade)
-  version  ResourceVersion?   @relation("CommentAtVersion", fields: [versionId], references: [id], onDelete: SetNull)
-  parent   ResourceComment?   @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
-  replies  ResourceComment[]  @relation("CommentReplies")
-  reports  Report[]           @relation("ReportedResourceComment")
+  user     User              @relation("ResourceComments", fields: [userId], references: [id], onDelete: Cascade)
+  resource Resource          @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  version  ResourceVersion?  @relation("CommentAtVersion", fields: [versionId], references: [id], onDelete: SetNull)
+  parent   ResourceComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies  ResourceComment[] @relation("CommentReplies")
+  reports  Report[]          @relation("ReportedResourceComment")
 
   @@index([resourceId, createdAt])
   @@index([userId])

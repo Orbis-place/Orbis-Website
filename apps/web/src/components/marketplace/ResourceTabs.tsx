@@ -15,6 +15,9 @@ export interface ResourceTabsProps {
     tabs?: Tab[];
     commentCount?: number;
     dependencyCount?: number;
+    galleryCount?: number;
+    modCount?: number;
+    isModpack?: boolean;
 }
 
 const defaultTabs: Tab[] = [
@@ -25,7 +28,7 @@ const defaultTabs: Tab[] = [
     { id: 'dependencies', label: 'Dependencies', href: '/dependencies' },
 ];
 
-export default function ResourceTabs({ basePath, tabs = defaultTabs, commentCount, dependencyCount }: ResourceTabsProps) {
+export default function ResourceTabs({ basePath, tabs = defaultTabs, commentCount, dependencyCount, galleryCount, modCount, isModpack }: ResourceTabsProps) {
     const pathname = usePathname();
 
     const isActive = (tab: Tab) => {
@@ -35,11 +38,23 @@ export default function ResourceTabs({ basePath, tabs = defaultTabs, commentCoun
         return pathname === `${basePath}${tab.href}`;
     };
 
+    // Build tabs list with conditional mods tab for modpacks
+    let tabsList = [...tabs];
+    if (isModpack) {
+        // Insert "Mods" tab after "Description" (index 1)
+        const modsTab: Tab = { id: 'mods', label: 'Mods', href: '/mods', count: modCount };
+        tabsList.splice(1, 0, modsTab);
+    }
+
     // Filter tabs based on counts and add counts
-    const filteredTabs = tabs
+    const filteredTabs = tabsList
         .filter(tab => {
             // Hide dependencies tab if explicitly 0 dependencies
             if (tab.id === 'dependencies' && dependencyCount === 0) {
+                return false;
+            }
+            // Hide gallery tab if explicitly 0 images
+            if (tab.id === 'gallery' && galleryCount === 0) {
                 return false;
             }
             return true;
@@ -47,6 +62,9 @@ export default function ResourceTabs({ basePath, tabs = defaultTabs, commentCoun
         .map(tab => {
             if (tab.id === 'comments' && commentCount !== undefined) {
                 return { ...tab, count: commentCount };
+            }
+            if (tab.id === 'mods' && modCount !== undefined) {
+                return { ...tab, count: modCount };
             }
             return tab;
         });

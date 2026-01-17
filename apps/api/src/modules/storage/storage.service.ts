@@ -1,6 +1,7 @@
 import { ConfigService } from "@nestjs/config";
 import { Injectable } from "@nestjs/common";
-import { S3Client, DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, DeleteObjectCommand, PutObjectCommand, CopyObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { Readable } from 'stream';
 import { Upload } from "@aws-sdk/lib-storage";
 import { createId } from "@paralleldrive/cuid2";
 
@@ -74,5 +75,58 @@ export class StorageService {
             Bucket: this.publicBucket,
             Key: filename,
         }));
+    }
+
+    async copyFile(sourceUrl: string, destinationKey: string): Promise<string> {
+        const sourceKey = sourceUrl.split(`${this.publicUrl}/`)[1];
+        if (!sourceKey) {
+            throw new Error('Invalid source URL');
+        }
+
+        await this.s3Client.send(new CopyObjectCommand({
+            Bucket: this.publicBucket,
+            CopySource: `${this.publicBucket}/${sourceKey}`,
+            Key: destinationKey,
+        }));
+
+        return `${this.publicUrl}/${destinationKey}`;
+    }
+
+    async getFileStream(fileUrl: string): Promise<Readable> {
+        const key = fileUrl.split(`${this.publicUrl}/`)[1];
+        if (!key) {
+            throw new Error('Invalid file URL');
+        }
+
+        const command = new GetObjectCommand({
+            Bucket: this.publicBucket,
+            Key: key,
+        });
+
+        const response = await this.s3Client.send(command);
+        return response.Body as Readable;
+    }
+
+    async uploadStream(
+        stream: Readable | Buffer,
+        folder: string,
+        filename: string,
+        mimeType: string = 'application/octet-stream'
+    ): Promise<string> {
+        const fullKey = `${folder}/${createId()}-${filename}`;
+
+        const upload = new Upload({
+            client: this.s3Client,
+            params: {
+                Bucket: this.publicBucket,
+                Key: fullKey,
+                Body: stream,
+                ContentType: mimeType,
+                CacheControl: 'public, max-age=31536000',
+            },
+        });
+
+        await upload.done();
+        return `${this.publicUrl}/${fullKey}`;
     }
 }

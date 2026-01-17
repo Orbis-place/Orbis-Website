@@ -152,6 +152,11 @@ export function OrbisConfirmDialog({
     children,
     ...props
 }: OrbisConfirmDialogProps) {
+    const handleCancel = () => {
+        onCancel?.();
+        props.onOpenChange?.(false);
+    };
+
     return (
         <OrbisDialog
             {...props}
@@ -159,7 +164,7 @@ export function OrbisConfirmDialog({
             footer={
                 <>
                     <button
-                        onClick={onCancel}
+                        onClick={handleCancel}
                         className="px-4 py-2 rounded-full font-hebden font-semibold text-sm border-2 border-border bg-secondary/30 hover:bg-secondary text-foreground transition-all"
                     >
                         {cancelText}
@@ -212,6 +217,11 @@ export function OrbisFormDialog({
         onSubmit(e)
     }
 
+    const handleCancel = () => {
+        onCancel?.();
+        props.onOpenChange?.(false);
+    };
+
     return (
         <OrbisDialog
             {...props}
@@ -220,7 +230,7 @@ export function OrbisFormDialog({
                     {showCancelButton && (
                         <button
                             type="button"
-                            onClick={onCancel}
+                            onClick={handleCancel}
                             className="px-4 py-2 rounded-full font-hebden font-semibold text-sm border-2 border-border bg-secondary/30 hover:bg-secondary text-foreground transition-all"
                         >
                             Cancel

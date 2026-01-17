@@ -144,3 +144,19 @@ export class SetPrimaryFileDto {
     @IsNotEmpty()
     fileId: string;
 }
+
+// ============================================
+// MODPACK BUILD STRATEGY
+// ============================================
+
+export class UpdateBuildStrategyDto {
+    @ApiProperty({
+        description: 'Build strategy for the modpack',
+        enum: ['COMPLETE_ZIP', 'CONFIGURATOR'],
+        example: 'CONFIGURATOR',
+    })
+    @IsString()
+    @IsNotEmpty()
+    @IsEnum({ COMPLETE_ZIP: 'COMPLETE_ZIP', CONFIGURATOR: 'CONFIGURATOR' })
+    buildStrategy: 'COMPLETE_ZIP' | 'CONFIGURATOR';
+}
