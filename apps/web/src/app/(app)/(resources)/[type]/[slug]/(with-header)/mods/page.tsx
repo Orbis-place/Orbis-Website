@@ -6,7 +6,7 @@ import { Icon } from '@iconify/react';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import Image from 'next/image';
-import { getModpackBySlug, type ModpackModEntry, type Modpack } from '@/lib/api/modpack';
+import { getModpackBySlug, getModpackEntries, type ModpackModEntry, type Modpack } from '@/lib/api/modpack';
 
 function formatBytes(bytes: number): string {
     if (bytes === 0) return '0 B';
@@ -19,6 +19,7 @@ function formatBytes(bytes: number): string {
 export default function ModsPage() {
     const { resource, isLoading: resourceLoading } = useResource();
     const [modpack, setModpack] = useState<Modpack | null>(null);
+    const [modEntries, setModEntries] = useState<ModpackModEntry[]>([]);
     const [loading, setLoading] = useState(true);
 
     const fetchModpack = useCallback(async () => {
@@ -30,6 +31,12 @@ export default function ModsPage() {
         try {
             const data = await getModpackBySlug(resource.slug);
             setModpack(data);
+
+            // Fetch mod entries for the latest version if available
+            if (data.resource.latestVersion) {
+                const entries = await getModpackEntries(data.resource.id, data.resource.latestVersion.id);
+                setModEntries(entries);
+            }
         } catch (error) {
             console.error('Failed to fetch modpack:', error);
         } finally {
@@ -62,8 +69,6 @@ export default function ModsPage() {
             </div>
         );
     }
-
-    const modEntries = modpack?.modEntries || [];
 
     return (
         <div className="space-y-6">
