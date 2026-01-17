@@ -165,6 +165,9 @@ export default function ManageVersionsPage() {
     // Expanded versions for file view
     const [expandedVersions, setExpandedVersions] = useState<Set<string>>(new Set());
 
+    // Current user state for upload limits
+    const [currentUser, setCurrentUser] = useState<{ isVerifiedCreator: boolean } | null>(null);
+
     // ============================================
     // DATA FETCHING
     // ============================================
@@ -218,10 +221,25 @@ export default function ManageVersionsPage() {
         }
     }, []);
 
+    const fetchCurrentUser = useCallback(async () => {
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/users/me`, {
+                credentials: 'include',
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setCurrentUser(data);
+            }
+        } catch (error) {
+            console.error('Failed to fetch current user:', error);
+        }
+    }, []);
+
     useEffect(() => {
         fetchResource();
         fetchHytaleVersions();
-    }, [fetchResource, fetchHytaleVersions]);
+        fetchCurrentUser();
+    }, [fetchResource, fetchHytaleVersions, fetchCurrentUser]);
 
     useEffect(() => {
         if (resourceId) {
@@ -359,6 +377,17 @@ export default function ManageVersionsPage() {
     // ============================================
 
     const handleFileUpload = async (versionId: string, file: File) => {
+        // Validation for file size
+        const isVerified = currentUser?.isVerifiedCreator || false;
+        const maxSize = isVerified ? 2 * 1024 * 1024 * 1024 : 100 * 1024 * 1024; // 2GB vs 100MB
+
+        if (file.size > maxSize) {
+            toast.error(
+                `File too large. Limit is ${formatFileSize(maxSize)}.`
+            );
+            return;
+        }
+
         setUploading(true);
         try {
             const formData = new FormData();

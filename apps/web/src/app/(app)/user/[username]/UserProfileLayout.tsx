@@ -181,9 +181,6 @@ function UserProfileLayoutContent({ children }: { children: ReactNode }) {
                                     </AvatarFallback>
                                 </Avatar>
                             </div>
-                            {user.showOnlineStatus && (
-                                <div className="absolute bottom-2 right-2 h-5 w-5 bg-green-500 rounded-full border-4 border-[#032125]" />
-                            )}
                         </div>
                     </div>
 
@@ -221,14 +218,24 @@ function UserProfileLayoutContent({ children }: { children: ReactNode }) {
                 </div>
             </div>
 
-
-
             {/* Info Section */}
             <div className="px-2">
                 {/* Title and Description */}
                 <div className="mb-4">
-                    <h1 className="font-hebden font-extrabold text-3xl sm:text-4xl leading-tight text-[#C7F4FA] mb-2">
+                    <h1 className="font-hebden font-extrabold text-3xl sm:text-4xl leading-tight text-[#C7F4FA] mb-2 items-center flex gap-2">
                         {user.displayName || user.username}
+                        {user.isVerifiedCreator && (
+                            <div className="inline-flex relative group">
+                                <Icon
+                                    ssr={true}
+                                    icon="mdi:check-decagram"
+                                    className="w-6 h-6 sm:w-8 sm:h-8 text-[#109EB1]"
+                                />
+                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1 bg-[#06363D] border border-[#084B54] text-[#C7F4FA] text-xs font-nunito rounded-full opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                                    Verified Creator
+                                </div>
+                            </div>
+                        )}
                     </h1>
                     {user.bio && (
                         <p className="font-nunito text-base text-[#C7F4FA]/80 leading-relaxed">

@@ -20,6 +20,15 @@ export class ResourceDescriptionImageService {
      * Uploads directly to the resource-specific folder
      */
     async uploadImage(userId: string, resourceId: string, file: Express.Multer.File) {
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+        const MAX_SIZE = user?.isVerifiedCreator ? 50 * 1024 * 1024 : 5 * 1024 * 1024;
+
+        if (file.size > MAX_SIZE) {
+            throw new BadRequestException(
+                `File size exceeds the limit of ${MAX_SIZE / 1024 / 1024}MB.`,
+            );
+        }
+
         // Check temporary image limit for this user and resource
         const temporaryCount = await prisma.resourceDescriptionImage.count({
             where: {

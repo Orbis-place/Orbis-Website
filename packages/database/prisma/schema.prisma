@@ -144,6 +144,7 @@ enum NotificationType {
 model User {
   // Core fields (Better Auth)
   id            String   @id @default(cuid())
+  isVerifiedCreator Boolean @default(false)
   username      String   @unique
   email         String   @unique
   emailVerified Boolean  @default(false)
@@ -903,7 +904,6 @@ model Modpack {
   updatedAt DateTime @updatedAt
 
   resource   Resource          @relation(fields: [resourceId], references: [id], onDelete: Cascade)
-  // modEntries removed, now on ResourceVersion
 
   @@index([forkedFromId])
   @@index([forkCount])

@@ -19,6 +19,15 @@ export class VersionChangelogImageService {
      * Uploads directly to the version-specific folder
      */
     async uploadImage(userId: string, versionId: string, file: Express.Multer.File) {
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+        const MAX_SIZE = user?.isVerifiedCreator ? 50 * 1024 * 1024 : 5 * 1024 * 1024;
+
+        if (file.size > MAX_SIZE) {
+            throw new BadRequestException(
+                `File size exceeds the limit of ${MAX_SIZE / 1024 / 1024}MB.`,
+            );
+        }
+
         // Check temporary image limit for this user and version
         const temporaryCount = await prisma.resourceVersionChangelogImage.count({
             where: {

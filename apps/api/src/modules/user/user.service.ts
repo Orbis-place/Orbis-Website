@@ -19,6 +19,7 @@ export class UserService {
             where: { id: userId },
             select: {
                 id: true,
+                isVerifiedCreator: true,
                 username: true,
                 email: true,
                 emailVerified: true,
@@ -122,16 +123,16 @@ export class UserService {
             throw new BadRequestException('Invalid file type. Only JPEG, PNG, WebP, and GIF are allowed');
         }
 
-        // Max 5MB
-        const maxSize = 5 * 1024 * 1024;
-        if (file.size > maxSize) {
-            throw new BadRequestException('File too large. Maximum size is 5MB');
-        }
-
         const user = await prisma.user.findUnique({
             where: { id: userId },
-            select: { image: true },
+            select: { image: true, isVerifiedCreator: true },
         });
+
+        // Max 5MB or 50MB for verified creators
+        const maxSize = user?.isVerifiedCreator ? 50 * 1024 * 1024 : 5 * 1024 * 1024;
+        if (file.size > maxSize) {
+            throw new BadRequestException(`File too large. Maximum size is ${maxSize / 1024 / 1024}MB`);
+        }
 
         const imageUrl = await this.storage.uploadFile(
             file,
@@ -177,16 +178,16 @@ export class UserService {
             throw new BadRequestException('Invalid file type. Only JPEG, PNG, WebP, and GIF are allowed');
         }
 
-        // Max 10MB for banner
-        const maxSize = 10 * 1024 * 1024;
-        if (file.size > maxSize) {
-            throw new BadRequestException('File too large. Maximum size is 10MB');
-        }
-
         const user = await prisma.user.findUnique({
             where: { id: userId },
-            select: { banner: true },
+            select: { banner: true, isVerifiedCreator: true },
         });
+
+        // Max 10MB or 50MB for verified creators
+        const maxSize = user?.isVerifiedCreator ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
+        if (file.size > maxSize) {
+            throw new BadRequestException(`File too large. Maximum size is ${maxSize / 1024 / 1024}MB`);
+        }
 
         const bannerUrl = await this.storage.uploadFile(
             file,
@@ -404,6 +405,7 @@ export class UserService {
             where: { id: userId },
             select: {
                 id: true,
+                isVerifiedCreator: true,
                 username: true,
                 displayName: true,
                 image: true,
@@ -460,6 +462,7 @@ export class UserService {
             where: { username: { equals: username, mode: 'insensitive' } },
             select: {
                 id: true,
+                isVerifiedCreator: true,
                 username: true,
                 displayName: true,
                 image: true,

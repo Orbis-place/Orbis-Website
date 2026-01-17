@@ -28,14 +28,17 @@ export interface UploadImageResponse {
  * console.log(result.url) // https://cdn.orbis.com/images/abc123.png
  * ```
  */
+const DEFAULT_MAX_SIZE = 5 * 1024 * 1024 // 5MB
+
 export async function uploadResourceDescriptionImage(
   resourceId: string,
-  file: File
+  file: File,
+  options?: { maxSize?: number }
 ): Promise<UploadImageResponse> {
-  // Validation de la taille du fichier (max 5MB)
-  const MAX_SIZE = 5 * 1024 * 1024 // 5MB
-  if (file.size > MAX_SIZE) {
-    throw new Error(`Image size exceeds maximum allowed size of ${MAX_SIZE / 1024 / 1024}MB`)
+  // Validation de la taille du fichier
+  const maxSize = options?.maxSize || DEFAULT_MAX_SIZE
+  if (file.size > maxSize) {
+    throw new Error(`Image size exceeds maximum allowed size of ${maxSize / 1024 / 1024}MB`)
   }
 
   // Validation du type de fichier
@@ -92,12 +95,13 @@ export async function uploadResourceDescriptionImage(
  */
 export async function uploadServerDescriptionImage(
   serverId: string,
-  file: File
+  file: File,
+  options?: { maxSize?: number }
 ): Promise<UploadImageResponse> {
-  // Validation de la taille du fichier (max 5MB)
-  const MAX_SIZE = 5 * 1024 * 1024 // 5MB
-  if (file.size > MAX_SIZE) {
-    throw new Error(`Image size exceeds maximum allowed size of ${MAX_SIZE / 1024 / 1024}MB`)
+  // Validation de la taille du fichier
+  const maxSize = options?.maxSize || DEFAULT_MAX_SIZE
+  if (file.size > maxSize) {
+    throw new Error(`Image size exceeds maximum allowed size of ${maxSize / 1024 / 1024}MB`)
   }
 
   // Validation du type de fichier
@@ -154,12 +158,13 @@ export async function uploadServerDescriptionImage(
  */
 export async function uploadVersionChangelogImage(
   versionId: string,
-  file: File
+  file: File,
+  options?: { maxSize?: number }
 ): Promise<UploadImageResponse> {
-  // Validation de la taille du fichier (max 5MB)
-  const MAX_SIZE = 5 * 1024 * 1024 // 5MB
-  if (file.size > MAX_SIZE) {
-    throw new Error(`Image size exceeds maximum allowed size of ${MAX_SIZE / 1024 / 1024}MB`)
+  // Validation de la taille du fichier
+  const maxSize = options?.maxSize || DEFAULT_MAX_SIZE
+  if (file.size > maxSize) {
+    throw new Error(`Image size exceeds maximum allowed size of ${maxSize / 1024 / 1024}MB`)
   }
 
   // Validation du type de fichier

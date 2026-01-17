@@ -136,7 +136,12 @@ export class VersionController {
 
     @Post(':versionId/files')
     @ApiBearerAuth()
-    @UseInterceptors(FileInterceptor('file'))
+    @UseInterceptors(FileInterceptor('file', {
+        limits: {
+            // Allow up to 2GB specifically for this endpoint (handled by service logic)
+            fileSize: 2 * 1024 * 1024 * 1024,
+        },
+    }))
     @ApiConsumes('multipart/form-data')
     @ApiOperation({ summary: 'Upload a file for a version' })
     @ApiBody({
@@ -298,7 +303,12 @@ export class VersionController {
 
     @Post(':versionId/complete-zip')
     @ApiBearerAuth()
-    @UseInterceptors(FileInterceptor('file'))
+    @UseInterceptors(FileInterceptor('file', {
+        limits: {
+            // Allow up to 2GB specifically for this endpoint
+            fileSize: 2 * 1024 * 1024 * 1024,
+        },
+    }))
     @ApiConsumes('multipart/form-data')
     @ApiOperation({ summary: 'Upload complete zip for a modpack version' })
     @ApiBody({

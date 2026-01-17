@@ -799,6 +799,20 @@ export class VersionService {
         file: Express.Multer.File,
         displayName?: string,
     ) {
+        // Enforce file size limits based on verification
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { isVerifiedCreator: true },
+        });
+
+        // 2GB for verified creators, 100MB for regular users
+        const MAX_SIZE = user?.isVerifiedCreator ? 2 * 1024 * 1024 * 1024 : 100 * 1024 * 1024;
+
+        if (file.size > MAX_SIZE) {
+            throw new BadRequestException(
+                `File size exceeds the limit of ${MAX_SIZE / 1024 / 1024}MB. Verified creators can upload up to 2GB.`,
+            );
+        }
         const version = await this.getVersionWithPermission(resourceId, versionId, userId);
 
         // Cannot modify files on pending, approved or archived versions
@@ -1247,6 +1261,20 @@ export class VersionService {
         userId: string,
         file: Express.Multer.File,
     ) {
+        // Enforce file size limits based on verification
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { isVerifiedCreator: true },
+        });
+
+        // 2GB for verified creators, 100MB for regular users
+        const MAX_SIZE = user?.isVerifiedCreator ? 2 * 1024 * 1024 * 1024 : 100 * 1024 * 1024;
+
+        if (file.size > MAX_SIZE) {
+            throw new BadRequestException(
+                `File size exceeds the limit of ${MAX_SIZE / 1024 / 1024}MB. Verified creators can upload up to 2GB.`,
+            );
+        }
         const version = await this.getVersionWithPermission(resourceId, versionId, userId);
 
         // Cannot modify files on pending, approved or archived versions

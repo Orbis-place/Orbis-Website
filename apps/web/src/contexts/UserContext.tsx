@@ -70,6 +70,7 @@ interface SocialLink {
 
 export interface UserProfile {
     id: string;
+    isVerifiedCreator: boolean;
     username: string;
     displayName: string | null;
     image: string | null;
