@@ -22,7 +22,6 @@ export interface ModManifest {
 export interface InstalledMod {
     jar_name: string;
     manifest: ModManifest;
-    enabled: boolean;
     orbis_metadata?: {
         id: string;
         slug?: string;

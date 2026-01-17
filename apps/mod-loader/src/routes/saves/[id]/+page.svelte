@@ -2,7 +2,6 @@
   import { page } from '$app/stores';
   import { saves, selectedSave, selectSave } from '$lib/stores/saves';
   import { Button } from '$lib/components/ui/button';
-  import { Badge } from '$lib/components/ui/badge';
   import {
     Play,
     FolderOpen,
@@ -86,25 +85,6 @@
       console.error('Failed to load installed mods:', error);
     } finally {
       loading = false;
-    }
-  }
-
-  async function toggleMod(mod: InstalledMod) {
-    if (!currentSave) return;
-
-    try {
-      await invoke('toggle_mod', {
-        savePath: currentSave.path,
-        group: mod.manifest.Group,
-        name: mod.manifest.Name,
-        enabled: !mod.enabled,
-      });
-
-      // Reload the mods list
-      await loadInstalledMods();
-    } catch (error) {
-      console.error('Failed to toggle mod:', error);
-      toast.error('Failed to toggle mod', String(error));
     }
   }
 
@@ -271,7 +251,6 @@
             <tr>
               <th class="px-6 py-4 rounded-tl-xl">Name</th>
               <th class="px-6 py-4">Version</th>
-              <th class="px-6 py-4">Status</th>
               <th class="px-6 py-4 rounded-tr-xl text-right">Actions</th>
             </tr>
           </thead>
@@ -309,39 +288,10 @@
                 <td class="px-6 py-4 text-sm text-[#c7f4fa]/70">
                   {mod.manifest.Version}
                 </td>
-                <td class="px-6 py-4">
-                  <Badge
-                    variant={mod.enabled ? 'default' : 'secondary'}
-                    class={mod.enabled
-                      ? 'bg-[#109eb1]/20 text-[#109eb1]'
-                      : 'bg-[#032125] text-[#c7f4fa]/50'}
-                  >
-                    {mod.enabled ? 'Enabled' : 'Disabled'}
-                  </Badge>
-                </td>
                 <td class="px-6 py-4 text-right">
                   <div
                     class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity"
                   >
-                    {#if mod.enabled}
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        class="h-8 text-xs border-[#084b54] bg-[#032125] text-[#c7f4fa] hover:bg-red-500/10 hover:text-red-400 hover:border-red-500"
-                        onclick={() => toggleMod(mod)}
-                      >
-                        Disable
-                      </Button>
-                    {:else}
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        class="h-8 text-xs border-[#084b54] bg-[#032125] text-[#c7f4fa] hover:bg-[#10b981]/10 hover:text-[#10b981] hover:border-[#10b981]"
-                        onclick={() => toggleMod(mod)}
-                      >
-                        Enable
-                      </Button>
-                    {/if}
                     <Button
                       size="icon"
                       variant="ghost"

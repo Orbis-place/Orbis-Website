@@ -854,8 +854,35 @@ export class ModpackService {
     // =========================================================================
 
     /**
+     * Extract manifest.json from a mod archive (JAR/ZIP) to get Group:Name
+     * Returns null if manifest cannot be extracted
+     */
+    private async extractModManifest(modBuffer: Buffer): Promise<{ Group: string; Name: string } | null> {
+        try {
+            const zip = new AdmZip(modBuffer);
+            const manifestEntry = zip.getEntry('manifest.json');
+            if (!manifestEntry) {
+                return null;
+            }
+            const manifestData = manifestEntry.getData().toString('utf-8');
+            const manifest = JSON.parse(manifestData);
+            if (manifest.Group && manifest.Name) {
+                return { Group: manifest.Group, Name: manifest.Name };
+            }
+            return null;
+        } catch (error) {
+            console.error('[BuildModpack] Failed to extract manifest:', error);
+            return null;
+        }
+    }
+
+    /**
      * Build a modpack archive (ZIP) from the configurator entries
      * This is called during submit/resubmit when buildStrategy is CONFIGURATOR
+     *
+     * Structure:
+     * - Mods/       -> Contains all mod files (.jar or .zip)
+     * - Configs/    -> Contains config archives named as "Group-Name.zip"
      *
      * @param resourceId The modpack resource ID
      * @param versionId The version ID to attach the file to
@@ -867,6 +894,7 @@ export class ModpackService {
             where: { id: versionId },
             include: {
                 modpackModEntries: {
+                    orderBy: { order: 'asc' },
                     include: {
                         modVersion: {
                             include: {
@@ -892,49 +920,63 @@ export class ModpackService {
             throw new NotFoundException('Version not found');
         }
 
-        // Implementation of build logic would go here
-        // For now, we'll leave it as a placeholder or minimal implementation since the detailed logic was lost/not fully visible
-        // But since this is a refactor, I should try to preserve the intent.
-
         // Create archive
         const archive = archiver('zip', { zlib: { level: 9 } });
 
-        // Iterate entries and add to archive
+        // Iterate entries and add to archive with proper structure
         for (const entry of version.modpackModEntries) {
             try {
-                // 1. Platform Mod
+                let modBuffer: Buffer | null = null;
+                let modFileName: string = '';
+
+                // 1. Platform Mod - add to Mods/ folder
                 if (entry.modVersionId && entry.modVersion?.primaryFile?.url) {
                     const stream = await this.storage.getFileStream(entry.modVersion.primaryFile.url);
-                    const name = entry.modVersion.primaryFile.filename || `mod-${entry.modVersionId}.jar`;
-                    archive.append(stream, { name });
+                    const chunks: Buffer[] = [];
+                    for await (const chunk of stream) {
+                        chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+                    }
+                    modBuffer = Buffer.concat(chunks);
+                    modFileName = entry.modVersion.primaryFile.filename || `mod-${entry.modVersionId}.jar`;
+
+                    // Add mod to Mods/ folder
+                    archive.append(modBuffer, { name: `Mods/${modFileName}` });
                 }
-                // 2. Custom Mod
+                // 2. Custom Mod - add to Mods/ folder
                 else if (entry.customModFile?.url) {
                     const stream = await this.storage.getFileStream(entry.customModFile.url);
-                    const name = entry.customModName ? `${entry.customModName}.jar` : (entry.customModFile.fileName || `custom-${entry.id}.jar`);
-                    archive.append(stream, { name });
+                    const chunks: Buffer[] = [];
+                    for await (const chunk of stream) {
+                        chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+                    }
+                    modBuffer = Buffer.concat(chunks);
+                    modFileName = entry.customModFile.fileName || `custom-${entry.id}.jar`;
+
+                    // Add mod to Mods/ folder
+                    archive.append(modBuffer, { name: `Mods/${modFileName}` });
                 }
 
-                // 3. Config
-                if (entry.config?.url) {
-                    const stream = await this.storage.getFileStream(entry.config.url);
-                    const chunks: any[] = [];
-                    for await (const chunk of stream) {
-                        chunks.push(chunk);
+                // 3. Config - add to Configs/ folder as a zip named with Group-Name
+                if (entry.config?.url && modBuffer) {
+                    // Extract manifest from mod to get Group:Name
+                    const manifest = await this.extractModManifest(modBuffer);
+
+                    let configFileName: string;
+                    if (manifest) {
+                        // Use Group_Name format
+                        configFileName = `${manifest.Group}_${manifest.Name}.zip`;
+                    } else {
+                        // Fallback to mod filename without extension
+                        const baseName = modFileName.replace(/\.(jar|zip)$/i, '');
+                        configFileName = `${baseName}-config.zip`;
                     }
-                    const buffer = Buffer.concat(chunks);
-                    const zip = new AdmZip(buffer);
-                    const zipEntries = zip.getEntries();
-                    for (const zipEntry of zipEntries) {
-                        if (!zipEntry.isDirectory) {
-                            archive.append(zipEntry.getData(), { name: zipEntry.entryName });
-                        }
-                    }
+
+                    // Get the config file stream and add it to Configs/ folder
+                    const configStream = await this.storage.getFileStream(entry.config.url);
+                    archive.append(configStream, { name: `Configs/${configFileName}` });
                 }
             } catch (error) {
                 console.error(`[BuildModpack] Failed to process entry ${entry.id}:`, error);
-                // Continue with other entries? Or fail?
-                // Failing is probably safer for consistency
                 throw new Error(`Failed to process mod entry ${entry.id}: ${error instanceof Error ? error.message : 'Unknown error'}`);
             }
         }
@@ -975,7 +1017,7 @@ export class ModpackService {
                     versionId,
                     filename,
                     displayName: filename,
-                    fileType: FileType.ZIP, // Or custom type for Modpack?
+                    fileType: FileType.ZIP,
                     storageKey: fileUrl.split('media.orbis.place/')[1] || fileUrl,
                     url: fileUrl,
                     size: archive.pointer(), // Approx size
@@ -991,9 +1033,5 @@ export class ModpackService {
 
             return file;
         }
-        // Since I don't have the full original code, I will mark this as to be implemented or return specific error.
-
-        // For now, let's just return void to satisfy the controller
-        return;
     }
 }

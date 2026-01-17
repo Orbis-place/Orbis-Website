@@ -12,6 +12,7 @@
     Globe,
     Check,
     ChevronsUpDown,
+    Layers,
   } from 'lucide-svelte';
   import { modManager } from '$lib/services/mod-manager';
   import { onMount, tick } from 'svelte';
@@ -25,10 +26,14 @@
 
   let mods = $state<Mod[]>([]);
   let worlds = $state<Mod[]>([]);
+  let modpacks = $state<Mod[]>([]);
   let searchQuery = $state('');
   let worldSearchQuery = $state('');
+  let modpackSearchQuery = $state('');
   let loading = $state(true);
   let worldsLoading = $state(false);
+  let modpacksLoading = $state(false);
+  let modpacksLoaded = $state(false);
   let activeTab = $state('mods');
 
   // Combobox state - can be 'global' or a save path
@@ -63,6 +68,7 @@
 
   let debounceTimer: ReturnType<typeof setTimeout>;
   let worldDebounceTimer: ReturnType<typeof setTimeout>;
+  let modpackDebounceTimer: ReturnType<typeof setTimeout>;
 
   // Initial load
   onMount(async () => {
@@ -72,6 +78,12 @@
   $effect(() => {
     if (activeTab === 'worlds' && worlds.length === 0 && !worldsLoading) {
       fetchWorlds();
+    }
+  });
+
+  $effect(() => {
+    if (activeTab === 'modpacks' && !modpacksLoaded && !modpacksLoading) {
+      fetchModpacks();
     }
   });
 
@@ -104,6 +116,21 @@
     }
   }
 
+  async function fetchModpacks() {
+    modpacksLoading = true;
+    try {
+      modpacks = await modManager.searchMods({
+        query: modpackSearchQuery,
+        type: 'MODPACK',
+      });
+    } catch (error) {
+      console.error('Error loading modpacks:', error);
+    } finally {
+      modpacksLoading = false;
+      modpacksLoaded = true;
+    }
+  }
+
   $effect(() => {
     // React to search query changes with debounce
     const query = searchQuery;
@@ -128,6 +155,22 @@
     }, 500);
 
     return () => clearTimeout(worldDebounceTimer);
+  });
+
+  $effect(() => {
+    // React to modpack search query changes with debounce
+    const query = modpackSearchQuery;
+
+    clearTimeout(modpackDebounceTimer);
+    modpackDebounceTimer = setTimeout(() => {
+      if (activeTab === 'modpacks' && modpacksLoaded) {
+        // Reset loaded state to allow refetch with new query
+        modpacksLoaded = false;
+        fetchModpacks();
+      }
+    }, 500);
+
+    return () => clearTimeout(modpackDebounceTimer);
   });
 
   async function handleInstall(mod: Mod) {
@@ -156,6 +199,26 @@
       }
     } catch (e) {
       console.error('Install failed:', e);
+      toast.error('Installation failed', String(e));
+    }
+  }
+
+  async function handleInstallModpack(modpack: Mod) {
+    if (!installTarget || installTarget === 'global') {
+      toast.warning('Please select a save to install the modpack');
+      return;
+    }
+
+    try {
+      await modManager.installModpack(modpack, installTarget);
+      const saveName =
+        $saves.find((s) => s.path === installTarget)?.name ?? 'save';
+      toast.success(
+        'Modpack installed',
+        `Successfully installed ${modpack.name} to ${saveName}`,
+      );
+    } catch (e) {
+      console.error('Modpack install failed:', e);
       toast.error('Installation failed', String(e));
     }
   }
@@ -273,9 +336,9 @@
         </div>
       </div>
 
-      <Tabs.Root value="mods" class="space-y-6">
+      <Tabs.Root class="space-y-6" bind:value={activeTab}>
         <Tabs.List
-          class="bg-[#032125] border border-[#084b54] p-1 rounded-xl w-[300px] grid grid-cols-2 h-auto"
+          class="bg-[#032125] border border-[#084b54] p-1 rounded-xl w-[450px] grid grid-cols-3 h-auto"
         >
           <Tabs.Trigger
             value="mods"
@@ -288,6 +351,12 @@
             class="h-10 rounded-lg font-hebden text-xs uppercase tracking-wider data-[state=active]:bg-[#109eb1] data-[state=active]:text-white text-[#c7f4fa]/70 hover:text-[#c7f4fa] transition-all flex items-center justify-center"
           >
             Worlds
+          </Tabs.Trigger>
+          <Tabs.Trigger
+            value="modpacks"
+            class="h-10 rounded-lg font-hebden text-xs uppercase tracking-wider data-[state=active]:bg-[#109eb1] data-[state=active]:text-white text-[#c7f4fa]/70 hover:text-[#c7f4fa] transition-all flex items-center justify-center"
+          >
+            Modpacks
           </Tabs.Trigger>
         </Tabs.List>
 
@@ -564,6 +633,141 @@
                     >
                       <Download class="mr-2 size-4" />
                       Add World
+                    </Button>
+                  </div>
+                </div>
+              {/each}
+            </div>
+          {/if}
+        </Tabs.Content>
+
+        <Tabs.Content value="modpacks" class="space-y-6 outline-none">
+          <!-- Search and Filters for Modpacks -->
+          <div class="flex gap-4 items-center">
+            <div class="relative flex-1 group">
+              <Search
+                class="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors"
+              />
+              <Input
+                type="text"
+                bind:value={modpackSearchQuery}
+                placeholder="Search modpacks..."
+                class="pl-11 h-11 bg-white/5 border-white/10 rounded-full text-foreground placeholder:text-muted-foreground/70 focus-visible:ring-primary/50 font-nunito"
+              />
+            </div>
+          </div>
+
+          <!-- Modpacks Grid -->
+          {#if modpacksLoading}
+            <div class="flex flex-col items-center justify-center py-20">
+              <Spinner class="mb-4 size-10 text-primary" />
+              <p
+                class="text-lg text-muted-foreground font-hebden animate-pulse"
+              >
+                Loading modpacks...
+              </p>
+            </div>
+          {:else if modpacks.length === 0}
+            <div
+              class="flex flex-col items-center justify-center py-20 text-muted-foreground"
+            >
+              <Layers class="size-16 mb-4 opacity-20" />
+              <p class="text-lg font-hebden">No modpacks found</p>
+            </div>
+          {:else}
+            <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+              {#each modpacks as modpack}
+                <!-- Marketplace Style Card -->
+                <div
+                  class="bg-[#06363d] border border-[#084b54] hover:border-[#109eb1] rounded-[25px] overflow-hidden flex flex-col min-h-[200px] transition-all duration-200 group relative"
+                >
+                  <!-- Content -->
+                  <div class="flex gap-4 p-4">
+                    <!-- Icon -->
+                    <div
+                      class="relative w-24 h-24 flex-shrink-0 rounded-[15px] overflow-hidden bg-[#032125] flex items-center justify-center group-hover:scale-105 transition-transform duration-300"
+                    >
+                      {#if modpack.icon}
+                        <img
+                          src={modpack.icon}
+                          alt={modpack.name}
+                          class="w-full h-full object-cover"
+                        />
+                      {:else}
+                        <Layers class="size-10 text-[#c7f4fa]/20" />
+                      {/if}
+                    </div>
+
+                    <div class="flex-1 flex flex-col min-w-0">
+                      <!-- Title & Author -->
+                      <div class="flex-1 min-w-0 mb-1">
+                        <div class="flex justify-between items-start gap-2">
+                          <h3
+                            class="font-hebden font-semibold text-lg leading-tight text-[#c7f4fa] truncate mb-0.5 group-hover:text-primary transition-colors"
+                          >
+                            {modpack.name}
+                          </h3>
+                          <!-- Source Badge/Icon -->
+                          <div class="flex items-center">
+                            <img
+                              src="/orbis_icon.png"
+                              alt="Orbis"
+                              class="size-5 object-contain"
+                              title="Orbis"
+                            />
+                          </div>
+                        </div>
+
+                        <p
+                          class="font-hebden font-semibold text-xs text-[#c7f4fa]/50"
+                        >
+                          by <span
+                            class="text-[#109eb1] hover:underline cursor-pointer"
+                            >{modpack.author}</span
+                          >
+                        </p>
+                      </div>
+
+                      <!-- Description -->
+                      <p
+                        class="font-nunito text-xs leading-relaxed text-[#c7f4fa]/70 line-clamp-2 mb-3 h-8"
+                      >
+                        {@html modpack.description}
+                      </p>
+
+                      <!-- Tags -->
+                      <div class="flex flex-wrap gap-1.5">
+                        {#each modpack.categories.slice(0, 3) as category}
+                          <span
+                            class="px-2 py-0.5 rounded-[5px] font-nunito text-[11px] font-bold uppercase tracking-wider bg-[#109eb1]/20 text-[#109eb1] border border-[#109eb1]/30"
+                          >
+                            {category}
+                          </span>
+                        {/each}
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Footer -->
+                  <div
+                    class="flex justify-between items-center px-4 py-3 border-t border-[#084b54] bg-[#032125]/30 mt-auto"
+                  >
+                    <div class="flex items-center gap-4">
+                      <div class="flex items-center gap-1.5" title="Downloads">
+                        <Download class="size-3.5 text-[#c7f4fa]/40" />
+                        <span class="font-hebden text-xs text-[#c7f4fa]/50"
+                          >{modpack.downloads.toLocaleString()}</span
+                        >
+                      </div>
+                    </div>
+
+                    <Button
+                      size="sm"
+                      variant="default"
+                      onclick={() => handleInstallModpack(modpack)}
+                    >
+                      <Download class="mr-2 size-4" />
+                      Add Modpack
                     </Button>
                   </div>
                 </div>

@@ -21,12 +21,12 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             greet,
             mods::get_installed_mods,
-            mods::toggle_mod,
             mods::add_mod_to_config,
             mods::register_jar_in_config,
             mods::delete_mod,
             mods::get_global_mods,
             mods::delete_global_mod,
+            mods::install_modpack,
             saves::import_save,
             launcher::launch_hytale
         ])

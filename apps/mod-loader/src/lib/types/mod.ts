@@ -50,7 +50,7 @@ export interface ModFilters {
     page?: number;
     limit?: number;
     offset?: number;
-    type?: 'MOD' | 'WORLD' | 'PLUGIN';
+    type?: 'MOD' | 'WORLD' | 'PLUGIN' | 'MODPACK';
 }
 
 export interface HytaleSave {

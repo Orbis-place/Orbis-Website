@@ -193,11 +193,32 @@ export class ModManager {
         const { join } = await import('@tauri-apps/api/path');
         const { exists, mkdir } = await import('@tauri-apps/plugin-fs');
         const { invoke } = await import('@tauri-apps/api/core');
+        const { get } = await import('svelte/store');
+        const { settings } = await import('../stores/settings');
 
-        const modsPath = await join(savePath, 'mods');
+        // Dynamic import of settings to avoid initialization issues
+        console.log('[ModManager] Imported settings store');
 
-        if (!await exists(modsPath)) {
-            await mkdir(modsPath, { recursive: true });
+        // Ensure settings loaded
+        let hytaleRoot = get(settings).hytaleRoot;
+        console.log(`[ModManager] Initial hytaleRoot: "${hytaleRoot}"`);
+
+        if (!hytaleRoot) {
+            console.log('[ModManager] hytaleRoot is empty, loading settings...');
+            await settings.load();
+            hytaleRoot = get(settings).hytaleRoot;
+            console.log(`[ModManager] After loading, hytaleRoot: "${hytaleRoot}"`);
+        }
+
+        if (!hytaleRoot) {
+            throw new Error('hytaleRoot is still empty after loading settings');
+        }
+
+        const userDataDir = await join(hytaleRoot, 'UserData');
+        const globalModsDir = await join(userDataDir, 'Mods');
+
+        if (!await exists(globalModsDir)) {
+            await mkdir(globalModsDir, { recursive: true });
         }
 
         // Get the real filename by checking the headers
@@ -235,96 +256,28 @@ export class ModManager {
             console.warn('[ModManager] Failed to resolve real filename, using fallback:', error);
         }
 
-        const destination = await join(modsPath, fileName);
+        const globalDestination = await join(globalModsDir, fileName);
 
-        await source.downloadMod(mod.id, mod.version, destination);
+        // Download to GLOBAL mods folder
+        await source.downloadMod(mod.id, mod.version, globalDestination);
 
-        // Also copy to global mods folder (UserData/Mods)
-        console.log('[ModManager] === Starting global mods folder copy ===');
-        try {
-            const { copyFile } = await import('@tauri-apps/plugin-fs');
-            const { get } = await import('svelte/store');
-
-            console.log('[ModManager] Imported fs and store utilities');
-
-            // Dynamic import of settings to avoid initialization issues
-            const { settings } = await import('../stores/settings');
-            console.log('[ModManager] Imported settings store');
-
-            // Ensure settings loaded
-            let hytaleRoot = get(settings).hytaleRoot;
-            console.log(`[ModManager] Initial hytaleRoot: "${hytaleRoot}"`);
-
-            if (!hytaleRoot) {
-                console.log('[ModManager] hytaleRoot is empty, loading settings...');
-                await settings.load();
-                hytaleRoot = get(settings).hytaleRoot;
-                console.log(`[ModManager] After loading, hytaleRoot: "${hytaleRoot}"`);
-            }
-
-            if (!hytaleRoot) {
-                throw new Error('hytaleRoot is still empty after loading settings');
-            }
-
-            const userDataDir = await join(hytaleRoot, 'UserData');
-            console.log(`[ModManager] UserData directory: "${userDataDir}"`);
-
-            const globalModsDir = await join(userDataDir, 'Mods');
-            console.log(`[ModManager] Global Mods directory: "${globalModsDir}"`);
-
-            const globalModsDirExists = await exists(globalModsDir);
-            console.log(`[ModManager] Global Mods directory exists: ${globalModsDirExists}`);
-
-            if (!globalModsDirExists) {
-                console.log('[ModManager] Creating global Mods directory...');
-                await mkdir(globalModsDir, { recursive: true });
-                console.log('[ModManager] Global Mods directory created successfully');
-            }
-
-            const globalDestination = await join(globalModsDir, fileName);
-            console.log(`[ModManager] Source: "${destination}"`);
-            console.log(`[ModManager] Destination: "${globalDestination}"`);
-            console.log('[ModManager] Starting file copy...');
-
-            await copyFile(destination, globalDestination);
-            console.log('[ModManager] ✅ File copied successfully to global Mods folder!');
-
-            // Save Orbis metadata to global mods folder as well
-            if (mod.source === 'orbis') {
-                try {
-                    await saveOrbisMetadata(globalModsDir, fileName, mod, mod.version);
-                    console.log('[ModManager] ✅ Saved Orbis metadata to global Mods folder');
-                } catch (metaError) {
-                    console.warn('[ModManager] Failed to save global Orbis metadata:', metaError);
-                }
-            }
-        } catch (error) {
-            console.error('[ModManager] ❌ Failed to copy mod to global Mods folder:', error);
-            console.error('[ModManager] Error details:', {
-                name: error instanceof Error ? error.name : 'Unknown',
-                message: error instanceof Error ? error.message : String(error),
-                stack: error instanceof Error ? error.stack : undefined
-            });
-            // Don't fail the whole installation, just log
-        }
-        console.log('[ModManager] === End global mods folder copy ===');
-
-        // Save Orbis metadata for the save-level mods folder
+        // Save Orbis metadata to global mods folder as well
         if (mod.source === 'orbis') {
             try {
-                await saveOrbisMetadata(modsPath, fileName, mod, mod.version);
-                console.log('[ModManager] ✅ Saved Orbis metadata to save mods folder');
-            } catch (error) {
-                console.warn('[ModManager] Failed to save Orbis metadata:', error);
+                await saveOrbisMetadata(globalModsDir, fileName, mod, mod.version);
+                console.log('[ModManager] ✅ Saved Orbis metadata to global Mods folder');
+            } catch (metaError) {
+                console.warn('[ModManager] Failed to save global Orbis metadata:', metaError);
             }
         }
 
-        // Extract manifest from the downloaded jar and add to config.json
+        // Register in config.json using the global JAR
         try {
-            console.log(`[ModManager] Registering installed jar: ${fileName}`);
+            console.log(`[ModManager] Registering installed global jar: ${fileName}`);
             await invoke('register_jar_in_config', {
                 savePath,
-                jarFilename: fileName
+                jarFilename: fileName,
+                hytaleRoot // Pass hytaleRoot so backend can find it in global mods
             });
             console.log(`[ModManager] Successfully registered ${fileName} in config.json`);
         } catch (error) {
@@ -332,7 +285,7 @@ export class ModManager {
             // Don't fail the installation, just log the error
         }
 
-        console.log(`Installed ${mod.id} version ${mod.version} to ${destination}`);
+        console.log(`Installed ${mod.id} version ${mod.version} to ${globalDestination} and linked to save.`);
     }
 
     /**
@@ -423,14 +376,84 @@ export class ModManager {
      */
     async getInstalledMods(savePath: string): Promise<InstalledMod[]> {
         const { invoke } = await import('@tauri-apps/api/core');
+        const { get } = await import('svelte/store');
+        const { settings } = await import('../stores/settings');
 
         try {
-            const mods = await invoke<InstalledMod[]>('get_installed_mods', { savePath });
+            // Get hytale root
+            let hytaleRoot = get(settings).hytaleRoot;
+            if (!hytaleRoot) {
+                await settings.load();
+                hytaleRoot = get(settings).hytaleRoot;
+            }
+            if (!hytaleRoot) {
+                console.error('[ModManager] Hytale root not configured');
+                return [];
+            }
+
+            const mods = await invoke<InstalledMod[]>('get_installed_mods', { savePath, hytaleRoot });
             return mods;
         } catch (error) {
             console.error('[ModManager] Failed to get installed mods:', error);
             return [];
         }
+    }
+
+    /**
+     * Install a modpack to a specific save
+     * Downloads the modpack zip, then extracts:
+     * - Mods/ contents to UserData/Mods
+     * - Configs/*.zip contents to save_path/mods
+     */
+    async installModpack(mod: Mod, savePath: string): Promise<void> {
+        const source = this.sources.get(mod.source);
+        if (!source) {
+            throw new Error(`Mod source '${mod.source}' not found`);
+        }
+
+        const { join } = await import('@tauri-apps/api/path');
+        const { tempDir } = await import('@tauri-apps/api/path');
+        const { invoke } = await import('@tauri-apps/api/core');
+        const { get } = await import('svelte/store');
+        const { settings } = await import('../stores/settings');
+
+        // Get hytale root
+        let hytaleRoot = get(settings).hytaleRoot;
+        if (!hytaleRoot) {
+            await settings.load();
+            hytaleRoot = get(settings).hytaleRoot;
+        }
+        if (!hytaleRoot) {
+            throw new Error('Hytale root not configured');
+        }
+
+        // Get the download URL and filename
+        const versions = await source.getModVersions(mod.id);
+        const targetVersion = versions.find(v => v.version === mod.version);
+        if (!targetVersion) {
+            throw new Error(`Version ${mod.version} not found for modpack ${mod.name}`);
+        }
+
+        // Generate temp file path for the modpack
+        const tempDirectory = await tempDir();
+        const fileName = `${mod.id}-${mod.version}.zip`;
+        const tempFilePath = await join(tempDirectory, fileName);
+
+        console.log(`[ModManager] Downloading modpack to ${tempFilePath}`);
+
+        // Download the modpack zip to temp
+        await source.downloadMod(mod.id, mod.version, tempFilePath);
+
+        console.log(`[ModManager] Installing modpack from ${tempFilePath}`);
+
+        // Call Rust backend to extract and install the modpack
+        await invoke('install_modpack', {
+            modpackZipPath: tempFilePath,
+            savePath,
+            hytaleRoot,
+        });
+
+        console.log(`[ModManager] Modpack ${mod.name} installed successfully`);
     }
 }
 
