@@ -23,6 +23,7 @@
   import * as Tabs from '$lib/components/ui/tabs';
   import { toast } from '$lib/stores/toast';
   import { cn } from '$lib/utils';
+  import { goto } from '$app/navigation';
 
   let mods = $state<Mod[]>([]);
   let worlds = $state<Mod[]>([]);
@@ -231,7 +232,7 @@
 
 <div class="flex flex-1 flex-col overflow-hidden">
   <main class="flex-1 overflow-y-auto p-8 custom-scrollbar">
-    <div class="mx-auto max-w-7xl space-y-8">
+    <div class="mx-auto space-y-8">
       <!-- Header -->
       <div class="flex items-end justify-between">
         <div>
@@ -401,7 +402,20 @@
                   class="bg-[#06363d] border border-[#084b54] hover:border-[#109eb1] rounded-[25px] overflow-hidden flex flex-col min-h-[200px] transition-all duration-200 group relative"
                 >
                   <!-- Content -->
-                  <div class="flex gap-4 p-4">
+                  <div
+                    class="flex gap-4 p-4 cursor-pointer"
+                    role="button"
+                    tabindex="0"
+                    onkeydown={(e: KeyboardEvent) =>
+                      e.key === 'Enter' &&
+                      goto(
+                        `/view/mod/${mod.slug || mod.id}?source=${mod.source}`,
+                      )}
+                    onclick={() =>
+                      goto(
+                        `/view/mod/${mod.slug || mod.id}?source=${mod.source}`,
+                      )}
+                  >
                     <!-- Icon -->
                     <div
                       class="relative w-24 h-24 flex-shrink-0 rounded-[15px] overflow-hidden bg-[#032125] flex items-center justify-center group-hover:scale-105 transition-transform duration-300"
@@ -494,7 +508,10 @@
                     <Button
                       size="sm"
                       variant="default"
-                      onclick={() => handleInstall(mod)}
+                      onclick={(e: MouseEvent) => {
+                        e.stopPropagation();
+                        handleInstall(mod);
+                      }}
                     >
                       <Download class="mr-2 size-4" />
                       Add Mod
@@ -547,7 +564,20 @@
                   class="bg-[#06363d] border border-[#084b54] hover:border-[#109eb1] rounded-[25px] overflow-hidden flex flex-col min-h-[200px] transition-all duration-200 group relative"
                 >
                   <!-- Content -->
-                  <div class="flex gap-4 p-4">
+                  <div
+                    class="flex gap-4 p-4 cursor-pointer"
+                    role="button"
+                    tabindex="0"
+                    onkeydown={(e: KeyboardEvent) =>
+                      e.key === 'Enter' &&
+                      goto(
+                        `/view/world/${world.slug || world.id}?source=${world.source}`,
+                      )}
+                    onclick={() =>
+                      goto(
+                        `/view/world/${world.slug || world.id}?source=${world.source}`,
+                      )}
+                  >
                     <!-- Icon -->
                     <div
                       class="relative w-24 h-24 flex-shrink-0 rounded-[15px] overflow-hidden bg-[#032125] flex items-center justify-center group-hover:scale-105 transition-transform duration-300"
@@ -629,7 +659,10 @@
                     <Button
                       size="sm"
                       variant="default"
-                      onclick={() => handleInstall(world)}
+                      onclick={(e: MouseEvent) => {
+                        e.stopPropagation();
+                        handleInstall(world);
+                      }}
                     >
                       <Download class="mr-2 size-4" />
                       Add World
@@ -682,7 +715,20 @@
                   class="bg-[#06363d] border border-[#084b54] hover:border-[#109eb1] rounded-[25px] overflow-hidden flex flex-col min-h-[200px] transition-all duration-200 group relative"
                 >
                   <!-- Content -->
-                  <div class="flex gap-4 p-4">
+                  <div
+                    class="flex gap-4 p-4 cursor-pointer"
+                    role="button"
+                    tabindex="0"
+                    onkeydown={(e: KeyboardEvent) =>
+                      e.key === 'Enter' &&
+                      goto(
+                        `/view/modpack/${modpack.slug || modpack.id}?source=${modpack.source}`,
+                      )}
+                    onclick={() =>
+                      goto(
+                        `/view/modpack/${modpack.slug || modpack.id}?source=${modpack.source}`,
+                      )}
+                  >
                     <!-- Icon -->
                     <div
                       class="relative w-24 h-24 flex-shrink-0 rounded-[15px] overflow-hidden bg-[#032125] flex items-center justify-center group-hover:scale-105 transition-transform duration-300"
@@ -764,7 +810,10 @@
                     <Button
                       size="sm"
                       variant="default"
-                      onclick={() => handleInstallModpack(modpack)}
+                      onclick={(e) => {
+                        e.stopPropagation();
+                        handleInstallModpack(modpack);
+                      }}
                     >
                       <Download class="mr-2 size-4" />
                       Add Modpack

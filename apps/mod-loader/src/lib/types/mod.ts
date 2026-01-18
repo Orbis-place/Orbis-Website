@@ -8,6 +8,7 @@ export interface Mod {
     description: string;
     author: string;
     version: string;
+    slug?: string;
     icon?: string;
     downloads: number;
     categories: string[];
@@ -17,6 +18,7 @@ export interface Mod {
 }
 
 export interface ModVersion {
+    id?: string;
     version: string;
     downloadUrl: string;
     changelog?: string;
@@ -72,4 +74,66 @@ export interface OrbisModMetadata {
 }
 
 export type OrbisMetadataFile = Record<string, OrbisModMetadata>;
+
+// Comments
+export interface ResourceComment {
+    id: string;
+    content: string;
+    createdAt: string;
+    updatedAt: string;
+    userId: string;
+    user: {
+        username: string;
+        displayName?: string;
+        image?: string;
+    };
+    replies?: ResourceComment[];
+    version?: {
+        versionNumber: string;
+    };
+}
+
+// Modpack
+export interface ModpackModEntry {
+    id: string;
+    modpackId: string;
+    modVersionId?: string;
+    modVersion?: {
+        id: string;
+        versionNumber: string;
+        resource: {
+            id: string;
+            name: string;
+            slug: string;
+            iconUrl?: string;
+        };
+    };
+    customModName?: string;
+    customModVersion?: string;
+    customModFile?: {
+        id: string;
+        fileName: string;
+        size: number;
+    };
+    isRequired: boolean;
+    notes?: string;
+    order: number;
+    config?: {
+        id: string;
+        fileName: string;
+        size: number;
+    };
+}
+
+export interface Modpack {
+    id: string;
+    resource: {
+        id: string;
+        slug: string;
+        latestVersion?: {
+            id: string;
+            versionNumber: string;
+        };
+    };
+}
 

@@ -21,6 +21,10 @@ interface OrbisResource {
         username: string;
         displayName?: string;
     };
+    ownerTeam?: {
+        name: string;
+        displayName: string;
+    };
     categories?: {
         category: {
             slug: string;
@@ -105,22 +109,35 @@ export class OrbisModSource implements IModSource {
         }
     }
 
-    async getModDetails(modId: string): Promise<ModDetails> {
+    async getModDetails(modIdOrSlug: string): Promise<ModDetails> {
         try {
-            const response = await fetch(`${this.apiBaseUrl}/resources/${modId}`);
+            // Try fetching by slug first (public endpoint)
+            let response = await fetch(`${this.apiBaseUrl}/resources/slug/${modIdOrSlug}`);
+
+            // If 404, might be an ID, try ID endpoint (auth required usually)
+            if (!response.ok) {
+                response = await fetch(`${this.apiBaseUrl}/resources/${modIdOrSlug}`);
+            }
+
             if (!response.ok) throw new Error('Failed to fetch mod details');
 
             const { resource } = await response.json();
 
-            // Fetch versions as they might not be fully populated in getById details
-            const versions = await this.getModVersions(modId);
+            // Fetch versions
+            // Note: getModVersions expects an ID. If we fetched by slug, 'resource.id' is the ID.
+            // We should use the ID from the fetched resource to get versions.
+            const versions = await this.getModVersions(resource.id);
+
+            // Fetch gallery images
+            const gallery = await this.getGalleryImages(resource.id);
 
             return {
                 ...this.mapToMod(resource),
-                longDescription: resource.description, // API returns markdown/html in description usually
+                longDescription: resource.description,
                 versions,
-                tags: [], // Map tags if available
-                license: 'All rights reserved', // Placeholder or fetch from resource
+                screenshots: gallery,
+                tags: [],
+                license: 'All rights reserved',
             };
         } catch (error) {
             console.error('Error fetching Orbis mod details:', error);
@@ -146,6 +163,7 @@ export class OrbisModSource implements IModSource {
             }
 
             return versions.map((v: OrbisVersion) => ({
+                id: v.id,
                 version: v.versionNumber,
                 changelog: v.changelog,
                 downloadUrl: `${this.apiBaseUrl}/resources/${modId}/versions/${v.id}/download`, // This redirects based on analysis
@@ -154,6 +172,43 @@ export class OrbisModSource implements IModSource {
             }));
         } catch (error) {
             console.error('Error fetching Orbis mod versions:', error);
+            return [];
+        }
+    }
+
+    async getGalleryImages(modId: string): Promise<string[]> {
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/resources/${modId}/gallery-images`);
+            if (!response.ok) return [];
+
+            const data = await response.json();
+            if (!data.galleryImages || !Array.isArray(data.galleryImages)) return [];
+
+            return data.galleryImages.map((img: any) => img.url).filter(Boolean);
+        } catch (error) {
+            console.error('Error fetching gallery images:', error);
+            return [];
+        }
+    }
+
+    async getResourceComments(resourceId: string, page = 1): Promise<{ data: any[], meta: any }> {
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/resources/${resourceId}/comments?page=${page}`);
+            if (!response.ok) return { data: [], meta: { total: 0, totalPages: 0 } };
+            return response.json();
+        } catch (error) {
+            console.error('Error fetching comments:', error);
+            return { data: [], meta: { total: 0, totalPages: 0 } };
+        }
+    }
+
+    async getModpackEntries(resourceId: string, versionId: string): Promise<any[]> {
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/resources/${resourceId}/versions/${versionId}/modpack/entries`);
+            if (!response.ok) return [];
+            return response.json();
+        } catch (error) {
+            console.error('Error fetching modpack entries:', error);
             return [];
         }
     }
@@ -211,11 +266,12 @@ export class OrbisModSource implements IModSource {
             id: resource.id, // Using UUID
             name: resource.name,
             description: resource.tagline || resource.description || '',
-            author: resource.ownerUser?.displayName || resource.ownerUser?.username || 'Unknown',
+            author: resource.ownerTeam?.displayName || resource.ownerTeam?.name || resource.ownerUser?.displayName || resource.ownerUser?.username || 'Unknown',
             version: resource.latestVersion?.versionNumber || '0.0.0',
             downloads: resource.downloads || 0,
             categories: resource.categories?.map(c => c.category.name) || [],
             source: ModSource.ORBIS,
+            slug: resource.slug,
             icon: resource.iconUrl,
         };
     }
