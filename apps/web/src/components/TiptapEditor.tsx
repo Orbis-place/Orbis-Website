@@ -8,6 +8,7 @@ import Image from '@tiptap/extension-image'
 import Link from '@tiptap/extension-link'
 import Placeholder from '@tiptap/extension-placeholder'
 import Underline from '@tiptap/extension-underline'
+import Youtube from '@tiptap/extension-youtube'
 import { Icon } from '@iconify/react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
@@ -36,6 +37,8 @@ export function TiptapEditor({
 }: TiptapEditorProps) {
   const [showImageInput, setShowImageInput] = useState(false)
   const [imageUrl, setImageUrl] = useState('')
+  const [showYoutubeInput, setShowYoutubeInput] = useState(false)
+  const [youtubeUrl, setYoutubeUrl] = useState('')
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -64,7 +67,16 @@ export function TiptapEditor({
       Placeholder.configure({
         placeholder
       }),
-      Underline
+      Underline,
+      Youtube.configure({
+        width: 640,
+        height: 480,
+        controls: true,
+        nocookie: true,
+        HTMLAttributes: {
+          class: 'rounded-lg my-4 max-w-full'
+        }
+      })
     ],
     content,
     editorProps: {
@@ -197,6 +209,15 @@ export function TiptapEditor({
       setImageUrl('')
       setShowImageInput(false)
       toast.success('Image added!')
+    }
+  }
+
+  const addYoutubeVideo = () => {
+    if (youtubeUrl && editor) {
+      editor.chain().focus().setYoutubeVideo({ src: youtubeUrl }).run()
+      setYoutubeUrl('')
+      setShowYoutubeInput(false)
+      toast.success('YouTube video added!')
     }
   }
 
@@ -370,6 +391,18 @@ export function TiptapEditor({
             />
           </div>
 
+          <div className="w-px h-6 bg-[#1E5A63] mx-1" />
+
+          {/* YouTube */}
+          <div className="flex items-center gap-0.5">
+            <MenuButton
+              onClick={() => setShowYoutubeInput(!showYoutubeInput)}
+              active={showYoutubeInput}
+              icon="mdi:youtube"
+              tooltip="Add YouTube Video"
+            />
+          </div>
+
           <div className="flex-1" />
 
           {/* Undo/Redo */}
@@ -432,6 +465,48 @@ export function TiptapEditor({
             </Button>
           </div>
         )}
+
+        {/* YouTube URL Input */}
+        {showYoutubeInput && (
+          <div className="flex items-center gap-2 mt-2 p-2 bg-[#041518] border border-[#1E5A63] rounded-lg animate-in slide-in-from-top-2 duration-200">
+            <input
+              type="text"
+              value={youtubeUrl}
+              onChange={(e) => setYoutubeUrl(e.target.value)}
+              placeholder="Enter YouTube URL..."
+              className="flex-1 px-3 py-1.5 bg-[#0A1F24] border border-[#1E5A63] rounded text-sm text-[#C7F4FA] placeholder:text-[#C7F4FA]/40 focus:outline-none focus:ring-2 focus:ring-[#109EB1]/50 font-nunito"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  addYoutubeVideo()
+                } else if (e.key === 'Escape') {
+                  setShowYoutubeInput(false)
+                  setYoutubeUrl('')
+                }
+              }}
+              autoFocus
+            />
+            <Button
+              type="button"
+              size="sm"
+              onClick={addYoutubeVideo}
+              className="h-8 px-3 font-nunito bg-[#109EB1] hover:bg-[#0D8A9A] text-white"
+            >
+              Add
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={() => {
+                setShowYoutubeInput(false)
+                setYoutubeUrl('')
+              }}
+              className="h-8 px-3 font-nunito text-[#C7F4FA]/70 hover:text-[#C7F4FA] hover:bg-[#1E5A63]/30"
+            >
+              Cancel
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Editor Content */}
@@ -447,7 +522,7 @@ export function TiptapEditor({
         <div className="flex items-center gap-2">
           <Icon ssr={true} icon="mdi:information-outline" width="14" height="14" />
           <span>
-            Select text to format it • Paste or drag & drop images
+            Select text to format it • Paste or drag & drop images • Add YouTube videos
           </span>
         </div>
       </div>

@@ -5,6 +5,7 @@
   import Image from '@tiptap/extension-image';
   import Link from '@tiptap/extension-link';
   import Underline from '@tiptap/extension-underline';
+  import Youtube from '@tiptap/extension-youtube';
 
   let { content, class: className = '' } = $props<{
     content: string;
@@ -40,6 +41,15 @@
           },
         }),
         Underline,
+        Youtube.configure({
+          width: 640,
+          height: 480,
+          controls: true,
+          nocookie: true,
+          HTMLAttributes: {
+            class: 'rounded-lg my-4 max-w-full',
+          },
+        }),
       ],
       editorProps: {
         attributes: {
