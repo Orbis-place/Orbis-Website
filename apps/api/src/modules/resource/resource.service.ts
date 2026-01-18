@@ -1355,7 +1355,7 @@ export class ResourceService {
         if (versions && versions.length > 0) {
             where.versions = {
                 some: {
-                    hytaleVersions: {
+                    compatibleVersions: {
                         some: {
                             hytaleVersion: {
                                 hytaleVersion: {
