@@ -458,16 +458,16 @@ export default function ConfigureModpackPage() {
                                         </p>
                                         <pre className="font-mono text-xs text-muted-foreground bg-background/50 p-3 rounded-md overflow-x-auto">
                                             {`modpack.zip
-├── mod1.jar              # JARs at root level
-├── mod2.jar
-├── ModName_Config/       # Config folders (unzipped)
-│   ├── config.toml
-│   └── settings.json
-└── AnotherMod_Config/
+├── mods/                 # Place JAR files here
+│   ├── mod1.jar
+│   └── mod2.jar
+└── configs/              # Place config files here
+    ├── ModName_Config/
+    │   └── config.toml
     └── options.yml`}
                                         </pre>
                                         <p className="text-muted-foreground mt-2">
-                                            Place all JAR files at the root of the archive. Config folders should be decompressed (not zipped) inside the archive.
+                                            The archive must contain a <code>mods</code> folder for JARs and a <code>configs</code> folder for configuration files.
                                         </p>
                                     </div>
                                 </div>

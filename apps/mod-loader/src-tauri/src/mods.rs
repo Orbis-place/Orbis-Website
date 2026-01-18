@@ -314,12 +314,25 @@ pub fn register_jar_in_config(
     let mut config = read_mod_config(save_path)?;
     let mod_key = format!("{}:{}", manifest.group, manifest.name);
 
-    if !config.mods.contains_key(&mod_key) {
+    let mut needs_save = false;
+
+    if let Some(entry) = config.mods.get_mut(&mod_key) {
+        if !entry.enabled {
+            println!("Mod {} found but disabled, enabling it.", mod_key);
+            entry.enabled = true;
+            needs_save = true;
+        } else {
+            println!("{} already in config and enabled", mod_key);
+        }
+    } else {
         println!("Adding {} to config", mod_key);
         config
             .mods
             .insert(mod_key, ModConfigEntry { enabled: true });
-        
+        needs_save = true;
+    }
+
+    if needs_save {
         // Ensure save mods dir exists for config.json if it doesn't
         if !mods_dir.exists() {
             fs::create_dir_all(&mods_dir).map_err(|e| format!("Failed to create mods dir: {}", e))?;
@@ -330,8 +343,6 @@ pub fn register_jar_in_config(
             println!("{}", err);
             return Err(err);
         }
-    } else {
-        println!("{} already in config", mod_key);
     }
 
     Ok(manifest)

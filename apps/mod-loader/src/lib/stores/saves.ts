@@ -1,6 +1,6 @@
 import { writable, get } from 'svelte/store';
 import type { HytaleSave } from '$lib/types/mod';
-import { readDir, exists } from '@tauri-apps/plugin-fs';
+import { readDir, exists, readTextFile } from '@tauri-apps/plugin-fs';
 import { join } from '@tauri-apps/api/path';
 import { settings } from './settings';
 
@@ -45,18 +45,19 @@ function createSavesStore() {
                         const fullPath = await join(saveRoot, entry.name);
 
                         // Count mods in the mods folder
+                        // Count enabled mods from config.json
                         let modCount = 0;
                         try {
-                            const modsPath = await join(fullPath, 'mods');
-                            const modsExist = await exists(modsPath);
-                            if (modsExist) {
-                                const modEntries = await readDir(modsPath);
-                                modCount = modEntries.filter(e =>
-                                    !e.isDirectory && e.name.endsWith('.jar')
-                                ).length;
+                            const configPath = await join(fullPath, 'config.json');
+                            if (await exists(configPath)) {
+                                const content = await readTextFile(configPath);
+                                const config = JSON.parse(content);
+                                if (config && config.Mods) {
+                                    modCount = Object.values(config.Mods).filter((m: any) => m.Enabled).length;
+                                }
                             }
                         } catch (e) {
-                            // Mods folder doesn't exist or can't be read
+                            console.warn('Failed to read mod count from config:', e);
                         }
 
                         saves.push({

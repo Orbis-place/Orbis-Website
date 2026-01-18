@@ -132,7 +132,7 @@
         </Card.Header>
         <Card.Content>
           <div class="space-y-2 text-sm">
-            <p><strong>Version:</strong> 0.2.1</p>
+            <p><strong>Version:</strong> 0.2.2</p>
             <p><strong>Built with:</strong> Tauri + SvelteKit</p>
             <p><strong>Design:</strong> Orbis Theme</p>
           </div>
