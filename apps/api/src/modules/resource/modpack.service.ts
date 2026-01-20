@@ -281,11 +281,6 @@ export class ModpackService {
             throw new BadRequestException('No mod file provided');
         }
 
-        // Validate file type
-        if (!file.originalname.endsWith('.jar')) {
-            throw new BadRequestException('Only JAR files are allowed for mods');
-        }
-
         const maxSize = 100 * 1024 * 1024; // 100MB
         if (file.size > maxSize) {
             throw new BadRequestException('File too large. Maximum size is 100MB');
