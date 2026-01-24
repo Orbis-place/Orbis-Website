@@ -1,5 +1,6 @@
 // apps/api/src/main.ts
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from "@nestjs/config";
@@ -7,9 +8,11 @@ import { initializeEmail } from "@repo/auth";
 import { ValidationPipe } from "@nestjs/common";
 
 async function bootstrap() {
-    const app = await NestFactory.create(AppModule, {
+    const app = await NestFactory.create<NestExpressApplication>(AppModule, {
         bodyParser: false,
     });
+
+    app.set('trust proxy', true);
 
     // Enable CORS
     app.enableCors({
