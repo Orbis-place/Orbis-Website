@@ -75,6 +75,7 @@ export class ResourceController {
 
     @Get(':id')
     @ApiOperation({ summary: 'Get resource by ID' })
+    @AllowAnonymous()
     async getById(@Param('id') id: string) {
         return this.resourceService.getById(id);
     }
