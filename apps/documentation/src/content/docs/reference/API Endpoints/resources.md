@@ -24,14 +24,14 @@ Get all approved resources with optional filters for the public marketplace.
 **Authentication:** Not required (public endpoint)
 
 **Query Parameters:**
-- `type` (string, optional) - Filter by resource type (MOD, PLUGIN, TEXTURE_PACK, TOOLS_SCRIPTS)
-- `search` (string, optional) - Search query for resource name
-- `tags` (array, optional) - Filter by tag IDs
-- `categories` (array, optional) - Filter by category IDs
-- `versions` (array, optional) - Filter by Hytale version IDs
-- `sort` (string, optional) - Sort order (newest, popular, downloads)
-- `limit` (number, optional) - Number of results per page
-- `offset` (number, optional) - Pagination offset
+- `type` (string, optional) - Filter by resource type (MOD, PLUGIN, ASSET_PACK, DATA_PACK, WORLD, PREFAB, MODPACK, PREMADE_SERVER)
+- `search` (string, optional) - Search query for resource name or description
+- `tags` (array, optional) - Filter by tag slugs or IDs
+- `categories` (array, optional) - Filter by category slugs or IDs
+- `versions` (array, optional) - Filter by Hytale version strings
+- `sortBy` (string, optional) - Sort option: `downloads`, `likes`, `date` (newest), `updated`, `name` (default: `date`)
+- `page` (number, optional) - Page number (default: 1)
+- `limit` (number, optional) - Number of results per page (default: 20, max: 100)
 
 **Response:**
 ```json
