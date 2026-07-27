@@ -4,6 +4,11 @@
 
 Orbis is the ultimate community hub for Hytale, inspired by SpigotMC/CurseForge for Minecraft. The project is community-driven and open-source, reflecting Hytale's philosophy.
 
+
+## Related Hytale Resources
+
+- [Hytale Character Recipes](https://hytalecharacter.com/) - Fan-maintained character recipe archive with manual recreation notes, source screenshots, and recipe JSON for Hytale-inspired character looks.
+
 ## What's inside?
 
 This Turborepo monorepo includes the following packages & apps:
